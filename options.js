@@ -85,7 +85,10 @@ class ForgetfulMeOptions {
         this.showAuthInterface()
       }
     } catch (error) {
-      console.error('Error initializing app:', error)
+      const errorResult = ErrorHandler.handle(error, 'options.initializeApp')
+      if (errorResult.shouldShowToUser) {
+        UIMessages.error(errorResult.userMessage, this.appContainer)
+      }
       this.showConfigInterface()
     }
   }
@@ -186,8 +189,8 @@ class ForgetfulMeOptions {
       this.loadRecentEntries(bookmarks)
       
     } catch (error) {
-      console.error('Error loading data:', error)
-      this.showMessage('Error loading data', 'error')
+      const errorResult = ErrorHandler.handle(error, 'options.loadData')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
   }
 
@@ -226,7 +229,7 @@ class ForgetfulMeOptions {
     const status = this.newStatusInput.value.trim().toLowerCase().replace(/\s+/g, '-')
     
     if (!status) {
-      this.showMessage('Please enter a status type', 'error')
+      UIMessages.error('Please enter a status type', this.appContainer)
       return
     }
 
@@ -235,7 +238,7 @@ class ForgetfulMeOptions {
       const customStatusTypes = preferences.customStatusTypes || []
       
       if (customStatusTypes.includes(status)) {
-        this.showMessage('Status type already exists', 'error')
+        UIMessages.error('Status type already exists', this.appContainer)
         return
       }
 
@@ -244,11 +247,11 @@ class ForgetfulMeOptions {
       
       this.newStatusInput.value = ''
       this.loadStatusTypes(customStatusTypes)
-      this.showMessage('Status type added successfully', 'success')
+      UIMessages.success('Status type added successfully', this.appContainer)
       
     } catch (error) {
-      console.error('Error adding status type:', error)
-      this.showMessage('Error adding status type', 'error')
+      const errorResult = ErrorHandler.handle(error, 'options.addStatusType')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
   }
 
@@ -261,11 +264,11 @@ class ForgetfulMeOptions {
       await this.supabaseService.saveUserPreferences({ customStatusTypes: updatedTypes })
       
       this.loadStatusTypes(updatedTypes)
-      this.showMessage('Status type removed successfully', 'success')
+      UIMessages.success('Status type removed successfully', this.appContainer)
       
     } catch (error) {
-      console.error('Error removing status type:', error)
-      this.showMessage('Error removing status type', 'error')
+      const errorResult = ErrorHandler.handle(error, 'options.removeStatusType')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
   }
 
@@ -355,11 +358,11 @@ class ForgetfulMeOptions {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
       
-      this.showMessage('Data exported successfully', 'success')
+      UIMessages.success('Data exported successfully', this.appContainer)
       
     } catch (error) {
-      console.error('Error exporting data:', error)
-      this.showMessage('Error exporting data', 'error')
+      const errorResult = ErrorHandler.handle(error, 'options.exportData')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
   }
 
@@ -373,12 +376,12 @@ class ForgetfulMeOptions {
       
       await this.supabaseService.importData(importData)
       
-      this.showMessage('Data imported successfully', 'success')
+      UIMessages.success('Data imported successfully', this.appContainer)
       this.loadData() // Refresh the data
       
     } catch (error) {
-      console.error('Error importing data:', error)
-      this.showMessage('Error importing data', 'error')
+      const errorResult = ErrorHandler.handle(error, 'options.importData')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
     
     // Clear the file input
@@ -386,24 +389,29 @@ class ForgetfulMeOptions {
   }
 
   async clearData() {
-    if (!confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      const bookmarks = await this.supabaseService.getBookmarks({ limit: 10000 })
-      
-      for (const bookmark of bookmarks) {
-        await this.supabaseService.deleteBookmark(bookmark.id)
-      }
-      
-      this.showMessage('All data cleared successfully', 'success')
-      this.loadData() // Refresh the data
-      
-    } catch (error) {
-      console.error('Error clearing data:', error)
-      this.showMessage('Error clearing data', 'error')
-    }
+    UIMessages.confirm(
+      'Are you sure you want to clear all data? This action cannot be undone.',
+      async () => {
+        try {
+          const bookmarks = await this.supabaseService.getBookmarks({ limit: 10000 })
+          
+          for (const bookmark of bookmarks) {
+            await this.supabaseService.deleteBookmark(bookmark.id)
+          }
+          
+          UIMessages.success('All data cleared successfully', this.appContainer)
+          this.loadData() // Refresh the data
+          
+        } catch (error) {
+          const errorResult = ErrorHandler.handle(error, 'options.clearData')
+          UIMessages.error(errorResult.userMessage, this.appContainer)
+        }
+      },
+      () => {
+        // User cancelled
+      },
+      this.appContainer
+    )
   }
 
   viewAllEntries() {
@@ -433,27 +441,8 @@ class ForgetfulMeOptions {
   }
 
   showMessage(message, type) {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.success-message, .error-message')
-    existingMessages.forEach(msg => msg.remove())
-    
-    const messageDiv = document.createElement('div')
-    messageDiv.className = `${type}-message`
-    messageDiv.textContent = message
-    
-    // Insert after header
-    const header = document.querySelector('header')
-    if (header) {
-      header.parentNode.insertBefore(messageDiv, header.nextSibling)
-    } else {
-      // If no header, append to body
-      document.body.appendChild(messageDiv)
-    }
-    
-    // Remove message after 3 seconds
-    setTimeout(() => {
-      messageDiv.remove()
-    }, 3000)
+    // Use the centralized UIMessages system
+    UIMessages.show(message, type, this.appContainer)
   }
 }
 

@@ -18,7 +18,7 @@ class SupabaseService {
   // Bookmark operations
   async saveBookmark(bookmark) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.saveBookmark')
     }
 
     const userId = this.config.getCurrentUser().id
@@ -44,20 +44,17 @@ class SupabaseService {
       if (error) throw error
       return data[0]
     } catch (error) {
-      console.error('Error saving bookmark:', error)
+      ErrorHandler.handle(error, 'supabase-service.saveBookmark')
       throw error
     }
   }
 
   async getBookmarks(options = {}) {
-    console.log('getBookmarks called with options:', options)
-    
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.getBookmarks')
     }
 
     const userId = this.config.getCurrentUser().id
-    console.log('User ID:', userId)
     
     const {
       page = 1,
@@ -96,14 +93,14 @@ class SupabaseService {
 
       return data
     } catch (error) {
-      console.error('Error getting bookmarks:', error)
+      ErrorHandler.handle(error, 'supabase-service.getBookmarks')
       throw error
     }
   }
 
   async updateBookmark(bookmarkId, updates) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.updateBookmark')
     }
 
     try {
@@ -119,14 +116,14 @@ class SupabaseService {
       if (error) throw error
       return data[0]
     } catch (error) {
-      console.error('Error updating bookmark:', error)
+      ErrorHandler.handle(error, 'supabase-service.updateBookmark')
       throw error
     }
   }
 
   async deleteBookmark(bookmarkId) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.deleteBookmark')
     }
 
     try {
@@ -139,14 +136,14 @@ class SupabaseService {
       if (error) throw error
       return true
     } catch (error) {
-      console.error('Error deleting bookmark:', error)
+      ErrorHandler.handle(error, 'supabase-service.deleteBookmark')
       throw error
     }
   }
 
   async getBookmarkStats() {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.getBookmarkStats')
     }
 
     const userId = this.config.getCurrentUser().id
@@ -164,7 +161,7 @@ class SupabaseService {
         return stats
       }, {})
     } catch (error) {
-      console.error('Error getting bookmark stats:', error)
+      ErrorHandler.handle(error, 'supabase-service.getBookmarkStats')
       throw error
     }
   }
@@ -172,7 +169,7 @@ class SupabaseService {
   // User preferences operations
   async saveUserPreferences(preferences) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.saveUserPreferences')
     }
 
     const userId = this.config.getCurrentUser().id
@@ -189,14 +186,14 @@ class SupabaseService {
       if (error) throw error
       return data[0]
     } catch (error) {
-      console.error('Error saving user preferences:', error)
+      ErrorHandler.handle(error, 'supabase-service.saveUserPreferences')
       throw error
     }
   }
 
   async getUserPreferences() {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.getUserPreferences')
     }
 
     const userId = this.config.getCurrentUser().id
@@ -211,7 +208,7 @@ class SupabaseService {
       if (error) throw error
       return data?.preferences || {}
     } catch (error) {
-      console.error('Error getting user preferences:', error)
+      ErrorHandler.handle(error, 'supabase-service.getUserPreferences')
       throw error
     }
   }
@@ -219,7 +216,7 @@ class SupabaseService {
   // Real-time subscriptions
   subscribeToBookmarks(callback) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.subscribeToBookmarks')
     }
 
     const userId = this.config.getCurrentUser().id
@@ -233,7 +230,7 @@ class SupabaseService {
   // Data export/import
   async exportData() {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.exportData')
     }
 
     try {
@@ -247,14 +244,14 @@ class SupabaseService {
         version: '1.0.0'
       }
     } catch (error) {
-      console.error('Error exporting data:', error)
+      ErrorHandler.handle(error, 'supabase-service.exportData')
       throw error
     }
   }
 
   async importData(importData) {
     if (!this.config.isAuthenticated()) {
-      throw new Error('User not authenticated')
+      throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.importData')
     }
 
     try {
@@ -281,7 +278,7 @@ class SupabaseService {
 
       return true
     } catch (error) {
-      console.error('Error importing data:', error)
+      ErrorHandler.handle(error, 'supabase-service.importData')
       throw error
     }
   }

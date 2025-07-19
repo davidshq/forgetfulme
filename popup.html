@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ForgetfulMe</title>
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="utils/ui-messages.css">
 </head>
 <body>
   <div id="app" class="container">
     <!-- Content will be dynamically loaded by JavaScript -->
   </div>
 
-  <!-- Load Supabase scripts first -->
+  <!-- Load utilities first -->
+  <script src="utils/error-handler.js"></script>
+  <script src="utils/ui-messages.js"></script>
+  
+  <!-- Load Supabase scripts -->
   <script src="supabase-client.js"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-service.js"></script>

@@ -61,7 +61,10 @@ class ForgetfulMePopup {
         this.showAuthInterface()
       }
     } catch (error) {
-      console.error('Error initializing app:', error)
+      const errorResult = ErrorHandler.handle(error, 'popup.initializeApp')
+      if (errorResult.shouldShowToUser) {
+        UIMessages.error(errorResult.userMessage, this.appContainer)
+      }
       this.showSetupInterface()
     }
   }
@@ -161,7 +164,7 @@ class ForgetfulMePopup {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
       
       if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-        this.showMessage('Cannot mark browser pages as read', 'error')
+        UIMessages.error('Cannot mark browser pages as read', this.appContainer)
         return
       }
 
@@ -174,7 +177,7 @@ class ForgetfulMePopup {
       }
 
       await this.supabaseService.saveBookmark(bookmark)
-      this.showMessage('Page marked as read!', 'success')
+      UIMessages.success('Page marked as read!', this.appContainer)
       this.tagsInput.value = ''
       this.loadRecentEntries()
       
@@ -184,8 +187,8 @@ class ForgetfulMePopup {
       }, 1500)
 
     } catch (error) {
-      console.error('Error marking as read:', error)
-      this.showMessage('Error saving entry', 'error')
+      const errorResult = ErrorHandler.handle(error, 'popup.markAsRead')
+      UIMessages.error(errorResult.userMessage, this.appContainer)
     }
   }
 
@@ -234,8 +237,11 @@ class ForgetfulMePopup {
       })
       
     } catch (error) {
-      console.error('Error loading recent entries:', error)
+      const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries')
       this.recentList.innerHTML = '<div class="recent-item">Error loading entries</div>'
+      if (errorResult.shouldShowToUser) {
+        UIMessages.error(errorResult.userMessage, this.appContainer)
+      }
     }
   }
 
@@ -255,7 +261,8 @@ class ForgetfulMePopup {
         })
       }
     } catch (error) {
-      console.error('Error loading custom status types:', error)
+      const errorResult = ErrorHandler.handle(error, 'popup.loadCustomStatusTypes', { silent: true })
+      // Don't show user for this error as it's not critical
     }
   }
 
@@ -281,27 +288,8 @@ class ForgetfulMePopup {
   }
 
   showMessage(message, type) {
-    // Remove existing messages
-    const existingMessages = document.querySelectorAll('.success-message, .error-message')
-    existingMessages.forEach(msg => msg.remove())
-    
-    const messageDiv = document.createElement('div')
-    messageDiv.className = `${type}-message`
-    messageDiv.textContent = message
-    
-    // Insert after header
-    const header = document.querySelector('header')
-    if (header) {
-      header.parentNode.insertBefore(messageDiv, header.nextSibling)
-    } else {
-      // If no header, append to body
-      document.body.appendChild(messageDiv)
-    }
-    
-    // Remove message after 3 seconds
-    setTimeout(() => {
-      messageDiv.remove()
-    }, 3000)
+    // Use the centralized UIMessages system
+    UIMessages.show(message, type, this.appContainer)
   }
 
   openSettings() {

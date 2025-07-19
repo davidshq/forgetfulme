@@ -74,10 +74,11 @@ class ConfigUI {
         if (urlInput) urlInput.value = currentConfig.url || ''
         if (keyInput) keyInput.value = currentConfig.anonKey || ''
         
-        this.showConfigMessage(container, 'Current configuration loaded', 'info')
+        UIMessages.info('Current configuration loaded', container)
       }
     } catch (error) {
-      console.error('Error loading current config:', error)
+      const errorResult = ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', { silent: true })
+      // Don't show user for this error as it's not critical
     }
   }
 
@@ -89,50 +90,42 @@ class ConfigUI {
     const anonKey = keyInput.value.trim()
     
     if (!url || !anonKey) {
-      this.showConfigMessage(container, 'Please fill in all fields', 'error')
+      UIMessages.error('Please fill in all fields', container)
       return
     }
     
     try {
-      this.showConfigMessage(container, 'Saving configuration...', 'info')
+      UIMessages.loading('Saving configuration...', container)
       
       const result = await this.config.setConfiguration(url, anonKey)
       
       if (result.success) {
-        this.showConfigMessage(container, 'Configuration saved successfully!', 'success')
+        UIMessages.success('Configuration saved successfully!', container)
         
         // Test the configuration
         setTimeout(async () => {
           try {
             await this.config.initialize()
-            this.showConfigMessage(container, 'Configuration test successful! You can now use the extension.', 'success')
+            UIMessages.success('Configuration test successful! You can now use the extension.', container)
           } catch (error) {
-            this.showConfigMessage(container, 'Configuration saved but test failed. Please check your credentials.', 'error')
+            const errorResult = ErrorHandler.handle(error, 'config-ui.testConfiguration')
+            UIMessages.error('Configuration saved but test failed. Please check your credentials.', container)
           }
         }, 1000)
         
       } else {
-        this.showConfigMessage(container, `Error: ${result.message}`, 'error')
+        UIMessages.error(`Error: ${result.message}`, container)
       }
       
     } catch (error) {
-      console.error('Error saving configuration:', error)
-      this.showConfigMessage(container, 'Error saving configuration', 'error')
+      const errorResult = ErrorHandler.handle(error, 'config-ui.handleConfigSubmit')
+      UIMessages.error(errorResult.userMessage, container)
     }
   }
 
   showConfigMessage(container, message, type) {
-    const messageEl = container.querySelector('#configMessage')
-    if (messageEl) {
-      messageEl.textContent = message
-      messageEl.className = `config-message ${type}`
-      
-      // Clear message after 5 seconds
-      setTimeout(() => {
-        messageEl.textContent = ''
-        messageEl.className = 'config-message'
-      }, 5000)
-    }
+    // Use the centralized UIMessages system
+    UIMessages.show(message, type, container)
   }
 
   showConfigStatus(container) {
@@ -185,7 +178,8 @@ class ConfigUI {
         if (connectionEl) connectionEl.textContent = 'Not configured'
       }
     } catch (error) {
-      console.error('Error loading config status:', error)
+      const errorResult = ErrorHandler.handle(error, 'config-ui.loadConfigStatus', { silent: true })
+      // Don't show user for this error as it's not critical
     }
   }
 

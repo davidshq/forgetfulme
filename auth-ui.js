@@ -118,19 +118,18 @@ class AuthUI {
   async handleLogin(container) {
     const email = container.querySelector('#loginEmail').value
     const password = container.querySelector('#loginPassword').value
-    const messageEl = container.querySelector('#authMessage')
 
     if (!email || !password) {
-      this.showAuthMessage(container, 'Please fill in all fields', 'error')
+      UIMessages.error('Please fill in all fields', container)
       return
     }
 
     try {
-      this.showAuthMessage(container, 'Signing in...', 'info')
+      UIMessages.loading('Signing in...', container)
       
       await this.config.signIn(email, password)
       
-      this.showAuthMessage(container, 'Successfully signed in!', 'success')
+      UIMessages.success('Successfully signed in!', container)
       
       // Call the success callback
       if (this.onAuthSuccess) {
@@ -140,8 +139,8 @@ class AuthUI {
       }
       
     } catch (error) {
-      console.error('Login error:', error)
-      this.showAuthMessage(container, this.getErrorMessage(error), 'error')
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleLogin')
+      UIMessages.error(errorResult.userMessage, container)
     }
   }
 
@@ -149,25 +148,24 @@ class AuthUI {
     const email = container.querySelector('#signupEmail').value
     const password = container.querySelector('#signupPassword').value
     const confirmPassword = container.querySelector('#confirmPassword').value
-    const messageEl = container.querySelector('#authMessage')
 
     if (!email || !password || !confirmPassword) {
-      this.showAuthMessage(container, 'Please fill in all fields', 'error')
+      UIMessages.error('Please fill in all fields', container)
       return
     }
 
     if (password !== confirmPassword) {
-      this.showAuthMessage(container, 'Passwords do not match', 'error')
+      UIMessages.error('Passwords do not match', container)
       return
     }
 
     if (password.length < 6) {
-      this.showAuthMessage(container, 'Password must be at least 6 characters', 'error')
+      UIMessages.error('Password must be at least 6 characters', container)
       return
     }
 
     try {
-      this.showAuthMessage(container, 'Creating account...', 'info')
+      UIMessages.loading('Creating account...', container)
       
       const result = await this.config.signUp(email, password)
       
@@ -177,7 +175,7 @@ class AuthUI {
         // since email verification links don't work well with extensions
         try {
           await this.config.signIn(email, password)
-          this.showAuthMessage(container, 'Account created and signed in successfully!', 'success')
+          UIMessages.success('Account created and signed in successfully!', container)
           
           // Call the success callback
           if (this.onAuthSuccess) {
@@ -187,7 +185,7 @@ class AuthUI {
           }
         } catch (signInError) {
           // If auto-signin fails, show the email verification message
-          this.showAuthMessage(container, 'Account created! Please check your email to verify your account, then sign in.', 'success')
+          UIMessages.success('Account created! Please check your email to verify your account, then sign in.', container)
           
           // Switch to login form after successful signup
           setTimeout(() => {
@@ -195,7 +193,7 @@ class AuthUI {
           }, 3000)
         }
       } else {
-        this.showAuthMessage(container, 'Account created! Please check your email to verify your account.', 'success')
+        UIMessages.success('Account created! Please check your email to verify your account.', container)
         
         // Switch to login form after successful signup
         setTimeout(() => {
@@ -204,24 +202,14 @@ class AuthUI {
       }
       
     } catch (error) {
-      console.error('Signup error:', error)
-      this.showAuthMessage(container, this.getErrorMessage(error), 'error')
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignup')
+      UIMessages.error(errorResult.userMessage, container)
     }
   }
 
   showAuthMessage(container, message, type) {
-    const messageEl = container.querySelector('#authMessage')
-    if (messageEl) {
-      messageEl.textContent = message
-      messageEl.className = `auth-message ${type}`
-      
-      // Clear message after 5 seconds for success/info, 10 seconds for error
-      const timeout = type === 'error' ? 10000 : 5000
-      setTimeout(() => {
-        messageEl.textContent = ''
-        messageEl.className = 'auth-message'
-      }, timeout)
-    }
+    // Use the centralized UIMessages system
+    UIMessages.show(message, type, container)
   }
 
   getErrorMessage(error) {
@@ -266,7 +254,8 @@ class AuthUI {
           // Refresh the page or show login form
           location.reload()
         } catch (error) {
-          console.error('Sign out error:', error)
+          const errorResult = ErrorHandler.handle(error, 'auth-ui.signOut', { silent: true })
+          // Don't show user for sign out errors as they're not critical
         }
       })
     }

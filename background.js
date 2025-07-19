@@ -46,6 +46,7 @@ class ForgetfulMeBackground {
       })
 
     } catch (error) {
+      // Log error for debugging
       console.error('Error handling keyboard shortcut:', error)
       
       // Show error notification
@@ -68,6 +69,7 @@ class ForgetfulMeBackground {
         message: 'Page marked as read!'
       })
     } catch (error) {
+      // Log error for debugging
       console.error('Error marking as read:', error)
       
       chrome.notifications.create({
@@ -93,6 +95,7 @@ class ForgetfulMeBackground {
       
       console.log('Default settings initialized')
     } catch (error) {
+      // Log error for debugging
       console.error('Error initializing default settings:', error)
     }
   }
