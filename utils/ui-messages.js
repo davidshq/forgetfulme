@@ -161,16 +161,27 @@ class UIMessages {
     const messageEl = this.error(message, container, options)
     
     if (retryFunction) {
-      const retryBtn = document.createElement('button')
-      retryBtn.textContent = 'Retry'
-      retryBtn.className = 'ui-message-retry-btn'
-      retryBtn.addEventListener('click', () => {
-        if (messageEl.parentNode) {
-          messageEl.parentNode.removeChild(messageEl)
-        }
-        retryFunction()
-      })
-      messageEl.appendChild(retryBtn)
+      // Use UIComponents if available, otherwise fall back to manual creation
+      if (typeof UIComponents !== 'undefined') {
+        const retryBtn = UIComponents.createButton('Retry', () => {
+          if (messageEl.parentNode) {
+            messageEl.parentNode.removeChild(messageEl)
+          }
+          retryFunction()
+        }, 'ui-message-retry-btn')
+        messageEl.appendChild(retryBtn)
+      } else {
+        const retryBtn = document.createElement('button')
+        retryBtn.textContent = 'Retry'
+        retryBtn.className = 'ui-message-retry-btn'
+        retryBtn.addEventListener('click', () => {
+          if (messageEl.parentNode) {
+            messageEl.parentNode.removeChild(messageEl)
+          }
+          retryFunction()
+        })
+        messageEl.appendChild(retryBtn)
+      }
     }
 
     return messageEl
@@ -185,6 +196,14 @@ class UIMessages {
    * @param {Object} options - Additional options
    */
   static confirm(message, onConfirm, onCancel, container, options = {}) {
+    // Use UIComponents if available, otherwise fall back to manual creation
+    if (typeof UIComponents !== 'undefined') {
+      const confirmEl = UIComponents.createConfirmDialog(message, onConfirm, onCancel, options)
+      container.appendChild(confirmEl)
+      return confirmEl
+    }
+    
+    // Fallback to manual creation
     const confirmEl = document.createElement('div')
     confirmEl.className = 'ui-confirm'
     

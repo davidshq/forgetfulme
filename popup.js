@@ -16,16 +16,15 @@ class ForgetfulMePopup {
     // Try to get dynamically created elements
     this.readStatusSelect = document.getElementById('read-status')
     this.tagsInput = document.getElementById('tags')
-    this.markReadBtn = document.getElementById('mark-read')
+    this.markReadBtn = document.querySelector('button[type="submit"]') // Form submit button
     this.settingsBtn = document.getElementById('settings-btn')
     this.recentList = document.getElementById('recent-list')
   }
 
   bindEvents() {
     // Only bind events if elements exist
-    if (this.markReadBtn) {
-      this.markReadBtn.addEventListener('click', () => this.markAsRead())
-    }
+    // Note: Form submit is handled by the form's onSubmit event
+    // No need to bind click event to submit button
     
     if (this.settingsBtn) {
       this.settingsBtn.addEventListener('click', () => this.openSettings())
@@ -70,41 +69,43 @@ class ForgetfulMePopup {
   }
 
   showSetupInterface() {
-    this.appContainer.innerHTML = `
-      <div class="setup-container">
-        <h2>Welcome to ForgetfulMe!</h2>
-        <p>This extension helps you mark websites as read for research purposes.</p>
-        
-        <div class="setup-section">
-          <h3>🔧 Setup Required</h3>
-          <p>To use this extension, you need to configure your Supabase backend:</p>
-          
-          <ol>
-            <li>Create a Supabase project at <a href="https://supabase.com" target="_blank">supabase.com</a></li>
-            <li>Get your Project URL and anon public key</li>
-            <li>Open the extension settings to configure</li>
-          </ol>
-          
-          <button id="open-settings" class="primary-btn">Open Settings</button>
-        </div>
-        
-        <div class="setup-section">
-          <h3>📚 How it works</h3>
-          <ul>
-            <li>Click the extension icon to mark the current page</li>
-            <li>Choose a status (Read, Good Reference, etc.)</li>
-            <li>Add tags to organize your entries</li>
-            <li>View your recent entries in the popup</li>
-          </ul>
-        </div>
-      </div>
+    // Create main container
+    const container = UIComponents.createContainer(
+      'Welcome to ForgetfulMe!',
+      'This extension helps you mark websites as read for research purposes.',
+      'setup-container'
+    )
+    
+    // Create setup section
+    const setupSection = UIComponents.createSection('🔧 Setup Required', 'setup-section')
+    setupSection.innerHTML = `
+      <p>To use this extension, you need to configure your Supabase backend:</p>
+      
+      <ol>
+        <li>Create a Supabase project at <a href="https://supabase.com" target="_blank">supabase.com</a></li>
+        <li>Get your Project URL and anon public key</li>
+        <li>Open the extension settings to configure</li>
+      </ol>
     `
     
-    // Bind settings button
-    const settingsBtn = document.getElementById('open-settings')
-    if (settingsBtn) {
-      settingsBtn.addEventListener('click', () => this.openSettings())
-    }
+    const settingsBtn = UIComponents.createButton('Open Settings', () => this.openSettings(), 'ui-btn-primary')
+    setupSection.appendChild(settingsBtn)
+    container.appendChild(setupSection)
+    
+    // Create how it works section
+    const howItWorksSection = UIComponents.createSection('📚 How it works', 'setup-section')
+    howItWorksSection.innerHTML = `
+      <ul>
+        <li>Click the extension icon to mark the current page</li>
+        <li>Choose a status (Read, Good Reference, etc.)</li>
+        <li>Add tags to organize your entries</li>
+        <li>View your recent entries in the popup</li>
+      </ul>
+    `
+    container.appendChild(howItWorksSection)
+    
+    this.appContainer.innerHTML = ''
+    this.appContainer.appendChild(container)
   }
 
   showAuthInterface() {
@@ -118,37 +119,62 @@ class ForgetfulMePopup {
   }
 
   showMainInterface() {
-    // Show the main popup interface
-    this.appContainer.innerHTML = `
-      <header>
-        <h1>ForgetfulMe</h1>
-        <button id="settings-btn" class="settings-btn" title="Settings">⚙️</button>
-      </header>
-      
-      <div class="main-content">
-        <div class="form-group">
-          <label for="read-status">Mark as:</label>
-          <select id="read-status">
-            <option value="read">Read</option>
-            <option value="good-reference">Good Reference</option>
-            <option value="low-value">Low Value</option>
-            <option value="revisit-later">Revisit Later</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label for="tags">Tags (comma separated):</label>
-          <input type="text" id="tags" placeholder="research, tutorial, important">
-        </div>
-        
-        <button id="mark-read" class="primary-btn">Mark as Read</button>
-      </div>
-      
-      <div class="recent-section">
-        <h3>Recent Entries</h3>
-        <div id="recent-list"></div>
-      </div>
-    `
+    // Create header
+    const header = document.createElement('header')
+    const title = document.createElement('h1')
+    title.textContent = 'ForgetfulMe'
+    header.appendChild(title)
+    
+    const settingsBtn = UIComponents.createButton('⚙️', () => this.openSettings(), 'ui-btn-secondary settings-btn', {
+      title: 'Settings',
+      id: 'settings-btn'
+    })
+    header.appendChild(settingsBtn)
+    
+    // Create main content container
+    const mainContent = document.createElement('div')
+    mainContent.className = 'main-content'
+    
+    // Create form using UI components
+    const form = UIComponents.createForm('bookmarkForm', (e) => this.markAsRead(), [
+      {
+        type: 'select',
+        id: 'read-status',
+        label: 'Mark as:',
+        options: {
+          options: [
+            { value: 'read', text: 'Read' },
+            { value: 'good-reference', text: 'Good Reference' },
+            { value: 'low-value', text: 'Low Value' },
+            { value: 'revisit-later', text: 'Revisit Later' }
+          ]
+        }
+      },
+      {
+        type: 'text',
+        id: 'tags',
+        label: 'Tags (comma separated):',
+        options: {
+          placeholder: 'research, tutorial, important'
+        }
+      }
+    ], {
+      submitText: 'Mark as Read',
+      className: 'bookmark-form'
+    })
+    
+    mainContent.appendChild(form)
+    
+    // Create recent section
+    const recentSection = UIComponents.createSection('Recent Entries', 'recent-section')
+    const recentList = UIComponents.createList('recent-list')
+    recentSection.appendChild(recentList)
+    
+    // Assemble the interface
+    this.appContainer.innerHTML = ''
+    this.appContainer.appendChild(header)
+    this.appContainer.appendChild(mainContent)
+    this.appContainer.appendChild(recentSection)
     
     // Re-initialize elements after DOM update
     this.initializeElements()
@@ -199,46 +225,43 @@ class ForgetfulMePopup {
       this.recentList.innerHTML = ''
       
       if (bookmarks.length === 0) {
-        this.recentList.innerHTML = '<div class="recent-item">No entries yet</div>'
+        const emptyItem = UIComponents.createListItem({
+          title: 'No entries yet',
+          meta: {
+            status: 'info',
+            statusText: 'No entries'
+          }
+        }, { className: 'recent-item empty' })
+        this.recentList.appendChild(emptyItem)
         return
       }
       
       bookmarks.forEach(bookmark => {
-        const item = document.createElement('div')
-        item.className = 'recent-item'
+        const listItem = UIComponents.createListItem({
+          title: bookmark.title || 'Untitled',
+          titleTooltip: bookmark.title || 'Untitled',
+          meta: {
+            status: bookmark.read_status,
+            statusText: this.formatStatus(bookmark.read_status),
+            time: this.formatTime(new Date(bookmark.created_at).getTime()),
+            tags: bookmark.tags || []
+          }
+        }, { className: 'recent-item' })
         
-        const title = document.createElement('div')
-        title.className = 'title'
-        title.textContent = bookmark.title || 'Untitled'
-        title.title = bookmark.title || 'Untitled'
-        
-        const meta = document.createElement('div')
-        meta.className = 'meta'
-        
-        const status = document.createElement('span')
-        status.className = `status status-${bookmark.read_status}`
-        status.textContent = this.formatStatus(bookmark.read_status)
-        
-        const time = document.createElement('span')
-        time.textContent = this.formatTime(new Date(bookmark.created_at).getTime())
-        
-        meta.appendChild(status)
-        meta.appendChild(time)
-        
-        if (bookmark.tags && bookmark.tags.length > 0) {
-          const tags = document.createElement('span')
-          tags.textContent = ` • ${bookmark.tags.join(', ')}`
-          meta.appendChild(tags)
-        }
-        
-        item.appendChild(title)
-        item.appendChild(meta)
-        this.recentList.appendChild(item)
+        this.recentList.appendChild(listItem)
       })
       
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries')
-      this.recentList.innerHTML = '<div class="recent-item">Error loading entries</div>'
+      const errorItem = UIComponents.createListItem({
+        title: 'Error loading entries',
+        meta: {
+          status: 'error',
+          statusText: 'Error'
+        }
+      }, { className: 'recent-item error' })
+      this.recentList.appendChild(errorItem)
+      
       if (errorResult.shouldShowToUser) {
         UIMessages.error(errorResult.userMessage, this.appContainer)
       }

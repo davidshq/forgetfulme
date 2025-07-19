@@ -14,21 +14,21 @@ class ForgetfulMeOptions {
     // Initialize elements that exist in the initial HTML
     this.appContainer = document.getElementById('app')
     
-    // These elements will be created dynamically, so we'll initialize them later
-    this.statusTypesList = null
-    this.newStatusInput = null
-    this.addStatusBtn = null
-    this.exportDataBtn = null
-    this.importDataBtn = null
-    this.importFile = null
-    this.clearDataBtn = null
-    this.viewAllBtn = null
-    this.recentEntriesList = null
+    // Re-initialize dynamically created elements
+    this.statusTypesList = document.getElementById('status-types-list')
+    this.newStatusInput = document.getElementById('new-status')
+    this.addStatusBtn = document.getElementById('add-status-btn')
+    this.exportDataBtn = document.getElementById('export-data-btn')
+    this.importDataBtn = document.getElementById('import-data-btn')
+    this.importFile = document.getElementById('import-file')
+    this.clearDataBtn = document.getElementById('clear-data-btn')
+    this.viewAllBtn = document.getElementById('view-all-btn')
+    this.recentEntriesList = document.getElementById('recent-entries-list')
     
     // Stats elements
-    this.totalEntries = null
-    this.statusTypesCount = null
-    this.mostUsedStatus = null
+    this.totalEntries = document.getElementById('total-entries')
+    this.statusTypesCount = document.getElementById('status-types-count')
+    this.mostUsedStatus = document.getElementById('most-used-status')
   }
 
   bindEvents() {
@@ -107,71 +107,106 @@ class ForgetfulMeOptions {
   }
 
   showMainInterface() {
-    // Show the main options interface
-    this.appContainer.innerHTML = `
-      <div class="container">
-        <header>
-          <h1>ForgetfulMe Settings</h1>
-        </header>
-
-        <div class="config-section">
-          <h2>Supabase Configuration</h2>
-          <div id="config-status-container"></div>
-        </div>
-
-        <div class="stats-section">
-          <h2>Statistics</h2>
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">Total Entries:</span>
-              <span id="total-entries" class="stat-value">-</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Status Types:</span>
-              <span id="status-types-count" class="stat-value">-</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Most Used Status:</span>
-              <span id="most-used-status" class="stat-value">-</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="status-types-section">
-          <h2>Custom Status Types</h2>
-          <div class="add-status">
-            <input type="text" id="new-status" placeholder="Enter new status type">
-            <button id="add-status-btn">Add</button>
-          </div>
-          <div id="status-types-list"></div>
-        </div>
-
-        <div class="data-section">
-          <h2>Data Management</h2>
-          <div class="data-actions">
-            <button id="export-data-btn">Export Data</button>
-            <button id="import-data-btn">Import Data</button>
-            <input type="file" id="import-file" accept=".json" style="display: none;">
-            <button id="clear-data-btn" class="danger">Clear All Data</button>
-          </div>
-        </div>
-
-        <div class="recent-section">
-          <h2>Recent Entries</h2>
-          <button id="view-all-btn">View All Entries</button>
-          <div id="recent-entries-list"></div>
-        </div>
-      </div>
-    `
+    // Create main container
+    const mainContainer = UIComponents.createContainer('ForgetfulMe Settings', '', 'main-container')
+    
+    // Create config section
+    const configSection = UIComponents.createSection('Supabase Configuration', 'config-section')
+    const configStatusContainer = document.createElement('div')
+    configStatusContainer.id = 'config-status-container'
+    configSection.appendChild(configStatusContainer)
+    mainContainer.appendChild(configSection)
+    
+    // Create stats section
+    const statsSection = UIComponents.createSection('Statistics', 'stats-section')
+    const statsGrid = UIComponents.createGrid([
+      { text: 'Total Entries:', className: 'stat-item' },
+      { text: 'Status Types:', className: 'stat-item' },
+      { text: 'Most Used Status:', className: 'stat-item' }
+    ], { className: 'stats-grid' })
+    
+    // Add stat values
+    const statItems = statsGrid.querySelectorAll('.grid-item')
+    statItems[0].innerHTML = '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>'
+    statItems[1].innerHTML = '<span class="stat-label">Status Types:</span><span id="status-types-count" class="stat-value">-</span>'
+    statItems[2].innerHTML = '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>'
+    
+    statsSection.appendChild(statsGrid)
+    mainContainer.appendChild(statsSection)
+    
+    // Create status types section
+    const statusSection = UIComponents.createSection('Custom Status Types', 'status-types-section')
+    
+    const addStatusContainer = document.createElement('div')
+    addStatusContainer.className = 'add-status'
+    
+    const statusInput = UIComponents.createFormField('text', 'new-status', '', {
+      placeholder: 'Enter new status type'
+    })
+    const addStatusBtn = UIComponents.createButton('Add', () => this.addStatusType(), 'ui-btn-primary', {
+      id: 'add-status-btn'
+    })
+    
+    addStatusContainer.appendChild(statusInput)
+    addStatusContainer.appendChild(addStatusBtn)
+    statusSection.appendChild(addStatusContainer)
+    
+    const statusTypesList = UIComponents.createList('status-types-list')
+    statusSection.appendChild(statusTypesList)
+    mainContainer.appendChild(statusSection)
+    
+    // Create data management section
+    const dataSection = UIComponents.createSection('Data Management', 'data-section')
+    const dataActions = document.createElement('div')
+    dataActions.className = 'data-actions'
+    
+    const exportBtn = UIComponents.createButton('Export Data', () => this.exportData(), 'ui-btn-secondary', {
+      id: 'export-data-btn'
+    })
+    const importBtn = UIComponents.createButton('Import Data', () => this.importFile.click(), 'ui-btn-secondary', {
+      id: 'import-data-btn'
+    })
+    const clearBtn = UIComponents.createButton('Clear All Data', () => this.clearData(), 'ui-btn-danger', {
+      id: 'clear-data-btn'
+    })
+    
+    dataActions.appendChild(exportBtn)
+    dataActions.appendChild(importBtn)
+    dataActions.appendChild(clearBtn)
+    
+    // Hidden file input
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.id = 'import-file'
+    fileInput.accept = '.json'
+    fileInput.style.display = 'none'
+    dataActions.appendChild(fileInput)
+    
+    dataSection.appendChild(dataActions)
+    mainContainer.appendChild(dataSection)
+    
+    // Create recent entries section
+    const recentSection = UIComponents.createSection('Recent Entries', 'recent-section')
+    const viewAllBtn = UIComponents.createButton('View All Entries', () => this.viewAllEntries(), 'ui-btn-secondary', {
+      id: 'view-all-btn'
+    })
+    const recentEntriesList = UIComponents.createList('recent-entries-list')
+    
+    recentSection.appendChild(viewAllBtn)
+    recentSection.appendChild(recentEntriesList)
+    mainContainer.appendChild(recentSection)
+    
+    // Assemble the interface
+    this.appContainer.innerHTML = ''
+    this.appContainer.appendChild(mainContainer)
     
     // Re-initialize elements after DOM update
     this.initializeElements()
     this.bindEvents()
     
     // Show configuration status
-    const configContainer = document.getElementById('config-status-container')
-    if (configContainer) {
-      this.configUI.showConfigStatus(configContainer)
+    if (configStatusContainer) {
+      this.configUI.showConfigStatus(configStatusContainer)
     }
   }
 
@@ -200,26 +235,30 @@ class ForgetfulMeOptions {
     this.statusTypesList.innerHTML = ''
     
     if (statusTypes.length === 0) {
-      this.statusTypesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No custom status types defined</p>'
+      const emptyItem = UIComponents.createListItem({
+        title: 'No custom status types defined',
+        meta: {
+          status: 'info',
+          statusText: 'No status types'
+        }
+      }, { className: 'status-type-item empty' })
+      this.statusTypesList.appendChild(emptyItem)
       return
     }
     
     statusTypes.forEach(status => {
-      const item = document.createElement('div')
-      item.className = 'status-type-item'
+      const listItem = UIComponents.createListItem({
+        title: this.formatStatus(status),
+        actions: [
+          {
+            text: 'Remove',
+            onClick: () => this.removeStatusType(status),
+            className: 'ui-btn-danger ui-btn-small'
+          }
+        ]
+      }, { className: 'status-type-item' })
       
-      const name = document.createElement('span')
-      name.className = 'status-name'
-      name.textContent = this.formatStatus(status)
-      
-      const removeBtn = document.createElement('button')
-      removeBtn.className = 'remove-btn'
-      removeBtn.textContent = 'Remove'
-      removeBtn.addEventListener('click', () => this.removeStatusType(status))
-      
-      item.appendChild(name)
-      item.appendChild(removeBtn)
-      this.statusTypesList.appendChild(item)
+      this.statusTypesList.appendChild(listItem)
     })
   }
 
@@ -303,43 +342,32 @@ class ForgetfulMeOptions {
     this.recentEntriesList.innerHTML = ''
     
     if (bookmarks.length === 0) {
-      this.recentEntriesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No entries yet</p>'
+      const emptyItem = UIComponents.createListItem({
+        title: 'No entries yet',
+        meta: {
+          status: 'info',
+          statusText: 'No entries'
+        }
+      }, { className: 'recent-item empty' })
+      this.recentEntriesList.appendChild(emptyItem)
       return
     }
     
     const recentBookmarks = bookmarks.slice(0, 10)
     
     recentBookmarks.forEach(bookmark => {
-      const item = document.createElement('div')
-      item.className = 'recent-item'
+      const listItem = UIComponents.createListItem({
+        title: bookmark.title || 'Untitled',
+        titleTooltip: bookmark.title || 'Untitled',
+        meta: {
+          status: bookmark.read_status,
+          statusText: this.formatStatus(bookmark.read_status),
+          time: this.formatTime(new Date(bookmark.created_at).getTime()),
+          tags: bookmark.tags || []
+        }
+      }, { className: 'recent-item' })
       
-      const title = document.createElement('div')
-      title.className = 'title'
-      title.textContent = bookmark.title || 'Untitled'
-      title.title = bookmark.title || 'Untitled'
-      
-      const meta = document.createElement('div')
-      meta.className = 'meta'
-      
-      const status = document.createElement('span')
-      status.className = `status status-${bookmark.read_status}`
-      status.textContent = this.formatStatus(bookmark.read_status)
-      
-      const time = document.createElement('span')
-      time.textContent = this.formatTime(new Date(bookmark.created_at).getTime())
-      
-      meta.appendChild(status)
-      meta.appendChild(time)
-      
-      if (bookmark.tags && bookmark.tags.length > 0) {
-        const tags = document.createElement('span')
-        tags.textContent = ` • ${bookmark.tags.join(', ')}`
-        meta.appendChild(tags)
-      }
-      
-      item.appendChild(title)
-      item.appendChild(meta)
-      this.recentEntriesList.appendChild(item)
+      this.recentEntriesList.appendChild(listItem)
     })
   }
 

@@ -7,76 +7,116 @@ class AuthUI {
   }
 
   showLoginForm(container) {
-    const loginHTML = `
-      <div class="auth-container">
-        <div class="auth-header">
-          <h2>Sign in to ForgetfulMe</h2>
-          <p>Access your bookmarks across all devices</p>
-        </div>
-        
-        <form id="loginForm" class="auth-form">
-          <div class="form-group">
-            <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" placeholder="Enter your email" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="Enter your password" required>
-          </div>
-          
-          <button type="submit" class="auth-btn primary">Sign In</button>
-        </form>
-        
-        <div class="auth-footer">
-          <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
-        </div>
-        
-        <div id="authMessage" class="auth-message"></div>
-      </div>
-    `
+    // Create container with header
+    const containerEl = UIComponents.createContainer(
+      'Sign in to ForgetfulMe',
+      'Access your bookmarks across all devices',
+      'auth-container'
+    )
     
-    container.innerHTML = loginHTML
+    // Create login form
+    const loginForm = UIComponents.createForm('loginForm', (e) => this.handleLogin(container), [
+      {
+        type: 'email',
+        id: 'loginEmail',
+        label: 'Email',
+        options: {
+          placeholder: 'Enter your email',
+          required: true
+        }
+      },
+      {
+        type: 'password',
+        id: 'loginPassword',
+        label: 'Password',
+        options: {
+          placeholder: 'Enter your password',
+          required: true
+        }
+      }
+    ], {
+      submitText: 'Sign In',
+      className: 'auth-form'
+    })
+    
+    containerEl.appendChild(loginForm)
+    
+    // Create footer
+    const footer = document.createElement('div')
+    footer.className = 'auth-footer'
+    footer.innerHTML = '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>'
+    containerEl.appendChild(footer)
+    
+    // Create message container
+    const messageContainer = document.createElement('div')
+    messageContainer.id = 'authMessage'
+    messageContainer.className = 'auth-message'
+    containerEl.appendChild(messageContainer)
+    
+    container.innerHTML = ''
+    container.appendChild(containerEl)
     this.bindAuthEvents(container)
   }
 
   showSignupForm(container) {
-    const signupHTML = `
-      <div class="auth-container">
-        <div class="auth-header">
-          <h2>Create Account</h2>
-          <p>Start organizing your bookmarks with ForgetfulMe</p>
-        </div>
-        
-        <form id="signupForm" class="auth-form">
-          <div class="form-group">
-            <label for="signupEmail">Email</label>
-            <input type="email" id="signupEmail" placeholder="Enter your email" required>
-          </div>
-          
-          <div class="form-group">
-            <label for="signupPassword">Password</label>
-            <input type="password" id="signupPassword" placeholder="Create a password" required>
-            <small>Password must be at least 6 characters</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-          </div>
-          
-          <button type="submit" class="auth-btn primary">Create Account</button>
-        </form>
-        
-        <div class="auth-footer">
-          <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
-        </div>
-        
-        <div id="authMessage" class="auth-message"></div>
-      </div>
-    `
+    // Create container with header
+    const containerEl = UIComponents.createContainer(
+      'Create Account',
+      'Start organizing your bookmarks with ForgetfulMe',
+      'auth-container'
+    )
     
-    container.innerHTML = signupHTML
+    // Create signup form
+    const signupForm = UIComponents.createForm('signupForm', (e) => this.handleSignup(container), [
+      {
+        type: 'email',
+        id: 'signupEmail',
+        label: 'Email',
+        options: {
+          placeholder: 'Enter your email',
+          required: true
+        }
+      },
+      {
+        type: 'password',
+        id: 'signupPassword',
+        label: 'Password',
+        options: {
+          placeholder: 'Create a password',
+          required: true,
+          helpText: 'Password must be at least 6 characters'
+        }
+      },
+      {
+        type: 'password',
+        id: 'confirmPassword',
+        label: 'Confirm Password',
+        options: {
+          placeholder: 'Confirm your password',
+          required: true
+        }
+      }
+    ], {
+      submitText: 'Create Account',
+      className: 'auth-form'
+    })
+    
+    containerEl.appendChild(signupForm)
+    
+    // Create footer
+    const footer = document.createElement('div')
+    footer.className = 'auth-footer'
+    footer.innerHTML = '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>'
+    containerEl.appendChild(footer)
+    
+    // Create message container
+    const messageContainer = document.createElement('div')
+    messageContainer.id = 'authMessage'
+    messageContainer.className = 'auth-message'
+    containerEl.appendChild(messageContainer)
+    
+    container.innerHTML = ''
+    container.appendChild(containerEl)
     this.bindAuthEvents(container)
   }
 

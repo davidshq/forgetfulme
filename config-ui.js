@@ -5,49 +5,67 @@ class ConfigUI {
   }
 
   showConfigForm(container) {
-    const configHTML = `
-      <div class="config-container">
-        <div class="config-header">
-          <h2>Supabase Configuration</h2>
-          <p>Enter your Supabase project credentials to enable cloud sync</p>
-        </div>
-        
-        <form id="configForm" class="config-form">
-          <div class="form-group">
-            <label for="supabaseUrl">Project URL</label>
-            <input type="url" id="supabaseUrl" placeholder="https://your-project.supabase.co" required>
-            <small>Your Supabase project URL (found in Settings > API)</small>
-          </div>
-          
-          <div class="form-group">
-            <label for="supabaseAnonKey">Anon Public Key</label>
-            <input type="text" id="supabaseAnonKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
-            <small>Your anon public key (found in Settings > API)</small>
-          </div>
-          
-          <button type="submit" class="config-btn primary">Save Configuration</button>
-        </form>
-        
-        <div class="config-help">
-          <h3>How to get your credentials:</h3>
-          <ol>
-            <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create an account</li>
-            <li>Create a new project</li>
-            <li>Go to Settings > API in your project dashboard</li>
-            <li>Copy the "Project URL" and "anon public" key</li>
-            <li>Paste them in the form above</li>
-          </ol>
-          
-          <div class="config-note">
-            <strong>Note:</strong> Your credentials are stored securely in your browser's sync storage and are never shared with anyone.
-          </div>
-        </div>
-        
-        <div id="configMessage" class="config-message"></div>
+    // Create container with header
+    const containerEl = UIComponents.createContainer(
+      'Supabase Configuration',
+      'Enter your Supabase project credentials to enable cloud sync',
+      'config-container'
+    )
+    
+    // Create config form
+    const configForm = UIComponents.createForm('configForm', (e) => this.handleConfigSubmit(container), [
+      {
+        type: 'url',
+        id: 'supabaseUrl',
+        label: 'Project URL',
+        options: {
+          placeholder: 'https://your-project.supabase.co',
+          required: true,
+          helpText: 'Your Supabase project URL (found in Settings > API)'
+        }
+      },
+      {
+        type: 'text',
+        id: 'supabaseAnonKey',
+        label: 'Anon Public Key',
+        options: {
+          placeholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          required: true,
+          helpText: 'Your anon public key (found in Settings > API)'
+        }
+      }
+    ], {
+      submitText: 'Save Configuration',
+      className: 'config-form'
+    })
+    
+    containerEl.appendChild(configForm)
+    
+    // Create help section
+    const helpSection = UIComponents.createSection('How to get your credentials:', 'config-help')
+    helpSection.innerHTML = `
+      <ol>
+        <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create an account</li>
+        <li>Create a new project</li>
+        <li>Go to Settings > API in your project dashboard</li>
+        <li>Copy the "Project URL" and "anon public" key</li>
+        <li>Paste them in the form above</li>
+      </ol>
+      
+      <div class="config-note">
+        <strong>Note:</strong> Your credentials are stored securely in your browser's sync storage and are never shared with anyone.
       </div>
     `
+    containerEl.appendChild(helpSection)
     
-    container.innerHTML = configHTML
+    // Create message container
+    const messageContainer = document.createElement('div')
+    messageContainer.id = 'configMessage'
+    messageContainer.className = 'config-message'
+    containerEl.appendChild(messageContainer)
+    
+    container.innerHTML = ''
+    container.appendChild(containerEl)
     this.bindConfigEvents(container)
     this.loadCurrentConfig(container)
   }
