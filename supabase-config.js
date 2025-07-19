@@ -116,14 +116,14 @@ class SupabaseConfig {
       }
 
       // Check if Supabase client is available
-      if (typeof window.supabase === 'undefined') {
+      if (typeof supabase === 'undefined') {
         console.error('Supabase client not loaded. Please include the Supabase library.')
         return false
       }
 
       // Use the globally available Supabase client
       console.log('Creating Supabase client with URL:', this.supabaseUrl)
-      this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseAnonKey)
+      this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseAnonKey)
       this.auth = this.supabase.auth
       
       // Verify the client was created properly

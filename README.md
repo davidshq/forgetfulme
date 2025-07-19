@@ -299,6 +299,8 @@ This should be sufficient for most users. Monitor your usage in the Supabase das
 
 MIT License - see LICENSE file for details.
 
+NOTE: supabase.min.js is Supabase's client library, it is not included in this license.
+
 ## Support
 
 For issues, feature requests, or questions:

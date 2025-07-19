@@ -39,9 +39,10 @@ class SupabaseService {
       const { data, error } = await this.supabase
         .from('bookmarks')
         .insert(bookmarkData)
+        .select()
 
       if (error) throw error
-      return data[0]
+      return data?.[0] || bookmarkData
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-service.saveBookmark')
       throw error
@@ -90,7 +91,7 @@ class SupabaseService {
       const { data, error } = await query
       if (error) throw error
 
-      return data
+      return data || []
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-service.getBookmarks')
       throw error
@@ -111,9 +112,10 @@ class SupabaseService {
         })
         .eq('id', bookmarkId)
         .eq('user_id', this.config.getCurrentUser().id)
+        .select()
 
       if (error) throw error
-      return data[0]
+      return data?.[0] || { id: bookmarkId, ...updates }
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-service.updateBookmark')
       throw error
@@ -155,7 +157,7 @@ class SupabaseService {
 
       if (error) throw error
 
-      return data.reduce((stats, bookmark) => {
+      return (data || []).reduce((stats, bookmark) => {
         stats[bookmark.read_status] = (stats[bookmark.read_status] || 0) + 1
         return stats
       }, {})
@@ -181,9 +183,10 @@ class SupabaseService {
           preferences: preferences,
           updated_at: new Date().toISOString()
         })
+        .select()
 
       if (error) throw error
-      return data[0]
+      return data?.[0] || { id: userId, preferences }
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-service.saveUserPreferences')
       throw error
@@ -266,6 +269,7 @@ class SupabaseService {
         const { error } = await this.supabase
           .from('bookmarks')
           .insert(transformedBookmarks)
+          .select()
 
         if (error) throw error
       }
