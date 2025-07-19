@@ -13,9 +13,9 @@ class ForgetfulMeBackground {
     })
 
     // Handle installation
-    chrome.runtime.onInstalled.addListener((details) => {
+    chrome.runtime.onInstalled.addListener(async (details) => {
       if (details.reason === 'install') {
-        this.initializeDefaultSettings()
+        await this.initializeDefaultSettings()
       }
     })
 
@@ -83,19 +83,25 @@ class ForgetfulMeBackground {
 
   async initializeDefaultSettings() {
     try {
-      // Set up default settings in chrome.storage
-      await chrome.storage.sync.set({
-        customStatusTypes: [
+      // Check if default settings already exist
+      const result = await chrome.storage.sync.get(['customStatusTypes'])
+      
+      // Only initialize if custom status types don't exist
+      if (!result.customStatusTypes) {
+        const defaultStatusTypes = [
           'read',
           'good-reference',
           'low-value',
           'revisit-later'
         ]
-      })
-      
-      console.log('Default settings initialized')
+        
+        await chrome.storage.sync.set({
+          customStatusTypes: defaultStatusTypes
+        })
+        
+        console.log('Default settings initialized')
+      }
     } catch (error) {
-      // Log error for debugging
       console.error('Error initializing default settings:', error)
     }
   }

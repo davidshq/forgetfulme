@@ -1,6 +1,7 @@
 // Options page script for ForgetfulMe extension with Supabase integration
 class ForgetfulMeOptions {
   constructor() {
+    this.configManager = new ConfigManager()
     this.supabaseConfig = new SupabaseConfig()
     this.supabaseService = new SupabaseService(this.supabaseConfig)
     this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess())
@@ -212,12 +213,11 @@ class ForgetfulMeOptions {
 
   async loadData() {
     try {
-      const [bookmarks, preferences] = await Promise.all([
+      await this.configManager.initialize()
+      const [bookmarks, customStatusTypes] = await Promise.all([
         this.supabaseService.getBookmarks({ limit: 1000 }),
-        this.supabaseService.getUserPreferences()
+        this.configManager.getCustomStatusTypes()
       ])
-      
-      const customStatusTypes = preferences.customStatusTypes || []
       
       this.loadStatusTypes(customStatusTypes)
       this.loadStatistics(bookmarks, customStatusTypes)
@@ -273,18 +273,11 @@ class ForgetfulMeOptions {
     }
 
     try {
-      const preferences = await this.supabaseService.getUserPreferences()
-      const customStatusTypes = preferences.customStatusTypes || []
-      
-      if (customStatusTypes.includes(status)) {
-        UIMessages.error('Status type already exists', this.appContainer)
-        return
-      }
-
-      customStatusTypes.push(status)
-      await this.supabaseService.saveUserPreferences({ customStatusTypes })
+      await this.configManager.initialize()
+      await this.configManager.addCustomStatusType(status)
       
       this.newStatusInput.value = ''
+      const customStatusTypes = await this.configManager.getCustomStatusTypes()
       this.loadStatusTypes(customStatusTypes)
       UIMessages.success('Status type added successfully', this.appContainer)
       
@@ -296,13 +289,11 @@ class ForgetfulMeOptions {
 
   async removeStatusType(status) {
     try {
-      const preferences = await this.supabaseService.getUserPreferences()
-      const customStatusTypes = preferences.customStatusTypes || []
+      await this.configManager.initialize()
+      await this.configManager.removeCustomStatusType(status)
       
-      const updatedTypes = customStatusTypes.filter(type => type !== status)
-      await this.supabaseService.saveUserPreferences({ customStatusTypes: updatedTypes })
-      
-      this.loadStatusTypes(updatedTypes)
+      const customStatusTypes = await this.configManager.getCustomStatusTypes()
+      this.loadStatusTypes(customStatusTypes)
       UIMessages.success('Status type removed successfully', this.appContainer)
       
     } catch (error) {

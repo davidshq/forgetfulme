@@ -1,6 +1,7 @@
 // Supabase configuration for ForgetfulMe extension
 class SupabaseConfig {
   constructor() {
+    this.configManager = new ConfigManager()
     this.supabaseUrl = null
     this.supabaseAnonKey = null
     
@@ -19,11 +20,12 @@ class SupabaseConfig {
     }
 
     try {
-      // Try to load from chrome.storage first (for user-provided config)
-      const result = await chrome.storage.sync.get(['supabaseConfig'])
-      if (result.supabaseConfig) {
-        this.supabaseUrl = result.supabaseConfig.url
-        this.supabaseAnonKey = result.supabaseConfig.anonKey
+      await this.configManager.initialize()
+      const supabaseConfig = await this.configManager.getSupabaseConfig()
+      
+      if (supabaseConfig) {
+        this.supabaseUrl = supabaseConfig.url
+        this.supabaseAnonKey = supabaseConfig.anonKey
         this.configLoaded = true
         return
       }
@@ -66,33 +68,15 @@ class SupabaseConfig {
 
   async setConfiguration(url, anonKey) {
     try {
-      // Validate the configuration
-      if (!url || !anonKey) {
-        throw new Error('Both URL and anon key are required')
-      }
-
-      if (!url.startsWith('https://')) {
-        throw new Error('URL must start with https://')
-      }
-
-      if (!anonKey.startsWith('eyJ')) {
-        throw new Error('Invalid anon key format')
-      }
-
-      // Save to chrome.storage
-      await chrome.storage.sync.set({
-        supabaseConfig: {
-          url: url,
-          anonKey: anonKey
-        }
-      })
-
+      await this.configManager.initialize()
+      const result = await this.configManager.setSupabaseConfig(url, anonKey)
+      
       // Update local configuration
       this.supabaseUrl = url
       this.supabaseAnonKey = anonKey
       this.configLoaded = true
 
-      return { success: true, message: 'Configuration saved successfully' }
+      return result
       
     } catch (error) {
       console.error('Error setting configuration:', error)
@@ -102,8 +86,7 @@ class SupabaseConfig {
 
   async getConfiguration() {
     await this.loadConfiguration()
-    const result = await chrome.storage.sync.get(['supabaseConfig'])
-    return result.supabaseConfig || null
+    return await this.configManager.getSupabaseConfig()
   }
 
   async initialize() {
@@ -218,7 +201,7 @@ class SupabaseConfig {
 
   async isConfigured() {
     await this.loadConfiguration()
-    return this.supabaseUrl !== null && this.supabaseAnonKey !== null
+    return await this.configManager.isSupabaseConfigured()
   }
 }
 

@@ -1,6 +1,7 @@
 // Popup script for ForgetfulMe extension with Supabase integration
 class ForgetfulMePopup {
   constructor() {
+    this.configManager = new ConfigManager()
     this.supabaseConfig = new SupabaseConfig()
     this.supabaseService = new SupabaseService(this.supabaseConfig)
     this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess())
@@ -265,8 +266,8 @@ class ForgetfulMePopup {
 
   async loadCustomStatusTypes() {
     try {
-      const preferences = await this.supabaseService.getUserPreferences()
-      const customStatusTypes = preferences.customStatusTypes || []
+      await this.configManager.initialize()
+      const customStatusTypes = await this.configManager.getCustomStatusTypes()
       
       if (customStatusTypes.length > 0) {
         // Clear default options and add custom ones
