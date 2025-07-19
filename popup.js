@@ -194,13 +194,7 @@ class ForgetfulMePopup {
         return
       }
 
-      const bookmark = {
-        url: tab.url,
-        title: tab.title,
-        status: status,
-        tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-        timestamp: Date.now()
-      }
+      const bookmark = BookmarkTransformer.fromCurrentTab(tab, status, tags ? tags.split(',') : [])
 
       await this.supabaseService.saveBookmark(bookmark)
       UIMessages.success('Page marked as read!', this.appContainer)
@@ -237,14 +231,15 @@ class ForgetfulMePopup {
       }
       
       bookmarks.forEach(bookmark => {
+        const uiBookmark = BookmarkTransformer.toUIFormat(bookmark)
         const listItem = UIComponents.createListItem({
-          title: bookmark.title || 'Untitled',
-          titleTooltip: bookmark.title || 'Untitled',
+          title: uiBookmark.title,
+          titleTooltip: uiBookmark.title,
           meta: {
-            status: bookmark.read_status,
-            statusText: this.formatStatus(bookmark.read_status),
-            time: this.formatTime(new Date(bookmark.created_at).getTime()),
-            tags: bookmark.tags || []
+            status: uiBookmark.status,
+            statusText: this.formatStatus(uiBookmark.status),
+            time: this.formatTime(new Date(uiBookmark.created_at).getTime()),
+            tags: uiBookmark.tags
           }
         }, { className: 'recent-item' })
         

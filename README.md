@@ -199,7 +199,6 @@ forgetfulme/
 ├── supabase-service.js   # Supabase service layer
 ├── auth-ui.js            # Authentication UI
 ├── config-ui.js          # Configuration UI
-├── migration.js          # Data migration utilities
 ├── supabase-schema.sql   # Database schema
 ├── supabase-config.template.js  # Template for local config
 ├── .gitignore           # Git ignore rules

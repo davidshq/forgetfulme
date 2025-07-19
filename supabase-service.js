@@ -21,20 +21,19 @@ class SupabaseService {
       throw ErrorHandler.createError('User not authenticated', ErrorHandler.ERROR_TYPES.AUTH, 'supabase-service.saveBookmark')
     }
 
+    // Validate bookmark data before transformation
+    const validation = BookmarkTransformer.validate(bookmark)
+    if (!validation.isValid) {
+      throw ErrorHandler.createError(
+        `Invalid bookmark data: ${validation.errors.join(', ')}`, 
+        ErrorHandler.ERROR_TYPES.VALIDATION, 
+        'supabase-service.saveBookmark'
+      )
+    }
+
     const userId = this.config.getCurrentUser().id
     
-    const bookmarkData = {
-      user_id: userId,
-      url: bookmark.url,
-      title: bookmark.title,
-      description: bookmark.description || '',
-      read_status: bookmark.status,
-      tags: bookmark.tags || [],
-      created_at: new Date(bookmark.timestamp).toISOString(),
-      updated_at: new Date().toISOString(),
-      last_accessed: new Date().toISOString(),
-      access_count: 1
-    }
+    const bookmarkData = BookmarkTransformer.toSupabaseFormat(bookmark, userId)
 
     try {
       const { data, error } = await this.supabase
@@ -258,12 +257,11 @@ class SupabaseService {
       const userId = this.config.getCurrentUser().id
 
       if (importData.bookmarks && importData.bookmarks.length > 0) {
-        const transformedBookmarks = importData.bookmarks.map(bookmark => ({
-          ...bookmark,
-          user_id: userId,
-          created_at: bookmark.created_at || new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }))
+        const transformedBookmarks = BookmarkTransformer.transformMultiple(
+          importData.bookmarks, 
+          userId, 
+          { preserveTimestamps: true, setDefaults: false }
+        )
 
         const { error } = await this.supabase
           .from('bookmarks')
