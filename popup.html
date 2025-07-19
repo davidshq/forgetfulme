@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ForgetfulMe</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ForgetfulMe</h1>
+      <p class="subtitle">Mark this page as read</p>
+    </header>
+
+    <div class="status-section">
+      <label for="read-status">Read Status:</label>
+      <select id="read-status">
+        <option value="read">Read</option>
+        <option value="good-reference">Good Reference</option>
+        <option value="low-value">Low Value</option>
+        <option value="revisit-later">Revisit Later</option>
+      </select>
+    </div>
+
+    <div class="tags-section">
+      <label for="tags">Tags (comma separated):</label>
+      <input type="text" id="tags" placeholder="research, important, todo">
+    </div>
+
+    <div class="actions">
+      <button id="mark-read" class="primary-btn">Mark as Read</button>
+      <button id="settings-btn" class="secondary-btn">Settings</button>
+    </div>
+
+    <div class="recent-entries">
+      <h3>Recent Entries</h3>
+      <div id="recent-list"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html> 
