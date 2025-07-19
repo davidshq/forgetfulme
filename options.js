@@ -1,334 +1,463 @@
-// Options page script for ForgetfulMe extension
+// Options page script for ForgetfulMe extension with Supabase integration
 class ForgetfulMeOptions {
   constructor() {
-    this.initializeElements();
-    this.bindEvents();
-    this.loadData();
+    this.supabaseConfig = new SupabaseConfig()
+    this.supabaseService = new SupabaseService(this.supabaseConfig)
+    this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess())
+    this.configUI = new ConfigUI(this.supabaseConfig)
+    
+    this.initializeElements()
+    this.initializeApp()
   }
 
   initializeElements() {
-    this.statusTypesList = document.getElementById('status-types-list');
-    this.newStatusInput = document.getElementById('new-status');
-    this.addStatusBtn = document.getElementById('add-status-btn');
-    this.exportDataBtn = document.getElementById('export-data-btn');
-    this.importDataBtn = document.getElementById('import-data-btn');
-    this.importFile = document.getElementById('import-file');
-    this.clearDataBtn = document.getElementById('clear-data-btn');
-    this.viewAllBtn = document.getElementById('view-all-btn');
-    this.recentEntriesList = document.getElementById('recent-entries-list');
+    // Initialize elements that exist in the initial HTML
+    this.appContainer = document.getElementById('app')
+    
+    // These elements will be created dynamically, so we'll initialize them later
+    this.statusTypesList = null
+    this.newStatusInput = null
+    this.addStatusBtn = null
+    this.exportDataBtn = null
+    this.importDataBtn = null
+    this.importFile = null
+    this.clearDataBtn = null
+    this.viewAllBtn = null
+    this.recentEntriesList = null
     
     // Stats elements
-    this.totalEntries = document.getElementById('total-entries');
-    this.statusTypesCount = document.getElementById('status-types-count');
-    this.mostUsedStatus = document.getElementById('most-used-status');
+    this.totalEntries = null
+    this.statusTypesCount = null
+    this.mostUsedStatus = null
   }
 
   bindEvents() {
-    this.addStatusBtn.addEventListener('click', () => this.addStatusType());
-    this.newStatusInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.addStatusType();
-      }
-    });
+    // Only bind events if elements exist
+    if (this.addStatusBtn) {
+      this.addStatusBtn.addEventListener('click', () => this.addStatusType())
+    }
     
-    this.exportDataBtn.addEventListener('click', () => this.exportData());
-    this.importDataBtn.addEventListener('click', () => this.importFile.click());
-    this.importFile.addEventListener('change', (e) => this.importData(e));
-    this.clearDataBtn.addEventListener('click', () => this.clearData());
-    this.viewAllBtn.addEventListener('click', () => this.viewAllEntries());
+    if (this.newStatusInput) {
+      this.newStatusInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.addStatusType()
+        }
+      })
+    }
+    
+    if (this.exportDataBtn) {
+      this.exportDataBtn.addEventListener('click', () => this.exportData())
+    }
+    
+    if (this.importDataBtn) {
+      this.importDataBtn.addEventListener('click', () => this.importFile.click())
+    }
+    
+    if (this.importFile) {
+      this.importFile.addEventListener('change', (e) => this.importData(e))
+    }
+    
+    if (this.clearDataBtn) {
+      this.clearDataBtn.addEventListener('click', () => this.clearData())
+    }
+    
+    if (this.viewAllBtn) {
+      this.viewAllBtn.addEventListener('click', () => this.viewAllEntries())
+    }
+  }
+
+  async initializeApp() {
+    try {
+      // Check if Supabase is configured
+      if (!(await this.supabaseConfig.isConfigured())) {
+        this.showConfigInterface()
+        return
+      }
+
+      // Initialize Supabase
+      await this.supabaseService.initialize()
+      
+      // Check if user is authenticated
+      if (this.supabaseConfig.isAuthenticated()) {
+        this.showMainInterface()
+        this.loadData()
+      } else {
+        this.showAuthInterface()
+      }
+    } catch (error) {
+      console.error('Error initializing app:', error)
+      this.showConfigInterface()
+    }
+  }
+
+  showConfigInterface() {
+    this.configUI.showConfigForm(this.appContainer)
+  }
+
+  showAuthInterface() {
+    this.authUI.showLoginForm(this.appContainer)
+  }
+
+  onAuthSuccess() {
+    this.showMainInterface()
+    this.loadData()
+  }
+
+  showMainInterface() {
+    // Show the main options interface
+    this.appContainer.innerHTML = `
+      <div class="container">
+        <header>
+          <h1>ForgetfulMe Settings</h1>
+        </header>
+
+        <div class="config-section">
+          <h2>Supabase Configuration</h2>
+          <div id="config-status-container"></div>
+        </div>
+
+        <div class="stats-section">
+          <h2>Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Total Entries:</span>
+              <span id="total-entries" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Status Types:</span>
+              <span id="status-types-count" class="stat-value">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Most Used Status:</span>
+              <span id="most-used-status" class="stat-value">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-types-section">
+          <h2>Custom Status Types</h2>
+          <div class="add-status">
+            <input type="text" id="new-status" placeholder="Enter new status type">
+            <button id="add-status-btn">Add</button>
+          </div>
+          <div id="status-types-list"></div>
+        </div>
+
+        <div class="data-section">
+          <h2>Data Management</h2>
+          <div class="data-actions">
+            <button id="export-data-btn">Export Data</button>
+            <button id="import-data-btn">Import Data</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="clear-data-btn" class="danger">Clear All Data</button>
+          </div>
+        </div>
+
+        <div class="recent-section">
+          <h2>Recent Entries</h2>
+          <button id="view-all-btn">View All Entries</button>
+          <div id="recent-entries-list"></div>
+        </div>
+      </div>
+    `
+    
+    // Re-initialize elements after DOM update
+    this.initializeElements()
+    this.bindEvents()
+    
+    // Show configuration status
+    const configContainer = document.getElementById('config-status-container')
+    if (configContainer) {
+      this.configUI.showConfigStatus(configContainer)
+    }
   }
 
   async loadData() {
     try {
-      const result = await chrome.storage.sync.get(['entries', 'customStatusTypes']);
-      const entries = result.entries || [];
-      const customStatusTypes = result.customStatusTypes || [];
+      const [bookmarks, preferences] = await Promise.all([
+        this.supabaseService.getBookmarks({ limit: 1000 }),
+        this.supabaseService.getUserPreferences()
+      ])
       
-      this.loadStatusTypes(customStatusTypes);
-      this.loadStatistics(entries, customStatusTypes);
-      this.loadRecentEntries(entries);
+      const customStatusTypes = preferences.customStatusTypes || []
+      
+      this.loadStatusTypes(customStatusTypes)
+      this.loadStatistics(bookmarks, customStatusTypes)
+      this.loadRecentEntries(bookmarks)
       
     } catch (error) {
-      console.error('Error loading data:', error);
-      this.showMessage('Error loading data', 'error');
+      console.error('Error loading data:', error)
+      this.showMessage('Error loading data', 'error')
     }
   }
 
   loadStatusTypes(statusTypes) {
-    this.statusTypesList.innerHTML = '';
+    if (!this.statusTypesList) return
+    
+    this.statusTypesList.innerHTML = ''
     
     if (statusTypes.length === 0) {
-      this.statusTypesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No custom status types defined</p>';
-      return;
+      this.statusTypesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No custom status types defined</p>'
+      return
     }
     
     statusTypes.forEach(status => {
-      const item = document.createElement('div');
-      item.className = 'status-type-item';
+      const item = document.createElement('div')
+      item.className = 'status-type-item'
       
-      const name = document.createElement('span');
-      name.className = 'status-name';
-      name.textContent = this.formatStatus(status);
+      const name = document.createElement('span')
+      name.className = 'status-name'
+      name.textContent = this.formatStatus(status)
       
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'remove-btn';
-      removeBtn.textContent = 'Remove';
-      removeBtn.addEventListener('click', () => this.removeStatusType(status));
+      const removeBtn = document.createElement('button')
+      removeBtn.className = 'remove-btn'
+      removeBtn.textContent = 'Remove'
+      removeBtn.addEventListener('click', () => this.removeStatusType(status))
       
-      item.appendChild(name);
-      item.appendChild(removeBtn);
-      this.statusTypesList.appendChild(item);
-    });
+      item.appendChild(name)
+      item.appendChild(removeBtn)
+      this.statusTypesList.appendChild(item)
+    })
   }
 
   async addStatusType() {
-    const status = this.newStatusInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!this.newStatusInput) return
+    
+    const status = this.newStatusInput.value.trim().toLowerCase().replace(/\s+/g, '-')
     
     if (!status) {
-      this.showMessage('Please enter a status type', 'error');
-      return;
+      this.showMessage('Please enter a status type', 'error')
+      return
     }
-    
-    if (status.length < 2) {
-      this.showMessage('Status type must be at least 2 characters', 'error');
-      return;
-    }
-    
+
     try {
-      const result = await chrome.storage.sync.get(['customStatusTypes']);
-      const customStatusTypes = result.customStatusTypes || [];
+      const preferences = await this.supabaseService.getUserPreferences()
+      const customStatusTypes = preferences.customStatusTypes || []
       
       if (customStatusTypes.includes(status)) {
-        this.showMessage('Status type already exists', 'error');
-        return;
+        this.showMessage('Status type already exists', 'error')
+        return
       }
+
+      customStatusTypes.push(status)
+      await this.supabaseService.saveUserPreferences({ customStatusTypes })
       
-      customStatusTypes.push(status);
-      await chrome.storage.sync.set({ customStatusTypes });
-      
-      this.newStatusInput.value = '';
-      this.loadData();
-      this.showMessage('Status type added successfully', 'success');
+      this.newStatusInput.value = ''
+      this.loadStatusTypes(customStatusTypes)
+      this.showMessage('Status type added successfully', 'success')
       
     } catch (error) {
-      console.error('Error adding status type:', error);
-      this.showMessage('Error adding status type', 'error');
+      console.error('Error adding status type:', error)
+      this.showMessage('Error adding status type', 'error')
     }
   }
 
   async removeStatusType(status) {
-    if (!confirm(`Are you sure you want to remove "${this.formatStatus(status)}"?`)) {
-      return;
-    }
-    
     try {
-      const result = await chrome.storage.sync.get(['customStatusTypes']);
-      const customStatusTypes = result.customStatusTypes || [];
+      const preferences = await this.supabaseService.getUserPreferences()
+      const customStatusTypes = preferences.customStatusTypes || []
       
-      const updatedTypes = customStatusTypes.filter(type => type !== status);
-      await chrome.storage.sync.set({ customStatusTypes: updatedTypes });
+      const updatedTypes = customStatusTypes.filter(type => type !== status)
+      await this.supabaseService.saveUserPreferences({ customStatusTypes: updatedTypes })
       
-      this.loadData();
-      this.showMessage('Status type removed successfully', 'success');
+      this.loadStatusTypes(updatedTypes)
+      this.showMessage('Status type removed successfully', 'success')
       
     } catch (error) {
-      console.error('Error removing status type:', error);
-      this.showMessage('Error removing status type', 'error');
+      console.error('Error removing status type:', error)
+      this.showMessage('Error removing status type', 'error')
     }
   }
 
-  loadStatistics(entries, statusTypes) {
-    this.totalEntries.textContent = entries.length;
-    this.statusTypesCount.textContent = statusTypes.length;
+  loadStatistics(bookmarks, statusTypes) {
+    if (!this.totalEntries || !this.statusTypesCount || !this.mostUsedStatus) return
     
-    // Calculate most used status
-    const statusCounts = {};
-    entries.forEach(entry => {
-      statusCounts[entry.status] = (statusCounts[entry.status] || 0) + 1;
-    });
+    // Total entries
+    this.totalEntries.textContent = bookmarks.length
     
-    let mostUsed = '-';
-    let maxCount = 0;
+    // Status types count
+    this.statusTypesCount.textContent = statusTypes.length
     
-    Object.entries(statusCounts).forEach(([status, count]) => {
-      if (count > maxCount) {
-        maxCount = count;
-        mostUsed = this.formatStatus(status);
-      }
-    });
+    // Most used status
+    const statusCounts = {}
+    bookmarks.forEach(bookmark => {
+      statusCounts[bookmark.read_status] = (statusCounts[bookmark.read_status] || 0) + 1
+    })
     
-    this.mostUsedStatus.textContent = mostUsed;
+    const mostUsed = Object.entries(statusCounts)
+      .sort(([,a], [,b]) => b - a)[0]
+    
+    if (mostUsed) {
+      this.mostUsedStatus.textContent = this.formatStatus(mostUsed[0])
+    } else {
+      this.mostUsedStatus.textContent = 'None'
+    }
   }
 
-  loadRecentEntries(entries) {
-    this.recentEntriesList.innerHTML = '';
+  loadRecentEntries(bookmarks) {
+    if (!this.recentEntriesList) return
     
-    if (entries.length === 0) {
-      this.recentEntriesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No entries yet</p>';
-      return;
+    this.recentEntriesList.innerHTML = ''
+    
+    if (bookmarks.length === 0) {
+      this.recentEntriesList.innerHTML = '<p style="color: #6c757d; font-style: italic;">No entries yet</p>'
+      return
     }
     
-    // Show last 10 entries
-    const recentEntries = entries.slice(0, 10);
+    const recentBookmarks = bookmarks.slice(0, 10)
     
-    recentEntries.forEach(entry => {
-      const item = document.createElement('div');
-      item.className = 'recent-entry-item';
+    recentBookmarks.forEach(bookmark => {
+      const item = document.createElement('div')
+      item.className = 'recent-item'
       
-      const title = document.createElement('div');
-      title.className = 'entry-title';
-      title.textContent = entry.title || 'Untitled';
+      const title = document.createElement('div')
+      title.className = 'title'
+      title.textContent = bookmark.title || 'Untitled'
+      title.title = bookmark.title || 'Untitled'
       
-      const meta = document.createElement('div');
-      meta.className = 'entry-meta';
+      const meta = document.createElement('div')
+      meta.className = 'meta'
       
-      const status = document.createElement('span');
-      status.className = `entry-status status-${entry.status}`;
-      status.textContent = this.formatStatus(entry.status);
+      const status = document.createElement('span')
+      status.className = `status status-${bookmark.read_status}`
+      status.textContent = this.formatStatus(bookmark.read_status)
       
-      const time = document.createElement('span');
-      time.textContent = this.formatTime(entry.timestamp);
+      const time = document.createElement('span')
+      time.textContent = this.formatTime(new Date(bookmark.created_at).getTime())
       
-      meta.appendChild(status);
-      meta.appendChild(document.createTextNode(' • '));
-      meta.appendChild(time);
+      meta.appendChild(status)
+      meta.appendChild(time)
       
-      if (entry.tags && entry.tags.length > 0) {
-        meta.appendChild(document.createTextNode(' • '));
-        const tags = document.createElement('span');
-        tags.textContent = entry.tags.join(', ');
-        meta.appendChild(tags);
+      if (bookmark.tags && bookmark.tags.length > 0) {
+        const tags = document.createElement('span')
+        tags.textContent = ` • ${bookmark.tags.join(', ')}`
+        meta.appendChild(tags)
       }
       
-      item.appendChild(title);
-      item.appendChild(meta);
-      this.recentEntriesList.appendChild(item);
-    });
+      item.appendChild(title)
+      item.appendChild(meta)
+      this.recentEntriesList.appendChild(item)
+    })
   }
 
   async exportData() {
     try {
-      const result = await chrome.storage.sync.get(['entries', 'customStatusTypes']);
+      const exportData = await this.supabaseService.exportData()
       
-      const data = {
-        entries: result.entries || [],
-        customStatusTypes: result.customStatusTypes || [],
-        exportDate: new Date().toISOString(),
-        version: '1.0.0'
-      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
       
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `forgetfulme-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
       
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `forgetfulme-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      this.showMessage('Data exported successfully', 'success');
+      this.showMessage('Data exported successfully', 'success')
       
     } catch (error) {
-      console.error('Error exporting data:', error);
-      this.showMessage('Error exporting data', 'error');
+      console.error('Error exporting data:', error)
+      this.showMessage('Error exporting data', 'error')
     }
   }
 
   async importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
+    const file = event.target.files[0]
+    if (!file) return
+
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const text = await file.text()
+      const importData = JSON.parse(text)
       
-      if (!data.entries || !Array.isArray(data.entries)) {
-        throw new Error('Invalid data format');
-      }
+      await this.supabaseService.importData(importData)
       
-      await chrome.storage.sync.set({
-        entries: data.entries,
-        customStatusTypes: data.customStatusTypes || []
-      });
-      
-      this.loadData();
-      this.showMessage('Data imported successfully', 'success');
+      this.showMessage('Data imported successfully', 'success')
+      this.loadData() // Refresh the data
       
     } catch (error) {
-      console.error('Error importing data:', error);
-      this.showMessage('Error importing data. Please check the file format.', 'error');
+      console.error('Error importing data:', error)
+      this.showMessage('Error importing data', 'error')
     }
     
-    // Reset file input
-    event.target.value = '';
+    // Clear the file input
+    event.target.value = ''
   }
 
   async clearData() {
     if (!confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-      return;
+      return
     }
-    
+
     try {
-      await chrome.storage.sync.clear();
-      this.loadData();
-      this.showMessage('All data cleared successfully', 'success');
+      const bookmarks = await this.supabaseService.getBookmarks({ limit: 10000 })
+      
+      for (const bookmark of bookmarks) {
+        await this.supabaseService.deleteBookmark(bookmark.id)
+      }
+      
+      this.showMessage('All data cleared successfully', 'success')
+      this.loadData() // Refresh the data
       
     } catch (error) {
-      console.error('Error clearing data:', error);
-      this.showMessage('Error clearing data', 'error');
+      console.error('Error clearing data:', error)
+      this.showMessage('Error clearing data', 'error')
     }
   }
 
   viewAllEntries() {
-    // For now, just show a message. In a full implementation, this could open a new tab
-    // with a comprehensive view of all entries
-    this.showMessage('View all entries feature coming soon!', 'info');
+    // Open a new tab with all entries
+    chrome.tabs.create({ url: 'options.html?view=all' })
   }
 
   formatStatus(status) {
     return status.split('-').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    ).join(' ')
   }
 
   formatTime(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
+    const now = Date.now()
+    const diff = now - timestamp
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
     
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
+    if (minutes < 1) return 'Just now'
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return `${hours}h ago`
+    if (days < 7) return `${days}d ago`
     
-    return new Date(timestamp).toLocaleDateString();
+    return new Date(timestamp).toLocaleDateString()
   }
 
   showMessage(message, type) {
     // Remove existing messages
-    const existingMessages = document.querySelectorAll('.message');
-    existingMessages.forEach(msg => msg.remove());
+    const existingMessages = document.querySelectorAll('.success-message, .error-message')
+    existingMessages.forEach(msg => msg.remove())
     
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
+    const messageDiv = document.createElement('div')
+    messageDiv.className = `${type}-message`
+    messageDiv.textContent = message
     
-    // Insert at the top of the container
-    const container = document.querySelector('.container');
-    container.insertBefore(messageDiv, container.firstChild);
+    // Insert after header
+    const header = document.querySelector('header')
+    if (header) {
+      header.parentNode.insertBefore(messageDiv, header.nextSibling)
+    } else {
+      // If no header, append to body
+      document.body.appendChild(messageDiv)
+    }
     
-    // Remove message after 5 seconds
+    // Remove message after 3 seconds
     setTimeout(() => {
-      messageDiv.remove();
-    }, 5000);
+      messageDiv.remove()
+    }, 3000)
   }
 }
 
 // Initialize options page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new ForgetfulMeOptions();
-}); 
+  new ForgetfulMeOptions()
+}) 

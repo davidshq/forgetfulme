@@ -7,71 +7,16 @@
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>ForgetfulMe Settings</h1>
-      <p>Customize your read status types and manage your data</p>
-    </header>
-
-    <main>
-      <section class="settings-section">
-        <h2>Custom Read Status Types</h2>
-        <p class="description">
-          Define your own read status types. These will appear in the dropdown when marking pages as read.
-        </p>
-        
-        <div class="status-types-container">
-          <div id="status-types-list"></div>
-          
-          <div class="add-status-form">
-            <input type="text" id="new-status" placeholder="Enter new status type (e.g., important, bookmark)">
-            <button id="add-status-btn">Add Status Type</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <h2>Data Management</h2>
-        <p class="description">
-          Export your data for backup or import data from another browser.
-        </p>
-        
-        <div class="data-actions">
-          <button id="export-data-btn" class="action-btn">Export Data</button>
-          <button id="import-data-btn" class="action-btn">Import Data</button>
-          <input type="file" id="import-file" accept=".json" style="display: none;">
-          <button id="clear-data-btn" class="action-btn danger">Clear All Data</button>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <h2>Statistics</h2>
-        <div class="stats-container">
-          <div class="stat-item">
-            <span class="stat-label">Total Entries:</span>
-            <span id="total-entries" class="stat-value">0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Status Types:</span>
-            <span id="status-types-count" class="stat-value">0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Most Used Status:</span>
-            <span id="most-used-status" class="stat-value">-</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="settings-section">
-        <h2>Recent Entries</h2>
-        <div class="recent-entries-container">
-          <div id="recent-entries-list"></div>
-          <button id="view-all-btn" class="action-btn">View All Entries</button>
-        </div>
-      </section>
-    </main>
+  <div id="app">
+    <!-- Content will be dynamically loaded by JavaScript -->
   </div>
 
+  <!-- Load Supabase scripts first -->
+  <script src="supabase-client.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-service.js"></script>
+  <script src="auth-ui.js"></script>
+  <script src="config-ui.js"></script>
   <script src="options.js"></script>
 </body>
 </html> 
