@@ -1,0 +1,3 @@
+- Change icon color when one has saved something to mark to read.
+- Have keyboard shortcut for quick add.
+- Prevent duplicate URLs from being saved.

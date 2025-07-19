@@ -2,13 +2,51 @@
 class ForgetfulMeOptions {
   constructor() {
     this.configManager = new ConfigManager()
+    this.authStateManager = new AuthStateManager()
     this.supabaseConfig = new SupabaseConfig()
     this.supabaseService = new SupabaseService(this.supabaseConfig)
-    this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess())
+    this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess(), this.authStateManager)
     this.configUI = new ConfigUI(this.supabaseConfig)
     
     this.initializeElements()
     this.initializeApp()
+    this.initializeAuthState()
+  }
+
+  async initializeAuthState() {
+    try {
+      await this.authStateManager.initialize()
+      
+      // Listen for auth state changes
+      this.authStateManager.addListener('authStateChanged', (session) => {
+        this.handleAuthStateChange(session)
+      })
+      
+      // Listen for runtime messages from background
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.type === 'AUTH_STATE_CHANGED') {
+          this.handleAuthStateChange(message.session)
+        }
+      })
+      
+      console.log('Options: Auth state initialized')
+    } catch (error) {
+      console.error('Options: Error initializing auth state:', error)
+    }
+  }
+
+  handleAuthStateChange(session) {
+    console.log('Options: Auth state changed:', session ? 'authenticated' : 'not authenticated')
+    
+    // Update UI based on auth state
+    if (session) {
+      // User is authenticated - show main interface
+      this.showMainInterface()
+      this.loadData()
+    } else {
+      // User is not authenticated - show auth interface
+      this.showAuthInterface()
+    }
   }
 
   initializeElements() {
@@ -78,8 +116,10 @@ class ForgetfulMeOptions {
       // Initialize Supabase
       await this.supabaseService.initialize()
       
-      // Check if user is authenticated
-      if (this.supabaseConfig.isAuthenticated()) {
+      // Check if user is authenticated using auth state manager
+      const isAuthenticated = await this.authStateManager.isAuthenticated()
+      
+      if (isAuthenticated) {
         this.showMainInterface()
         this.loadData()
       } else {
@@ -103,6 +143,9 @@ class ForgetfulMeOptions {
   }
 
   onAuthSuccess() {
+    // Update auth state in the manager
+    this.authStateManager.setAuthState(this.supabaseConfig.session)
+    
     this.showMainInterface()
     this.loadData()
   }

@@ -1,8 +1,9 @@
 // Authentication UI component for ForgetfulMe extension
 class AuthUI {
-  constructor(supabaseConfig, onAuthSuccess) {
+  constructor(supabaseConfig, onAuthSuccess, authStateManager = null) {
     this.config = supabaseConfig
     this.onAuthSuccess = onAuthSuccess
+    this.authStateManager = authStateManager
     this.currentView = 'login' // 'login' or 'signup'
   }
 
@@ -247,6 +248,27 @@ class AuthUI {
     }
   }
 
+  async handleSignOut() {
+    try {
+      // Sign out from Supabase
+      await this.config.signOut()
+      
+      // Clear auth state if auth state manager is available
+      if (this.authStateManager) {
+        await this.authStateManager.clearAuthState()
+      }
+      
+      console.log('Successfully signed out')
+      
+      // Refresh the page or show login form
+      location.reload()
+    } catch (error) {
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', { silent: true })
+      console.error('Error during sign out:', errorResult)
+      // Don't show user for sign out errors as they're not critical
+    }
+  }
+
   showAuthMessage(container, message, type) {
     // Use the centralized UIMessages system
     UIMessages.show(message, type, container)
@@ -289,14 +311,7 @@ class AuthUI {
     const signOutBtn = container.querySelector('#signOutBtn')
     if (signOutBtn) {
       signOutBtn.addEventListener('click', async () => {
-        try {
-          await this.config.signOut()
-          // Refresh the page or show login form
-          location.reload()
-        } catch (error) {
-          const errorResult = ErrorHandler.handle(error, 'auth-ui.signOut', { silent: true })
-          // Don't show user for sign out errors as they're not critical
-        }
+        await this.handleSignOut()
       })
     }
   }

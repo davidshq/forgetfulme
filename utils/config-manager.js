@@ -256,6 +256,19 @@ class ConfigManager {
     })
 
     this.notifyListeners('authSessionChanged', session)
+    
+    // Notify all contexts via runtime message
+    try {
+      chrome.runtime.sendMessage({
+        type: 'AUTH_STATE_CHANGED',
+        session: session
+      }).catch(error => {
+        // Ignore errors when no listeners are available
+        console.debug('No runtime message listeners available:', error.message)
+      })
+    } catch (error) {
+      console.debug('Error sending auth state message:', error.message)
+    }
   }
 
   async clearAuthSession() {
@@ -267,6 +280,19 @@ class ConfigManager {
     await chrome.storage.sync.remove(['auth_session'])
 
     this.notifyListeners('authSessionChanged', null)
+    
+    // Notify all contexts via runtime message
+    try {
+      chrome.runtime.sendMessage({
+        type: 'AUTH_STATE_CHANGED',
+        session: null
+      }).catch(error => {
+        // Ignore errors when no listeners are available
+        console.debug('No runtime message listeners available:', error.message)
+      })
+    } catch (error) {
+      console.debug('Error sending auth state message:', error.message)
+    }
   }
 
   async isAuthenticated() {
