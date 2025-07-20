@@ -16,8 +16,8 @@ class UIComponents {
     LIST_ITEM: 'list-item',
     MESSAGE: 'message',
     CONFIRM: 'confirm',
-    TOAST: 'toast'
-  }
+    TOAST: 'toast',
+  };
 
   // Button styles
   static BUTTON_STYLES = {
@@ -28,8 +28,8 @@ class UIComponents {
     WARNING: 'warning',
     INFO: 'info',
     SMALL: 'small',
-    LARGE: 'large'
-  }
+    LARGE: 'large',
+  };
 
   // Form field types
   static FIELD_TYPES = {
@@ -41,8 +41,8 @@ class UIComponents {
     SELECT: 'select',
     TEXTAREA: 'textarea',
     CHECKBOX: 'checkbox',
-    RADIO: 'radio'
-  }
+    RADIO: 'radio',
+  };
 
   /**
    * DOM utility class for safe element access
@@ -53,7 +53,10 @@ class UIComponents {
      * @returns {boolean} - True if DOM is ready
      */
     isReady() {
-      return document.readyState === 'complete' || document.readyState === 'interactive'
+      return (
+        document.readyState === 'complete' ||
+        document.readyState === 'interactive'
+      );
     },
 
     /**
@@ -61,13 +64,15 @@ class UIComponents {
      * @returns {Promise} - Promise that resolves when DOM is ready
      */
     ready() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         if (this.isReady()) {
-          resolve()
+          resolve();
         } else {
-          document.addEventListener('DOMContentLoaded', resolve, { once: true })
+          document.addEventListener('DOMContentLoaded', resolve, {
+            once: true,
+          });
         }
-      })
+      });
     },
 
     /**
@@ -78,10 +83,13 @@ class UIComponents {
      */
     getElement(id, container = document) {
       try {
-        return container.getElementById(id)
+        return container.getElementById(id);
       } catch (error) {
-        console.warn(`UIComponents.DOM.getElement: Error accessing element with id '${id}':`, error)
-        return null
+        console.warn(
+          `UIComponents.DOM.getElement: Error accessing element with id '${id}':`,
+          error
+        );
+        return null;
       }
     },
 
@@ -93,10 +101,13 @@ class UIComponents {
      */
     querySelector(selector, container = document) {
       try {
-        return container.querySelector(selector)
+        return container.querySelector(selector);
       } catch (error) {
-        console.warn(`UIComponents.DOM.querySelector: Error accessing element with selector '${selector}':`, error)
-        return null
+        console.warn(
+          `UIComponents.DOM.querySelector: Error accessing element with selector '${selector}':`,
+          error
+        );
+        return null;
       }
     },
 
@@ -108,10 +119,13 @@ class UIComponents {
      */
     querySelectorAll(selector, container = document) {
       try {
-        return container.querySelectorAll(selector)
+        return container.querySelectorAll(selector);
       } catch (error) {
-        console.warn(`UIComponents.DOM.querySelectorAll: Error accessing elements with selector '${selector}':`, error)
-        return document.querySelectorAll('') // Return empty NodeList
+        console.warn(
+          `UIComponents.DOM.querySelectorAll: Error accessing elements with selector '${selector}':`,
+          error
+        );
+        return document.querySelectorAll(''); // Return empty NodeList
       }
     },
 
@@ -122,7 +136,7 @@ class UIComponents {
      * @returns {boolean} - True if element exists
      */
     elementExists(id, container = document) {
-      return this.getElement(id, container) !== null
+      return this.getElement(id, container) !== null;
     },
 
     /**
@@ -134,30 +148,32 @@ class UIComponents {
      */
     waitForElement(id, timeout = 5000, container = document) {
       return new Promise((resolve, reject) => {
-        const element = this.getElement(id, container)
+        const element = this.getElement(id, container);
         if (element) {
-          resolve(element)
-          return
+          resolve(element);
+          return;
         }
 
-        const startTime = Date.now()
+        const startTime = Date.now();
         const checkElement = () => {
-          const element = this.getElement(id, container)
+          const element = this.getElement(id, container);
           if (element) {
-            resolve(element)
-            return
+            resolve(element);
+            return;
           }
 
           if (Date.now() - startTime > timeout) {
-            reject(new Error(`Element with id '${id}' not found within ${timeout}ms`))
-            return
+            reject(
+              new Error(`Element with id '${id}' not found within ${timeout}ms`)
+            );
+            return;
           }
 
-          requestAnimationFrame(checkElement)
-        }
+          requestAnimationFrame(checkElement);
+        };
 
-        requestAnimationFrame(checkElement)
-      })
+        requestAnimationFrame(checkElement);
+      });
     },
 
     /**
@@ -169,13 +185,15 @@ class UIComponents {
      * @returns {boolean} - True if listener was added
      */
     addEventListener(id, event, handler, container = document) {
-      const element = this.getElement(id, container)
+      const element = this.getElement(id, container);
       if (element) {
-        element.addEventListener(event, handler)
-        return true
+        element.addEventListener(event, handler);
+        return true;
       }
-      console.warn(`UIComponents.DOM.addEventListener: Element with id '${id}' not found`)
-      return false
+      console.warn(
+        `UIComponents.DOM.addEventListener: Element with id '${id}' not found`
+      );
+      return false;
     },
 
     /**
@@ -186,13 +204,15 @@ class UIComponents {
      * @returns {boolean} - True if value was set
      */
     setValue(id, value, container = document) {
-      const element = this.getElement(id, container)
+      const element = this.getElement(id, container);
       if (element) {
-        element.value = value
-        return true
+        element.value = value;
+        return true;
       }
-      console.warn(`UIComponents.DOM.setValue: Element with id '${id}' not found`)
-      return false
+      console.warn(
+        `UIComponents.DOM.setValue: Element with id '${id}' not found`
+      );
+      return false;
     },
 
     /**
@@ -202,8 +222,8 @@ class UIComponents {
      * @returns {string|null} - Element value or null
      */
     getValue(id, container = document) {
-      const element = this.getElement(id, container)
-      return element ? element.value : null
+      const element = this.getElement(id, container);
+      return element ? element.value : null;
     },
 
     /**
@@ -213,13 +233,13 @@ class UIComponents {
      * @returns {Object} - Object with initialized elements
      */
     initializeElements(elementMap, container = document) {
-      const elements = {}
-      
+      const elements = {};
+
       for (const [propertyName, elementId] of Object.entries(elementMap)) {
-        elements[propertyName] = this.getElement(elementId, container)
+        elements[propertyName] = this.getElement(elementId, container);
       }
-      
-      return elements
+
+      return elements;
     },
 
     /**
@@ -229,29 +249,32 @@ class UIComponents {
      * @returns {Array} - Array of successfully bound events
      */
     bindEvents(eventBindings, container = document) {
-      const boundEvents = []
-      
+      const boundEvents = [];
+
       for (const binding of eventBindings) {
-        const { elementId, event, handler, selector } = binding
-        
-        let element = null
+        const { elementId, event, handler, selector } = binding;
+
+        let element = null;
         if (elementId) {
-          element = this.getElement(elementId, container)
+          element = this.getElement(elementId, container);
         } else if (selector) {
-          element = this.querySelector(selector, container)
+          element = this.querySelector(selector, container);
         }
-        
+
         if (element) {
-          element.addEventListener(event, handler)
-          boundEvents.push({ element, event, handler })
+          element.addEventListener(event, handler);
+          boundEvents.push({ element, event, handler });
         } else {
-          console.warn(`UIComponents.DOM.bindEvents: Element not found for binding:`, binding)
+          console.warn(
+            `UIComponents.DOM.bindEvents: Element not found for binding:`,
+            binding
+          );
         }
       }
-      
-      return boundEvents
-    }
-  }
+
+      return boundEvents;
+    },
+  };
 
   /**
    * Create a button element
@@ -262,21 +285,21 @@ class UIComponents {
    * @returns {HTMLButtonElement}
    */
   static createButton(text, onClick, className = '', options = {}) {
-    const button = document.createElement('button')
-    button.textContent = text
-    button.className = `ui-btn ${className}`.trim()
-    
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.className = `ui-btn ${className}`.trim();
+
     if (onClick) {
-      button.addEventListener('click', onClick)
+      button.addEventListener('click', onClick);
     }
-    
+
     // Apply additional attributes
-    if (options.type) button.type = options.type
-    if (options.disabled) button.disabled = options.disabled
-    if (options.title) button.title = options.title
-    if (options.id) button.id = options.id
-    
-    return button
+    if (options.type) button.type = options.type;
+    if (options.disabled) button.disabled = options.disabled;
+    if (options.title) button.title = options.title;
+    if (options.id) button.id = options.id;
+
+    return button;
   }
 
   /**
@@ -288,52 +311,52 @@ class UIComponents {
    * @returns {HTMLElement} Form group container
    */
   static createFormField(type, id, label, options = {}) {
-    const formGroup = document.createElement('div')
-    formGroup.className = 'ui-form-group'
-    
+    const formGroup = document.createElement('div');
+    formGroup.className = 'ui-form-group';
+
     // Create label
-    const labelEl = document.createElement('label')
-    labelEl.htmlFor = id
-    labelEl.textContent = label
-    formGroup.appendChild(labelEl)
-    
+    const labelEl = document.createElement('label');
+    labelEl.htmlFor = id;
+    labelEl.textContent = label;
+    formGroup.appendChild(labelEl);
+
     // Create input/select based on type
-    let field
+    let field;
     if (type === 'select') {
-      field = document.createElement('select')
+      field = document.createElement('select');
       if (options.options) {
         options.options.forEach(option => {
-          const optionEl = document.createElement('option')
-          optionEl.value = option.value
-          optionEl.textContent = option.text
-          if (option.selected) optionEl.selected = true
-          field.appendChild(optionEl)
-        })
+          const optionEl = document.createElement('option');
+          optionEl.value = option.value;
+          optionEl.textContent = option.text;
+          if (option.selected) optionEl.selected = true;
+          field.appendChild(optionEl);
+        });
       }
     } else {
-      field = document.createElement('input')
-      field.type = type
+      field = document.createElement('input');
+      field.type = type;
     }
-    
+
     // Apply common attributes
-    field.id = id
-    field.className = 'ui-form-control'
-    
-    if (options.placeholder) field.placeholder = options.placeholder
-    if (options.required) field.required = options.required
-    if (options.value) field.value = options.value
-    if (options.disabled) field.disabled = options.disabled
-    
-    formGroup.appendChild(field)
-    
+    field.id = id;
+    field.className = 'ui-form-control';
+
+    if (options.placeholder) field.placeholder = options.placeholder;
+    if (options.required) field.required = options.required;
+    if (options.value) field.value = options.value;
+    if (options.disabled) field.disabled = options.disabled;
+
+    formGroup.appendChild(field);
+
     // Add help text if provided
     if (options.helpText) {
-      const helpEl = document.createElement('small')
-      helpEl.textContent = options.helpText
-      formGroup.appendChild(helpEl)
+      const helpEl = document.createElement('small');
+      helpEl.textContent = options.helpText;
+      formGroup.appendChild(helpEl);
     }
-    
-    return formGroup
+
+    return formGroup;
   }
 
   /**
@@ -345,17 +368,17 @@ class UIComponents {
    * @returns {HTMLFormElement}
    */
   static createForm(id, onSubmit, fields = [], options = {}) {
-    const form = document.createElement('form')
-    form.id = id
-    form.className = `ui-form ${options.className || ''}`.trim()
-    
+    const form = document.createElement('form');
+    form.id = id;
+    form.className = `ui-form ${options.className || ''}`.trim();
+
     if (onSubmit) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault()
-        onSubmit(e)
-      })
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        onSubmit(e);
+      });
     }
-    
+
     // Add fields
     fields.forEach(fieldConfig => {
       const field = this.createFormField(
@@ -363,10 +386,10 @@ class UIComponents {
         fieldConfig.id,
         fieldConfig.label,
         fieldConfig.options || {}
-      )
-      form.appendChild(field)
-    })
-    
+      );
+      form.appendChild(field);
+    });
+
     // Add submit button if specified
     if (options.submitText) {
       const submitBtn = this.createButton(
@@ -374,11 +397,11 @@ class UIComponents {
         null,
         'ui-btn-primary',
         { type: 'submit' }
-      )
-      form.appendChild(submitBtn)
+      );
+      form.appendChild(submitBtn);
     }
-    
-    return form
+
+    return form;
   }
 
   /**
@@ -389,27 +412,27 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createContainer(title, subtitle = '', className = '') {
-    const container = document.createElement('div')
-    container.className = `ui-container ${className}`.trim()
-    
+    const container = document.createElement('div');
+    container.className = `ui-container ${className}`.trim();
+
     if (title) {
-      const header = document.createElement('div')
-      header.className = 'ui-container-header'
-      
-      const titleEl = document.createElement('h2')
-      titleEl.textContent = title
-      header.appendChild(titleEl)
-      
+      const header = document.createElement('div');
+      header.className = 'ui-container-header';
+
+      const titleEl = document.createElement('h2');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+
       if (subtitle) {
-        const subtitleEl = document.createElement('p')
-        subtitleEl.textContent = subtitle
-        header.appendChild(subtitleEl)
+        const subtitleEl = document.createElement('p');
+        subtitleEl.textContent = subtitle;
+        header.appendChild(subtitleEl);
       }
-      
-      container.appendChild(header)
+
+      container.appendChild(header);
     }
-    
-    return container
+
+    return container;
   }
 
   /**
@@ -419,10 +442,10 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createList(id, className = '') {
-    const list = document.createElement('div')
-    list.id = id
-    list.className = `list ${className}`.trim()
-    return list
+    const list = document.createElement('div');
+    list.id = id;
+    list.className = `list ${className}`.trim();
+    return list;
   }
 
   /**
@@ -432,63 +455,63 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createListItem(data, options = {}) {
-    const item = document.createElement('div')
-    item.className = `list-item ${options.className || ''}`.trim()
-    
+    const item = document.createElement('div');
+    item.className = `list-item ${options.className || ''}`.trim();
+
     // Add title if provided
     if (data.title) {
-      const title = document.createElement('div')
-      title.className = 'item-title'
-      title.textContent = data.title
-      if (data.titleTooltip) title.title = data.titleTooltip
-      item.appendChild(title)
+      const title = document.createElement('div');
+      title.className = 'item-title';
+      title.textContent = data.title;
+      if (data.titleTooltip) title.title = data.titleTooltip;
+      item.appendChild(title);
     }
-    
+
     // Add meta information
     if (data.meta) {
-      const meta = document.createElement('div')
-      meta.className = 'item-meta'
-      
+      const meta = document.createElement('div');
+      meta.className = 'item-meta';
+
       if (data.meta.status) {
-        const status = document.createElement('span')
-        status.className = `status status-${data.meta.status}`
-        status.textContent = data.meta.statusText || data.meta.status
-        meta.appendChild(status)
+        const status = document.createElement('span');
+        status.className = `status status-${data.meta.status}`;
+        status.textContent = data.meta.statusText || data.meta.status;
+        meta.appendChild(status);
       }
-      
+
       if (data.meta.time) {
-        const time = document.createElement('span')
-        time.textContent = data.meta.time
-        meta.appendChild(time)
+        const time = document.createElement('span');
+        time.textContent = data.meta.time;
+        meta.appendChild(time);
       }
-      
+
       if (data.meta.tags && data.meta.tags.length > 0) {
-        const tags = document.createElement('span')
-        tags.textContent = ` • ${data.meta.tags.join(', ')}`
-        meta.appendChild(tags)
+        const tags = document.createElement('span');
+        tags.textContent = ` • ${data.meta.tags.join(', ')}`;
+        meta.appendChild(tags);
       }
-      
-      item.appendChild(meta)
+
+      item.appendChild(meta);
     }
-    
+
     // Add actions if provided
     if (data.actions) {
-      const actions = document.createElement('div')
-      actions.className = 'item-actions'
-      
+      const actions = document.createElement('div');
+      actions.className = 'item-actions';
+
       data.actions.forEach(action => {
         const actionBtn = this.createButton(
           action.text,
           action.onClick,
           action.className || 'ui-btn-small'
-        )
-        actions.appendChild(actionBtn)
-      })
-      
-      item.appendChild(actions)
+        );
+        actions.appendChild(actionBtn);
+      });
+
+      item.appendChild(actions);
     }
-    
-    return item
+
+    return item;
   }
 
   /**
@@ -498,16 +521,16 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createSection(title, className = '') {
-    const section = document.createElement('div')
-    section.className = `section ${className}`.trim()
-    
+    const section = document.createElement('div');
+    section.className = `section ${className}`.trim();
+
     if (title) {
-      const titleEl = document.createElement('h3')
-      titleEl.textContent = title
-      section.appendChild(titleEl)
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      section.appendChild(titleEl);
     }
-    
-    return section
+
+    return section;
   }
 
   /**
@@ -517,17 +540,17 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createGrid(items, options = {}) {
-    const grid = document.createElement('div')
-    grid.className = `grid ${options.className || ''}`.trim()
-    
+    const grid = document.createElement('div');
+    grid.className = `grid ${options.className || ''}`.trim();
+
     items.forEach(item => {
-      const gridItem = document.createElement('div')
-      gridItem.className = `grid-item ${item.className || ''}`.trim()
-      gridItem.textContent = item.text
-      grid.appendChild(gridItem)
-    })
-    
-    return grid
+      const gridItem = document.createElement('div');
+      gridItem.className = `grid-item ${item.className || ''}`.trim();
+      gridItem.textContent = item.text;
+      grid.appendChild(gridItem);
+    });
+
+    return grid;
   }
 
   /**
@@ -539,34 +562,34 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createConfirmDialog(message, onConfirm, onCancel, options = {}) {
-    const dialog = document.createElement('div')
-    dialog.className = 'confirm-dialog'
-    
-    const messageEl = document.createElement('div')
-    messageEl.className = 'confirm-message'
-    messageEl.textContent = message
-    dialog.appendChild(messageEl)
-    
-    const buttonContainer = document.createElement('div')
-    buttonContainer.className = 'confirm-buttons'
-    
+    const dialog = document.createElement('div');
+    dialog.className = 'confirm-dialog';
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'confirm-message';
+    messageEl.textContent = message;
+    dialog.appendChild(messageEl);
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'confirm-buttons';
+
     const confirmBtn = this.createButton(
       options.confirmText || 'Confirm',
       onConfirm,
       'ui-btn-primary'
-    )
-    
+    );
+
     const cancelBtn = this.createButton(
       options.cancelText || 'Cancel',
       onCancel,
       'ui-btn-secondary'
-    )
-    
-    buttonContainer.appendChild(confirmBtn)
-    buttonContainer.appendChild(cancelBtn)
-    dialog.appendChild(buttonContainer)
-    
-    return dialog
+    );
+
+    buttonContainer.appendChild(confirmBtn);
+    buttonContainer.appendChild(cancelBtn);
+    dialog.appendChild(buttonContainer);
+
+    return dialog;
   }
 
   /**
@@ -576,21 +599,21 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createLoadingSpinner(text = 'Loading...', className = '') {
-    const spinner = document.createElement('div')
-    spinner.className = `loading-spinner ${className}`.trim()
-    
-    const spinnerEl = document.createElement('div')
-    spinnerEl.className = 'spinner'
-    spinner.appendChild(spinnerEl)
-    
+    const spinner = document.createElement('div');
+    spinner.className = `loading-spinner ${className}`.trim();
+
+    const spinnerEl = document.createElement('div');
+    spinnerEl.className = 'spinner';
+    spinner.appendChild(spinnerEl);
+
     if (text) {
-      const textEl = document.createElement('div')
-      textEl.className = 'spinner-text'
-      textEl.textContent = text
-      spinner.appendChild(textEl)
+      const textEl = document.createElement('div');
+      textEl.className = 'spinner-text';
+      textEl.textContent = text;
+      spinner.appendChild(textEl);
     }
-    
-    return spinner
+
+    return spinner;
   }
 
   /**
@@ -601,38 +624,39 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createStatusIndicator(status, text, className = '') {
-    const indicator = document.createElement('div')
-    indicator.className = `status-indicator status-${status} ${className}`.trim()
-    
-    const icon = document.createElement('span')
-    icon.className = 'status-icon'
-    
+    const indicator = document.createElement('div');
+    indicator.className =
+      `status-indicator status-${status} ${className}`.trim();
+
+    const icon = document.createElement('span');
+    icon.className = 'status-icon';
+
     // Set appropriate icon based on status
     switch (status) {
       case 'success':
-        icon.textContent = '✓'
-        break
+        icon.textContent = '✓';
+        break;
       case 'error':
-        icon.textContent = '✗'
-        break
+        icon.textContent = '✗';
+        break;
       case 'warning':
-        icon.textContent = '⚠'
-        break
+        icon.textContent = '⚠';
+        break;
       case 'info':
-        icon.textContent = 'ℹ'
-        break
+        icon.textContent = 'ℹ';
+        break;
       default:
-        icon.textContent = '•'
+        icon.textContent = '•';
     }
-    
-    const textEl = document.createElement('span')
-    textEl.className = 'status-text'
-    textEl.textContent = text
-    
-    indicator.appendChild(icon)
-    indicator.appendChild(textEl)
-    
-    return indicator
+
+    const textEl = document.createElement('span');
+    textEl.className = 'status-text';
+    textEl.textContent = text;
+
+    indicator.appendChild(icon);
+    indicator.appendChild(textEl);
+
+    return indicator;
   }
 
   /**
@@ -642,33 +666,33 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createTabs(tabs, options = {}) {
-    const tabContainer = document.createElement('div')
-    tabContainer.className = 'tab-container'
-    
-    const tabList = document.createElement('div')
-    tabList.className = 'tab-list'
-    
-    const tabContent = document.createElement('div')
-    tabContent.className = 'tab-content'
-    
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'tab-container';
+
+    const tabList = document.createElement('div');
+    tabList.className = 'tab-list';
+
+    const tabContent = document.createElement('div');
+    tabContent.className = 'tab-content';
+
     tabs.forEach((tab, index) => {
       const tabButton = this.createButton(
         tab.title,
         () => this.switchTab(tabContainer, index),
         `tab-button ${index === 0 ? 'active' : ''}`
-      )
-      tabList.appendChild(tabButton)
-      
-      const tabPanel = document.createElement('div')
-      tabPanel.className = `tab-panel ${index === 0 ? 'active' : ''}`
-      tabPanel.innerHTML = tab.content
-      tabContent.appendChild(tabPanel)
-    })
-    
-    tabContainer.appendChild(tabList)
-    tabContainer.appendChild(tabContent)
-    
-    return tabContainer
+      );
+      tabList.appendChild(tabButton);
+
+      const tabPanel = document.createElement('div');
+      tabPanel.className = `tab-panel ${index === 0 ? 'active' : ''}`;
+      tabPanel.innerHTML = tab.content;
+      tabContent.appendChild(tabPanel);
+    });
+
+    tabContainer.appendChild(tabList);
+    tabContainer.appendChild(tabContent);
+
+    return tabContainer;
   }
 
   /**
@@ -677,16 +701,16 @@ class UIComponents {
    * @param {number} activeIndex - Index of active tab
    */
   static switchTab(tabContainer, activeIndex) {
-    const buttons = tabContainer.querySelectorAll('.tab-button')
-    const panels = tabContainer.querySelectorAll('.tab-panel')
-    
+    const buttons = tabContainer.querySelectorAll('.tab-button');
+    const panels = tabContainer.querySelectorAll('.tab-panel');
+
     buttons.forEach((button, index) => {
-      button.classList.toggle('active', index === activeIndex)
-    })
-    
+      button.classList.toggle('active', index === activeIndex);
+    });
+
     panels.forEach((panel, index) => {
-      panel.classList.toggle('active', index === activeIndex)
-    })
+      panel.classList.toggle('active', index === activeIndex);
+    });
   }
 
   /**
@@ -697,42 +721,42 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createModal(title, content, options = {}) {
-    const modal = document.createElement('div')
-    modal.className = 'modal'
-    
-    const modalContent = document.createElement('div')
-    modalContent.className = 'modal-content'
-    
-    const header = document.createElement('div')
-    header.className = 'modal-header'
-    
-    const titleEl = document.createElement('h3')
-    titleEl.textContent = title
-    header.appendChild(titleEl)
-    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+
+    const header = document.createElement('div');
+    header.className = 'modal-header';
+
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    header.appendChild(titleEl);
+
     const closeBtn = this.createButton(
       '×',
       () => this.closeModal(modal),
       'modal-close'
-    )
-    header.appendChild(closeBtn)
-    
-    const body = document.createElement('div')
-    body.className = 'modal-body'
-    body.appendChild(content)
-    
-    modalContent.appendChild(header)
-    modalContent.appendChild(body)
-    modal.appendChild(modalContent)
-    
+    );
+    header.appendChild(closeBtn);
+
+    const body = document.createElement('div');
+    body.className = 'modal-body';
+    body.appendChild(content);
+
+    modalContent.appendChild(header);
+    modalContent.appendChild(body);
+    modal.appendChild(modalContent);
+
     // Add backdrop click to close
-    modal.addEventListener('click', (e) => {
+    modal.addEventListener('click', e => {
       if (e.target === modal) {
-        this.closeModal(modal)
+        this.closeModal(modal);
       }
-    })
-    
-    return modal
+    });
+
+    return modal;
   }
 
   /**
@@ -741,7 +765,7 @@ class UIComponents {
    */
   static closeModal(modal) {
     if (modal.parentNode) {
-      modal.parentNode.removeChild(modal)
+      modal.parentNode.removeChild(modal);
     }
   }
 
@@ -750,7 +774,7 @@ class UIComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static showModal(modal) {
-    document.body.appendChild(modal)
+    document.body.appendChild(modal);
   }
 
   /**
@@ -760,20 +784,20 @@ class UIComponents {
    * @param {Object} options - Tooltip options
    */
   static createTooltip(element, text, options = {}) {
-    const tooltip = document.createElement('div')
-    tooltip.className = 'tooltip'
-    tooltip.textContent = text
-    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = text;
+
     element.addEventListener('mouseenter', () => {
-      document.body.appendChild(tooltip)
-      this.positionTooltip(element, tooltip, options)
-    })
-    
+      document.body.appendChild(tooltip);
+      this.positionTooltip(element, tooltip, options);
+    });
+
     element.addEventListener('mouseleave', () => {
       if (tooltip.parentNode) {
-        tooltip.parentNode.removeChild(tooltip)
+        tooltip.parentNode.removeChild(tooltip);
       }
-    })
+    });
   }
 
   /**
@@ -783,36 +807,36 @@ class UIComponents {
    * @param {Object} options - Positioning options
    */
   static positionTooltip(element, tooltip, options = {}) {
-    const rect = element.getBoundingClientRect()
-    const position = options.position || 'top'
-    
-    let top, left
-    
+    const rect = element.getBoundingClientRect();
+    const position = options.position || 'top';
+
+    let top, left;
+
     switch (position) {
       case 'top':
-        top = rect.top - tooltip.offsetHeight - 5
-        left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)
-        break
+        top = rect.top - tooltip.offsetHeight - 5;
+        left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+        break;
       case 'bottom':
-        top = rect.bottom + 5
-        left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2)
-        break
+        top = rect.bottom + 5;
+        left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+        break;
       case 'left':
-        top = rect.top + (rect.height / 2) - (tooltip.offsetHeight / 2)
-        left = rect.left - tooltip.offsetWidth - 5
-        break
+        top = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+        left = rect.left - tooltip.offsetWidth - 5;
+        break;
       case 'right':
-        top = rect.top + (rect.height / 2) - (tooltip.offsetHeight / 2)
-        left = rect.right + 5
-        break
+        top = rect.top + rect.height / 2 - tooltip.offsetHeight / 2;
+        left = rect.right + 5;
+        break;
     }
-    
-    tooltip.style.top = `${top}px`
-    tooltip.style.left = `${left}px`
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
   }
 }
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = UIComponents
-} 
+  module.exports = UIComponents;
+}

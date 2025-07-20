@@ -1,92 +1,99 @@
 // Popup script for ForgetfulMe extension with Supabase integration
 class ForgetfulMePopup {
   constructor() {
-    this.configManager = new ConfigManager()
-    this.authStateManager = new AuthStateManager()
-    this.supabaseConfig = new SupabaseConfig()
-    this.supabaseService = new SupabaseService(this.supabaseConfig)
-    this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess(), this.authStateManager)
-    
+    this.configManager = new ConfigManager();
+    this.authStateManager = new AuthStateManager();
+    this.supabaseConfig = new SupabaseConfig();
+    this.supabaseService = new SupabaseService(this.supabaseConfig);
+    this.authUI = new AuthUI(
+      this.supabaseConfig,
+      () => this.onAuthSuccess(),
+      this.authStateManager
+    );
+
     // Initialize after DOM is ready
-    this.initializeAsync()
+    this.initializeAsync();
   }
 
   async initializeAsync() {
     try {
       // Wait for DOM to be ready
-      await UIComponents.DOM.ready()
-      
-      this.initializeElements()
-      await this.initializeApp()
-      this.initializeAuthState()
+      await UIComponents.DOM.ready();
+
+      this.initializeElements();
+      await this.initializeApp();
+      this.initializeAuthState();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.initializeAsync')
-      console.error('Failed to initialize popup:', errorResult)
+      const errorResult = ErrorHandler.handle(error, 'popup.initializeAsync');
+      console.error('Failed to initialize popup:', errorResult);
     }
   }
 
   async initializeAuthState() {
     try {
-      await this.authStateManager.initialize()
-      
+      await this.authStateManager.initialize();
+
       // Listen for auth state changes
-      this.authStateManager.addListener('authStateChanged', (session) => {
-        this.handleAuthStateChange(session)
-      })
-      
+      this.authStateManager.addListener('authStateChanged', session => {
+        this.handleAuthStateChange(session);
+      });
+
       // Listen for runtime messages from background
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.type === 'AUTH_STATE_CHANGED') {
-          this.handleAuthStateChange(message.session)
+          this.handleAuthStateChange(message.session);
         }
-      })
-      
-      console.log('Popup: Auth state initialized')
+      });
+
+      console.log('Popup: Auth state initialized');
     } catch (error) {
-      console.error('Popup: Error initializing auth state:', error)
+      console.error('Popup: Error initializing auth state:', error);
     }
   }
 
   handleAuthStateChange(session) {
-    console.log('Popup: Auth state changed:', session ? 'authenticated' : 'not authenticated')
-    
+    console.log(
+      'Popup: Auth state changed:',
+      session ? 'authenticated' : 'not authenticated'
+    );
+
     // Update UI based on auth state
     if (session) {
       // User is authenticated - show main interface
-      this.showMainInterface()
-      this.loadRecentEntries()
-      this.loadCustomStatusTypes()
+      this.showMainInterface();
+      this.loadRecentEntries();
+      this.loadCustomStatusTypes();
     } else {
       // User is not authenticated - show auth interface
-      this.showAuthInterface()
+      this.showAuthInterface();
     }
   }
 
   initializeElements() {
     // Initialize elements that exist in the initial HTML
-    this.appContainer = UIComponents.DOM.getElement('app')
-    
+    this.appContainer = UIComponents.DOM.getElement('app');
+
     // Try to get dynamically created elements with safe access
-    this.readStatusSelect = UIComponents.DOM.getElement('read-status')
-    this.tagsInput = UIComponents.DOM.getElement('tags')
-    this.markReadBtn = UIComponents.DOM.querySelector('button[type="submit"]') // Form submit button
-    this.settingsBtn = UIComponents.DOM.getElement('settings-btn')
-    this.recentList = UIComponents.DOM.getElement('recent-list')
+    this.readStatusSelect = UIComponents.DOM.getElement('read-status');
+    this.tagsInput = UIComponents.DOM.getElement('tags');
+    this.markReadBtn = UIComponents.DOM.querySelector('button[type="submit"]'); // Form submit button
+    this.settingsBtn = UIComponents.DOM.getElement('settings-btn');
+    this.recentList = UIComponents.DOM.getElement('recent-list');
   }
 
   bindEvents() {
     // Only bind events if elements exist using safe DOM utilities
     if (this.settingsBtn) {
-      this.settingsBtn.addEventListener('click', () => this.openSettings())
+      this.settingsBtn.addEventListener('click', () => this.openSettings());
     }
-    
+
     if (this.tagsInput) {
       // Allow Enter key to mark as read
-      this.tagsInput.addEventListener('keypress', (e) => {
+      this.tagsInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
-          this.markAsRead()
+          this.markAsRead();
         }
-      })
+      });
     }
   }
 
@@ -94,29 +101,29 @@ class ForgetfulMePopup {
     try {
       // Check if Supabase is configured
       if (!(await this.supabaseConfig.isConfigured())) {
-        this.showSetupInterface()
-        return
+        this.showSetupInterface();
+        return;
       }
 
       // Initialize Supabase
-      await this.supabaseService.initialize()
-      
+      await this.supabaseService.initialize();
+
       // Check if user is authenticated using auth state manager
-      const isAuthenticated = await this.authStateManager.isAuthenticated()
-      
+      const isAuthenticated = await this.authStateManager.isAuthenticated();
+
       if (isAuthenticated) {
-        this.showMainInterface()
-        this.loadRecentEntries()
-        this.loadCustomStatusTypes()
+        this.showMainInterface();
+        this.loadRecentEntries();
+        this.loadCustomStatusTypes();
       } else {
-        this.showAuthInterface()
+        this.showAuthInterface();
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.initializeApp')
+      const errorResult = ErrorHandler.handle(error, 'popup.initializeApp');
       if (errorResult.shouldShowToUser) {
-        UIMessages.error(errorResult.userMessage, this.appContainer)
+        UIMessages.error(errorResult.userMessage, this.appContainer);
       }
-      this.showSetupInterface()
+      this.showSetupInterface();
     }
   }
 
@@ -126,10 +133,13 @@ class ForgetfulMePopup {
       'Welcome to ForgetfulMe!',
       'This extension helps you mark websites as read for research purposes.',
       'setup-container'
-    )
-    
+    );
+
     // Create setup section
-    const setupSection = UIComponents.createSection('🔧 Setup Required', 'setup-section')
+    const setupSection = UIComponents.createSection(
+      '🔧 Setup Required',
+      'setup-section'
+    );
     setupSection.innerHTML = `
       <p>To use this extension, you need to configure your Supabase backend:</p>
       
@@ -138,14 +148,21 @@ class ForgetfulMePopup {
         <li>Get your Project URL and anon public key</li>
         <li>Open the extension settings to configure</li>
       </ol>
-    `
-    
-    const settingsBtn = UIComponents.createButton('Open Settings', () => this.openSettings(), 'ui-btn-primary')
-    setupSection.appendChild(settingsBtn)
-    container.appendChild(setupSection)
-    
+    `;
+
+    const settingsBtn = UIComponents.createButton(
+      'Open Settings',
+      () => this.openSettings(),
+      'ui-btn-primary'
+    );
+    setupSection.appendChild(settingsBtn);
+    container.appendChild(setupSection);
+
     // Create how it works section
-    const howItWorksSection = UIComponents.createSection('📚 How it works', 'setup-section')
+    const howItWorksSection = UIComponents.createSection(
+      '📚 How it works',
+      'setup-section'
+    );
     howItWorksSection.innerHTML = `
       <ul>
         <li>Click the extension icon to mark the current page</li>
@@ -153,236 +170,275 @@ class ForgetfulMePopup {
         <li>Add tags to organize your entries</li>
         <li>View your recent entries in the popup</li>
       </ul>
-    `
-    container.appendChild(howItWorksSection)
-    
-    this.appContainer.innerHTML = ''
-    this.appContainer.appendChild(container)
+    `;
+    container.appendChild(howItWorksSection);
+
+    this.appContainer.innerHTML = '';
+    this.appContainer.appendChild(container);
   }
 
   showAuthInterface() {
-    this.authUI.showLoginForm(this.appContainer)
+    this.authUI.showLoginForm(this.appContainer);
   }
 
   onAuthSuccess() {
     // Update auth state in the manager
-    this.authStateManager.setAuthState(this.supabaseConfig.session)
-    
-    this.showMainInterface()
-    this.loadRecentEntries()
-    this.loadCustomStatusTypes()
+    this.authStateManager.setAuthState(this.supabaseConfig.session);
+
+    this.showMainInterface();
+    this.loadRecentEntries();
+    this.loadCustomStatusTypes();
   }
 
   showMainInterface() {
     // Create header
-    const header = document.createElement('header')
-    const title = document.createElement('h1')
-    title.textContent = 'ForgetfulMe'
-    header.appendChild(title)
-    
-    const settingsBtn = UIComponents.createButton('⚙️', () => this.openSettings(), 'ui-btn-secondary settings-btn', {
-      title: 'Settings',
-      id: 'settings-btn'
-    })
-    header.appendChild(settingsBtn)
-    
-    // Create main content container
-    const mainContent = document.createElement('div')
-    mainContent.className = 'main-content'
-    
-    // Create form using UI components
-    const form = UIComponents.createForm('bookmarkForm', (e) => this.markAsRead(), [
+    const header = document.createElement('header');
+    const title = document.createElement('h1');
+    title.textContent = 'ForgetfulMe';
+    header.appendChild(title);
+
+    const settingsBtn = UIComponents.createButton(
+      '⚙️',
+      () => this.openSettings(),
+      'ui-btn-secondary settings-btn',
       {
-        type: 'select',
-        id: 'read-status',
-        label: 'Mark as:',
-        options: {
-          options: [
-            { value: 'read', text: 'Read' },
-            { value: 'good-reference', text: 'Good Reference' },
-            { value: 'low-value', text: 'Low Value' },
-            { value: 'revisit-later', text: 'Revisit Later' }
-          ]
-        }
-      },
-      {
-        type: 'text',
-        id: 'tags',
-        label: 'Tags (comma separated):',
-        options: {
-          placeholder: 'research, tutorial, important'
-        }
+        title: 'Settings',
+        id: 'settings-btn',
       }
-    ], {
-      submitText: 'Mark as Read',
-      className: 'bookmark-form'
-    })
-    
-    mainContent.appendChild(form)
-    
+    );
+    header.appendChild(settingsBtn);
+
+    // Create main content container
+    const mainContent = document.createElement('div');
+    mainContent.className = 'main-content';
+
+    // Create form using UI components
+    const form = UIComponents.createForm(
+      'bookmarkForm',
+      e => this.markAsRead(),
+      [
+        {
+          type: 'select',
+          id: 'read-status',
+          label: 'Mark as:',
+          options: {
+            options: [
+              { value: 'read', text: 'Read' },
+              { value: 'good-reference', text: 'Good Reference' },
+              { value: 'low-value', text: 'Low Value' },
+              { value: 'revisit-later', text: 'Revisit Later' },
+            ],
+          },
+        },
+        {
+          type: 'text',
+          id: 'tags',
+          label: 'Tags (comma separated):',
+          options: {
+            placeholder: 'research, tutorial, important',
+          },
+        },
+      ],
+      {
+        submitText: 'Mark as Read',
+        className: 'bookmark-form',
+      }
+    );
+
+    mainContent.appendChild(form);
+
     // Create recent section
-    const recentSection = UIComponents.createSection('Recent Entries', 'recent-section')
-    const recentList = UIComponents.createList('recent-list')
-    recentSection.appendChild(recentList)
-    
+    const recentSection = UIComponents.createSection(
+      'Recent Entries',
+      'recent-section'
+    );
+    const recentList = UIComponents.createList('recent-list');
+    recentSection.appendChild(recentList);
+
     // Assemble the interface
-    this.appContainer.innerHTML = ''
-    this.appContainer.appendChild(header)
-    this.appContainer.appendChild(mainContent)
-    this.appContainer.appendChild(recentSection)
-    
+    this.appContainer.innerHTML = '';
+    this.appContainer.appendChild(header);
+    this.appContainer.appendChild(mainContent);
+    this.appContainer.appendChild(recentSection);
+
     // Re-initialize elements after DOM update
-    this.initializeElements()
-    this.bindEvents()
+    this.initializeElements();
+    this.bindEvents();
   }
 
   async markAsRead() {
     try {
       // Safely get form values using DOM utilities
-      const status = UIComponents.DOM.getValue('read-status') || 'read'
-      const tags = UIComponents.DOM.getValue('tags') || ''
-      
+      const status = UIComponents.DOM.getValue('read-status') || 'read';
+      const tags = UIComponents.DOM.getValue('tags') || '';
+
       // Get current tab info
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-      
-      if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('chrome-extension://')) {
-        UIMessages.error('Cannot mark browser pages as read', this.appContainer)
-        return
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (
+        !tab.url ||
+        tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('chrome-extension://')
+      ) {
+        UIMessages.error(
+          'Cannot mark browser pages as read',
+          this.appContainer
+        );
+        return;
       }
 
-      const bookmark = BookmarkTransformer.fromCurrentTab(tab, status, tags.trim() ? tags.trim().split(',') : [])
+      const bookmark = BookmarkTransformer.fromCurrentTab(
+        tab,
+        status,
+        tags.trim() ? tags.trim().split(',') : []
+      );
 
-      await this.supabaseService.saveBookmark(bookmark)
-      UIMessages.success('Page marked as read!', this.appContainer)
-      
+      await this.supabaseService.saveBookmark(bookmark);
+      UIMessages.success('Page marked as read!', this.appContainer);
+
       // Clear tags input safely
-      UIComponents.DOM.setValue('tags', '')
-      
-      this.loadRecentEntries()
-      
+      UIComponents.DOM.setValue('tags', '');
+
+      this.loadRecentEntries();
+
       // Close popup after a short delay
       setTimeout(() => {
-        window.close()
-      }, 1500)
-
+        window.close();
+      }, 1500);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.markAsRead')
-      UIMessages.error(errorResult.userMessage, this.appContainer)
+      const errorResult = ErrorHandler.handle(error, 'popup.markAsRead');
+      UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
 
   async loadRecentEntries() {
     try {
-      const bookmarks = await this.supabaseService.getBookmarks({ limit: 5 })
-      
-      const recentListEl = UIComponents.DOM.getElement('recent-list')
-      if (!recentListEl) return
-      
-      recentListEl.innerHTML = ''
-      
+      const bookmarks = await this.supabaseService.getBookmarks({ limit: 5 });
+
+      const recentListEl = UIComponents.DOM.getElement('recent-list');
+      if (!recentListEl) return;
+
+      recentListEl.innerHTML = '';
+
       if (bookmarks.length === 0) {
-        const emptyItem = UIComponents.createListItem({
-          title: 'No entries yet',
-          meta: {
-            status: 'info',
-            statusText: 'No entries'
-          }
-        }, { className: 'recent-item empty' })
-        recentListEl.appendChild(emptyItem)
-        return
+        const emptyItem = UIComponents.createListItem(
+          {
+            title: 'No entries yet',
+            meta: {
+              status: 'info',
+              statusText: 'No entries',
+            },
+          },
+          { className: 'recent-item empty' }
+        );
+        recentListEl.appendChild(emptyItem);
+        return;
       }
-      
+
       bookmarks.forEach(bookmark => {
-        const uiBookmark = BookmarkTransformer.toUIFormat(bookmark)
-        const listItem = UIComponents.createListItem({
-          title: uiBookmark.title,
-          titleTooltip: uiBookmark.title,
-          meta: {
-            status: uiBookmark.status,
-            statusText: this.formatStatus(uiBookmark.status),
-            time: this.formatTime(new Date(uiBookmark.created_at).getTime()),
-            tags: uiBookmark.tags
-          }
-        }, { className: 'recent-item' })
-        
-        recentListEl.appendChild(listItem)
-      })
-      
+        const uiBookmark = BookmarkTransformer.toUIFormat(bookmark);
+        const listItem = UIComponents.createListItem(
+          {
+            title: uiBookmark.title,
+            titleTooltip: uiBookmark.title,
+            meta: {
+              status: uiBookmark.status,
+              statusText: this.formatStatus(uiBookmark.status),
+              time: this.formatTime(new Date(uiBookmark.created_at).getTime()),
+              tags: uiBookmark.tags,
+            },
+          },
+          { className: 'recent-item' }
+        );
+
+        recentListEl.appendChild(listItem);
+      });
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries')
-      const recentListEl = UIComponents.DOM.getElement('recent-list')
+      const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries');
+      const recentListEl = UIComponents.DOM.getElement('recent-list');
       if (recentListEl) {
-        const errorItem = UIComponents.createListItem({
-          title: 'Error loading entries',
-          meta: {
-            status: 'error',
-            statusText: 'Error'
-          }
-        }, { className: 'recent-item error' })
-        recentListEl.appendChild(errorItem)
+        const errorItem = UIComponents.createListItem(
+          {
+            title: 'Error loading entries',
+            meta: {
+              status: 'error',
+              statusText: 'Error',
+            },
+          },
+          { className: 'recent-item error' }
+        );
+        recentListEl.appendChild(errorItem);
       }
-      
+
       if (errorResult.shouldShowToUser) {
-        UIMessages.error(errorResult.userMessage, this.appContainer)
+        UIMessages.error(errorResult.userMessage, this.appContainer);
       }
     }
   }
 
   async loadCustomStatusTypes() {
     try {
-      await this.configManager.initialize()
-      const customStatusTypes = await this.configManager.getCustomStatusTypes()
-      
+      await this.configManager.initialize();
+      const customStatusTypes = await this.configManager.getCustomStatusTypes();
+
       if (customStatusTypes.length > 0) {
         // Safely get the select element
-        const readStatusSelectEl = UIComponents.DOM.getElement('read-status')
+        const readStatusSelectEl = UIComponents.DOM.getElement('read-status');
         if (readStatusSelectEl) {
           // Clear default options and add custom ones
-          readStatusSelectEl.innerHTML = ''
+          readStatusSelectEl.innerHTML = '';
           customStatusTypes.forEach(status => {
-            const option = document.createElement('option')
-            option.value = status
-            option.textContent = this.formatStatus(status)
-            readStatusSelectEl.appendChild(option)
-          })
+            const option = document.createElement('option');
+            option.value = status;
+            option.textContent = this.formatStatus(status);
+            readStatusSelectEl.appendChild(option);
+          });
         }
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.loadCustomStatusTypes', { silent: true })
+      const errorResult = ErrorHandler.handle(
+        error,
+        'popup.loadCustomStatusTypes',
+        { silent: true }
+      );
       // Don't show user for this error as it's not critical
     }
   }
 
   formatStatus(status) {
-    return status.split('-').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ')
+    return status
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   formatTime(timestamp) {
-    const now = Date.now()
-    const diff = now - timestamp
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-    
-    if (minutes < 1) return 'Just now'
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7) return `${days}d ago`
-    
-    return new Date(timestamp).toLocaleDateString()
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+
+    return new Date(timestamp).toLocaleDateString();
   }
 
   showMessage(message, type) {
     // Use the centralized UIMessages system
-    UIMessages.show(message, type, this.appContainer)
+    UIMessages.show(message, type, this.appContainer);
   }
 
   openSettings() {
-    chrome.runtime.openOptionsPage()
+    chrome.runtime.openOptionsPage();
   }
 }
 
 // Initialize popup immediately (DOM ready is handled in constructor)
-new ForgetfulMePopup() 
+new ForgetfulMePopup();

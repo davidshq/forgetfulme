@@ -1,7 +1,7 @@
 // Configuration UI component for ForgetfulMe extension
 class ConfigUI {
   constructor(supabaseConfig) {
-    this.config = supabaseConfig
+    this.config = supabaseConfig;
   }
 
   showConfigForm(container) {
@@ -10,39 +10,47 @@ class ConfigUI {
       'Supabase Configuration',
       'Enter your Supabase project credentials to enable cloud sync',
       'config-container'
-    )
-    
+    );
+
     // Create config form
-    const configForm = UIComponents.createForm('configForm', (e) => this.handleConfigSubmit(container), [
+    const configForm = UIComponents.createForm(
+      'configForm',
+      e => this.handleConfigSubmit(container),
+      [
+        {
+          type: 'url',
+          id: 'supabaseUrl',
+          label: 'Project URL',
+          options: {
+            placeholder: 'https://your-project.supabase.co',
+            required: true,
+            helpText: 'Your Supabase project URL (found in Settings > API)',
+          },
+        },
+        {
+          type: 'text',
+          id: 'supabaseAnonKey',
+          label: 'Anon Public Key',
+          options: {
+            placeholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            required: true,
+            helpText: 'Your anon public key (found in Settings > API)',
+          },
+        },
+      ],
       {
-        type: 'url',
-        id: 'supabaseUrl',
-        label: 'Project URL',
-        options: {
-          placeholder: 'https://your-project.supabase.co',
-          required: true,
-          helpText: 'Your Supabase project URL (found in Settings > API)'
-        }
-      },
-      {
-        type: 'text',
-        id: 'supabaseAnonKey',
-        label: 'Anon Public Key',
-        options: {
-          placeholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-          required: true,
-          helpText: 'Your anon public key (found in Settings > API)'
-        }
+        submitText: 'Save Configuration',
+        className: 'config-form',
       }
-    ], {
-      submitText: 'Save Configuration',
-      className: 'config-form'
-    })
-    
-    containerEl.appendChild(configForm)
-    
+    );
+
+    containerEl.appendChild(configForm);
+
     // Create help section
-    const helpSection = UIComponents.createSection('How to get your credentials:', 'config-help')
+    const helpSection = UIComponents.createSection(
+      'How to get your credentials:',
+      'config-help'
+    );
     helpSection.innerHTML = `
       <ol>
         <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create an account</li>
@@ -55,95 +63,118 @@ class ConfigUI {
       <div class="config-note">
         <strong>Note:</strong> Your credentials are stored securely in your browser's sync storage and are never shared with anyone.
       </div>
-    `
-    containerEl.appendChild(helpSection)
-    
+    `;
+    containerEl.appendChild(helpSection);
+
     // Create message container
-    const messageContainer = document.createElement('div')
-    messageContainer.id = 'configMessage'
-    messageContainer.className = 'config-message'
-    containerEl.appendChild(messageContainer)
-    
-    container.innerHTML = ''
-    container.appendChild(containerEl)
-    this.bindConfigEvents(container)
-    this.loadCurrentConfig(container)
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'configMessage';
+    messageContainer.className = 'config-message';
+    containerEl.appendChild(messageContainer);
+
+    container.innerHTML = '';
+    container.appendChild(containerEl);
+    this.bindConfigEvents(container);
+    this.loadCurrentConfig(container);
   }
 
   bindConfigEvents(container) {
-    const configForm = UIComponents.DOM.querySelector('#configForm', container)
-    
+    const configForm = UIComponents.DOM.querySelector('#configForm', container);
+
     if (configForm) {
-      configForm.addEventListener('submit', (e) => {
-        e.preventDefault()
-        this.handleConfigSubmit(container)
-      })
+      configForm.addEventListener('submit', e => {
+        e.preventDefault();
+        this.handleConfigSubmit(container);
+      });
     }
   }
 
   async loadCurrentConfig(container) {
     try {
-      const currentConfig = await this.config.getConfiguration()
-      
+      const currentConfig = await this.config.getConfiguration();
+
       if (currentConfig) {
-        const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container)
-        const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container)
-        
-        if (urlInput) urlInput.value = currentConfig.url || ''
-        if (keyInput) keyInput.value = currentConfig.anonKey || ''
-        
-        UIMessages.info('Current configuration loaded', container)
+        const urlInput = UIComponents.DOM.querySelector(
+          '#supabaseUrl',
+          container
+        );
+        const keyInput = UIComponents.DOM.querySelector(
+          '#supabaseAnonKey',
+          container
+        );
+
+        if (urlInput) urlInput.value = currentConfig.url || '';
+        if (keyInput) keyInput.value = currentConfig.anonKey || '';
+
+        UIMessages.info('Current configuration loaded', container);
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', { silent: true })
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-ui.loadCurrentConfig',
+        { silent: true }
+      );
       // Don't show user for this error as it's not critical
     }
   }
 
   async handleConfigSubmit(container) {
-    const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container)
-    const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container)
-    
-    const url = urlInput ? urlInput.value.trim() : ''
-    const anonKey = keyInput ? keyInput.value.trim() : ''
-    
+    const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
+    const keyInput = UIComponents.DOM.querySelector(
+      '#supabaseAnonKey',
+      container
+    );
+
+    const url = urlInput ? urlInput.value.trim() : '';
+    const anonKey = keyInput ? keyInput.value.trim() : '';
+
     if (!url || !anonKey) {
-      UIMessages.error('Please fill in all fields', container)
-      return
+      UIMessages.error('Please fill in all fields', container);
+      return;
     }
-    
+
     try {
-      UIMessages.loading('Saving configuration...', container)
-      
-      const result = await this.config.setConfiguration(url, anonKey)
-      
+      UIMessages.loading('Saving configuration...', container);
+
+      const result = await this.config.setConfiguration(url, anonKey);
+
       if (result.success) {
-        UIMessages.success('Configuration saved successfully!', container)
-        
+        UIMessages.success('Configuration saved successfully!', container);
+
         // Test the configuration
         setTimeout(async () => {
           try {
-            await this.config.initialize()
-            UIMessages.success('Configuration test successful! You can now use the extension.', container)
+            await this.config.initialize();
+            UIMessages.success(
+              'Configuration test successful! You can now use the extension.',
+              container
+            );
           } catch (error) {
-            const errorResult = ErrorHandler.handle(error, 'config-ui.testConfiguration')
-            UIMessages.error('Configuration saved but test failed. Please check your credentials.', container)
+            const errorResult = ErrorHandler.handle(
+              error,
+              'config-ui.testConfiguration'
+            );
+            UIMessages.error(
+              'Configuration saved but test failed. Please check your credentials.',
+              container
+            );
           }
-        }, 1000)
-        
+        }, 1000);
       } else {
-        UIMessages.error(`Error: ${result.message}`, container)
+        UIMessages.error(`Error: ${result.message}`, container);
       }
-      
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-ui.handleConfigSubmit')
-      UIMessages.error(errorResult.userMessage, container)
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-ui.handleConfigSubmit'
+      );
+      UIMessages.error(errorResult.userMessage, container);
     }
   }
 
   showConfigMessage(container, message, type) {
     // Use the centralized UIMessages system
-    UIMessages.show(message, type, container)
+    UIMessages.show(message, type, container);
   }
 
   showConfigStatus(container) {
@@ -166,75 +197,91 @@ class ConfigUI {
         <button id="testConnectionBtn" class="config-btn secondary">Test Connection</button>
         <button id="editConfigBtn" class="config-btn secondary">Edit Configuration</button>
       </div>
-    `
-    
-    container.innerHTML = statusHTML
-    this.loadConfigStatus(container)
-    this.bindStatusEvents(container)
+    `;
+
+    container.innerHTML = statusHTML;
+    this.loadConfigStatus(container);
+    this.bindStatusEvents(container);
   }
 
   async loadConfigStatus(container) {
     try {
-      const config = await this.config.getConfiguration()
-      
+      const config = await this.config.getConfiguration();
+
       if (config) {
-        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container)
-        const keyEl = UIComponents.DOM.querySelector('#statusKey', container)
-        
-        if (urlEl) urlEl.textContent = config.url || 'Not set'
-        if (keyEl) keyEl.textContent = config.anonKey ? `${config.anonKey.substring(0, 20)}...` : 'Not set'
-        
+        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container);
+        const keyEl = UIComponents.DOM.querySelector('#statusKey', container);
+
+        if (urlEl) urlEl.textContent = config.url || 'Not set';
+        if (keyEl)
+          keyEl.textContent = config.anonKey
+            ? `${config.anonKey.substring(0, 20)}...`
+            : 'Not set';
+
         // Test connection
-        await this.testConnection(container)
+        await this.testConnection(container);
       } else {
-        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container)
-        const keyEl = UIComponents.DOM.querySelector('#statusKey', container)
-        const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container)
-        
-        if (urlEl) urlEl.textContent = 'Not configured'
-        if (keyEl) keyEl.textContent = 'Not configured'
-        if (connectionEl) connectionEl.textContent = 'Not configured'
+        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container);
+        const keyEl = UIComponents.DOM.querySelector('#statusKey', container);
+        const connectionEl = UIComponents.DOM.querySelector(
+          '#statusConnection',
+          container
+        );
+
+        if (urlEl) urlEl.textContent = 'Not configured';
+        if (keyEl) keyEl.textContent = 'Not configured';
+        if (connectionEl) connectionEl.textContent = 'Not configured';
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-ui.loadConfigStatus', { silent: true })
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-ui.loadConfigStatus',
+        { silent: true }
+      );
       // Don't show user for this error as it's not critical
     }
   }
 
   async testConnection(container) {
-    const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container)
-    
+    const connectionEl = UIComponents.DOM.querySelector(
+      '#statusConnection',
+      container
+    );
+
     try {
-      await this.config.initialize()
+      await this.config.initialize();
       if (connectionEl) {
-        connectionEl.textContent = 'Connected'
-        connectionEl.className = 'status-value connected'
+        connectionEl.textContent = 'Connected';
+        connectionEl.className = 'status-value connected';
       }
     } catch (error) {
       if (connectionEl) {
-        connectionEl.textContent = 'Failed'
-        connectionEl.className = 'status-value failed'
+        connectionEl.textContent = 'Failed';
+        connectionEl.className = 'status-value failed';
       }
     }
   }
 
   bindStatusEvents(container) {
-    const testBtn = UIComponents.DOM.querySelector('#testConnectionBtn', container)
-    const editBtn = UIComponents.DOM.querySelector('#editConfigBtn', container)
-    
+    const testBtn = UIComponents.DOM.querySelector(
+      '#testConnectionBtn',
+      container
+    );
+    const editBtn = UIComponents.DOM.querySelector('#editConfigBtn', container);
+
     if (testBtn) {
       testBtn.addEventListener('click', async () => {
-        await this.testConnection(container)
-      })
+        await this.testConnection(container);
+      });
     }
-    
+
     if (editBtn) {
       editBtn.addEventListener('click', () => {
-        this.showConfigForm(container)
-      })
+        this.showConfigForm(container);
+      });
     }
   }
 }
 
 // Export for use in other files
-window.ConfigUI = ConfigUI 
+window.ConfigUI = ConfigUI;

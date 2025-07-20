@@ -139,7 +139,9 @@
   border-radius: 4px;
   font-size: 14px;
   background: white;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .ui-form-control:focus {
@@ -306,8 +308,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== STATUS INDICATORS ===== */
@@ -466,28 +472,28 @@
   border: 4px solid transparent;
 }
 
-.tooltip[data-position="top"]::before {
+.tooltip[data-position='top']::before {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-top-color: #333;
 }
 
-.tooltip[data-position="bottom"]::before {
+.tooltip[data-position='bottom']::before {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   border-bottom-color: #333;
 }
 
-.tooltip[data-position="left"]::before {
+.tooltip[data-position='left']::before {
   left: 100%;
   top: 50%;
   transform: translateY(-50%);
   border-left-color: #333;
 }
 
-.tooltip[data-position="right"]::before {
+.tooltip[data-position='right']::before {
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
@@ -522,19 +528,19 @@
   .ui-container {
     padding: 16px;
   }
-  
+
   .ui-btn {
     width: 100%;
   }
-  
+
   .confirm-buttons {
     flex-direction: column;
   }
-  
+
   .tab-list {
     flex-wrap: wrap;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 20px;
@@ -547,31 +553,31 @@
     background: #1a1a1a;
     color: #e9ecef;
   }
-  
+
   .ui-form-control {
     background: #2d2d2d;
     border-color: #495057;
     color: #e9ecef;
   }
-  
+
   .list-item {
     background: #2d2d2d;
     border-color: #495057;
   }
-  
+
   .modal-content {
     background: #2d2d2d;
     color: #e9ecef;
   }
-  
+
   .tooltip {
     background: #495057;
   }
-  
+
   .tooltip::before {
     border-top-color: #495057;
     border-bottom-color: #495057;
     border-left-color: #495057;
     border-right-color: #495057;
   }
-} 
+}

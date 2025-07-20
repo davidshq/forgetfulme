@@ -12,13 +12,10 @@ class BookmarkTransformer {
    * @returns {Object} Transformed bookmark data
    */
   static toSupabaseFormat(entry, userId, options = {}) {
-    const {
-      preserveTimestamps = false,
-      setDefaults = true
-    } = options
+    const { preserveTimestamps = false, setDefaults = true } = options;
 
-    const now = new Date().toISOString()
-    
+    const now = new Date().toISOString();
+
     const transformed = {
       user_id: userId,
       url: entry.url,
@@ -26,18 +23,21 @@ class BookmarkTransformer {
       description: entry.description || '',
       read_status: entry.status || entry.read_status || 'unread',
       tags: this.normalizeTags(entry.tags || []),
-      created_at: preserveTimestamps && entry.created_at 
-        ? entry.created_at 
-        : (entry.timestamp ? new Date(entry.timestamp).toISOString() : now),
+      created_at:
+        preserveTimestamps && entry.created_at
+          ? entry.created_at
+          : entry.timestamp
+            ? new Date(entry.timestamp).toISOString()
+            : now,
       updated_at: now,
       last_accessed: now,
-      access_count: setDefaults ? 1 : (entry.access_count || 0)
-    }
+      access_count: setDefaults ? 1 : entry.access_count || 0,
+    };
 
     // Add any additional fields that might exist
-    if (entry.id) transformed.id = entry.id
-    
-    return transformed
+    if (entry.id) transformed.id = entry.id;
+
+    return transformed;
   }
 
   /**
@@ -56,11 +56,9 @@ class BookmarkTransformer {
       created_at: bookmark.created_at,
       updated_at: bookmark.updated_at,
       last_accessed: bookmark.last_accessed,
-      access_count: bookmark.access_count || 0
-    }
+      access_count: bookmark.access_count || 0,
+    };
   }
-
-
 
   /**
    * Transform import data to Supabase format
@@ -71,8 +69,8 @@ class BookmarkTransformer {
   static fromImportData(bookmark, userId) {
     return this.toSupabaseFormat(bookmark, userId, {
       preserveTimestamps: true,
-      setDefaults: false
-    })
+      setDefaults: false,
+    });
   }
 
   /**
@@ -88,8 +86,8 @@ class BookmarkTransformer {
       title: tab.title || 'Untitled',
       status: status,
       tags: this.normalizeTags(tags),
-      timestamp: Date.now()
-    }
+      timestamp: Date.now(),
+    };
   }
 
   /**
@@ -98,21 +96,22 @@ class BookmarkTransformer {
    * @returns {Array} Normalized tags array
    */
   static normalizeTags(tags) {
-    if (!tags) return []
-    
+    if (!tags) return [];
+
     if (typeof tags === 'string') {
-      return tags.split(',')
+      return tags
+        .split(',')
         .map(tag => tag.trim())
-        .filter(tag => tag.length > 0)
+        .filter(tag => tag.length > 0);
     }
-    
+
     if (Array.isArray(tags)) {
       return tags
-        .map(tag => typeof tag === 'string' ? tag.trim() : String(tag).trim())
-        .filter(tag => tag.length > 0)
+        .map(tag => (typeof tag === 'string' ? tag.trim() : String(tag).trim()))
+        .filter(tag => tag.length > 0);
     }
-    
-    return []
+
+    return [];
   }
 
   /**
@@ -121,26 +120,26 @@ class BookmarkTransformer {
    * @returns {Object} Validation result with isValid and errors
    */
   static validate(bookmark) {
-    const errors = []
-    
+    const errors = [];
+
     if (!bookmark.url) {
-      errors.push('URL is required')
+      errors.push('URL is required');
     } else if (!this.isValidUrl(bookmark.url)) {
-      errors.push('Invalid URL format')
+      errors.push('Invalid URL format');
     }
-    
+
     if (!bookmark.title) {
-      errors.push('Title is required')
+      errors.push('Title is required');
     }
-    
+
     if (bookmark.tags && !Array.isArray(bookmark.tags)) {
-      errors.push('Tags must be an array')
+      errors.push('Tags must be an array');
     }
-    
+
     return {
       isValid: errors.length === 0,
-      errors: errors
-    }
+      errors: errors,
+    };
   }
 
   /**
@@ -150,10 +149,10 @@ class BookmarkTransformer {
    */
   static isValidUrl(url) {
     try {
-      new URL(url)
-      return true
+      new URL(url);
+      return true;
     } catch {
-      return false
+      return false;
     }
   }
 
@@ -173,8 +172,8 @@ class BookmarkTransformer {
       created_at: bookmark.created_at,
       updated_at: bookmark.updated_at,
       last_accessed: bookmark.last_accessed,
-      access_count: bookmark.access_count
-    }
+      access_count: bookmark.access_count,
+    };
   }
 
   /**
@@ -185,7 +184,9 @@ class BookmarkTransformer {
    * @returns {Array} Array of transformed bookmarks
    */
   static transformMultiple(bookmarks, userId, options = {}) {
-    return bookmarks.map(bookmark => this.toSupabaseFormat(bookmark, userId, options))
+    return bookmarks.map(bookmark =>
+      this.toSupabaseFormat(bookmark, userId, options)
+    );
   }
 
   /**
@@ -194,7 +195,7 @@ class BookmarkTransformer {
    * @returns {Object} Default bookmark structure
    */
   static getDefaultStructure(userId) {
-    const now = new Date().toISOString()
+    const now = new Date().toISOString();
     return {
       user_id: userId,
       url: '',
@@ -205,10 +206,10 @@ class BookmarkTransformer {
       created_at: now,
       updated_at: now,
       last_accessed: now,
-      access_count: 0
-    }
+      access_count: 0,
+    };
   }
 }
 
 // Export for use in other files
-window.BookmarkTransformer = BookmarkTransformer 
+window.BookmarkTransformer = BookmarkTransformer;

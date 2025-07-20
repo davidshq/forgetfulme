@@ -1,50 +1,49 @@
 // Supabase configuration for ForgetfulMe extension
 class SupabaseConfig {
   constructor() {
-    this.configManager = new ConfigManager()
-    this.supabaseUrl = null
-    this.supabaseAnonKey = null
-    
-    this.supabase = null
-    this.auth = null
-    this.user = null
-    this.session = null
-    
+    this.configManager = new ConfigManager();
+    this.supabaseUrl = null;
+    this.supabaseAnonKey = null;
+
+    this.supabase = null;
+    this.auth = null;
+    this.user = null;
+    this.session = null;
+
     // Don't load configuration immediately - wait until needed
-    this.configLoaded = false
+    this.configLoaded = false;
   }
 
   async loadConfiguration() {
     if (this.configLoaded) {
-      return
+      return;
     }
 
     try {
-      await this.configManager.initialize()
-      const supabaseConfig = await this.configManager.getSupabaseConfig()
-      
+      await this.configManager.initialize();
+      const supabaseConfig = await this.configManager.getSupabaseConfig();
+
       if (supabaseConfig) {
-        this.supabaseUrl = supabaseConfig.url
-        this.supabaseAnonKey = supabaseConfig.anonKey
-        this.configLoaded = true
-        return
+        this.supabaseUrl = supabaseConfig.url;
+        this.supabaseAnonKey = supabaseConfig.anonKey;
+        this.configLoaded = true;
+        return;
       }
 
       // Fallback to environment variables (for development)
       // Note: These won't work in extension context, but useful for development
       if (typeof process !== 'undefined' && process.env) {
-        this.supabaseUrl = process.env.SUPABASE_URL
-        this.supabaseAnonKey = process.env.SUPABASE_ANON_KEY
-        this.configLoaded = true
-        return
+        this.supabaseUrl = process.env.SUPABASE_URL;
+        this.supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+        this.configLoaded = true;
+        return;
       }
 
       // If no configuration found, don't show error - just mark as not configured
-      this.configLoaded = true
-      
+      this.configLoaded = true;
     } catch (error) {
-      console.error('Error loading Supabase configuration:', error)
-      this.configLoaded = true
+      console.error('Error loading Supabase configuration:', error);
+      this.configLoaded = true;
     }
   }
 
@@ -63,147 +62,153 @@ class SupabaseConfig {
       Or set environment variables:
       - SUPABASE_URL
       - SUPABASE_ANON_KEY
-    `)
+    `);
   }
 
   async setConfiguration(url, anonKey) {
     try {
-      await this.configManager.initialize()
-      const result = await this.configManager.setSupabaseConfig(url, anonKey)
-      
-      // Update local configuration
-      this.supabaseUrl = url
-      this.supabaseAnonKey = anonKey
-      this.configLoaded = true
+      await this.configManager.initialize();
+      const result = await this.configManager.setSupabaseConfig(url, anonKey);
 
-      return result
-      
+      // Update local configuration
+      this.supabaseUrl = url;
+      this.supabaseAnonKey = anonKey;
+      this.configLoaded = true;
+
+      return result;
     } catch (error) {
-      console.error('Error setting configuration:', error)
-      return { success: false, message: error.message }
+      console.error('Error setting configuration:', error);
+      return { success: false, message: error.message };
     }
   }
 
   async getConfiguration() {
-    await this.loadConfiguration()
-    return await this.configManager.getSupabaseConfig()
+    await this.loadConfiguration();
+    return await this.configManager.getSupabaseConfig();
   }
 
   async initialize() {
     try {
       // Load configuration if not already loaded
-      await this.loadConfiguration()
+      await this.loadConfiguration();
 
       if (!this.supabaseUrl || !this.supabaseAnonKey) {
-        return false // Not configured, but not an error
+        return false; // Not configured, but not an error
       }
 
       // Check if Supabase client is available
       if (typeof supabase === 'undefined') {
-        console.error('Supabase client not loaded. Please include the Supabase library.')
-        return false
+        console.error(
+          'Supabase client not loaded. Please include the Supabase library.'
+        );
+        return false;
       }
 
       // Use the globally available Supabase client
-      console.log('Creating Supabase client with URL:', this.supabaseUrl)
-      this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseAnonKey)
-      this.auth = this.supabase.auth
-      
+      console.log('Creating Supabase client with URL:', this.supabaseUrl);
+      this.supabase = supabase.createClient(
+        this.supabaseUrl,
+        this.supabaseAnonKey
+      );
+      this.auth = this.supabase.auth;
+
       // Verify the client was created properly
       if (!this.supabase || typeof this.supabase.from !== 'function') {
-        console.error('Supabase client not properly initialized')
-        return false
+        console.error('Supabase client not properly initialized');
+        return false;
       }
-      
+
       // Check for existing session
-      const { data: { session } } = await this.auth.getSession()
+      const {
+        data: { session },
+      } = await this.auth.getSession();
       if (session) {
-        this.session = session
-        this.user = session.user
-        return true
+        this.session = session;
+        this.user = session.user;
+        return true;
       }
-      
-      return false
+
+      return false;
     } catch (error) {
-      console.error('Error initializing Supabase:', error)
-      return false
+      console.error('Error initializing Supabase:', error);
+      return false;
     }
   }
 
   async signIn(email, password) {
     try {
       if (!this.auth) {
-        throw new Error('Supabase not initialized')
+        throw new Error('Supabase not initialized');
       }
 
       const { data, error } = await this.auth.signInWithPassword({
         email,
-        password
-      })
-      
-      if (error) throw error
-      
-      this.session = data.session
-      this.user = data.user
-      return data
+        password,
+      });
+
+      if (error) throw error;
+
+      this.session = data.session;
+      this.user = data.user;
+      return data;
     } catch (error) {
-      console.error('Sign in error:', error)
-      throw error
+      console.error('Sign in error:', error);
+      throw error;
     }
   }
 
   async signUp(email, password) {
     try {
       if (!this.auth) {
-        throw new Error('Supabase not initialized')
+        throw new Error('Supabase not initialized');
       }
 
       const { data, error } = await this.auth.signUp({
         email,
-        password
-      })
-      
-      if (error) throw error
-      
-      return data
+        password,
+      });
+
+      if (error) throw error;
+
+      return data;
     } catch (error) {
-      console.error('Sign up error:', error)
-      throw error
+      console.error('Sign up error:', error);
+      throw error;
     }
   }
 
   async signOut() {
     try {
       if (!this.auth) {
-        return
+        return;
       }
 
-      await this.auth.signOut()
-      this.session = null
-      this.user = null
+      await this.auth.signOut();
+      this.session = null;
+      this.user = null;
     } catch (error) {
-      console.error('Sign out error:', error)
-      throw error
+      console.error('Sign out error:', error);
+      throw error;
     }
   }
 
   isAuthenticated() {
-    return this.user !== null && this.session !== null
+    return this.user !== null && this.session !== null;
   }
 
   getCurrentUser() {
-    return this.user
+    return this.user;
   }
 
   getSupabaseClient() {
-    return this.supabase
+    return this.supabase;
   }
 
   async isConfigured() {
-    await this.loadConfiguration()
-    return await this.configManager.isSupabaseConfigured()
+    await this.loadConfiguration();
+    return await this.configManager.isSupabaseConfigured();
   }
 }
 
 // Export for use in other files
-window.SupabaseConfig = SupabaseConfig 
+window.SupabaseConfig = SupabaseConfig;

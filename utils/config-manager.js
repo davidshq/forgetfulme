@@ -6,34 +6,33 @@ class ConfigManager {
     this.config = {
       supabase: null,
       preferences: null,
-      auth: null
-    }
-    this.initialized = false
-    this.listeners = new Set()
+      auth: null,
+    };
+    this.initialized = false;
+    this.listeners = new Set();
   }
 
   // Initialize configuration manager
   async initialize() {
     if (this.initialized) {
-      return
+      return;
     }
 
     try {
       // Load all configuration from storage
-      await this.loadAllConfig()
-      
+      await this.loadAllConfig();
+
       // Validate configuration
-      await this.validateConfig()
-      
+      await this.validateConfig();
+
       // Set up migration if needed
-      await this.migrateConfig()
-      
-      this.initialized = true
-      this.notifyListeners('initialized')
-      
+      await this.migrateConfig();
+
+      this.initialized = true;
+      this.notifyListeners('initialized');
     } catch (error) {
-      console.error('Error initializing ConfigManager:', error)
-      throw error
+      console.error('Error initializing ConfigManager:', error);
+      throw error;
     }
   }
 
@@ -43,23 +42,22 @@ class ConfigManager {
       const result = await chrome.storage.sync.get([
         'supabaseConfig',
         'customStatusTypes',
-        'auth_session'
-      ])
+        'auth_session',
+      ]);
 
-      this.config.supabase = result.supabaseConfig || null
+      this.config.supabase = result.supabaseConfig || null;
       this.config.preferences = {
         customStatusTypes: result.customStatusTypes || [
           'read',
           'good-reference',
           'low-value',
-          'revisit-later'
-        ]
-      }
-      this.config.auth = result.auth_session || null
-
+          'revisit-later',
+        ],
+      };
+      this.config.auth = result.auth_session || null;
     } catch (error) {
-      console.error('Error loading configuration:', error)
-      throw error
+      console.error('Error loading configuration:', error);
+      throw error;
     }
   }
 
@@ -68,15 +66,17 @@ class ConfigManager {
     // Validate Supabase configuration if present
     if (this.config.supabase) {
       if (!this.config.supabase.url || !this.config.supabase.anonKey) {
-        throw new Error('Invalid Supabase configuration: missing URL or anon key')
+        throw new Error(
+          'Invalid Supabase configuration: missing URL or anon key'
+        );
       }
-      
+
       if (!this.config.supabase.url.startsWith('https://')) {
-        throw new Error('Invalid Supabase URL: must start with https://')
+        throw new Error('Invalid Supabase URL: must start with https://');
       }
-      
+
       if (!this.config.supabase.anonKey.startsWith('eyJ')) {
-        throw new Error('Invalid anon key format')
+        throw new Error('Invalid anon key format');
       }
     }
 
@@ -86,8 +86,8 @@ class ConfigManager {
         'read',
         'good-reference',
         'low-value',
-        'revisit-later'
-      ]
+        'revisit-later',
+      ];
     }
   }
 
@@ -95,16 +95,15 @@ class ConfigManager {
   async migrateConfig() {
     try {
       // Check if migration is needed
-      const migrationVersion = await this.getMigrationVersion()
-      
+      const migrationVersion = await this.getMigrationVersion();
+
       if (migrationVersion < 1) {
         // Migrate to version 1
-        await this.migrateToVersion1()
-        await this.setMigrationVersion(1)
+        await this.migrateToVersion1();
+        await this.setMigrationVersion(1);
       }
-      
     } catch (error) {
-      console.error('Error during configuration migration:', error)
+      console.error('Error during configuration migration:', error);
       // Don't throw - migration errors shouldn't break the app
     }
   }
@@ -112,192 +111,202 @@ class ConfigManager {
   async migrateToVersion1() {
     // Migration logic for version 1
     // This is where we'd handle any breaking changes in configuration format
-    console.log('Migrating configuration to version 1')
+    console.log('Migrating configuration to version 1');
   }
 
   async getMigrationVersion() {
     try {
-      const result = await chrome.storage.sync.get(['configVersion'])
-      return result.configVersion || 0
+      const result = await chrome.storage.sync.get(['configVersion']);
+      return result.configVersion || 0;
     } catch (error) {
-      return 0
+      return 0;
     }
   }
 
   async setMigrationVersion(version) {
     try {
-      await chrome.storage.sync.set({ configVersion: version })
+      await chrome.storage.sync.set({ configVersion: version });
     } catch (error) {
-      console.error('Error setting migration version:', error)
+      console.error('Error setting migration version:', error);
     }
   }
 
   // Supabase Configuration Methods
   async getSupabaseConfig() {
-    await this.ensureInitialized()
-    return this.config.supabase
+    await this.ensureInitialized();
+    return this.config.supabase;
   }
 
   async setSupabaseConfig(url, anonKey) {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     // Validate input
     if (!url || !anonKey) {
-      throw new Error('Both URL and anon key are required')
+      throw new Error('Both URL and anon key are required');
     }
 
     if (!url.startsWith('https://')) {
-      throw new Error('URL must start with https://')
+      throw new Error('URL must start with https://');
     }
 
     if (!anonKey.startsWith('eyJ')) {
-      throw new Error('Invalid anon key format')
+      throw new Error('Invalid anon key format');
     }
 
     // Update configuration
-    this.config.supabase = { url, anonKey }
-    
+    this.config.supabase = { url, anonKey };
+
     // Save to storage
     await chrome.storage.sync.set({
-      supabaseConfig: this.config.supabase
-    })
+      supabaseConfig: this.config.supabase,
+    });
 
-    this.notifyListeners('supabaseConfigChanged', this.config.supabase)
-    
-    return { success: true, message: 'Configuration saved successfully' }
+    this.notifyListeners('supabaseConfigChanged', this.config.supabase);
+
+    return { success: true, message: 'Configuration saved successfully' };
   }
 
   async isSupabaseConfigured() {
-    await this.ensureInitialized()
-    return this.config.supabase !== null
+    await this.ensureInitialized();
+    return this.config.supabase !== null;
   }
 
   // Preferences Methods
   async getPreferences() {
-    await this.ensureInitialized()
-    return this.config.preferences
+    await this.ensureInitialized();
+    return this.config.preferences;
   }
 
   async setPreferences(preferences) {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     // Merge with existing preferences
     this.config.preferences = {
       ...this.config.preferences,
-      ...preferences
-    }
-    
+      ...preferences,
+    };
+
     // Save to storage
     await chrome.storage.sync.set({
-      customStatusTypes: this.config.preferences.customStatusTypes
-    })
+      customStatusTypes: this.config.preferences.customStatusTypes,
+    });
 
-    this.notifyListeners('preferencesChanged', this.config.preferences)
+    this.notifyListeners('preferencesChanged', this.config.preferences);
   }
 
   async getCustomStatusTypes() {
-    await this.ensureInitialized()
-    return this.config.preferences.customStatusTypes
+    await this.ensureInitialized();
+    return this.config.preferences.customStatusTypes;
   }
 
   async setCustomStatusTypes(statusTypes) {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     if (!Array.isArray(statusTypes)) {
-      throw new Error('Status types must be an array')
+      throw new Error('Status types must be an array');
     }
-    
-    this.config.preferences.customStatusTypes = statusTypes
-    
+
+    this.config.preferences.customStatusTypes = statusTypes;
+
     // Save to storage
     await chrome.storage.sync.set({
-      customStatusTypes: statusTypes
-    })
+      customStatusTypes: statusTypes,
+    });
 
-    this.notifyListeners('statusTypesChanged', statusTypes)
+    this.notifyListeners('statusTypesChanged', statusTypes);
   }
 
   async addCustomStatusType(statusType) {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     if (!statusType || typeof statusType !== 'string') {
-      throw new Error('Status type must be a non-empty string')
+      throw new Error('Status type must be a non-empty string');
     }
-    
-    const currentTypes = this.config.preferences.customStatusTypes
+
+    const currentTypes = this.config.preferences.customStatusTypes;
     if (!currentTypes.includes(statusType)) {
-      currentTypes.push(statusType)
-      await this.setCustomStatusTypes(currentTypes)
+      currentTypes.push(statusType);
+      await this.setCustomStatusTypes(currentTypes);
     }
   }
 
   async removeCustomStatusType(statusType) {
-    await this.ensureInitialized()
-    
-    const currentTypes = this.config.preferences.customStatusTypes
-    const updatedTypes = currentTypes.filter(type => type !== statusType)
-    await this.setCustomStatusTypes(updatedTypes)
+    await this.ensureInitialized();
+
+    const currentTypes = this.config.preferences.customStatusTypes;
+    const updatedTypes = currentTypes.filter(type => type !== statusType);
+    await this.setCustomStatusTypes(updatedTypes);
   }
 
   // Authentication Methods
   async getAuthSession() {
-    await this.ensureInitialized()
-    return this.config.auth
+    await this.ensureInitialized();
+    return this.config.auth;
   }
 
   async setAuthSession(session) {
-    await this.ensureInitialized()
-    
-    this.config.auth = session
-    
+    await this.ensureInitialized();
+
+    this.config.auth = session;
+
     // Save to storage
     await chrome.storage.sync.set({
-      auth_session: session
-    })
+      auth_session: session,
+    });
 
-    this.notifyListeners('authSessionChanged', session)
-    
+    this.notifyListeners('authSessionChanged', session);
+
     // Notify all contexts via runtime message
     try {
-      chrome.runtime.sendMessage({
-        type: 'AUTH_STATE_CHANGED',
-        session: session
-      }).catch(error => {
-        // Ignore errors when no listeners are available
-        console.debug('No runtime message listeners available:', error.message)
-      })
+      chrome.runtime
+        .sendMessage({
+          type: 'AUTH_STATE_CHANGED',
+          session: session,
+        })
+        .catch(error => {
+          // Ignore errors when no listeners are available
+          console.debug(
+            'No runtime message listeners available:',
+            error.message
+          );
+        });
     } catch (error) {
-      console.debug('Error sending auth state message:', error.message)
+      console.debug('Error sending auth state message:', error.message);
     }
   }
 
   async clearAuthSession() {
-    await this.ensureInitialized()
-    
-    this.config.auth = null
-    
-    // Remove from storage
-    await chrome.storage.sync.remove(['auth_session'])
+    await this.ensureInitialized();
 
-    this.notifyListeners('authSessionChanged', null)
-    
+    this.config.auth = null;
+
+    // Remove from storage
+    await chrome.storage.sync.remove(['auth_session']);
+
+    this.notifyListeners('authSessionChanged', null);
+
     // Notify all contexts via runtime message
     try {
-      chrome.runtime.sendMessage({
-        type: 'AUTH_STATE_CHANGED',
-        session: null
-      }).catch(error => {
-        // Ignore errors when no listeners are available
-        console.debug('No runtime message listeners available:', error.message)
-      })
+      chrome.runtime
+        .sendMessage({
+          type: 'AUTH_STATE_CHANGED',
+          session: null,
+        })
+        .catch(error => {
+          // Ignore errors when no listeners are available
+          console.debug(
+            'No runtime message listeners available:',
+            error.message
+          );
+        });
     } catch (error) {
-      console.debug('Error sending auth state message:', error.message)
+      console.debug('Error sending auth state message:', error.message);
     }
   }
 
   async isAuthenticated() {
-    await this.ensureInitialized()
-    return this.config.auth !== null
+    await this.ensureInitialized();
+    return this.config.auth !== null;
   }
 
   // Default Settings Methods
@@ -308,69 +317,71 @@ class ConfigManager {
           'read',
           'good-reference',
           'low-value',
-          'revisit-later'
-        ]
-      }
-      
-      await chrome.storage.sync.set(defaultSettings)
-      
+          'revisit-later',
+        ],
+      };
+
+      await chrome.storage.sync.set(defaultSettings);
+
       // Update local config
-      this.config.preferences = defaultSettings
-      
-      console.log('Default settings initialized')
-      
+      this.config.preferences = defaultSettings;
+
+      console.log('Default settings initialized');
     } catch (error) {
-      console.error('Error initializing default settings:', error)
-      throw error
+      console.error('Error initializing default settings:', error);
+      throw error;
     }
   }
 
   // Export/Import Methods
   async exportConfig() {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     return {
       version: 1,
       timestamp: new Date().toISOString(),
       supabase: this.config.supabase,
       preferences: this.config.preferences,
-      auth: this.config.auth
-    }
+      auth: this.config.auth,
+    };
   }
 
   async importConfig(configData) {
-    await this.ensureInitialized()
-    
+    await this.ensureInitialized();
+
     if (!configData || typeof configData !== 'object') {
-      throw new Error('Invalid configuration data')
+      throw new Error('Invalid configuration data');
     }
-    
+
     // Validate imported data
     if (configData.supabase) {
-      await this.setSupabaseConfig(configData.supabase.url, configData.supabase.anonKey)
+      await this.setSupabaseConfig(
+        configData.supabase.url,
+        configData.supabase.anonKey
+      );
     }
-    
+
     if (configData.preferences) {
-      await this.setPreferences(configData.preferences)
+      await this.setPreferences(configData.preferences);
     }
-    
+
     if (configData.auth) {
-      await this.setAuthSession(configData.auth)
+      await this.setAuthSession(configData.auth);
     }
-    
-    return { success: true, message: 'Configuration imported successfully' }
+
+    return { success: true, message: 'Configuration imported successfully' };
   }
 
   // Event Listener Methods
   addListener(event, callback) {
-    this.listeners.add({ event, callback })
+    this.listeners.add({ event, callback });
   }
 
   removeListener(event, callback) {
     for (const listener of this.listeners) {
       if (listener.event === event && listener.callback === callback) {
-        this.listeners.delete(listener)
-        break
+        this.listeners.delete(listener);
+        break;
       }
     }
   }
@@ -379,9 +390,9 @@ class ConfigManager {
     for (const listener of this.listeners) {
       if (listener.event === event) {
         try {
-          listener.callback(data)
+          listener.callback(data);
         } catch (error) {
-          console.error('Error in config listener:', error)
+          console.error('Error in config listener:', error);
         }
       }
     }
@@ -390,23 +401,23 @@ class ConfigManager {
   // Utility Methods
   async ensureInitialized() {
     if (!this.initialized) {
-      await this.initialize()
+      await this.initialize();
     }
   }
 
   async reset() {
     try {
-      await chrome.storage.sync.clear()
+      await chrome.storage.sync.clear();
       this.config = {
         supabase: null,
         preferences: null,
-        auth: null
-      }
-      this.initialized = false
-      this.notifyListeners('configReset')
+        auth: null,
+      };
+      this.initialized = false;
+      this.notifyListeners('configReset');
     } catch (error) {
-      console.error('Error resetting configuration:', error)
-      throw error
+      console.error('Error resetting configuration:', error);
+      throw error;
     }
   }
 
@@ -416,10 +427,10 @@ class ConfigManager {
       initialized: this.initialized,
       supabaseConfigured: this.config.supabase !== null,
       hasAuthSession: this.config.auth !== null,
-      statusTypesCount: this.config.preferences?.customStatusTypes?.length || 0
-    }
+      statusTypesCount: this.config.preferences?.customStatusTypes?.length || 0,
+    };
   }
 }
 
 // Export for use in other files
-window.ConfigManager = ConfigManager 
+window.ConfigManager = ConfigManager;

@@ -5,8 +5,8 @@ class UIMessages {
     SUCCESS: 'success',
     ERROR: 'error',
     WARNING: 'warning',
-    INFO: 'info'
-  }
+    INFO: 'info',
+  };
 
   /**
    * Show a message in the UI
@@ -17,36 +17,38 @@ class UIMessages {
    */
   static show(message, type = 'info', container = null, options = {}) {
     if (!container) {
-      console.warn('UIMessages.show: No container provided, falling back to console')
-      console.log(`[${type.toUpperCase()}] ${message}`)
-      return
+      console.warn(
+        'UIMessages.show: No container provided, falling back to console'
+      );
+      console.log(`[${type.toUpperCase()}] ${message}`);
+      return;
     }
 
     // Create message element
-    const messageEl = document.createElement('div')
-    messageEl.className = `ui-message ui-message-${type}`
-    messageEl.textContent = message
+    const messageEl = document.createElement('div');
+    messageEl.className = `ui-message ui-message-${type}`;
+    messageEl.textContent = message;
 
     // Add icon if specified
     if (options.icon) {
-      const iconEl = document.createElement('span')
-      iconEl.className = 'ui-message-icon'
-      iconEl.textContent = options.icon
-      messageEl.insertBefore(iconEl, messageEl.firstChild)
+      const iconEl = document.createElement('span');
+      iconEl.className = 'ui-message-icon';
+      iconEl.textContent = options.icon;
+      messageEl.insertBefore(iconEl, messageEl.firstChild);
     }
 
     // Add to container
-    container.appendChild(messageEl)
+    container.appendChild(messageEl);
 
     // Auto-remove after timeout
-    const timeout = options.timeout || this.getDefaultTimeout(type)
+    const timeout = options.timeout || this.getDefaultTimeout(type);
     setTimeout(() => {
       if (messageEl.parentNode) {
-        messageEl.parentNode.removeChild(messageEl)
+        messageEl.parentNode.removeChild(messageEl);
       }
-    }, timeout)
+    }, timeout);
 
-    return messageEl
+    return messageEl;
   }
 
   /**
@@ -58,8 +60,8 @@ class UIMessages {
   static success(message, container, options = {}) {
     return this.show(message, this.MESSAGE_TYPES.SUCCESS, container, {
       icon: '✅',
-      ...options
-    })
+      ...options,
+    });
   }
 
   /**
@@ -71,8 +73,8 @@ class UIMessages {
   static error(message, container, options = {}) {
     return this.show(message, this.MESSAGE_TYPES.ERROR, container, {
       icon: '❌',
-      ...options
-    })
+      ...options,
+    });
   }
 
   /**
@@ -84,8 +86,8 @@ class UIMessages {
   static warning(message, container, options = {}) {
     return this.show(message, this.MESSAGE_TYPES.WARNING, container, {
       icon: '⚠️',
-      ...options
-    })
+      ...options,
+    });
   }
 
   /**
@@ -97,8 +99,8 @@ class UIMessages {
   static info(message, container, options = {}) {
     return this.show(message, this.MESSAGE_TYPES.INFO, container, {
       icon: 'ℹ️',
-      ...options
-    })
+      ...options,
+    });
   }
 
   /**
@@ -111,8 +113,8 @@ class UIMessages {
     return this.show(message, 'loading', container, {
       icon: '⏳',
       timeout: 0, // Don't auto-remove loading messages
-      ...options
-    })
+      ...options,
+    });
   }
 
   /**
@@ -120,14 +122,14 @@ class UIMessages {
    * @param {HTMLElement} container - Container element
    */
   static clear(container) {
-    if (!container) return
-    
-    const messages = container.querySelectorAll('.ui-message')
+    if (!container) return;
+
+    const messages = container.querySelectorAll('.ui-message');
     messages.forEach(message => {
       if (message.parentNode) {
-        message.parentNode.removeChild(message)
+        message.parentNode.removeChild(message);
       }
-    })
+    });
   }
 
   /**
@@ -138,15 +140,15 @@ class UIMessages {
   static getDefaultTimeout(type) {
     switch (type) {
       case this.MESSAGE_TYPES.ERROR:
-        return 10000 // 10 seconds for errors
+        return 10000; // 10 seconds for errors
       case this.MESSAGE_TYPES.WARNING:
-        return 8000  // 8 seconds for warnings
+        return 8000; // 8 seconds for warnings
       case this.MESSAGE_TYPES.SUCCESS:
-        return 5000  // 5 seconds for success
+        return 5000; // 5 seconds for success
       case this.MESSAGE_TYPES.INFO:
-        return 6000  // 6 seconds for info
+        return 6000; // 6 seconds for info
       default:
-        return 5000
+        return 5000;
     }
   }
 
@@ -158,33 +160,37 @@ class UIMessages {
    * @param {Object} options - Additional options
    */
   static showWithRetry(message, retryFunction, container, options = {}) {
-    const messageEl = this.error(message, container, options)
-    
+    const messageEl = this.error(message, container, options);
+
     if (retryFunction) {
       // Use UIComponents if available, otherwise fall back to manual creation
       if (typeof UIComponents !== 'undefined') {
-        const retryBtn = UIComponents.createButton('Retry', () => {
-          if (messageEl.parentNode) {
-            messageEl.parentNode.removeChild(messageEl)
-          }
-          retryFunction()
-        }, 'ui-message-retry-btn')
-        messageEl.appendChild(retryBtn)
+        const retryBtn = UIComponents.createButton(
+          'Retry',
+          () => {
+            if (messageEl.parentNode) {
+              messageEl.parentNode.removeChild(messageEl);
+            }
+            retryFunction();
+          },
+          'ui-message-retry-btn'
+        );
+        messageEl.appendChild(retryBtn);
       } else {
-        const retryBtn = document.createElement('button')
-        retryBtn.textContent = 'Retry'
-        retryBtn.className = 'ui-message-retry-btn'
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = 'Retry';
+        retryBtn.className = 'ui-message-retry-btn';
         retryBtn.addEventListener('click', () => {
           if (messageEl.parentNode) {
-            messageEl.parentNode.removeChild(messageEl)
+            messageEl.parentNode.removeChild(messageEl);
           }
-          retryFunction()
-        })
-        messageEl.appendChild(retryBtn)
+          retryFunction();
+        });
+        messageEl.appendChild(retryBtn);
       }
     }
 
-    return messageEl
+    return messageEl;
   }
 
   /**
@@ -198,50 +204,55 @@ class UIMessages {
   static confirm(message, onConfirm, onCancel, container, options = {}) {
     // Use UIComponents if available, otherwise fall back to manual creation
     if (typeof UIComponents !== 'undefined') {
-      const confirmEl = UIComponents.createConfirmDialog(message, onConfirm, onCancel, options)
-      container.appendChild(confirmEl)
-      return confirmEl
+      const confirmEl = UIComponents.createConfirmDialog(
+        message,
+        onConfirm,
+        onCancel,
+        options
+      );
+      container.appendChild(confirmEl);
+      return confirmEl;
     }
-    
+
     // Fallback to manual creation
-    const confirmEl = document.createElement('div')
-    confirmEl.className = 'ui-confirm'
-    
-    const messageEl = document.createElement('div')
-    messageEl.className = 'ui-confirm-message'
-    messageEl.textContent = message
-    
-    const buttonContainer = document.createElement('div')
-    buttonContainer.className = 'ui-confirm-buttons'
-    
-    const confirmBtn = document.createElement('button')
-    confirmBtn.textContent = options.confirmText || 'Confirm'
-    confirmBtn.className = 'ui-confirm-btn ui-confirm-btn-primary'
+    const confirmEl = document.createElement('div');
+    confirmEl.className = 'ui-confirm';
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'ui-confirm-message';
+    messageEl.textContent = message;
+
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'ui-confirm-buttons';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = options.confirmText || 'Confirm';
+    confirmBtn.className = 'ui-confirm-btn ui-confirm-btn-primary';
     confirmBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
-        confirmEl.parentNode.removeChild(confirmEl)
+        confirmEl.parentNode.removeChild(confirmEl);
       }
-      if (onConfirm) onConfirm()
-    })
-    
-    const cancelBtn = document.createElement('button')
-    cancelBtn.textContent = options.cancelText || 'Cancel'
-    cancelBtn.className = 'ui-confirm-btn ui-confirm-btn-secondary'
+      if (onConfirm) onConfirm();
+    });
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = options.cancelText || 'Cancel';
+    cancelBtn.className = 'ui-confirm-btn ui-confirm-btn-secondary';
     cancelBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
-        confirmEl.parentNode.removeChild(confirmEl)
+        confirmEl.parentNode.removeChild(confirmEl);
       }
-      if (onCancel) onCancel()
-    })
-    
-    buttonContainer.appendChild(confirmBtn)
-    buttonContainer.appendChild(cancelBtn)
-    confirmEl.appendChild(messageEl)
-    confirmEl.appendChild(buttonContainer)
-    
-    container.appendChild(confirmEl)
-    
-    return confirmEl
+      if (onCancel) onCancel();
+    });
+
+    buttonContainer.appendChild(confirmBtn);
+    buttonContainer.appendChild(cancelBtn);
+    confirmEl.appendChild(messageEl);
+    confirmEl.appendChild(buttonContainer);
+
+    container.appendChild(confirmEl);
+
+    return confirmEl;
   }
 
   /**
@@ -252,31 +263,31 @@ class UIMessages {
    */
   static toast(message, type = 'info', options = {}) {
     // Create toast container if it doesn't exist
-    let toastContainer = UIComponents.DOM.getElement('toast-container')
+    let toastContainer = UIComponents.DOM.getElement('toast-container');
     if (!toastContainer) {
-      toastContainer = document.createElement('div')
-      toastContainer.id = 'toast-container'
-      toastContainer.className = 'toast-container'
-      document.body.appendChild(toastContainer)
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toast-container';
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
     }
 
-    const toastEl = document.createElement('div')
-    toastEl.className = `toast toast-${type}`
-    toastEl.textContent = message
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast toast-${type}`;
+    toastEl.textContent = message;
 
-    toastContainer.appendChild(toastEl)
+    toastContainer.appendChild(toastEl);
 
     // Auto-remove after timeout
-    const timeout = options.timeout || this.getDefaultTimeout(type)
+    const timeout = options.timeout || this.getDefaultTimeout(type);
     setTimeout(() => {
       if (toastEl.parentNode) {
-        toastEl.parentNode.removeChild(toastEl)
+        toastEl.parentNode.removeChild(toastEl);
       }
-    }, timeout)
+    }, timeout);
 
-    return toastEl
+    return toastEl;
   }
 }
 
 // Export for use in other files
-window.UIMessages = UIMessages 
+window.UIMessages = UIMessages;

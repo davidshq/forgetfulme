@@ -214,17 +214,17 @@
     width: 95%;
     padding: 20px;
   }
-  
+
   .toast-container {
     right: 10px;
     left: 10px;
     max-width: none;
   }
-  
+
   .ui-confirm-buttons {
     flex-direction: column;
   }
-  
+
   .ui-confirm-btn {
     width: 100%;
   }
@@ -236,24 +236,24 @@
     background-color: #2d3748;
     color: #e2e8f0;
   }
-  
+
   .ui-confirm-message {
     color: #e2e8f0;
   }
-  
+
   .ui-confirm-btn {
     background-color: #4a5568;
     color: #e2e8f0;
     border-color: #718096;
   }
-  
+
   .ui-confirm-btn-primary {
     background-color: #3182ce;
     border-color: #3182ce;
   }
-  
+
   .ui-confirm-btn-secondary {
     background-color: #718096;
     border-color: #718096;
   }
-} 
+}

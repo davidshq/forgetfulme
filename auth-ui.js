@@ -1,10 +1,10 @@
 // Authentication UI component for ForgetfulMe extension
 class AuthUI {
   constructor(supabaseConfig, onAuthSuccess, authStateManager = null) {
-    this.config = supabaseConfig
-    this.onAuthSuccess = onAuthSuccess
-    this.authStateManager = authStateManager
-    this.currentView = 'login' // 'login' or 'signup'
+    this.config = supabaseConfig;
+    this.onAuthSuccess = onAuthSuccess;
+    this.authStateManager = authStateManager;
+    this.currentView = 'login'; // 'login' or 'signup'
   }
 
   showLoginForm(container) {
@@ -13,50 +13,56 @@ class AuthUI {
       'Sign in to ForgetfulMe',
       'Access your bookmarks across all devices',
       'auth-container'
-    )
-    
+    );
+
     // Create login form
-    const loginForm = UIComponents.createForm('loginForm', (e) => this.handleLogin(container), [
+    const loginForm = UIComponents.createForm(
+      'loginForm',
+      e => this.handleLogin(container),
+      [
+        {
+          type: 'email',
+          id: 'loginEmail',
+          label: 'Email',
+          options: {
+            placeholder: 'Enter your email',
+            required: true,
+          },
+        },
+        {
+          type: 'password',
+          id: 'loginPassword',
+          label: 'Password',
+          options: {
+            placeholder: 'Enter your password',
+            required: true,
+          },
+        },
+      ],
       {
-        type: 'email',
-        id: 'loginEmail',
-        label: 'Email',
-        options: {
-          placeholder: 'Enter your email',
-          required: true
-        }
-      },
-      {
-        type: 'password',
-        id: 'loginPassword',
-        label: 'Password',
-        options: {
-          placeholder: 'Enter your password',
-          required: true
-        }
+        submitText: 'Sign In',
+        className: 'auth-form',
       }
-    ], {
-      submitText: 'Sign In',
-      className: 'auth-form'
-    })
-    
-    containerEl.appendChild(loginForm)
-    
+    );
+
+    containerEl.appendChild(loginForm);
+
     // Create footer
-    const footer = document.createElement('div')
-    footer.className = 'auth-footer'
-    footer.innerHTML = '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>'
-    containerEl.appendChild(footer)
-    
+    const footer = document.createElement('div');
+    footer.className = 'auth-footer';
+    footer.innerHTML =
+      '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>';
+    containerEl.appendChild(footer);
+
     // Create message container
-    const messageContainer = document.createElement('div')
-    messageContainer.id = 'authMessage'
-    messageContainer.className = 'auth-message'
-    containerEl.appendChild(messageContainer)
-    
-    container.innerHTML = ''
-    container.appendChild(containerEl)
-    this.bindAuthEvents(container)
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'authMessage';
+    messageContainer.className = 'auth-message';
+    containerEl.appendChild(messageContainer);
+
+    container.innerHTML = '';
+    container.appendChild(containerEl);
+    this.bindAuthEvents(container);
   }
 
   showSignupForm(container) {
@@ -65,230 +71,254 @@ class AuthUI {
       'Create Account',
       'Start organizing your bookmarks with ForgetfulMe',
       'auth-container'
-    )
-    
+    );
+
     // Create signup form
-    const signupForm = UIComponents.createForm('signupForm', (e) => this.handleSignup(container), [
+    const signupForm = UIComponents.createForm(
+      'signupForm',
+      e => this.handleSignup(container),
+      [
+        {
+          type: 'email',
+          id: 'signupEmail',
+          label: 'Email',
+          options: {
+            placeholder: 'Enter your email',
+            required: true,
+          },
+        },
+        {
+          type: 'password',
+          id: 'signupPassword',
+          label: 'Password',
+          options: {
+            placeholder: 'Create a password',
+            required: true,
+            helpText: 'Password must be at least 6 characters',
+          },
+        },
+        {
+          type: 'password',
+          id: 'confirmPassword',
+          label: 'Confirm Password',
+          options: {
+            placeholder: 'Confirm your password',
+            required: true,
+          },
+        },
+      ],
       {
-        type: 'email',
-        id: 'signupEmail',
-        label: 'Email',
-        options: {
-          placeholder: 'Enter your email',
-          required: true
-        }
-      },
-      {
-        type: 'password',
-        id: 'signupPassword',
-        label: 'Password',
-        options: {
-          placeholder: 'Create a password',
-          required: true,
-          helpText: 'Password must be at least 6 characters'
-        }
-      },
-      {
-        type: 'password',
-        id: 'confirmPassword',
-        label: 'Confirm Password',
-        options: {
-          placeholder: 'Confirm your password',
-          required: true
-        }
+        submitText: 'Create Account',
+        className: 'auth-form',
       }
-    ], {
-      submitText: 'Create Account',
-      className: 'auth-form'
-    })
-    
-    containerEl.appendChild(signupForm)
-    
+    );
+
+    containerEl.appendChild(signupForm);
+
     // Create footer
-    const footer = document.createElement('div')
-    footer.className = 'auth-footer'
-    footer.innerHTML = '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>'
-    containerEl.appendChild(footer)
-    
+    const footer = document.createElement('div');
+    footer.className = 'auth-footer';
+    footer.innerHTML =
+      '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>';
+    containerEl.appendChild(footer);
+
     // Create message container
-    const messageContainer = document.createElement('div')
-    messageContainer.id = 'authMessage'
-    messageContainer.className = 'auth-message'
-    containerEl.appendChild(messageContainer)
-    
-    container.innerHTML = ''
-    container.appendChild(containerEl)
-    this.bindAuthEvents(container)
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'authMessage';
+    messageContainer.className = 'auth-message';
+    containerEl.appendChild(messageContainer);
+
+    container.innerHTML = '';
+    container.appendChild(containerEl);
+    this.bindAuthEvents(container);
   }
 
   bindAuthEvents(container) {
-    const loginForm = UIComponents.DOM.querySelector('#loginForm', container)
-    const signupForm = UIComponents.DOM.querySelector('#signupForm', container)
-    const showSignupLink = UIComponents.DOM.querySelector('#showSignup', container)
-    const showLoginLink = UIComponents.DOM.querySelector('#showLogin', container)
+    const loginForm = UIComponents.DOM.querySelector('#loginForm', container);
+    const signupForm = UIComponents.DOM.querySelector('#signupForm', container);
+    const showSignupLink = UIComponents.DOM.querySelector(
+      '#showSignup',
+      container
+    );
+    const showLoginLink = UIComponents.DOM.querySelector(
+      '#showLogin',
+      container
+    );
 
     if (loginForm) {
-      loginForm.addEventListener('submit', (e) => {
-        e.preventDefault()
-        this.handleLogin(container)
-      })
+      loginForm.addEventListener('submit', e => {
+        e.preventDefault();
+        this.handleLogin(container);
+      });
     }
 
     if (signupForm) {
-      signupForm.addEventListener('submit', (e) => {
-        e.preventDefault()
-        this.handleSignup(container)
-      })
+      signupForm.addEventListener('submit', e => {
+        e.preventDefault();
+        this.handleSignup(container);
+      });
     }
 
     if (showSignupLink) {
-      showSignupLink.addEventListener('click', (e) => {
-        e.preventDefault()
-        this.showSignupForm(container)
-      })
+      showSignupLink.addEventListener('click', e => {
+        e.preventDefault();
+        this.showSignupForm(container);
+      });
     }
 
     if (showLoginLink) {
-      showLoginLink.addEventListener('click', (e) => {
-        e.preventDefault()
-        this.showLoginForm(container)
-      })
+      showLoginLink.addEventListener('click', e => {
+        e.preventDefault();
+        this.showLoginForm(container);
+      });
     }
   }
 
   async handleLogin(container) {
-    const email = UIComponents.DOM.getValue('loginEmail', container)
-    const password = UIComponents.DOM.getValue('loginPassword', container)
+    const email = UIComponents.DOM.getValue('loginEmail', container);
+    const password = UIComponents.DOM.getValue('loginPassword', container);
 
     if (!email || !password) {
-      UIMessages.error('Please fill in all fields', container)
-      return
+      UIMessages.error('Please fill in all fields', container);
+      return;
     }
 
     try {
-      UIMessages.loading('Signing in...', container)
-      
-      await this.config.signIn(email, password)
-      
-      UIMessages.success('Successfully signed in!', container)
-      
+      UIMessages.loading('Signing in...', container);
+
+      await this.config.signIn(email, password);
+
+      UIMessages.success('Successfully signed in!', container);
+
       // Call the success callback
       if (this.onAuthSuccess) {
         setTimeout(() => {
-          this.onAuthSuccess()
-        }, 1000)
+          this.onAuthSuccess();
+        }, 1000);
       }
-      
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleLogin')
-      UIMessages.error(errorResult.userMessage, container)
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleLogin');
+      UIMessages.error(errorResult.userMessage, container);
     }
   }
 
   async handleSignup(container) {
-    const email = UIComponents.DOM.getValue('signupEmail', container)
-    const password = UIComponents.DOM.getValue('signupPassword', container)
-    const confirmPassword = UIComponents.DOM.getValue('confirmPassword', container)
+    const email = UIComponents.DOM.getValue('signupEmail', container);
+    const password = UIComponents.DOM.getValue('signupPassword', container);
+    const confirmPassword = UIComponents.DOM.getValue(
+      'confirmPassword',
+      container
+    );
 
     if (!email || !password || !confirmPassword) {
-      UIMessages.error('Please fill in all fields', container)
-      return
+      UIMessages.error('Please fill in all fields', container);
+      return;
     }
 
     if (password !== confirmPassword) {
-      UIMessages.error('Passwords do not match', container)
-      return
+      UIMessages.error('Passwords do not match', container);
+      return;
     }
 
     if (password.length < 6) {
-      UIMessages.error('Password must be at least 6 characters', container)
-      return
+      UIMessages.error('Password must be at least 6 characters', container);
+      return;
     }
 
     try {
-      UIMessages.loading('Creating account...', container)
-      
-      const result = await this.config.signUp(email, password)
-      
+      UIMessages.loading('Creating account...', container);
+
+      const result = await this.config.signUp(email, password);
+
       // Check if user was created successfully
       if (result.data && result.data.user) {
         // For browser extensions, we'll try to sign in immediately
         // since email verification links don't work well with extensions
         try {
-          await this.config.signIn(email, password)
-          UIMessages.success('Account created and signed in successfully!', container)
-          
+          await this.config.signIn(email, password);
+          UIMessages.success(
+            'Account created and signed in successfully!',
+            container
+          );
+
           // Call the success callback
           if (this.onAuthSuccess) {
             setTimeout(() => {
-              this.onAuthSuccess()
-            }, 1000)
+              this.onAuthSuccess();
+            }, 1000);
           }
         } catch (signInError) {
           // If auto-signin fails, show the email verification message
-          UIMessages.success('Account created! Please check your email to verify your account, then sign in.', container)
-          
+          UIMessages.success(
+            'Account created! Please check your email to verify your account, then sign in.',
+            container
+          );
+
           // Switch to login form after successful signup
           setTimeout(() => {
-            this.showLoginForm(container)
-          }, 3000)
+            this.showLoginForm(container);
+          }, 3000);
         }
       } else {
-        UIMessages.success('Account created! Please check your email to verify your account.', container)
-        
+        UIMessages.success(
+          'Account created! Please check your email to verify your account.',
+          container
+        );
+
         // Switch to login form after successful signup
         setTimeout(() => {
-          this.showLoginForm(container)
-        }, 3000)
+          this.showLoginForm(container);
+        }, 3000);
       }
-      
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignup')
-      UIMessages.error(errorResult.userMessage, container)
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignup');
+      UIMessages.error(errorResult.userMessage, container);
     }
   }
 
   async handleSignOut() {
     try {
       // Sign out from Supabase
-      await this.config.signOut()
-      
+      await this.config.signOut();
+
       // Clear auth state if auth state manager is available
       if (this.authStateManager) {
-        await this.authStateManager.clearAuthState()
+        await this.authStateManager.clearAuthState();
       }
-      
-      console.log('Successfully signed out')
-      
+
+      console.log('Successfully signed out');
+
       // Refresh the page or show login form
-      location.reload()
+      location.reload();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', { silent: true })
-      console.error('Error during sign out:', errorResult)
+      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
+        silent: true,
+      });
+      console.error('Error during sign out:', errorResult);
       // Don't show user for sign out errors as they're not critical
     }
   }
 
   showAuthMessage(container, message, type) {
     // Use the centralized UIMessages system
-    UIMessages.show(message, type, container)
+    UIMessages.show(message, type, container);
   }
 
   getErrorMessage(error) {
     if (error.message.includes('Invalid login credentials')) {
-      return 'Invalid email or password'
+      return 'Invalid email or password';
     } else if (error.message.includes('User already registered')) {
-      return 'An account with this email already exists'
+      return 'An account with this email already exists';
     } else if (error.message.includes('Password should be at least')) {
-      return 'Password must be at least 6 characters'
+      return 'Password must be at least 6 characters';
     } else if (error.message.includes('Unable to validate email address')) {
-      return 'Please enter a valid email address'
+      return 'Please enter a valid email address';
     } else if (error.message.includes('Email not confirmed')) {
-      return 'Please check your email and click the verification link before signing in'
+      return 'Please check your email and click the verification link before signing in';
     } else if (error.message.includes('Invalid token')) {
-      return 'Email verification failed. Please try signing up again or contact support'
+      return 'Email verification failed. Please try signing up again or contact support';
     } else {
-      return error.message || 'An error occurred. Please try again.'
+      return error.message || 'An error occurred. Please try again.';
     }
   }
 
@@ -304,18 +334,18 @@ class AuthUI {
           <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
         </div>
       </div>
-    `
-    
-    container.innerHTML = profileHTML
-    
-    const signOutBtn = container.querySelector('#signOutBtn')
+    `;
+
+    container.innerHTML = profileHTML;
+
+    const signOutBtn = container.querySelector('#signOutBtn');
     if (signOutBtn) {
       signOutBtn.addEventListener('click', async () => {
-        await this.handleSignOut()
-      })
+        await this.handleSignOut();
+      });
     }
   }
 }
 
 // Export for use in other files
-window.AuthUI = AuthUI 
+window.AuthUI = AuthUI;

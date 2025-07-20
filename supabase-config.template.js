@@ -5,38 +5,45 @@
 class SupabaseConfigTemplate {
   constructor() {
     // Replace these with your actual Supabase project credentials
-    this.supabaseUrl = 'https://your-project.supabase.co'
-    this.supabaseAnonKey = 'your-anon-public-key-here'
-    
-    this.supabase = null
-    this.auth = null
-    this.user = null
-    this.session = null
+    this.supabaseUrl = 'https://your-project.supabase.co';
+    this.supabaseAnonKey = 'your-anon-public-key-here';
+
+    this.supabase = null;
+    this.auth = null;
+    this.user = null;
+    this.session = null;
   }
 
   async initialize() {
     try {
       // Check if Supabase client is available
       if (typeof window.supabase === 'undefined') {
-        throw new Error('Supabase client not loaded. Please include the Supabase library.')
+        throw new Error(
+          'Supabase client not loaded. Please include the Supabase library.'
+        );
       }
 
       // Use the globally available Supabase client
-      this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseAnonKey)
-      this.auth = this.supabase.auth
-      
+      this.supabase = window.supabase.createClient(
+        this.supabaseUrl,
+        this.supabaseAnonKey
+      );
+      this.auth = this.supabase.auth;
+
       // Check for existing session
-      const { data: { session } } = await this.auth.getSession()
+      const {
+        data: { session },
+      } = await this.auth.getSession();
       if (session) {
-        this.session = session
-        this.user = session.user
-        return true
+        this.session = session;
+        this.user = session.user;
+        return true;
       }
-      
-      return false
+
+      return false;
     } catch (error) {
-      console.error('Error initializing Supabase:', error)
-      return false
+      console.error('Error initializing Supabase:', error);
+      return false;
     }
   }
 
@@ -44,17 +51,17 @@ class SupabaseConfigTemplate {
     try {
       const { data, error } = await this.auth.signInWithPassword({
         email,
-        password
-      })
-      
-      if (error) throw error
-      
-      this.session = data.session
-      this.user = data.user
-      return data
+        password,
+      });
+
+      if (error) throw error;
+
+      this.session = data.session;
+      this.user = data.user;
+      return data;
     } catch (error) {
-      console.error('Sign in error:', error)
-      throw error
+      console.error('Sign in error:', error);
+      throw error;
     }
   }
 
@@ -62,45 +69,45 @@ class SupabaseConfigTemplate {
     try {
       const { data, error } = await this.auth.signUp({
         email,
-        password
-      })
-      
-      if (error) throw error
-      
-      return data
+        password,
+      });
+
+      if (error) throw error;
+
+      return data;
     } catch (error) {
-      console.error('Sign up error:', error)
-      throw error
+      console.error('Sign up error:', error);
+      throw error;
     }
   }
 
   async signOut() {
     try {
-      await this.auth.signOut()
-      this.session = null
-      this.user = null
+      await this.auth.signOut();
+      this.session = null;
+      this.user = null;
     } catch (error) {
-      console.error('Sign out error:', error)
-      throw error
+      console.error('Sign out error:', error);
+      throw error;
     }
   }
 
   isAuthenticated() {
-    return this.user !== null && this.session !== null
+    return this.user !== null && this.session !== null;
   }
 
   getCurrentUser() {
-    return this.user
+    return this.user;
   }
 
   getSupabaseClient() {
-    return this.supabase
+    return this.supabase;
   }
 
   isConfigured() {
-    return this.supabaseUrl !== null && this.supabaseAnonKey !== null
+    return this.supabaseUrl !== null && this.supabaseAnonKey !== null;
   }
 }
 
 // Export for use in other files
-window.SupabaseConfig = SupabaseConfigTemplate 
+window.SupabaseConfig = SupabaseConfigTemplate;
