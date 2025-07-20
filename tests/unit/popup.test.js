@@ -1,16 +1,96 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import ForgetfulMePopup from '../../popup.js';
 
-// Mock dependencies
-vi.mock('../../utils/ui-components.js');
-vi.mock('../../utils/auth-state-manager.js');
-vi.mock('../../utils/error-handler.js');
-vi.mock('../../utils/ui-messages.js');
-vi.mock('../../utils/config-manager.js');
-vi.mock('../../utils/bookmark-transformer.js');
-vi.mock('../../supabase-config.js');
-vi.mock('../../supabase-service.js');
-vi.mock('../../auth-ui.js');
+// Mock dependencies BEFORE importing the module under test
+vi.mock('../../utils/ui-components.js', () => ({
+  default: {
+    DOM: {
+      ready: vi.fn().mockResolvedValue(),
+      getElement: vi.fn(),
+      setValue: vi.fn(),
+      getValue: vi.fn(),
+      querySelector: vi.fn(),
+    },
+    createButton: vi.fn(),
+    createForm: vi.fn(),
+    createSection: vi.fn(),
+    createContainer: vi.fn(),
+    createListItem: vi.fn(),
+  }
+}));
+
+vi.mock('../../utils/auth-state-manager.js', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    initialize: vi.fn().mockResolvedValue(),
+    isAuthenticated: vi.fn().mockResolvedValue(true),
+    addListener: vi.fn(),
+  }))
+}));
+
+vi.mock('../../utils/error-handler.js', () => ({
+  default: {
+    handle: vi.fn(),
+    ERROR_TYPES: {
+      NETWORK: 'NETWORK',
+      AUTH: 'AUTH',
+      VALIDATION: 'VALIDATION',
+      DATABASE: 'DATABASE',
+      CONFIG: 'CONFIG',
+      UI: 'UI',
+      UNKNOWN: 'UNKNOWN',
+    },
+    SEVERITY: {
+      LOW: 'LOW',
+      MEDIUM: 'MEDIUM',
+      HIGH: 'HIGH',
+      CRITICAL: 'CRITICAL',
+    }
+  }
+}));
+
+vi.mock('../../utils/ui-messages.js', () => ({
+  default: {
+    success: vi.fn(),
+    error: vi.fn(),
+    show: vi.fn(),
+  }
+}));
+
+vi.mock('../../utils/config-manager.js', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    initialize: vi.fn().mockResolvedValue(),
+    getCustomStatusTypes: vi.fn().mockResolvedValue([]),
+  }))
+}));
+
+vi.mock('../../utils/bookmark-transformer.js', () => ({
+  default: {
+    toUIFormat: vi.fn(),
+    fromCurrentTab: vi.fn(),
+  }
+}));
+
+vi.mock('../../supabase-config.js', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    isConfigured: vi.fn().mockResolvedValue(true),
+    initialize: vi.fn().mockResolvedValue(),
+    getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
+  }))
+}));
+
+vi.mock('../../supabase-service.js', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    initialize: vi.fn().mockResolvedValue(),
+    saveBookmark: vi.fn(),
+    getBookmarks: vi.fn(),
+    updateBookmark: vi.fn(),
+  }))
+}));
+
+vi.mock('../../auth-ui.js', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    showLoginForm: vi.fn(),
+  }))
+}));
 
 // Mock chrome API
 global.chrome = {
@@ -25,93 +105,57 @@ global.chrome = {
   },
 };
 
+// Import the module under test AFTER mocking
+import ForgetfulMePopup from '../../popup.js';
+import UIComponents from '../../utils/ui-components.js';
+import UIMessages from '../../utils/ui-messages.js';
+import ErrorHandler from '../../utils/error-handler.js';
+import SupabaseService from '../../supabase-service.js';
+import BookmarkTransformer from '../../utils/bookmark-transformer.js';
+
 describe('ForgetfulMePopup', () => {
   let popup;
   let mockSupabaseService;
   let mockUIComponents;
   let mockUIMessages;
+  let mockErrorHandler;
 
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
 
-    // Mock UIComponents
-    mockUIComponents = {
-      DOM: {
-        ready: vi.fn().mockResolvedValue(),
-        getElement: vi.fn(),
-        setValue: vi.fn(),
-        getValue: vi.fn(),
+    // Get references to mocked modules
+    mockUIComponents = UIComponents;
+    mockUIMessages = UIMessages;
+    mockErrorHandler = ErrorHandler;
+    
+    // Directly replace the ErrorHandler.handle method to ensure it returns the correct structure
+    ErrorHandler.handle = vi.fn().mockReturnValue({
+      errorInfo: {
+        type: 'UNKNOWN',
+        severity: 'MEDIUM',
+        message: 'Test error message',
+        context: 'test',
+        originalError: new Error('Test error message')
       },
-      createButton: vi.fn(),
-      createForm: vi.fn(),
-      createSection: vi.fn(),
-      createContainer: vi.fn(),
-    };
+      userMessage: 'Test error message',
+      shouldRetry: false,
+      shouldShowToUser: true,
+    });
 
-    // Mock UIMessages
-    mockUIMessages = {
-      success: vi.fn(),
-      error: vi.fn(),
-    };
-
-    // Mock ErrorHandler
-    const mockErrorHandler = {
-      handle: vi.fn().mockReturnValue({
-        userMessage: 'Test error message',
-        shouldShowToUser: true,
-      }),
-    };
-
-    // Mock SupabaseService
-    mockSupabaseService = {
-      initialize: vi.fn().mockResolvedValue(),
-      saveBookmark: vi.fn(),
-      getBookmarks: vi.fn(),
-      updateBookmark: vi.fn(),
-    };
-
-    // Mock other dependencies
-    const mockConfigManager = {
-      initialize: vi.fn().mockResolvedValue(),
-      getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-    };
-
-    const mockAuthStateManager = {
-      initialize: vi.fn().mockResolvedValue(),
-      isAuthenticated: vi.fn().mockResolvedValue(true),
-      addListener: vi.fn(),
-    };
-
-    const mockSupabaseConfig = {
-      isConfigured: vi.fn().mockResolvedValue(true),
-      initialize: vi.fn().mockResolvedValue(),
-      getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
-    };
-
-    const mockAuthUI = {
-      showLoginForm: vi.fn(),
-    };
-
-    // Mock the modules
-    vi.doMock('../../utils/ui-components.js', () => mockUIComponents);
-    vi.doMock('../../utils/ui-messages.js', () => mockUIMessages);
-    vi.doMock('../../utils/error-handler.js', () => mockErrorHandler);
-    vi.doMock('../../supabase-service.js', () => ({
-      default: vi.fn().mockImplementation(() => mockSupabaseService),
-    }));
-    vi.doMock('../../utils/config-manager.js', () => ({
-      default: vi.fn().mockImplementation(() => mockConfigManager),
-    }));
-    vi.doMock('../../utils/auth-state-manager.js', () => ({
-      default: vi.fn().mockImplementation(() => mockAuthStateManager),
-    }));
-    vi.doMock('../../supabase-config.js', () => ({
-      default: vi.fn().mockImplementation(() => mockSupabaseConfig),
-    }));
-    vi.doMock('../../auth-ui.js', () => ({
-      default: vi.fn().mockImplementation(() => mockAuthUI),
-    }));
+    // Mock BookmarkTransformer.fromCurrentTab
+    BookmarkTransformer.fromCurrentTab = vi.fn().mockReturnValue({
+      url: 'https://example.com',
+      title: 'Test Page',
+      read_status: 'read',
+      tags: ['test'],
+    });
+    
+    // Create a new instance of SupabaseService and ensure methods are vi.fn() instances
+    mockSupabaseService = new SupabaseService();
+    mockSupabaseService.saveBookmark = vi.fn();
+    mockSupabaseService.updateBookmark = vi.fn();
+    mockSupabaseService.getBookmarks = vi.fn();
 
     // Mock DOM elements
     const mockAppContainer = document.createElement('div');
@@ -121,6 +165,8 @@ describe('ForgetfulMePopup', () => {
       if (id === 'tags') return document.createElement('input');
       if (id === 'settings-btn') return document.createElement('button');
       if (id === 'recent-list') return document.createElement('div');
+      if (id === 'edit-read-status') return document.createElement('select');
+      if (id === 'edit-tags') return document.createElement('input');
       return null;
     });
 
@@ -132,6 +178,14 @@ describe('ForgetfulMePopup', () => {
 
     // Create popup instance
     popup = new ForgetfulMePopup();
+    
+    // Replace the popup's service instances with our mocked ones
+    popup.supabaseService = mockSupabaseService;
+    popup.supabaseConfig = {
+      isConfigured: vi.fn().mockResolvedValue(true),
+      initialize: vi.fn().mockResolvedValue(),
+      getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
+    };
   });
 
   afterEach(() => {
@@ -156,7 +210,7 @@ describe('ForgetfulMePopup', () => {
       await popup.markAsRead();
 
       expect(mockSupabaseService.saveBookmark).toHaveBeenCalled();
-      expect(mockUIMessages.success).toHaveBeenCalledWith('Page marked as read!', expect.any(HTMLElement));
+      expect(mockUIMessages.success).toHaveBeenCalledWith('Page marked as read!', expect.any(Object));
     });
 
     it('should show edit interface when duplicate bookmark exists', async () => {
@@ -203,7 +257,8 @@ describe('ForgetfulMePopup', () => {
 
       await popup.markAsRead();
 
-      expect(mockUIMessages.error).toHaveBeenCalled();
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.markAsRead');
+      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
     });
   });
 
@@ -230,7 +285,7 @@ describe('ForgetfulMePopup', () => {
         tags: ['updated', 'tags'],
         updated_at: expect.any(String),
       });
-      expect(mockUIMessages.success).toHaveBeenCalledWith('Bookmark updated successfully!', expect.any(HTMLElement));
+      expect(mockUIMessages.success).toHaveBeenCalledWith('Bookmark updated successfully!', expect.any(Object));
     });
 
     it('should handle update errors', async () => {
@@ -245,7 +300,8 @@ describe('ForgetfulMePopup', () => {
 
       await popup.updateBookmark(bookmarkId);
 
-      expect(mockUIMessages.error).toHaveBeenCalled();
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.updateBookmark');
+      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
     });
   });
 

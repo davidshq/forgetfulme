@@ -87,42 +87,78 @@ const createMockElement = (tagName) => {
     
     // DOM manipulation
     appendChild: vi.fn(function(child) {
-      child.parentNode = this;
-      this.children.push(child);
-      if (!this.firstChild) this.firstChild = child;
-      this.lastChild = child;
+      if (child && typeof child === 'object') {
+        // Ensure child has required properties
+        if (!child.hasOwnProperty('parentNode')) {
+          child.parentNode = null;
+        }
+        if (!child.hasOwnProperty('children')) {
+          child.children = [];
+        }
+        
+        child.parentNode = this;
+        this.children.push(child);
+        if (!this.firstChild) this.firstChild = child;
+        this.lastChild = child;
+      }
       return child;
     }),
     removeChild: vi.fn(function(child) {
-      const index = this.children.indexOf(child);
-      if (index > -1) {
-        this.children.splice(index, 1);
-        child.parentNode = null;
-        if (this.firstChild === child) {
-          this.firstChild = this.children[0] || null;
-        }
-        if (this.lastChild === child) {
-          this.lastChild = this.children[this.children.length - 1] || null;
+      if (child && typeof child === 'object') {
+        const index = this.children.indexOf(child);
+        if (index > -1) {
+          this.children.splice(index, 1);
+          if (child.hasOwnProperty('parentNode')) {
+            child.parentNode = null;
+          }
+          if (this.firstChild === child) {
+            this.firstChild = this.children[0] || null;
+          }
+          if (this.lastChild === child) {
+            this.lastChild = this.children[this.children.length - 1] || null;
+          }
         }
       }
       return child;
     }),
     insertBefore: vi.fn(function(newNode, referenceNode) {
-      const index = referenceNode ? this.children.indexOf(referenceNode) : this.children.length;
-      this.children.splice(index, 0, newNode);
-      newNode.parentNode = this;
-      if (!this.firstChild) this.firstChild = newNode;
-      if (this.lastChild === referenceNode) this.lastChild = newNode;
+      if (newNode && typeof newNode === 'object') {
+        // Ensure newNode has required properties
+        if (!newNode.hasOwnProperty('parentNode')) {
+          newNode.parentNode = null;
+        }
+        if (!newNode.hasOwnProperty('children')) {
+          newNode.children = [];
+        }
+        
+        const index = referenceNode ? this.children.indexOf(referenceNode) : this.children.length;
+        this.children.splice(index, 0, newNode);
+        newNode.parentNode = this;
+        if (!this.firstChild) this.firstChild = newNode;
+        if (this.lastChild === referenceNode) this.lastChild = newNode;
+      }
       return newNode;
     }),
     replaceChild: vi.fn(function(newChild, oldChild) {
-      const index = this.children.indexOf(oldChild);
-      if (index > -1) {
-        this.children[index] = newChild;
-        oldChild.parentNode = null;
-        newChild.parentNode = this;
-        if (this.firstChild === oldChild) this.firstChild = newChild;
-        if (this.lastChild === oldChild) this.lastChild = newChild;
+      if (newChild && typeof newChild === 'object' && oldChild && typeof oldChild === 'object') {
+        // Ensure newChild has required properties
+        if (!newChild.hasOwnProperty('parentNode')) {
+          newChild.parentNode = null;
+        }
+        if (!newChild.hasOwnProperty('children')) {
+          newChild.children = [];
+        }
+        
+        const index = this.children.indexOf(oldChild);
+        if (index > -1) {
+          this.children[index] = newChild;
+          if (oldChild.hasOwnProperty('parentNode')) {
+            oldChild.parentNode = null;
+          }
+          newChild.parentNode = this;
+          if (this.firstChild === oldChild) this.firstChild = newChild;
+          if (this.lastChild === oldChild) this.lastChild = newChild;
+        }
       }
       return oldChild;
     }),
