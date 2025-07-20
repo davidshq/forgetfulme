@@ -4,10 +4,14 @@
   "description": "ForgetfulMe Chrome Extension with Playwright Integration Tests",
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "test:ui": "playwright test --ui",
+    "test": "vitest",
+    "test:unit": "vitest",
+    "test:unit:ui": "vitest --ui",
+    "test:unit:coverage": "vitest --coverage",
+    "test:playwright": "playwright test",
+    "test:playwright:headed": "playwright test --headed",
+    "test:playwright:debug": "playwright test --debug",
+    "test:playwright:ui": "playwright test --ui",
     "install-browsers": "playwright install chromium",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -18,10 +22,13 @@
   "devDependencies": {
     "@eslint/js": "^9.31.0",
     "@playwright/test": "^1.54.0",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
-    "prettier": "^3.6.2"
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.0.0"
