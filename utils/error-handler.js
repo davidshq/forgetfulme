@@ -277,21 +277,26 @@ class ErrorHandler {
   static shouldRetry(errorInfo) {
     const { type, severity } = errorInfo;
 
-    // Retry network errors and some auth errors
-    if (type === this.ERROR_TYPES.NETWORK) {
+    // Retry network errors and database errors
+    if (type === this.ERROR_TYPES.NETWORK || type === this.ERROR_TYPES.DATABASE) {
       return true;
     }
 
-    // Don't retry validation errors or critical errors
+    // Don't retry validation errors, config errors, or UI errors
     if (
       type === this.ERROR_TYPES.VALIDATION ||
-      severity === this.SEVERITY.CRITICAL
+      type === this.ERROR_TYPES.CONFIG ||
+      type === this.ERROR_TYPES.UI
     ) {
       return false;
     }
 
-    // Retry medium severity errors once
-    return severity === this.SEVERITY.MEDIUM;
+    // Retry auth errors
+    if (type === this.ERROR_TYPES.AUTH) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -302,11 +307,8 @@ class ErrorHandler {
   static shouldShowToUser(errorInfo) {
     const { type, severity } = errorInfo;
 
-    // Always show critical and high severity errors
-    if (
-      severity === this.SEVERITY.CRITICAL ||
-      severity === this.SEVERITY.HIGH
-    ) {
+    // Show config errors to user
+    if (type === this.ERROR_TYPES.CONFIG) {
       return true;
     }
 
@@ -320,7 +322,16 @@ class ErrorHandler {
       return true;
     }
 
-    // Don't show low severity or unknown errors to user
+    // Don't show database errors to user
+    if (type === this.ERROR_TYPES.DATABASE) {
+      return false;
+    }
+
+    // Show high severity errors
+    if (severity === this.SEVERITY.HIGH) {
+      return true;
+    }
+
     return false;
   }
 
@@ -398,7 +409,7 @@ class ErrorHandler {
       if (messageDiv.parentNode) {
         messageDiv.parentNode.removeChild(messageDiv);
       }
-    }, timeout);
+        }, timeout);
   }
 
   /**

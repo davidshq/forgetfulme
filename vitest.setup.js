@@ -1,6 +1,15 @@
 // Vitest setup file for ForgetfulMe Chrome Extension tests
 import { vi } from 'vitest';
 
+// Mock console methods
+global.console = {
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+  log: vi.fn(),
+  debug: vi.fn(),
+};
+
 // Mock Chrome API
 global.chrome = {
   storage: {
@@ -344,15 +353,6 @@ global.window = {
 
 // Mock fetch
 global.fetch = vi.fn();
-
-// Mock console to reduce noise
-global.console = {
-  log: vi.fn(),
-  error: vi.fn(),
-  warn: vi.fn(),
-  info: vi.fn(),
-  debug: vi.fn()
-};
 
 // Mock UIComponents
 global.UIComponents = {

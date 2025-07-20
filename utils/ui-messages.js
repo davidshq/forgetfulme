@@ -38,13 +38,25 @@ class UIMessages {
     }
 
     // Add to container
-    container.appendChild(messageEl);
+    try {
+      container.appendChild(messageEl);
+    } catch (error) {
+      console.warn(
+        'UIMessages.show: Error adding message to container, falling back to console'
+      );
+      console.log(`[${type.toUpperCase()}] ${message}`);
+      return;
+    }
 
     // Auto-remove after timeout
     const timeout = options.timeout || this.getDefaultTimeout(type);
     setTimeout(() => {
       if (messageEl.parentNode) {
-        messageEl.parentNode.removeChild(messageEl);
+        try {
+          messageEl.parentNode.removeChild(messageEl);
+        } catch (error) {
+          // Ignore removal errors
+        }
       }
     }, timeout);
 
@@ -263,7 +275,7 @@ class UIMessages {
    */
   static toast(message, type = 'info', options = {}) {
     // Create toast container if it doesn't exist
-    let toastContainer = UIComponents.DOM.getElement('toast-container');
+    let toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
       toastContainer = document.createElement('div');
       toastContainer.id = 'toast-container';
