@@ -34,21 +34,29 @@ header h1 {
   letter-spacing: -0.025em;
 }
 
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .settings-btn,
 .manage-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: #f8f9fa;
   border: 2px solid #e1e5e9;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 8px;
+  padding: 8px 12px;
   border-radius: 6px;
   transition: all 0.2s ease;
   color: #495057;
-  min-width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-weight: 500;
+  text-decoration: none;
+  min-height: 36px;
+  line-height: 1.4;
 }
 
 .settings-btn:hover,
@@ -71,6 +79,37 @@ header h1 {
 .manage-btn:active {
   transform: translateY(0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.settings-btn .icon,
+.manage-btn .icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.settings-btn .text,
+.manage-btn .text {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for smaller popup */
+@media (max-width: 400px) {
+  .settings-btn,
+  .manage-btn {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  
+  .settings-btn .text,
+  .manage-btn .text {
+    font-size: 12px;
+  }
+  
+  .settings-btn .icon,
+  .manage-btn .icon {
+    font-size: 14px;
+  }
 }
 
 /* Setup Interface */

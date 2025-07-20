@@ -258,15 +258,24 @@ class BookmarkManagementPage {
     headerActions.setAttribute('role', 'toolbar');
     headerActions.setAttribute('aria-label', 'Page actions');
 
-    const backBtn = UIComponents.createButton(
-      '← Back to Extension',
-      () => window.close(),
-      'ui-btn-secondary',
-      { 
-        title: 'Close bookmark management and return to extension',
-        'aria-label': 'Close bookmark management'
-      }
-    );
+    const backBtn = document.createElement('button');
+    backBtn.className = 'ui-btn-secondary';
+    backBtn.setAttribute('aria-label', 'Close bookmark management and return to extension');
+    backBtn.setAttribute('title', 'Close bookmark management');
+    backBtn.addEventListener('click', () => window.close());
+    
+    const backIcon = document.createElement('span');
+    backIcon.className = 'icon';
+    backIcon.textContent = '←';
+    backIcon.style.fontSize = '16px';
+    backIcon.style.fontWeight = 'bold';
+    backBtn.appendChild(backIcon);
+    
+    const backText = document.createElement('span');
+    backText.className = 'text';
+    backText.textContent = 'Back to Extension';
+    backBtn.appendChild(backText);
+    
     headerActions.appendChild(backBtn);
     header.appendChild(headerActions);
 

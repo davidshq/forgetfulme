@@ -316,18 +316,38 @@ class ForgetfulMePopup {
 
     const settingsBtn = document.createElement('button');
     settingsBtn.className = 'settings-btn';
-    settingsBtn.textContent = '⚙️';
     settingsBtn.setAttribute('aria-label', 'Open settings');
     settingsBtn.setAttribute('title', 'Settings');
     settingsBtn.addEventListener('click', () => this.openSettings());
+    
+    const settingsIcon = document.createElement('span');
+    settingsIcon.className = 'icon';
+    settingsIcon.textContent = '⚙️';
+    settingsBtn.appendChild(settingsIcon);
+    
+    const settingsText = document.createElement('span');
+    settingsText.className = 'text';
+    settingsText.textContent = 'Settings';
+    settingsBtn.appendChild(settingsText);
+    
     headerActions.appendChild(settingsBtn);
 
     const manageBtn = document.createElement('button');
     manageBtn.className = 'manage-btn';
-    manageBtn.textContent = '📚';
     manageBtn.setAttribute('aria-label', 'Manage bookmarks');
     manageBtn.setAttribute('title', 'Manage Bookmarks');
     manageBtn.addEventListener('click', () => this.showBookmarkManagement());
+    
+    const manageIcon = document.createElement('span');
+    manageIcon.className = 'icon';
+    manageIcon.textContent = '📚';
+    manageBtn.appendChild(manageIcon);
+    
+    const manageText = document.createElement('span');
+    manageText.className = 'text';
+    manageText.textContent = 'Manage URLs';
+    manageBtn.appendChild(manageText);
+    
     headerActions.appendChild(manageBtn);
 
     header.appendChild(headerActions);

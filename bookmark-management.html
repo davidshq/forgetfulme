@@ -55,6 +55,53 @@
         align-items: center;
       }
       
+      .header-actions button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8f9fa;
+        border: 2px solid #e1e5e9;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 10px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        color: #495057;
+        font-weight: 500;
+        text-decoration: none;
+        min-height: 40px;
+        line-height: 1.4;
+      }
+      
+      .header-actions button:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        color: #212529;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      
+      .header-actions button:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      .header-actions button:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      .header-actions button .icon {
+        font-size: 16px;
+        line-height: 1;
+      }
+      
+      .header-actions button .text {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
       /* Enhanced main content layout */
       .main-content {
         display: grid;
