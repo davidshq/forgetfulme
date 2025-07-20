@@ -317,6 +317,17 @@ class ForgetfulMePopup {
     );
     header.appendChild(settingsBtn);
 
+    const manageBtn = UIComponents.createButton(
+      '📚',
+      () => this.showBookmarkManagement(),
+      'ui-btn-secondary manage-btn',
+      {
+        title: 'Manage Bookmarks',
+        id: 'manage-btn',
+      }
+    );
+    header.appendChild(manageBtn);
+
     // Create main content container
     const mainContent = document.createElement('div');
     mainContent.className = 'main-content';
@@ -565,6 +576,16 @@ class ForgetfulMePopup {
   }
 
   /**
+   * Open bookmark management in a new tab
+   * @method showBookmarkManagement
+   * @description Opens the bookmark management interface in a new tab for better usability
+   */
+  showBookmarkManagement() {
+    // Open bookmark management page in a new tab
+    chrome.tabs.create({ url: chrome.runtime.getURL('bookmark-management.html') });
+  }
+
+  /**
    * Check the current tab URL status and notify background script
    * @async
    * @method checkCurrentTabUrlStatus
@@ -731,6 +752,8 @@ class ForgetfulMePopup {
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
+
+
 }
 
 // Initialize popup immediately (DOM ready is handled in constructor)

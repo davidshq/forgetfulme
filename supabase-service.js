@@ -275,6 +275,38 @@ class SupabaseService {
     }
   }
 
+  async getBookmarkById(bookmarkId) {
+    if (!this.config.isAuthenticated()) {
+      throw ErrorHandler.createError(
+        'User not authenticated',
+        ErrorHandler.ERROR_TYPES.AUTH,
+        'supabase-service.getBookmarkById'
+      );
+    }
+
+    try {
+      const { data, error } = await this.supabase
+        .from('bookmarks')
+        .select('*')
+        .eq('id', bookmarkId)
+        .eq('user_id', this.config.getCurrentUser().id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - bookmark doesn't exist
+          return null;
+        }
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      ErrorHandler.handle(error, 'supabase-service.getBookmarkById');
+      throw error;
+    }
+  }
+
   async getBookmarkStats() {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(

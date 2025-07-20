@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgetfulMe - Bookmark Management</title>
+    <link rel="stylesheet" href="popup.css" />
+    <link rel="stylesheet" href="utils/ui-messages.css" />
+    <link rel="stylesheet" href="utils/ui-components.css" />
+    <style>
+      /* Override popup styles for full-page layout */
+      body {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8f9fa;
+      }
+      
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+      }
+      
+      /* Full-page header */
+      header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+      }
+      
+      header h1 {
+        font-size: 28px;
+        margin: 0;
+      }
+      
+      /* Full-page sections */
+      .main-content {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 20px;
+      }
+      
+      .sidebar {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: fit-content;
+      }
+      
+      .content-area {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+        
+        body {
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container">
+      <!-- Content will be dynamically loaded by JavaScript -->
+    </div>
+
+    <!-- Load Supabase library -->
+    <script src="supabase-js.min.js"></script>
+    <!-- Load bookmark management script -->
+    <script src="bookmark-management.js" type="module"></script>
+  </body>
+</html> 

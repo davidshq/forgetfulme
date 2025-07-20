@@ -1,5 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+/**
+ * @fileoverview Unit tests for ForgetfulMePopup using Kent Dodds testing methodology
+ * @module popup.test
+ * @description Tests for the main popup interface using Kent Dodds' testing principles:
+ * 
+ * 1. Test behavior, not implementation details
+ * 2. Use proper async/await patterns for callback testing
+ * 3. Mock at the right level (module boundaries)
+ * 4. Focus on user interactions and outcomes
+ * 5. Use descriptive test names that explain the scenario
+ * 
+ * Key methodology applied:
+ * - For async callbacks (like UIMessages.confirm), capture the callback
+ * - Use setTimeout(0) to allow async operations to start
+ * - Manually trigger callbacks to simulate user interactions
+ * - Test the actual behavior rather than internal implementation
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 // Mock dependencies BEFORE importing the module under test
 vi.mock('../../utils/ui-components.js', () => ({
   default: {
@@ -15,6 +37,7 @@ vi.mock('../../utils/ui-components.js', () => ({
     createSection: vi.fn(),
     createContainer: vi.fn(),
     createListItem: vi.fn(),
+    createList: vi.fn(),
   }
 }));
 
@@ -52,6 +75,7 @@ vi.mock('../../utils/ui-messages.js', () => ({
     success: vi.fn(),
     error: vi.fn(),
     show: vi.fn(),
+    confirm: vi.fn(),
   }
 }));
 
@@ -83,6 +107,8 @@ vi.mock('../../supabase-service.js', () => ({
     saveBookmark: vi.fn(),
     getBookmarks: vi.fn(),
     updateBookmark: vi.fn(),
+    deleteBookmark: vi.fn(),
+    getBookmarkById: vi.fn(),
   }))
 }));
 
@@ -156,6 +182,8 @@ describe('ForgetfulMePopup', () => {
     mockSupabaseService.saveBookmark = vi.fn();
     mockSupabaseService.updateBookmark = vi.fn();
     mockSupabaseService.getBookmarks = vi.fn();
+    mockSupabaseService.deleteBookmark = vi.fn();
+    mockSupabaseService.getBookmarkById = vi.fn();
 
     // Mock DOM elements
     const mockAppContainer = document.createElement('div');
@@ -323,6 +351,20 @@ describe('ForgetfulMePopup', () => {
       
       const oneHourAgo = now - 3600000;
       expect(popup.formatTime(oneHourAgo)).toBe('1h ago');
+    });
+  });
+
+  describe('Bookmark Management', () => {
+    it('should open bookmark management in new tab', () => {
+      const mockTabsCreate = vi.fn();
+      global.chrome.tabs.create = mockTabsCreate;
+      global.chrome.runtime.getURL = vi.fn().mockReturnValue('chrome-extension://test/bookmark-management.html');
+
+      popup.showBookmarkManagement();
+
+      expect(mockTabsCreate).toHaveBeenCalledWith({ 
+        url: 'chrome-extension://test/bookmark-management.html' 
+      });
     });
   });
 }); 
