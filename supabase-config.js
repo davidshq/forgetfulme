@@ -1,4 +1,6 @@
-// Supabase configuration for ForgetfulMe extension
+// Supabase configuration manager for ForgetfulMe extension
+import ConfigManager from './utils/config-manager.js';
+
 class SupabaseConfig {
   constructor() {
     this.configManager = new ConfigManager();
@@ -211,4 +213,4 @@ class SupabaseConfig {
 }
 
 // Export for use in other files
-window.SupabaseConfig = SupabaseConfig;
+export default SupabaseConfig;

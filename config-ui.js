@@ -1,4 +1,8 @@
 // Configuration UI component for ForgetfulMe extension
+import UIComponents from './utils/ui-components.js';
+import ErrorHandler from './utils/error-handler.js';
+import UIMessages from './utils/ui-messages.js';
+
 class ConfigUI {
   constructor(supabaseConfig) {
     this.config = supabaseConfig;

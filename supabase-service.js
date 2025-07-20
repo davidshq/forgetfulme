@@ -1,4 +1,7 @@
-// Supabase service layer for ForgetfulMe extension
+// Supabase service for ForgetfulMe extension
+import ErrorHandler from './utils/error-handler.js';
+import BookmarkTransformer from './utils/bookmark-transformer.js';
+
 class SupabaseService {
   constructor(supabaseConfig) {
     this.config = supabaseConfig;
@@ -366,4 +369,4 @@ class RealtimeManager {
 }
 
 // Export for use in other files
-window.SupabaseService = SupabaseService;
+export default SupabaseService;

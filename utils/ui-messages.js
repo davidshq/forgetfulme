@@ -290,4 +290,4 @@ class UIMessages {
 }
 
 // Export for use in other files
-window.UIMessages = UIMessages;
+export default UIMessages;

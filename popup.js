@@ -1,4 +1,11 @@
 // Popup script for ForgetfulMe extension with Supabase integration
+import UIComponents from './utils/ui-components.js';
+import AuthStateManager from './utils/auth-state-manager.js';
+import ErrorHandler from './utils/error-handler.js';
+import UIMessages from './utils/ui-messages.js';
+import ConfigManager from './utils/config-manager.js';
+import BookmarkTransformer from './utils/bookmark-transformer.js';
+
 class ForgetfulMePopup {
   constructor() {
     this.configManager = new ConfigManager();

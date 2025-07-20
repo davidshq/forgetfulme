@@ -1,4 +1,8 @@
 // Authentication UI component for ForgetfulMe extension
+import UIComponents from './utils/ui-components.js';
+import ErrorHandler from './utils/error-handler.js';
+import UIMessages from './utils/ui-messages.js';
+
 class AuthUI {
   constructor(supabaseConfig, onAuthSuccess, authStateManager = null) {
     this.config = supabaseConfig;
@@ -348,4 +352,4 @@ class AuthUI {
 }
 
 // Export for use in other files
-window.AuthUI = AuthUI;
+export default AuthUI;

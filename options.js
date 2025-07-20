@@ -1,4 +1,10 @@
-// Options page script for ForgetfulMe extension with Supabase integration
+// Options page script for ForgetfulMe extension
+import UIComponents from './utils/ui-components.js';
+import ErrorHandler from './utils/error-handler.js';
+import UIMessages from './utils/ui-messages.js';
+import ConfigManager from './utils/config-manager.js';
+import BookmarkTransformer from './utils/bookmark-transformer.js';
+
 class ForgetfulMeOptions {
   constructor() {
     this.configManager = new ConfigManager();

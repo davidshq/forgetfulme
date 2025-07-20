@@ -212,4 +212,4 @@ class BookmarkTransformer {
 }
 
 // Export for use in other files
-window.BookmarkTransformer = BookmarkTransformer;
+export default BookmarkTransformer;

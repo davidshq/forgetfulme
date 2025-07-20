@@ -454,4 +454,4 @@ class ErrorHandler {
 }
 
 // Export for use in other files
-window.ErrorHandler = ErrorHandler;
+export default ErrorHandler;

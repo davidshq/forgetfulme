@@ -1,4 +1,5 @@
 // Background service worker for ForgetfulMe extension
+
 class ForgetfulMeBackground {
   constructor() {
     this.authState = null;

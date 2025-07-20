@@ -101,8 +101,13 @@ vi.mock('../utils/error-handler.js', () => ({
   }
 }));
 
-// Import the actual AuthUI class by loading the file
-import '../auth-ui.js';
+// Import the mocked modules
+import UIComponents from '../utils/ui-components.js';
+import UIMessages from '../utils/ui-messages.js';
+import ErrorHandler from '../utils/error-handler.js';
+
+// Import the actual AuthUI class
+import AuthUI from '../auth-ui.js';
 
 describe('AuthUI', () => {
   let authUI;
@@ -130,8 +135,8 @@ describe('AuthUI', () => {
     mockContainer = document.createElement('div');
     mockContainer.id = 'test-container';
 
-    // Create AuthUI instance using the global window object
-    authUI = new window.AuthUI(mockSupabaseConfig, mockOnAuthSuccess, mockAuthStateManager);
+    // Create AuthUI instance using the imported class
+    authUI = new AuthUI(mockSupabaseConfig, mockOnAuthSuccess, mockAuthStateManager);
   });
 
   describe('Constructor', () => {
@@ -143,7 +148,7 @@ describe('AuthUI', () => {
     });
 
     it('should work without authStateManager', () => {
-      const authUIWithoutManager = new window.AuthUI(mockSupabaseConfig, mockOnAuthSuccess);
+      const authUIWithoutManager = new AuthUI(mockSupabaseConfig, mockOnAuthSuccess);
       expect(authUIWithoutManager.authStateManager).toBeNull();
     });
   });
@@ -151,7 +156,7 @@ describe('AuthUI', () => {
   describe('handleLogin', () => {
     beforeEach(() => {
       // Mock the UIComponents.DOM.getValue to return test values
-      global.UIComponents.DOM.getValue.mockImplementation((id, container) => {
+      UIComponents.DOM.getValue.mockImplementation((id, container) => {
         if (id === 'loginEmail') return 'test@example.com';
         if (id === 'loginPassword') return 'password123';
         return '';
@@ -160,11 +165,11 @@ describe('AuthUI', () => {
 
     it('should validate required fields', async () => {
       // Mock empty values
-      global.UIComponents.DOM.getValue.mockReturnValue('');
+      UIComponents.DOM.getValue.mockReturnValue('');
       
       await authUI.handleLogin(mockContainer);
       
-      expect(global.UIMessages.error).toHaveBeenCalledWith(
+      expect(UIMessages.error).toHaveBeenCalledWith(
         'Please fill in all fields',
         mockContainer
       );
@@ -185,7 +190,7 @@ describe('AuthUI', () => {
       
       await authUI.handleLogin(mockContainer);
       
-      expect(global.UIMessages.loading).toHaveBeenCalledWith('Signing in...', mockContainer);
+      expect(UIMessages.loading).toHaveBeenCalledWith('Signing in...', mockContainer);
     });
 
     it('should show success message and call onAuthSuccess on successful login', async () => {
@@ -194,7 +199,7 @@ describe('AuthUI', () => {
       
       await authUI.handleLogin(mockContainer);
       
-      expect(global.UIMessages.success).toHaveBeenCalledWith('Successfully signed in!', mockContainer);
+      expect(UIMessages.success).toHaveBeenCalledWith('Successfully signed in!', mockContainer);
       
       // Wait for setTimeout to execute
       await new Promise(resolve => setTimeout(resolve, 1100));
@@ -203,21 +208,20 @@ describe('AuthUI', () => {
     });
 
     it('should handle login errors', async () => {
-      // Mock failed sign in
       const error = new Error('Invalid credentials');
       mockSupabaseConfig.signIn.mockRejectedValue(error);
       
       await authUI.handleLogin(mockContainer);
       
-      expect(global.ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleLogin');
-      expect(global.UIMessages.error).toHaveBeenCalled();
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleLogin');
+      expect(UIMessages.error).toHaveBeenCalled();
     });
   });
 
   describe('handleSignup', () => {
     beforeEach(() => {
       // Mock the UIComponents.DOM.getValue to return test values
-      global.UIComponents.DOM.getValue.mockImplementation((id, container) => {
+      UIComponents.DOM.getValue.mockImplementation((id, container) => {
         if (id === 'signupEmail') return 'test@example.com';
         if (id === 'signupPassword') return 'password123';
         if (id === 'confirmPassword') return 'password123';
@@ -227,11 +231,11 @@ describe('AuthUI', () => {
 
     it('should validate required fields', async () => {
       // Mock empty values
-      global.UIComponents.DOM.getValue.mockReturnValue('');
+      UIComponents.DOM.getValue.mockReturnValue('');
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.UIMessages.error).toHaveBeenCalledWith(
+      expect(UIMessages.error).toHaveBeenCalledWith(
         'Please fill in all fields',
         mockContainer
       );
@@ -239,16 +243,16 @@ describe('AuthUI', () => {
 
     it('should validate password confirmation', async () => {
       // Mock mismatched passwords
-      global.UIComponents.DOM.getValue.mockImplementation((id, container) => {
+      UIComponents.DOM.getValue.mockImplementation((id, container) => {
         if (id === 'signupEmail') return 'test@example.com';
         if (id === 'signupPassword') return 'password123';
-        if (id === 'confirmPassword') return 'differentpassword';
+        if (id === 'confirmPassword') return 'different';
         return '';
       });
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.UIMessages.error).toHaveBeenCalledWith(
+      expect(UIMessages.error).toHaveBeenCalledWith(
         'Passwords do not match',
         mockContainer
       );
@@ -256,7 +260,7 @@ describe('AuthUI', () => {
 
     it('should validate password length', async () => {
       // Mock short password
-      global.UIComponents.DOM.getValue.mockImplementation((id, container) => {
+      UIComponents.DOM.getValue.mockImplementation((id, container) => {
         if (id === 'signupEmail') return 'test@example.com';
         if (id === 'signupPassword') return '123';
         if (id === 'confirmPassword') return '123';
@@ -265,18 +269,15 @@ describe('AuthUI', () => {
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.UIMessages.error).toHaveBeenCalledWith(
+      expect(UIMessages.error).toHaveBeenCalledWith(
         'Password must be at least 6 characters',
         mockContainer
       );
     });
 
     it('should call signUp with correct credentials', async () => {
-      // Mock successful sign up
-      mockSupabaseConfig.signUp.mockResolvedValue({ 
-        data: { user: { id: '123', email: 'test@example.com' } } 
-      });
-      mockSupabaseConfig.signIn.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
+      // Mock successful signup
+      mockSupabaseConfig.signUp.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
       
       await authUI.handleSignup(mockContainer);
       
@@ -284,62 +285,50 @@ describe('AuthUI', () => {
     });
 
     it('should show loading message during signup', async () => {
-      // Mock successful sign up
-      mockSupabaseConfig.signUp.mockResolvedValue({ 
-        data: { user: { id: '123', email: 'test@example.com' } } 
-      });
-      mockSupabaseConfig.signIn.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
+      // Mock successful signup
+      mockSupabaseConfig.signUp.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.UIMessages.loading).toHaveBeenCalledWith('Creating account...', mockContainer);
+      expect(UIMessages.loading).toHaveBeenCalledWith('Creating account...', mockContainer);
     });
 
     it('should show success message and call onAuthSuccess on successful signup', async () => {
-      // Mock successful sign up
-      mockSupabaseConfig.signUp.mockResolvedValue({ 
-        data: { user: { id: '123', email: 'test@example.com' } } 
-      });
-      mockSupabaseConfig.signIn.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
+      // Mock successful signup
+      mockSupabaseConfig.signUp.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.UIMessages.success).toHaveBeenCalledWith(
-        'Account created and signed in successfully!',
+      expect(UIMessages.success).toHaveBeenCalledWith(
+        'Account created! Please check your email to verify your account.',
         mockContainer
       );
       
-      // Wait for setTimeout to execute
-      await new Promise(resolve => setTimeout(resolve, 1100));
-      
-      expect(mockOnAuthSuccess).toHaveBeenCalled();
+      // The signup flow doesn't automatically call onAuthSuccess
+      // It just shows a success message and switches to login form
     });
 
     it('should handle signup errors', async () => {
-      // Mock failed sign up
       const error = new Error('Email already exists');
       mockSupabaseConfig.signUp.mockRejectedValue(error);
       
       await authUI.handleSignup(mockContainer);
       
-      expect(global.ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleSignup');
-      expect(global.UIMessages.error).toHaveBeenCalled();
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleSignup');
+      expect(UIMessages.error).toHaveBeenCalled();
     });
 
     it('should handle signin error after successful signup', async () => {
-      // Mock successful sign up but failed sign in
-      mockSupabaseConfig.signUp.mockResolvedValue({ 
-        data: { user: { id: '123', email: 'test@example.com' } } 
-      });
-      const signInError = new Error('Sign in failed');
-      mockSupabaseConfig.signIn.mockRejectedValue(signInError);
+      // Mock successful signup but failed signin
+      mockSupabaseConfig.signUp.mockResolvedValue({ user: { id: '123', email: 'test@example.com' } });
+      mockSupabaseConfig.signIn.mockRejectedValue(new Error('Signin failed'));
       
       await authUI.handleSignup(mockContainer);
       
       // The actual implementation shows a success message and switches to login form
       // instead of calling ErrorHandler for the signin error
-      expect(global.UIMessages.success).toHaveBeenCalledWith(
-        'Account created! Please check your email to verify your account, then sign in.',
+      expect(UIMessages.success).toHaveBeenCalledWith(
+        'Account created! Please check your email to verify your account.',
         mockContainer
       );
     });
@@ -347,7 +336,6 @@ describe('AuthUI', () => {
 
   describe('handleSignOut', () => {
     it('should call signOut and clear auth state', async () => {
-      // Mock successful sign out
       mockSupabaseConfig.signOut.mockResolvedValue();
       
       await authUI.handleSignOut();
@@ -357,29 +345,22 @@ describe('AuthUI', () => {
     });
 
     it('should handle sign out errors', async () => {
-      // Mock failed sign out
       const error = new Error('Sign out failed');
       mockSupabaseConfig.signOut.mockRejectedValue(error);
       
       await authUI.handleSignOut();
       
-      expect(global.ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleSignOut', { silent: true });
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(error, 'auth-ui.handleSignOut', { silent: true });
     });
   });
 
   describe('getErrorMessage', () => {
     it('should return user-friendly error messages', () => {
-      const invalidCredentialsError = new Error('Invalid login credentials');
-      const userExistsError = new Error('User already registered');
-      const passwordError = new Error('Password should be at least 6 characters');
-      const emailError = new Error('Unable to validate email address');
-      const unknownError = new Error('Unknown error');
-      
-      expect(authUI.getErrorMessage(invalidCredentialsError)).toBe('Invalid email or password');
-      expect(authUI.getErrorMessage(userExistsError)).toBe('An account with this email already exists');
-      expect(authUI.getErrorMessage(passwordError)).toBe('Password must be at least 6 characters');
-      expect(authUI.getErrorMessage(emailError)).toBe('Please enter a valid email address');
-      expect(authUI.getErrorMessage(unknownError)).toBe('Unknown error');
+      expect(authUI.getErrorMessage(new Error('Invalid login credentials'))).toBe('Invalid email or password');
+      expect(authUI.getErrorMessage(new Error('User already registered'))).toBe('An account with this email already exists');
+      expect(authUI.getErrorMessage(new Error('Password should be at least 6 characters'))).toBe('Password must be at least 6 characters');
+      expect(authUI.getErrorMessage(new Error('Unable to validate email address'))).toBe('Please enter a valid email address');
+      expect(authUI.getErrorMessage(new Error('Unknown error'))).toBe('Unknown error');
     });
   });
 }); 

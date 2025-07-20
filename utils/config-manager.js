@@ -433,4 +433,4 @@ class ConfigManager {
 }
 
 // Export for use in other files
-window.ConfigManager = ConfigManager;
+export default ConfigManager;

@@ -158,4 +158,4 @@ class AuthStateManager {
 }
 
 // Export for use in other files
-window.AuthStateManager = AuthStateManager;
+export default AuthStateManager;

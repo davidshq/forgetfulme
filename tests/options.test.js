@@ -1,5 +1,5 @@
-const { test, expect } = require('@playwright/test');
-const ExtensionHelper = require('./helpers/extension-helper');
+import { test, expect } from '@playwright/test';
+import ExtensionHelper from './helpers/extension-helper.js';
 
 test.describe('ForgetfulMe Options Tests', () => {
   let extensionHelper;
