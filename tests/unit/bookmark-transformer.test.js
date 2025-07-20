@@ -1,7 +1,32 @@
-import { describe, test, expect, beforeEach } from 'vitest';
+import { describe, test, expect, beforeEach, vi } from 'vitest';
 import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 
+/**
+ * BookmarkTransformer Unit Tests
+ * 
+ * Tests the bookmark data transformation functionality.
+ * This module is critical for converting between different data formats:
+ * - UI format (for display)
+ * - Supabase format (for database storage)
+ * - Import/Export format (for data portability)
+ * 
+ * Following the recommended approach: test individual utility modules separately
+ * with proper mocking and focus on business logic.
+ */
+
+// Mock Chrome extension APIs
+const mockChrome = {
+  tabs: {
+    query: vi.fn(),
+  },
+};
+
 describe('BookmarkTransformer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    global.chrome = mockChrome;
+  });
+
   const mockUserId = 'test-user-123';
   const mockTimestamp = '2023-01-01T00:00:00.000Z';
 

@@ -72,6 +72,7 @@ export const createMockErrorHandler = () => ({
     userMessage: 'Test error message',
     shouldRetry: false,
     shouldShowToUser: true,
+    technicalMessage: 'Test error message',
   }),
   createError: vi.fn((message, type, context) => {
     const error = new Error(message);
@@ -324,7 +325,7 @@ export const setupTestWithMocks = (customMocks = {}) => {
 };
 
 /**
- * Sets up module mocks using vi.mock()
+ * Sets up module mocks using vi.mock() for ES modules
  * Note: This function should be called at the top level of test files
  * due to Vitest's hoisting behavior
  */
@@ -496,16 +497,6 @@ export const setupModuleMocks = () => {
     }))
   }));
 
-  vi.mock('../../utils/bookmark-transformer.js', () => ({
-    default: {
-      toUIFormat: vi.fn(),
-      fromCurrentTab: vi.fn(),
-      fromBookmarkData: vi.fn(),
-      toBookmarkData: vi.fn(),
-      validateBookmark: vi.fn(),
-    }
-  }));
-
   vi.mock('../../supabase-config.js', () => ({
     default: vi.fn().mockImplementation(() => ({
       isConfigured: vi.fn().mockResolvedValue(true),
@@ -536,8 +527,22 @@ export const setupModuleMocks = () => {
       handleLogin: vi.fn(),
       handleSignup: vi.fn(),
       handleSignOut: vi.fn(),
-      getErrorMessage: vi.fn(),
     }))
+  }));
+
+  vi.mock('../../utils/bookmark-transformer.js', () => ({
+    default: {
+      toUIFormat: vi.fn(),
+      fromCurrentTab: vi.fn(),
+      toSupabaseFormat: vi.fn(),
+      fromImportData: vi.fn(),
+      normalizeTags: vi.fn(),
+      validate: vi.fn(),
+      isValidUrl: vi.fn(),
+      toExportFormat: vi.fn(),
+      transformMultiple: vi.fn(),
+      getDefaultStructure: vi.fn(),
+    }
   }));
 };
 
@@ -627,7 +632,7 @@ export const createPopupTestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
   
   // Setup module mocks
-  setupModuleMocks(mocks);
+  setupModuleMocks();
   
   // Setup DOM
   const domElements = setupPopupDOM(mocks);
@@ -654,7 +659,7 @@ export const createAuthUITestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
   
   // Setup module mocks
-  setupModuleMocks(mocks);
+  setupModuleMocks();
   
   // Create mock container
   const mockContainer = createMockElement('div', { id: 'test-container' });

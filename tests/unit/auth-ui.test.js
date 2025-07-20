@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+// Mock location.reload globally to prevent JSDOM navigation errors
+Object.defineProperty(window.location, 'reload', {
+  value: vi.fn(),
+  writable: true,
+});
+
 // Mock dependencies before importing AuthUI
 vi.mock('../../utils/ui-components.js', () => ({
   default: {
@@ -342,6 +348,7 @@ describe('AuthUI', () => {
       
       expect(mockSupabaseConfig.signOut).toHaveBeenCalled();
       expect(mockAuthStateManager.clearAuthState).toHaveBeenCalled();
+      // Note: location.reload is not tested due to JSDOM limitations
     });
 
     it('should handle sign out errors', async () => {

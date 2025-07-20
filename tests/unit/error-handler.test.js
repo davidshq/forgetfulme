@@ -1,6 +1,14 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import ErrorHandler from '../../utils/error-handler.js';
 
+/**
+ * ErrorHandler Unit Tests
+ * 
+ * Tests the error handling and categorization functionality.
+ * This module is critical for providing user-friendly error messages
+ * and proper error categorization for different error types.
+ */
+
 // Mock console methods
 const mockConsole = {
   error: vi.fn(),
@@ -15,7 +23,7 @@ describe('ErrorHandler', () => {
     global.console = mockConsole;
   });
 
-  describe('ERROR_TYPES', () => {
+  describe('Constants', () => {
     test('should have all expected error types', () => {
       expect(ErrorHandler.ERROR_TYPES).toEqual({
         NETWORK: 'NETWORK',
@@ -27,9 +35,7 @@ describe('ErrorHandler', () => {
         UNKNOWN: 'UNKNOWN',
       });
     });
-  });
 
-  describe('SEVERITY', () => {
     test('should have all expected severity levels', () => {
       expect(ErrorHandler.SEVERITY).toEqual({
         LOW: 'LOW',
