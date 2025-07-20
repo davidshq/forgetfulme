@@ -56,15 +56,6 @@ The ForgetfulMe Chrome extension is a well-structured project with good separati
 
 ## 🧪 Testing & Quality Assurance
 
-### **Add Unit Tests**
-**Current Issue**: No automated testing infrastructure.
-**Impact**: High - Bugs can go undetected
-
-**Recommendations**:
-- Set up Jest testing framework
-- Add unit tests for core business logic
-- Implement mock Supabase client for testing
-
 ### **Add Integration Tests**
 **Current Issue**: No end-to-end testing.
 **Impact**: Medium - Integration issues may go undetected

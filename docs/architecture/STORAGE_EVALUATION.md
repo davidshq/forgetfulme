@@ -237,6 +237,6 @@ Consider a hybrid approach:
 
 ## Conclusion
 
-For the initial implementation, **Chrome Sync Storage API** provides the best balance of simplicity, performance, and user experience for a Chromium-focused extension. The unlimited storage capacity and automatic synchronization make it ideal for handling hundreds of thousands of entries.
+After evaluating all storage options, **Supabase** was chosen for the ForgetfulMe extension implementation. Supabase provides the best combination of performance, features, and browser compatibility while maintaining reasonable costs and complexity.
 
-If cross-browser support becomes a priority, **Supabase** offers the best combination of performance, features, and browser compatibility while maintaining reasonable costs and complexity. 
+The decision to use Supabase over Chrome Sync Storage API was made to ensure cross-browser compatibility from the start, allowing the extension to work on all browsers rather than being limited to Chromium-based browsers only. 

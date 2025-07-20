@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import UIComponents from '../utils/ui-components.js';
+import UIComponents from '../../utils/ui-components.js';
 
 // Mock console methods
 const mockConsole = {

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import ErrorHandler from '../utils/error-handler.js';
+import ErrorHandler from '../../utils/error-handler.js';
 
 // Mock console methods
 const mockConsole = {

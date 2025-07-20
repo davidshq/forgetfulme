@@ -15,7 +15,7 @@ This document provides comprehensive guidance on implementing Supabase as a back
 7. [Error Handling & Offline Support](#error-handling--offline-support)
 8. [Implementation Options](#implementation-options)
 9. [Recommendations](#recommendations)
-10. [Migration Strategy](#migration-strategy)
+10. [Data Import/Export Strategy](#data-importexport-strategy)
 
 ## Architecture Overview
 
@@ -653,47 +653,40 @@ For the ForgetfulMe extension, I recommend implementing **Pure Supabase** for th
 4. **Batch Operations**: Group multiple operations when possible
 5. **Connection Pooling**: Optimize database connections
 
-## Migration Strategy
+## Data Import/Export Strategy
 
-### From Chrome Sync to Supabase
+The extension supports data import/export functionality for user data portability:
 
 ```javascript
-// migration.js
-class MigrationManager {
-  constructor(supabase) {
-    this.supabase = supabase
+// Data export functionality
+async exportData() {
+  const bookmarks = await this.supabaseService.getBookmarks({ limit: 10000 })
+  const preferences = await this.supabaseService.getUserPreferences()
+  
+  return {
+    bookmarks: bookmarks,
+    preferences: preferences,
+    exportDate: new Date().toISOString(),
+    version: '1.0.0'
   }
+}
 
-  async migrateFromChromeSync() {
-    // Get existing data from Chrome sync
-    const { bookmarks } = await chrome.storage.sync.get(['bookmarks'])
+// Data import functionality
+async importData(importData) {
+  const userId = this.config.getCurrentUser().id
+  
+  if (importData.bookmarks && importData.bookmarks.length > 0) {
+    const transformedBookmarks = BookmarkTransformer.transformMultiple(
+      importData.bookmarks, 
+      userId, 
+      { preserveTimestamps: true, setDefaults: false }
+    )
     
-    if (!bookmarks) return
-
-    // Transform data for Supabase
-    const transformedBookmarks = bookmarks.map(bookmark => ({
-      url: bookmark.url,
-      title: bookmark.title,
-      description: bookmark.description || '',
-      read_status: bookmark.read_status || 'unread',
-      tags: bookmark.tags || [],
-      created_at: bookmark.created_at || new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }))
-
-    // Batch insert into Supabase
-    const { data, error } = await this.supabase
-      .from('bookmarks')
-      .insert(transformedBookmarks)
-
-    if (error) {
-      throw new Error(`Migration failed: ${error.message}`)
-    }
-
-    // Clear Chrome sync data after successful migration
-    await chrome.storage.sync.remove(['bookmarks'])
-    
-    return data
+    await this.supabase.from('bookmarks').insert(transformedBookmarks)
+  }
+  
+  if (importData.preferences) {
+    await this.saveUserPreferences(importData.preferences)
   }
 }
 ```

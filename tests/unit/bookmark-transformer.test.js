@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'vitest';
-import BookmarkTransformer from '../utils/bookmark-transformer.js';
+import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 
 describe('BookmarkTransformer', () => {
   const mockUserId = 'test-user-123';

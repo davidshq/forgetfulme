@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import ConfigManager from '../utils/config-manager.js';
+import ConfigManager from '../../utils/config-manager.js';
 
 // Mock Chrome extension APIs
 const mockChrome = {

@@ -7,10 +7,13 @@ export default defineConfig({
     
     // Test file patterns
     include: [
-      '**/__tests__/**/*.test.js'
+      'tests/unit/**/*.test.js'
     ],
     exclude: [
-      'tests/**/*.test.js',
+      'tests/popup.test.js',
+      'tests/options.test.js',
+      'tests/auth.test.js',
+      'tests/helpers/**',
       '**/node_modules/**'
     ],
     
@@ -23,8 +26,11 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'tests/',
-        '**/*.test.js',
+        'tests/popup.test.js',
+        'tests/options.test.js',
+        'tests/auth.test.js',
+        'tests/helpers/**',
+        'tests/unit/**/*.test.js',
         'vitest.config.js',
         'vitest.setup.js',
         'playwright.config.js'

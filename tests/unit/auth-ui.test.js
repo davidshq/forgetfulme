@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock dependencies before importing AuthUI
-vi.mock('../utils/ui-components.js', () => ({
+vi.mock('../../utils/ui-components.js', () => ({
   default: {
     createContainer: vi.fn((title, subtitle, className) => {
       const container = document.createElement('div');
@@ -66,7 +66,7 @@ vi.mock('../utils/ui-components.js', () => ({
   }
 }));
 
-vi.mock('../utils/ui-messages.js', () => ({
+vi.mock('../../utils/ui-messages.js', () => ({
   default: {
     success: vi.fn(),
     error: vi.fn(),
@@ -77,7 +77,7 @@ vi.mock('../utils/ui-messages.js', () => ({
   }
 }));
 
-vi.mock('../utils/error-handler.js', () => ({
+vi.mock('../../utils/error-handler.js', () => ({
   default: {
     handle: vi.fn((error, context) => ({
       shouldShowToUser: true,
@@ -102,12 +102,12 @@ vi.mock('../utils/error-handler.js', () => ({
 }));
 
 // Import the mocked modules
-import UIComponents from '../utils/ui-components.js';
-import UIMessages from '../utils/ui-messages.js';
-import ErrorHandler from '../utils/error-handler.js';
+import UIComponents from '../../utils/ui-components.js';
+import UIMessages from '../../utils/ui-messages.js';
+import ErrorHandler from '../../utils/error-handler.js';
 
 // Import the actual AuthUI class
-import AuthUI from '../auth-ui.js';
+import AuthUI from '../../auth-ui.js';
 
 describe('AuthUI', () => {
   let authUI;

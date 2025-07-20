@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import UIMessages from '../utils/ui-messages.js';
+import UIMessages from '../../utils/ui-messages.js';
 
 // Mock console methods
 const mockConsole = {

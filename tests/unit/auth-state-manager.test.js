@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import AuthStateManager from '../utils/auth-state-manager.js';
+import AuthStateManager from '../../utils/auth-state-manager.js';
 
 // Mock Chrome extension APIs
 const mockChrome = {

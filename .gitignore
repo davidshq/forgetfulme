@@ -89,3 +89,7 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp 
+
+# Other Test Results
+playwright-report/
+test-results/
