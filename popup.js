@@ -300,79 +300,144 @@ class ForgetfulMePopup {
   }
 
   showMainInterface() {
-    // Create header
+    // Create header with better accessibility
     const header = document.createElement('header');
+    header.setAttribute('role', 'banner');
+    
     const title = document.createElement('h1');
     title.textContent = 'ForgetfulMe';
+    title.setAttribute('id', 'popup-title');
     header.appendChild(title);
 
-    const settingsBtn = UIComponents.createButton(
-      '⚙️',
-      () => this.openSettings(),
-      'ui-btn-secondary settings-btn',
-      {
-        title: 'Settings',
-        id: 'settings-btn',
-      }
-    );
-    header.appendChild(settingsBtn);
+    const headerActions = document.createElement('div');
+    headerActions.className = 'header-actions';
+    headerActions.setAttribute('role', 'toolbar');
+    headerActions.setAttribute('aria-label', 'Extension actions');
 
-    const manageBtn = UIComponents.createButton(
-      '📚',
-      () => this.showBookmarkManagement(),
-      'ui-btn-secondary manage-btn',
-      {
-        title: 'Manage Bookmarks',
-        id: 'manage-btn',
-      }
-    );
-    header.appendChild(manageBtn);
+    const settingsBtn = document.createElement('button');
+    settingsBtn.className = 'settings-btn';
+    settingsBtn.textContent = '⚙️';
+    settingsBtn.setAttribute('aria-label', 'Open settings');
+    settingsBtn.setAttribute('title', 'Settings');
+    settingsBtn.addEventListener('click', () => this.openSettings());
+    headerActions.appendChild(settingsBtn);
+
+    const manageBtn = document.createElement('button');
+    manageBtn.className = 'manage-btn';
+    manageBtn.textContent = '📚';
+    manageBtn.setAttribute('aria-label', 'Manage bookmarks');
+    manageBtn.setAttribute('title', 'Manage Bookmarks');
+    manageBtn.addEventListener('click', () => this.showBookmarkManagement());
+    headerActions.appendChild(manageBtn);
+
+    header.appendChild(headerActions);
 
     // Create main content container
     const mainContent = document.createElement('div');
     mainContent.className = 'main-content';
+    mainContent.setAttribute('role', 'main');
 
-    // Create form using UI components
-    const form = UIComponents.createForm(
-      'bookmarkForm',
-      e => this.markAsRead(),
-      [
-        {
-          type: 'select',
-          id: 'read-status',
-          label: 'Mark as:',
-          options: {
-            options: [
-              { value: 'read', text: 'Read' },
-              { value: 'good-reference', text: 'Good Reference' },
-              { value: 'low-value', text: 'Low Value' },
-              { value: 'revisit-later', text: 'Revisit Later' },
-            ],
-          },
-        },
-        {
-          type: 'text',
-          id: 'tags',
-          label: 'Tags (comma separated):',
-          options: {
-            placeholder: 'research, tutorial, important',
-          },
-        },
-      ],
-      {
-        submitText: 'Mark as Read',
-        className: 'bookmark-form',
-      }
-    );
+    // Create form with better accessibility
+    const form = document.createElement('form');
+    form.className = 'bookmark-form';
+    form.setAttribute('role', 'form');
+    form.setAttribute('aria-label', 'Mark current page as read');
+
+    // Status selection group
+    const statusGroup = document.createElement('div');
+    statusGroup.className = 'form-group';
+
+    const statusLabel = document.createElement('label');
+    statusLabel.setAttribute('for', 'read-status');
+    statusLabel.textContent = 'Mark as:';
+    statusGroup.appendChild(statusLabel);
+
+    const statusSelect = document.createElement('select');
+    statusSelect.id = 'read-status';
+    statusSelect.name = 'read-status';
+    statusSelect.setAttribute('aria-describedby', 'status-help');
+    statusGroup.appendChild(statusSelect);
+
+    // Add status options
+    const statusOptions = [
+      { value: 'read', text: 'Read' },
+      { value: 'good-reference', text: 'Good Reference' },
+      { value: 'low-value', text: 'Low Value' },
+      { value: 'revisit-later', text: 'Revisit Later' },
+    ];
+
+    statusOptions.forEach(option => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.value;
+      optionElement.textContent = option.text;
+      statusSelect.appendChild(optionElement);
+    });
+
+    const statusHelp = document.createElement('small');
+    statusHelp.id = 'status-help';
+    statusHelp.textContent = 'Choose how you want to categorize this page';
+    statusHelp.style.color = '#6c757d';
+    statusHelp.style.fontSize = '12px';
+    statusGroup.appendChild(statusHelp);
+
+    // Tags input group
+    const tagsGroup = document.createElement('div');
+    tagsGroup.className = 'form-group';
+
+    const tagsLabel = document.createElement('label');
+    tagsLabel.setAttribute('for', 'tags');
+    tagsLabel.textContent = 'Tags (comma separated):';
+    tagsGroup.appendChild(tagsLabel);
+
+    const tagsInput = document.createElement('input');
+    tagsInput.type = 'text';
+    tagsInput.id = 'tags';
+    tagsInput.name = 'tags';
+    tagsInput.placeholder = 'research, tutorial, important';
+    tagsInput.setAttribute('aria-describedby', 'tags-help');
+    tagsGroup.appendChild(tagsInput);
+
+    const tagsHelp = document.createElement('small');
+    tagsHelp.id = 'tags-help';
+    tagsHelp.textContent = 'Add tags to help organize your bookmarks';
+    tagsHelp.style.color = '#6c757d';
+    tagsHelp.style.fontSize = '12px';
+    tagsGroup.appendChild(tagsHelp);
+
+    // Submit button
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'submit';
+    submitBtn.className = 'primary-btn';
+    submitBtn.textContent = 'Mark as Read';
+    submitBtn.setAttribute('aria-label', 'Mark current page as read with selected status and tags');
+
+    // Add form elements
+    form.appendChild(statusGroup);
+    form.appendChild(tagsGroup);
+    form.appendChild(submitBtn);
+
+    // Add form submit handler
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.markAsRead();
+    });
 
     mainContent.appendChild(form);
 
-    // Create recent section
-    const recentSection = UIComponents.createSection(
-      'Recent Entries',
-      'recent-section'
-    );
-    const recentList = UIComponents.createList('recent-list');
+    // Create recent section with better accessibility
+    const recentSection = document.createElement('section');
+    recentSection.className = 'recent-section';
+    recentSection.setAttribute('role', 'region');
+    recentSection.setAttribute('aria-label', 'Recent entries');
+
+    const recentTitle = document.createElement('h3');
+    recentTitle.textContent = 'Recent Entries';
+    recentSection.appendChild(recentTitle);
+
+    const recentList = document.createElement('div');
+    recentList.id = 'recent-list';
+    recentList.setAttribute('role', 'list');
+    recentList.setAttribute('aria-label', 'Recent bookmarks');
     recentSection.appendChild(recentList);
 
     // Assemble the interface
@@ -454,58 +519,64 @@ class ForgetfulMePopup {
     try {
       const bookmarks = await this.supabaseService.getBookmarks({ limit: 5 });
 
-      const recentListEl = UIComponents.DOM.getElement('recent-list');
+      const recentListEl = document.getElementById('recent-list');
       if (!recentListEl) return;
 
       recentListEl.innerHTML = '';
 
       if (bookmarks.length === 0) {
-        const emptyItem = UIComponents.createListItem(
-          {
-            title: 'No entries yet',
-            meta: {
-              status: 'info',
-              statusText: 'No entries',
-            },
-          },
-          { className: 'recent-item empty' }
-        );
+        const emptyItem = document.createElement('div');
+        emptyItem.className = 'recent-item empty';
+        emptyItem.setAttribute('role', 'listitem');
+        emptyItem.setAttribute('aria-label', 'No recent entries');
+        
+        const emptyIcon = document.createElement('div');
+        emptyIcon.style.fontSize = '24px';
+        emptyIcon.style.marginBottom = '8px';
+        emptyIcon.textContent = '📚';
+        emptyItem.appendChild(emptyIcon);
+        
+        const emptyTitle = document.createElement('div');
+        emptyTitle.className = 'title';
+        emptyTitle.textContent = 'No entries yet';
+        emptyTitle.style.fontWeight = '600';
+        emptyTitle.style.color = '#495057';
+        emptyItem.appendChild(emptyTitle);
+        
+        const emptyMeta = document.createElement('div');
+        emptyMeta.className = 'meta';
+        emptyMeta.innerHTML = '<span class="status status-info">No entries</span>';
+        emptyItem.appendChild(emptyMeta);
+        
         recentListEl.appendChild(emptyItem);
         return;
       }
 
-      bookmarks.forEach(bookmark => {
+      bookmarks.forEach((bookmark, index) => {
         const uiBookmark = BookmarkTransformer.toUIFormat(bookmark);
-        const listItem = UIComponents.createListItem(
-          {
-            title: uiBookmark.title,
-            titleTooltip: uiBookmark.title,
-            meta: {
-              status: uiBookmark.status,
-              statusText: this.formatStatus(uiBookmark.status),
-              time: this.formatTime(new Date(uiBookmark.created_at).getTime()),
-              tags: uiBookmark.tags,
-            },
-          },
-          { className: 'recent-item' }
-        );
-
+        const listItem = this.createRecentListItem(uiBookmark, index);
         recentListEl.appendChild(listItem);
       });
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries');
-      const recentListEl = UIComponents.DOM.getElement('recent-list');
+      const recentListEl = document.getElementById('recent-list');
       if (recentListEl) {
-        const errorItem = UIComponents.createListItem(
-          {
-            title: 'Error loading entries',
-            meta: {
-              status: 'error',
-              statusText: 'Error',
-            },
-          },
-          { className: 'recent-item error' }
-        );
+        const errorItem = document.createElement('div');
+        errorItem.className = 'recent-item error';
+        errorItem.setAttribute('role', 'listitem');
+        errorItem.setAttribute('aria-label', 'Error loading entries');
+        
+        const errorTitle = document.createElement('div');
+        errorTitle.className = 'title';
+        errorTitle.textContent = 'Error loading entries';
+        errorTitle.style.color = '#dc3545';
+        errorItem.appendChild(errorTitle);
+        
+        const errorMeta = document.createElement('div');
+        errorMeta.className = 'meta';
+        errorMeta.innerHTML = '<span class="status status-error">Error</span>';
+        errorItem.appendChild(errorMeta);
+        
         recentListEl.appendChild(errorItem);
       }
 
@@ -513,6 +584,56 @@ class ForgetfulMePopup {
         UIMessages.error(errorResult.userMessage, this.appContainer);
       }
     }
+  }
+
+  /**
+   * Create a recent list item with proper accessibility
+   * @method createRecentListItem
+   * @param {Object} bookmark - The bookmark to display
+   * @param {number} index - The index of the bookmark in the list
+   * @returns {HTMLElement} The list item element
+   */
+  createRecentListItem(bookmark, index) {
+    const listItem = document.createElement('div');
+    listItem.className = 'recent-item';
+    listItem.setAttribute('role', 'listitem');
+    listItem.setAttribute('aria-label', `Recent bookmark ${index + 1}: ${bookmark.title}`);
+
+    // Add title
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'title';
+    titleDiv.textContent = bookmark.title;
+    titleDiv.setAttribute('title', bookmark.title);
+    listItem.appendChild(titleDiv);
+
+    // Add meta information
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'meta';
+
+    // Add status badge
+    const statusSpan = document.createElement('span');
+    statusSpan.className = `status status-${bookmark.status}`;
+    statusSpan.textContent = this.formatStatus(bookmark.status);
+    statusSpan.setAttribute('aria-label', `Status: ${this.formatStatus(bookmark.status)}`);
+    metaDiv.appendChild(statusSpan);
+
+    // Add time
+    const timeSpan = document.createElement('span');
+    timeSpan.textContent = this.formatTime(new Date(bookmark.created_at).getTime());
+    timeSpan.setAttribute('aria-label', `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`);
+    metaDiv.appendChild(timeSpan);
+
+    // Add tags if they exist
+    if (bookmark.tags && bookmark.tags.length > 0) {
+      const tagsSpan = document.createElement('span');
+      tagsSpan.textContent = `Tags: ${bookmark.tags.join(', ')}`;
+      tagsSpan.setAttribute('aria-label', `Tags: ${bookmark.tags.join(', ')}`);
+      metaDiv.appendChild(tagsSpan);
+    }
+
+    listItem.appendChild(metaDiv);
+
+    return listItem;
   }
 
   async loadCustomStatusTypes() {

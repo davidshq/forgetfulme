@@ -8,14 +8,16 @@
     <link rel="stylesheet" href="utils/ui-messages.css" />
     <link rel="stylesheet" href="utils/ui-components.css" />
     <style>
-      /* Override popup styles for full-page layout */
+      /* Enhanced bookmark management styles with accessibility focus */
       body {
         width: 100%;
         min-height: 100vh;
         margin: 0;
         padding: 20px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         background: #f8f9fa;
+        color: #1a1a1a;
+        line-height: 1.5;
       }
       
       .container {
@@ -24,56 +26,487 @@
         padding: 0;
       }
       
-      /* Full-page header */
+      /* Enhanced header with better accessibility */
       header {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 24px;
+        border: 2px solid #e1e5e9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
       }
       
       header h1 {
-        font-size: 28px;
+        font-size: 32px;
         margin: 0;
+        color: #1a1a1a;
+        font-weight: 700;
+        letter-spacing: -0.025em;
       }
       
-      /* Full-page sections */
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      
+      /* Enhanced main content layout */
       .main-content {
         display: grid;
-        grid-template-columns: 300px 1fr;
-        gap: 20px;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        align-items: start;
       }
       
       .sidebar {
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         height: fit-content;
+        border: 2px solid #e1e5e9;
+        position: sticky;
+        top: 20px;
       }
       
       .content-area {
-        background: white;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 2px solid #e1e5e9;
+        min-height: 600px;
+      }
+      
+      /* Enhanced search and filter section */
+      .search-section {
+        margin-bottom: 24px;
+      }
+      
+      .search-section h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .search-section h3::before {
+        content: "🔍";
+        font-size: 16px;
+      }
+      
+      /* Enhanced bulk actions section */
+      .bulk-section {
+        margin-bottom: 24px;
+      }
+      
+      .bulk-section h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .bulk-section h3::before {
+        content: "⚡";
+        font-size: 16px;
+      }
+      
+      .bulk-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .bulk-actions button {
+        padding: 12px 16px;
+        font-weight: 600;
         border-radius: 8px;
-        padding: 20px;
+        border: 2px solid;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      
+      .bulk-actions button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      }
+      
+      .bulk-actions button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      /* Enhanced bookmarks section */
+      .bookmarks-section h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .bookmarks-section h3::before {
+        content: "📚";
+        font-size: 20px;
+      }
+      
+      /* Enhanced bookmark items */
+      .bookmark-item {
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        background: #ffffff;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .bookmark-item:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        transform: translateY(-2px);
+      }
+      
+      .bookmark-item:focus-within {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      .bookmark-checkbox {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        accent-color: #007bff;
+        z-index: 2;
+      }
+      
+      .bookmark-checkbox:focus {
+        outline: 2px solid #007bff;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+      
+      .bookmark-content {
+        padding: 20px 20px 20px 48px;
+      }
+      
+      .bookmark-title {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+        font-size: 16px;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+      
+      .bookmark-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+        font-size: 13px;
+        color: #6c757d;
+      }
+      
+      .bookmark-status {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: 1px solid;
+      }
+      
+      .bookmark-time {
+        color: #6c757d;
+        font-weight: 500;
+      }
+      
+      .bookmark-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      
+      .bookmark-actions button {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        border: 2px solid;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        min-width: 60px;
+      }
+      
+      .bookmark-actions button:hover {
+        transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
       
+      .bookmark-actions button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      /* Status colors with better contrast */
+      .status-read {
+        background: #d1e7dd;
+        color: #0f5132;
+        border-color: #badbcc;
+      }
+      
+      .status-good-reference {
+        background: #cff4fc;
+        color: #055160;
+        border-color: #b6effb;
+      }
+      
+      .status-low-value {
+        background: #f8d7da;
+        color: #721c24;
+        border-color: #f5c2c7;
+      }
+      
+      .status-revisit-later {
+        background: #fff3cd;
+        color: #664d03;
+        border-color: #ffecb5;
+      }
+      
+      /* Enhanced form styles */
+      .search-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      
+      .form-group label {
+        font-weight: 600;
+        color: #1a1a1a;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      
+      .form-group input,
+      .form-group select {
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        color: #1a1a1a;
+        transition: all 0.2s ease;
+        line-height: 1.4;
+      }
+      
+      .form-group input:hover,
+      .form-group select:hover {
+        border-color: #adb5bd;
+      }
+      
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      .search-btn {
+        padding: 12px 20px;
+        background: #007bff;
+        color: #ffffff;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        line-height: 1.4;
+      }
+      
+      .search-btn:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+      }
+      
+      .search-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+      }
+      
+      /* Empty state */
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+      }
+      
+      .empty-state h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+      }
+      
+      .empty-state p {
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      
+      /* Loading state */
+      .loading-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+      }
+      
+      .loading-spinner {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e9ecef;
+        border-radius: 50%;
+        border-top-color: #007bff;
+        animation: spin 1s linear infinite;
+        margin-bottom: 12px;
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
       /* Responsive design */
+      @media (max-width: 1024px) {
+        .main-content {
+          grid-template-columns: 280px 1fr;
+          gap: 20px;
+        }
+      }
+      
       @media (max-width: 768px) {
         .main-content {
           grid-template-columns: 1fr;
+          gap: 16px;
         }
         
         body {
-          padding: 10px;
+          padding: 16px;
+        }
+        
+        header {
+          padding: 20px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        
+        header h1 {
+          font-size: 24px;
+        }
+        
+        .sidebar {
+          position: static;
+          order: 2;
+        }
+        
+        .content-area {
+          order: 1;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        body {
+          padding: 12px;
+        }
+        
+        header {
+          padding: 16px;
+        }
+        
+        .sidebar,
+        .content-area {
+          padding: 16px;
+        }
+        
+        .bookmark-content {
+          padding: 16px 16px 16px 44px;
+        }
+        
+        .bookmark-actions {
+          flex-direction: column;
+        }
+        
+        .bookmark-actions button {
+          width: 100%;
+        }
+      }
+      
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        .bookmark-item,
+        .sidebar,
+        .content-area,
+        header {
+          border-width: 3px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .search-btn {
+          border-width: 3px;
+        }
+      }
+      
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .bookmark-item,
+        .search-btn,
+        .bookmark-actions button {
+          transition: none;
+          transform: none;
+        }
+        
+        .loading-spinner {
+          animation: none;
         }
       }
     </style>
   </head>
   <body>
-    <div id="app" class="container">
+    <div id="app" class="container" role="main" aria-label="ForgetfulMe Bookmark Management">
       <!-- Content will be dynamically loaded by JavaScript -->
     </div>
 
