@@ -98,10 +98,20 @@ class SupabaseConfig {
         return false; // Not configured, but not an error
       }
 
+      // Wait for Supabase client to be available
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (typeof supabase === 'undefined' && attempts < maxAttempts) {
+        console.log(`Waiting for Supabase library to load... (attempt ${attempts + 1}/${maxAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+
       // Check if Supabase client is available
       if (typeof supabase === 'undefined') {
-        console.error(
-          'Supabase client not loaded. Please include the Supabase library.'
+        console.warn(
+          'Supabase client not loaded after waiting. This might be a timing issue.'
         );
         return false;
       }

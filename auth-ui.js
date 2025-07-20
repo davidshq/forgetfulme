@@ -22,7 +22,7 @@ class AuthUI {
     // Create login form
     const loginForm = UIComponents.createForm(
       'loginForm',
-      e => this.handleLogin(container),
+      (e, form) => this.handleLogin(document),
       [
         {
           type: 'email',
@@ -80,7 +80,7 @@ class AuthUI {
     // Create signup form
     const signupForm = UIComponents.createForm(
       'signupForm',
-      e => this.handleSignup(container),
+      (e, form) => this.handleSignup(document),
       [
         {
           type: 'email',
@@ -138,8 +138,6 @@ class AuthUI {
   }
 
   bindAuthEvents(container) {
-    const loginForm = UIComponents.DOM.querySelector('#loginForm', container);
-    const signupForm = UIComponents.DOM.querySelector('#signupForm', container);
     const showSignupLink = UIComponents.DOM.querySelector(
       '#showSignup',
       container
@@ -148,20 +146,6 @@ class AuthUI {
       '#showLogin',
       container
     );
-
-    if (loginForm) {
-      loginForm.addEventListener('submit', e => {
-        e.preventDefault();
-        this.handleLogin(container);
-      });
-    }
-
-    if (signupForm) {
-      signupForm.addEventListener('submit', e => {
-        e.preventDefault();
-        this.handleSignup(container);
-      });
-    }
 
     if (showSignupLink) {
       showSignupLink.addEventListener('click', e => {

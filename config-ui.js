@@ -19,7 +19,7 @@ class ConfigUI {
     // Create config form
     const configForm = UIComponents.createForm(
       'configForm',
-      e => this.handleConfigSubmit(container),
+      (e, form) => this.handleConfigSubmit(document),
       [
         {
           type: 'url',
@@ -83,14 +83,7 @@ class ConfigUI {
   }
 
   bindConfigEvents(container) {
-    const configForm = UIComponents.DOM.querySelector('#configForm', container);
-
-    if (configForm) {
-      configForm.addEventListener('submit', e => {
-        e.preventDefault();
-        this.handleConfigSubmit(container);
-      });
-    }
+    // Form event is handled by createForm, no additional binding needed
   }
 
   async loadCurrentConfig(container) {
@@ -288,4 +281,4 @@ class ConfigUI {
 }
 
 // Export for use in other files
-window.ConfigUI = ConfigUI;
+export default ConfigUI;

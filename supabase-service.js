@@ -40,6 +40,17 @@ class SupabaseService {
 
     const userId = this.config.getCurrentUser().id;
 
+    // Check if bookmark already exists
+    const existingBookmark = await this.getBookmarkByUrl(bookmark.url);
+    
+    if (existingBookmark) {
+      // Return existing bookmark with a flag indicating it's a duplicate
+      return {
+        ...existingBookmark,
+        isDuplicate: true
+      };
+    }
+
     const bookmarkData = BookmarkTransformer.toSupabaseFormat(bookmark, userId);
 
     try {
@@ -107,6 +118,40 @@ class SupabaseService {
       return data || [];
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-service.getBookmarks');
+      throw error;
+    }
+  }
+
+  async getBookmarkByUrl(url) {
+    if (!this.config.isAuthenticated()) {
+      throw ErrorHandler.createError(
+        'User not authenticated',
+        ErrorHandler.ERROR_TYPES.AUTH,
+        'supabase-service.getBookmarkByUrl'
+      );
+    }
+
+    const userId = this.config.getCurrentUser().id;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('bookmarks')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('url', url)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - bookmark doesn't exist
+          return null;
+        }
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      ErrorHandler.handle(error, 'supabase-service.getBookmarkByUrl');
       throw error;
     }
   }

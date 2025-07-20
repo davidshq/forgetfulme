@@ -4,6 +4,11 @@ import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 import ConfigManager from './utils/config-manager.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
+import SupabaseConfig from './supabase-config.js';
+import SupabaseService from './supabase-service.js';
+import AuthUI from './auth-ui.js';
+import AuthStateManager from './utils/auth-state-manager.js';
+import ConfigUI from './config-ui.js';
 
 class ForgetfulMeOptions {
   constructor() {
@@ -144,8 +149,26 @@ class ForgetfulMeOptions {
         return;
       }
 
-      // Initialize Supabase
-      await this.supabaseService.initialize();
+      // Initialize Supabase with retry mechanism
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          await this.supabaseService.initialize();
+          break; // Success, exit the retry loop
+        } catch (error) {
+          retryCount++;
+          console.log(`Supabase initialization attempt ${retryCount} failed:`, error);
+          
+          if (retryCount >= maxRetries) {
+            throw error; // Re-throw if we've exhausted retries
+          }
+          
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
 
       // Check if user is authenticated using auth state manager
       const isAuthenticated = await this.authStateManager.isAuthenticated();
@@ -637,3 +660,6 @@ class ForgetfulMeOptions {
 
 // Initialize options page immediately (DOM ready is handled in constructor)
 new ForgetfulMeOptions();
+
+// Export for testing
+export default ForgetfulMeOptions;

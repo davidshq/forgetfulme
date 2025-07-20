@@ -339,3 +339,91 @@ header h1 {
     transform: rotate(360deg);
   }
 }
+
+/* Edit Interface */
+.bookmark-info {
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #e9ecef;
+}
+
+.bookmark-info p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.bookmark-info p:last-child {
+  margin-bottom: 0;
+}
+
+.bookmark-info strong {
+  color: #495057;
+  font-weight: 600;
+}
+
+.bookmark-info a {
+  color: #007bff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.bookmark-info a:hover {
+  text-decoration: underline;
+}
+
+/* Edit Form */
+#editBookmarkForm {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+}
+
+#editBookmarkForm .form-group {
+  margin-bottom: 16px;
+}
+
+#editBookmarkForm label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #495057;
+  font-size: 14px;
+}
+
+#editBookmarkForm select,
+#editBookmarkForm input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+#editBookmarkForm select:focus,
+#editBookmarkForm input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Back Button */
+.ui-btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.ui-btn-secondary:hover {
+  background: #545b62;
+}

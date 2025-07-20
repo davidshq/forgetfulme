@@ -375,7 +375,7 @@ class UIComponents {
     if (onSubmit) {
       form.addEventListener('submit', e => {
         e.preventDefault();
-        onSubmit(e);
+        onSubmit(e, form);
       });
     }
 

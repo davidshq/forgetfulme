@@ -5,6 +5,9 @@ import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 import ConfigManager from './utils/config-manager.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
+import SupabaseConfig from './supabase-config.js';
+import SupabaseService from './supabase-service.js';
+import AuthUI from './auth-ui.js';
 
 class ForgetfulMePopup {
   constructor() {
@@ -112,8 +115,26 @@ class ForgetfulMePopup {
         return;
       }
 
-      // Initialize Supabase
-      await this.supabaseService.initialize();
+      // Initialize Supabase with retry mechanism
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (retryCount < maxRetries) {
+        try {
+          await this.supabaseService.initialize();
+          break; // Success, exit the retry loop
+        } catch (error) {
+          retryCount++;
+          console.log(`Supabase initialization attempt ${retryCount} failed:`, error);
+          
+          if (retryCount >= maxRetries) {
+            throw error; // Re-throw if we've exhausted retries
+          }
+          
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
 
       // Check if user is authenticated using auth state manager
       const isAuthenticated = await this.authStateManager.isAuthenticated();
@@ -303,18 +324,24 @@ class ForgetfulMePopup {
         tags.trim() ? tags.trim().split(',') : []
       );
 
-      await this.supabaseService.saveBookmark(bookmark);
-      UIMessages.success('Page marked as read!', this.appContainer);
+      const result = await this.supabaseService.saveBookmark(bookmark);
+      
+      if (result.isDuplicate) {
+        // Show edit interface for existing bookmark
+        this.showEditInterface(result);
+      } else {
+        UIMessages.success('Page marked as read!', this.appContainer);
 
-      // Clear tags input safely
-      UIComponents.DOM.setValue('tags', '');
+        // Clear tags input safely
+        UIComponents.DOM.setValue('tags', '');
 
-      this.loadRecentEntries();
+        this.loadRecentEntries();
 
-      // Close popup after a short delay
-      setTimeout(() => {
-        window.close();
-      }, 1500);
+        // Close popup after a short delay
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      }
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.markAsRead');
       UIMessages.error(errorResult.userMessage, this.appContainer);
@@ -445,7 +472,122 @@ class ForgetfulMePopup {
   openSettings() {
     chrome.runtime.openOptionsPage();
   }
+
+  showEditInterface(existingBookmark) {
+    // Create header
+    const header = document.createElement('header');
+    const title = document.createElement('h1');
+    title.textContent = 'Edit Bookmark';
+    header.appendChild(title);
+
+    const backBtn = UIComponents.createButton(
+      '← Back',
+      () => this.showMainInterface(),
+      'ui-btn-secondary',
+      { title: 'Back to main interface' }
+    );
+    header.appendChild(backBtn);
+
+    // Create main content container
+    const mainContent = document.createElement('div');
+    mainContent.className = 'main-content';
+
+    // Create info section
+    const infoSection = UIComponents.createSection(
+      'Bookmark Info',
+      'info-section'
+    );
+    infoSection.innerHTML = `
+      <div class="bookmark-info">
+        <p><strong>Title:</strong> ${existingBookmark.title}</p>
+        <p><strong>URL:</strong> <a href="${existingBookmark.url}" target="_blank">${existingBookmark.url}</a></p>
+        <p><strong>Current Status:</strong> ${this.formatStatus(existingBookmark.read_status)}</p>
+        <p><strong>Current Tags:</strong> ${existingBookmark.tags ? existingBookmark.tags.join(', ') : 'None'}</p>
+        <p><strong>Created:</strong> ${this.formatTime(new Date(existingBookmark.created_at).getTime())}</p>
+      </div>
+    `;
+
+    // Create edit form using UI components
+    const statusOptions = [
+      { value: 'read', text: 'Read' },
+      { value: 'good-reference', text: 'Good Reference' },
+      { value: 'low-value', text: 'Low Value' },
+      { value: 'revisit-later', text: 'Revisit Later' },
+    ];
+    
+    // Mark the current status as selected
+    statusOptions.forEach(option => {
+      if (option.value === existingBookmark.read_status) {
+        option.selected = true;
+      }
+    });
+
+    const editForm = UIComponents.createForm(
+      'editBookmarkForm',
+      (e) => {
+        e.preventDefault();
+        this.updateBookmark(existingBookmark.id);
+      },
+      [
+        {
+          type: 'select',
+          id: 'edit-read-status',
+          label: 'Update Status:',
+          options: {
+            options: statusOptions
+          },
+        },
+        {
+          type: 'text',
+          id: 'edit-tags',
+          label: 'Update Tags (comma separated):',
+          options: {
+            placeholder: 'research, tutorial, important',
+            value: existingBookmark.tags ? existingBookmark.tags.join(', ') : ''
+          },
+        },
+      ],
+      {
+        submitText: 'Update Bookmark'
+      }
+    );
+
+    // Assemble the interface
+    this.appContainer.innerHTML = '';
+    this.appContainer.appendChild(header);
+    this.appContainer.appendChild(mainContent);
+    mainContent.appendChild(infoSection);
+    mainContent.appendChild(editForm);
+  }
+
+  async updateBookmark(bookmarkId) {
+    try {
+      const status = UIComponents.DOM.getValue('edit-read-status') || 'read';
+      const tags = UIComponents.DOM.getValue('edit-tags') || '';
+
+      const updates = {
+        read_status: status,
+        tags: tags.trim() ? tags.trim().split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+        updated_at: new Date().toISOString()
+      };
+
+      await this.supabaseService.updateBookmark(bookmarkId, updates);
+      UIMessages.success('Bookmark updated successfully!', this.appContainer);
+
+      // Return to main interface after a short delay
+      setTimeout(() => {
+        this.showMainInterface();
+        this.loadRecentEntries();
+      }, 1500);
+    } catch (error) {
+      const errorResult = ErrorHandler.handle(error, 'popup.updateBookmark');
+      UIMessages.error(errorResult.userMessage, this.appContainer);
+    }
+  }
 }
 
 // Initialize popup immediately (DOM ready is handled in constructor)
 new ForgetfulMePopup();
+
+// Export for testing
+export default ForgetfulMePopup;
