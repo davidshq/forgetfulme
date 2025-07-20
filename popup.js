@@ -238,8 +238,9 @@ class ForgetfulMePopup {
 
   async markAsRead() {
     try {
-      const status = this.readStatusSelect.value
-      const tags = this.tagsInput.value.trim()
+      // Safely get form values using DOM utilities
+      const status = UIComponents.DOM.getValue('read-status') || 'read'
+      const tags = UIComponents.DOM.getValue('tags') || ''
       
       // Get current tab info
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -249,11 +250,14 @@ class ForgetfulMePopup {
         return
       }
 
-      const bookmark = BookmarkTransformer.fromCurrentTab(tab, status, tags ? tags.split(',') : [])
+      const bookmark = BookmarkTransformer.fromCurrentTab(tab, status, tags.trim() ? tags.trim().split(',') : [])
 
       await this.supabaseService.saveBookmark(bookmark)
       UIMessages.success('Page marked as read!', this.appContainer)
-      this.tagsInput.value = ''
+      
+      // Clear tags input safely
+      UIComponents.DOM.setValue('tags', '')
+      
       this.loadRecentEntries()
       
       // Close popup after a short delay
@@ -271,7 +275,10 @@ class ForgetfulMePopup {
     try {
       const bookmarks = await this.supabaseService.getBookmarks({ limit: 5 })
       
-      this.recentList.innerHTML = ''
+      const recentListEl = UIComponents.DOM.getElement('recent-list')
+      if (!recentListEl) return
+      
+      recentListEl.innerHTML = ''
       
       if (bookmarks.length === 0) {
         const emptyItem = UIComponents.createListItem({
@@ -281,7 +288,7 @@ class ForgetfulMePopup {
             statusText: 'No entries'
           }
         }, { className: 'recent-item empty' })
-        this.recentList.appendChild(emptyItem)
+        recentListEl.appendChild(emptyItem)
         return
       }
       
@@ -298,19 +305,22 @@ class ForgetfulMePopup {
           }
         }, { className: 'recent-item' })
         
-        this.recentList.appendChild(listItem)
+        recentListEl.appendChild(listItem)
       })
       
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries')
-      const errorItem = UIComponents.createListItem({
-        title: 'Error loading entries',
-        meta: {
-          status: 'error',
-          statusText: 'Error'
-        }
-      }, { className: 'recent-item error' })
-      this.recentList.appendChild(errorItem)
+      const recentListEl = UIComponents.DOM.getElement('recent-list')
+      if (recentListEl) {
+        const errorItem = UIComponents.createListItem({
+          title: 'Error loading entries',
+          meta: {
+            status: 'error',
+            statusText: 'Error'
+          }
+        }, { className: 'recent-item error' })
+        recentListEl.appendChild(errorItem)
+      }
       
       if (errorResult.shouldShowToUser) {
         UIMessages.error(errorResult.userMessage, this.appContainer)
@@ -324,14 +334,18 @@ class ForgetfulMePopup {
       const customStatusTypes = await this.configManager.getCustomStatusTypes()
       
       if (customStatusTypes.length > 0) {
-        // Clear default options and add custom ones
-        this.readStatusSelect.innerHTML = ''
-        customStatusTypes.forEach(status => {
-          const option = document.createElement('option')
-          option.value = status
-          option.textContent = this.formatStatus(status)
-          this.readStatusSelect.appendChild(option)
-        })
+        // Safely get the select element
+        const readStatusSelectEl = UIComponents.DOM.getElement('read-status')
+        if (readStatusSelectEl) {
+          // Clear default options and add custom ones
+          readStatusSelectEl.innerHTML = ''
+          customStatusTypes.forEach(status => {
+            const option = document.createElement('option')
+            option.value = status
+            option.textContent = this.formatStatus(status)
+            readStatusSelectEl.appendChild(option)
+          })
+        }
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.loadCustomStatusTypes', { silent: true })

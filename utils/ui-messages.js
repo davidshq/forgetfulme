@@ -252,7 +252,7 @@ class UIMessages {
    */
   static toast(message, type = 'info', options = {}) {
     // Create toast container if it doesn't exist
-    let toastContainer = document.getElementById('toast-container')
+    let toastContainer = UIComponents.DOM.getElement('toast-container')
     if (!toastContainer) {
       toastContainer = document.createElement('div')
       toastContainer.id = 'toast-container'

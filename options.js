@@ -102,7 +102,12 @@ class ForgetfulMeOptions {
     }
     
     if (this.importDataBtn) {
-      this.importDataBtn.addEventListener('click', () => this.importFile.click())
+      this.importDataBtn.addEventListener('click', () => {
+        const importFileEl = UIComponents.DOM.getElement('import-file')
+        if (importFileEl) {
+          importFileEl.click()
+        }
+      })
     }
     
     if (this.importFile) {
@@ -182,11 +187,13 @@ class ForgetfulMeOptions {
       { text: 'Most Used Status:', className: 'stat-item' }
     ], { className: 'stats-grid' })
     
-    // Add stat values
+    // Add stat values safely
     const statItems = statsGrid.querySelectorAll('.grid-item')
-    statItems[0].innerHTML = '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>'
-    statItems[1].innerHTML = '<span class="stat-label">Status Types:</span><span id="status-types-count" class="stat-value">-</span>'
-    statItems[2].innerHTML = '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>'
+    if (statItems.length >= 3) {
+      statItems[0].innerHTML = '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>'
+      statItems[1].innerHTML = '<span class="stat-label">Status Types:</span><span id="status-types-count" class="stat-value">-</span>'
+      statItems[2].innerHTML = '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>'
+    }
     
     statsSection.appendChild(statsGrid)
     mainContainer.appendChild(statsSection)
@@ -220,7 +227,12 @@ class ForgetfulMeOptions {
     const exportBtn = UIComponents.createButton('Export Data', () => this.exportData(), 'ui-btn-secondary', {
       id: 'export-data-btn'
     })
-    const importBtn = UIComponents.createButton('Import Data', () => this.importFile.click(), 'ui-btn-secondary', {
+    const importBtn = UIComponents.createButton('Import Data', () => {
+      const importFileEl = UIComponents.DOM.getElement('import-file')
+      if (importFileEl) {
+        importFileEl.click()
+      }
+    }, 'ui-btn-secondary', {
       id: 'import-data-btn'
     })
     const clearBtn = UIComponents.createButton('Clear All Data', () => this.clearData(), 'ui-btn-danger', {
@@ -286,9 +298,10 @@ class ForgetfulMeOptions {
   }
 
   loadStatusTypes(statusTypes) {
-    if (!this.statusTypesList) return
+    const statusTypesListEl = UIComponents.DOM.getElement('status-types-list')
+    if (!statusTypesListEl) return
     
-    this.statusTypesList.innerHTML = ''
+    statusTypesListEl.innerHTML = ''
     
     if (statusTypes.length === 0) {
       const emptyItem = UIComponents.createListItem({
@@ -298,7 +311,7 @@ class ForgetfulMeOptions {
           statusText: 'No status types'
         }
       }, { className: 'status-type-item empty' })
-      this.statusTypesList.appendChild(emptyItem)
+      statusTypesListEl.appendChild(emptyItem)
       return
     }
     
@@ -314,14 +327,19 @@ class ForgetfulMeOptions {
         ]
       }, { className: 'status-type-item' })
       
-      this.statusTypesList.appendChild(listItem)
+      statusTypesListEl.appendChild(listItem)
     })
   }
 
   async addStatusType() {
-    if (!this.newStatusInput) return
+    // Safely get the status input value
+    const statusValue = UIComponents.DOM.getValue('new-status')
+    if (!statusValue) {
+      UIMessages.error('Please enter a status type', this.appContainer)
+      return
+    }
     
-    const status = this.newStatusInput.value.trim().toLowerCase().replace(/\s+/g, '-')
+    const status = statusValue.trim().toLowerCase().replace(/\s+/g, '-')
     
     if (!status) {
       UIMessages.error('Please enter a status type', this.appContainer)
@@ -332,7 +350,9 @@ class ForgetfulMeOptions {
       await this.configManager.initialize()
       await this.configManager.addCustomStatusType(status)
       
-      this.newStatusInput.value = ''
+      // Clear input safely
+      UIComponents.DOM.setValue('new-status', '')
+      
       const customStatusTypes = await this.configManager.getCustomStatusTypes()
       this.loadStatusTypes(customStatusTypes)
       UIMessages.success('Status type added successfully', this.appContainer)
@@ -359,13 +379,18 @@ class ForgetfulMeOptions {
   }
 
   loadStatistics(bookmarks, statusTypes) {
-    if (!this.totalEntries || !this.statusTypesCount || !this.mostUsedStatus) return
+    // Safely update statistics using DOM utilities
+    const totalEntriesEl = UIComponents.DOM.getElement('total-entries')
+    const statusTypesCountEl = UIComponents.DOM.getElement('status-types-count')
+    const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status')
     
-    // Total entries
-    this.totalEntries.textContent = bookmarks.length
+    if (totalEntriesEl) {
+      totalEntriesEl.textContent = bookmarks.length
+    }
     
-    // Status types count
-    this.statusTypesCount.textContent = statusTypes.length
+    if (statusTypesCountEl) {
+      statusTypesCountEl.textContent = statusTypes.length
+    }
     
     // Most used status
     const statusCounts = {}
@@ -376,17 +401,20 @@ class ForgetfulMeOptions {
     const mostUsed = Object.entries(statusCounts)
       .sort(([,a], [,b]) => b - a)[0]
     
-    if (mostUsed) {
-      this.mostUsedStatus.textContent = this.formatStatus(mostUsed[0])
-    } else {
-      this.mostUsedStatus.textContent = 'None'
+    if (mostUsedStatusEl) {
+      if (mostUsed) {
+        mostUsedStatusEl.textContent = this.formatStatus(mostUsed[0])
+      } else {
+        mostUsedStatusEl.textContent = 'None'
+      }
     }
   }
 
   loadRecentEntries(bookmarks) {
-    if (!this.recentEntriesList) return
+    const recentEntriesListEl = UIComponents.DOM.getElement('recent-entries-list')
+    if (!recentEntriesListEl) return
     
-    this.recentEntriesList.innerHTML = ''
+    recentEntriesListEl.innerHTML = ''
     
     if (bookmarks.length === 0) {
       const emptyItem = UIComponents.createListItem({
@@ -396,7 +424,7 @@ class ForgetfulMeOptions {
           statusText: 'No entries'
         }
       }, { className: 'recent-item empty' })
-      this.recentEntriesList.appendChild(emptyItem)
+      recentEntriesListEl.appendChild(emptyItem)
       return
     }
     
@@ -415,7 +443,7 @@ class ForgetfulMeOptions {
         }
       }, { className: 'recent-item' })
       
-      this.recentEntriesList.appendChild(listItem)
+      recentEntriesListEl.appendChild(listItem)
     })
   }
 

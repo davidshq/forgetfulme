@@ -178,8 +178,8 @@ class ConfigUI {
       const config = await this.config.getConfiguration()
       
       if (config) {
-        const urlEl = container.querySelector('#statusUrl')
-        const keyEl = container.querySelector('#statusKey')
+        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container)
+        const keyEl = UIComponents.DOM.querySelector('#statusKey', container)
         
         if (urlEl) urlEl.textContent = config.url || 'Not set'
         if (keyEl) keyEl.textContent = config.anonKey ? `${config.anonKey.substring(0, 20)}...` : 'Not set'
@@ -187,9 +187,9 @@ class ConfigUI {
         // Test connection
         await this.testConnection(container)
       } else {
-        const urlEl = container.querySelector('#statusUrl')
-        const keyEl = container.querySelector('#statusKey')
-        const connectionEl = container.querySelector('#statusConnection')
+        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container)
+        const keyEl = UIComponents.DOM.querySelector('#statusKey', container)
+        const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container)
         
         if (urlEl) urlEl.textContent = 'Not configured'
         if (keyEl) keyEl.textContent = 'Not configured'
@@ -202,7 +202,7 @@ class ConfigUI {
   }
 
   async testConnection(container) {
-    const connectionEl = container.querySelector('#statusConnection')
+    const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container)
     
     try {
       await this.config.initialize()
@@ -219,8 +219,8 @@ class ConfigUI {
   }
 
   bindStatusEvents(container) {
-    const testBtn = container.querySelector('#testConnectionBtn')
-    const editBtn = container.querySelector('#editConfigBtn')
+    const testBtn = UIComponents.DOM.querySelector('#testConnectionBtn', container)
+    const editBtn = UIComponents.DOM.querySelector('#editConfigBtn', container)
     
     if (testBtn) {
       testBtn.addEventListener('click', async () => {
