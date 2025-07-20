@@ -26,6 +26,11 @@ class ForgetfulMeBackground {
   constructor() {
     /** @type {Object|null} Current authentication state */
     this.authState = null;
+    /** @type {Object} Cache for URL status to avoid repeated database calls */
+    this.urlStatusCache = new Map();
+    /** @type {number} Cache timeout in milliseconds (5 minutes) */
+    this.cacheTimeout = 5 * 60 * 1000;
+    
     this.initializeEventListeners();
     this.initializeAuthState();
   }
@@ -55,6 +60,8 @@ class ForgetfulMeBackground {
       console.error('Background: Error initializing auth state:', error);
     }
   }
+
+
 
   /**
    * Set up all Chrome extension event listeners
@@ -92,6 +99,32 @@ class ForgetfulMeBackground {
         this.handleStorageAuthChange(changes.auth_session.newValue);
       }
     });
+
+    // Handle tab updates to check URL status
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      if (changeInfo.status === 'complete' && tab.url) {
+        this.checkUrlStatus(tab);
+      }
+    });
+
+    // Handle tab activation to check URL status
+    chrome.tabs.onActivated.addListener(async (activeInfo) => {
+      try {
+        const tab = await chrome.tabs.get(activeInfo.tabId);
+        if (tab.url) {
+          this.checkUrlStatus(tab);
+        }
+      } catch (error) {
+        console.debug('Background: Error getting active tab:', error.message);
+      }
+    });
+
+    // Handle action button click to check URL status
+    chrome.action.onClicked.addListener(async (tab) => {
+      if (tab.url) {
+        await this.checkUrlStatus(tab);
+      }
+    });
   }
 
   async handleMessage(message, sender, sendResponse) {
@@ -99,6 +132,26 @@ class ForgetfulMeBackground {
       switch (message.type) {
         case 'MARK_AS_READ':
           await this.handleMarkAsRead(message.data);
+          sendResponse({ success: true });
+          break;
+
+        case 'BOOKMARK_SAVED':
+          // Clear cache for the saved URL to force fresh check
+          if (message.data && message.data.url) {
+            this.clearUrlCache(message.data.url);
+            // Update icon to show saved state
+            this.updateIconForUrl(message.data.url, true);
+          }
+          sendResponse({ success: true });
+          break;
+
+        case 'BOOKMARK_UPDATED':
+          // Clear cache for the updated URL to force fresh check
+          if (message.data && message.data.url) {
+            this.clearUrlCache(message.data.url);
+            // Update icon to show saved state
+            this.updateIconForUrl(message.data.url, true);
+          }
           sendResponse({ success: true });
           break;
 
@@ -115,6 +168,29 @@ class ForgetfulMeBackground {
         case 'GET_CONFIG_SUMMARY':
           const summary = this.getAuthSummary();
           sendResponse({ success: true, summary });
+          break;
+
+        case 'CHECK_URL_STATUS':
+          // Handle request to check current tab URL status
+          const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (currentTab && currentTab.url) {
+            await this.checkUrlStatus(currentTab);
+          }
+          sendResponse({ success: true });
+          break;
+
+        case 'URL_STATUS_RESULT':
+          // Handle URL status result from popup
+          if (message.data && message.data.url && typeof message.data.isSaved === 'boolean') {
+            // Cache the result
+            this.urlStatusCache.set(message.data.url, {
+              isSaved: message.data.isSaved,
+              timestamp: Date.now()
+            });
+            // Update icon
+            this.updateIconForUrl(message.data.url, message.data.isSaved);
+          }
+          sendResponse({ success: true });
           break;
 
         default:
@@ -177,6 +253,91 @@ class ForgetfulMeBackground {
       }
     } catch (error) {
       console.debug('Background: Error updating badge:', error.message);
+    }
+  }
+
+  /**
+   * Check if a URL is already saved and update icon accordingly
+   * @async
+   * @method checkUrlStatus
+   * @param {Object} tab - The tab object containing URL information
+   * @description Checks if the URL is already saved and updates the extension icon
+   */
+  async checkUrlStatus(tab) {
+    try {
+      // Skip browser pages and extension pages
+      if (!tab.url || 
+          tab.url.startsWith('chrome://') || 
+          tab.url.startsWith('chrome-extension://') ||
+          tab.url.startsWith('about:') ||
+          tab.url.startsWith('moz-extension://')) {
+        this.updateIconForUrl(null, false);
+        return;
+      }
+
+      // Check if user is authenticated
+      if (!this.authState) {
+        this.updateIconForUrl(null, false);
+        return;
+      }
+
+      // Check cache first
+      const cacheKey = tab.url;
+      const cached = this.urlStatusCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+        this.updateIconForUrl(tab.url, cached.isSaved);
+        return;
+      }
+
+      // For now, show default state since we can't access database from background
+      // The popup will handle the actual URL checking when opened
+      this.updateIconForUrl(tab.url, false);
+
+    } catch (error) {
+      console.debug('Background: Error checking URL status:', error.message);
+      // On error, show default icon
+      this.updateIconForUrl(null, false);
+    }
+  }
+
+  /**
+   * Update the extension icon based on URL save status
+   * @method updateIconForUrl
+   * @param {string|null} url - The URL being checked
+   * @param {boolean} isSaved - Whether the URL is already saved
+   * @description Updates the extension icon and badge to indicate save status
+   */
+  updateIconForUrl(url, isSaved) {
+    try {
+      if (!url) {
+        // Default state - no URL or browser page
+        chrome.action.setBadgeText({ text: '' });
+        return;
+      }
+
+      if (isSaved) {
+        // URL is already saved - show checkmark
+        chrome.action.setBadgeText({ text: '✓' });
+        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+      } else {
+        // URL is not saved - show plus sign
+        chrome.action.setBadgeText({ text: '+' });
+        chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
+      }
+    } catch (error) {
+      console.debug('Background: Error updating icon:', error.message);
+    }
+  }
+
+  /**
+   * Clear URL status cache when bookmark is saved or updated
+   * @method clearUrlCache
+   * @param {string} url - The URL to clear from cache
+   * @description Removes a URL from the cache to force fresh check
+   */
+  clearUrlCache(url) {
+    if (url) {
+      this.urlStatusCache.delete(url);
     }
   }
 

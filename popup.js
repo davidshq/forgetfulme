@@ -50,6 +50,9 @@ class ForgetfulMePopup {
       this.authStateManager
     );
 
+    /** @type {string|null} Current bookmark URL being edited */
+    this.currentBookmarkUrl = null;
+
     // Initialize after DOM is ready
     this.initializeAsync();
   }
@@ -219,6 +222,8 @@ class ForgetfulMePopup {
         this.showMainInterface();
         this.loadRecentEntries();
         this.loadCustomStatusTypes();
+        // Check current tab URL status
+        await this.checkCurrentTabUrlStatus();
       } else {
         this.showAuthInterface();
       }
@@ -413,6 +418,16 @@ class ForgetfulMePopup {
 
         this.loadRecentEntries();
 
+        // Notify background script about saved bookmark
+        try {
+          await chrome.runtime.sendMessage({
+            type: 'BOOKMARK_SAVED',
+            data: { url: bookmark.url }
+          });
+        } catch (error) {
+          console.debug('Popup: Error notifying background about saved bookmark:', error.message);
+        }
+
         // Close popup after a short delay
         setTimeout(() => {
           window.close();
@@ -549,7 +564,53 @@ class ForgetfulMePopup {
     chrome.runtime.openOptionsPage();
   }
 
+  /**
+   * Check the current tab URL status and notify background script
+   * @async
+   * @method checkCurrentTabUrlStatus
+   * @description Checks if the current tab URL is already saved and notifies background script
+   */
+  async checkCurrentTabUrlStatus() {
+    try {
+      // Get current tab
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab || !tab.url) {
+        return;
+      }
+
+      // Skip browser pages and extension pages
+      if (tab.url.startsWith('chrome://') || 
+          tab.url.startsWith('chrome-extension://') ||
+          tab.url.startsWith('about:') ||
+          tab.url.startsWith('moz-extension://')) {
+        return;
+      }
+
+      // Check if URL is already saved
+      try {
+        const bookmark = await this.supabaseService.getBookmarkByUrl(tab.url);
+        const isSaved = !!bookmark;
+
+        // Send result to background script
+        await chrome.runtime.sendMessage({
+          type: 'URL_STATUS_RESULT',
+          data: { url: tab.url, isSaved }
+        });
+      } catch (error) {
+        console.debug('Popup: Error checking URL in database:', error.message);
+        // Send default state on error
+        await chrome.runtime.sendMessage({
+          type: 'URL_STATUS_RESULT',
+          data: { url: tab.url, isSaved: false }
+        });
+      }
+    } catch (error) {
+      console.debug('Popup: Error checking URL status:', error.message);
+    }
+  }
+
   showEditInterface(existingBookmark) {
+    this.currentBookmarkUrl = existingBookmark.url;
     // Create header
     const header = document.createElement('header');
     const title = document.createElement('h1');
@@ -649,6 +710,16 @@ class ForgetfulMePopup {
 
       await this.supabaseService.updateBookmark(bookmarkId, updates);
       UIMessages.success('Bookmark updated successfully!', this.appContainer);
+
+      // Notify background script about updated bookmark
+      try {
+        await chrome.runtime.sendMessage({
+          type: 'BOOKMARK_UPDATED',
+          data: { url: updates.url || this.currentBookmarkUrl }
+        });
+      } catch (error) {
+        console.debug('Popup: Error notifying background about updated bookmark:', error.message);
+      }
 
       // Return to main interface after a short delay
       setTimeout(() => {

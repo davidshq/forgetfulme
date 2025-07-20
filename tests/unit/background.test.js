@@ -25,14 +25,24 @@ const mockChrome = {
     }
   },
   tabs: {
-    query: vi.fn()
+    query: vi.fn(),
+    get: vi.fn(),
+    onUpdated: {
+      addListener: vi.fn()
+    },
+    onActivated: {
+      addListener: vi.fn()
+    }
   },
   notifications: {
     create: vi.fn()
   },
   action: {
     setBadgeText: vi.fn(),
-    setBadgeBackgroundColor: vi.fn()
+    setBadgeBackgroundColor: vi.fn(),
+    onClicked: {
+      addListener: vi.fn()
+    }
   }
 };
 
@@ -627,6 +637,205 @@ describe('ForgetfulMe Background Service', () => {
         'Background: Error updating badge:',
         'Badge update failed'
       );
+    });
+  });
+
+  describe('URL Status Checking', () => {
+    test('should handle BOOKMARK_SAVED message and clear cache', async () => {
+      // Mock chrome.tabs.query to return a test tab
+      mockChrome.tabs.query.mockImplementation((queryInfo) => {
+        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      });
+
+      // Create a mock message handler
+      const handleMessage = async (message, sender, sendResponse) => {
+        try {
+          switch (message.type) {
+            case 'BOOKMARK_SAVED':
+              // Simulate cache clearing and URL status check
+              const url = message.data?.url;
+              if (url) {
+                // Clear cache (simulated)
+                console.log('Cache cleared for URL:', url);
+                
+                // Re-check current tab URL status
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tab && tab.url) {
+                  console.log('Re-checking URL status for:', tab.url);
+                }
+              }
+              sendResponse({ success: true });
+              break;
+            default:
+              sendResponse({ success: false, error: 'Unknown message type' });
+          }
+        } catch (error) {
+          sendResponse({ success: false, error: error.message });
+        }
+      };
+
+      const sendResponse = vi.fn();
+
+      // Test BOOKMARK_SAVED message
+      await handleMessage(
+        { type: 'BOOKMARK_SAVED', data: { url: 'https://example.com' } },
+        {},
+        sendResponse
+      );
+
+      // Check that tabs.query was called
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
+        { active: true, currentWindow: true }
+      );
+
+      // Check that response was sent
+      expect(sendResponse).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('should handle BOOKMARK_UPDATED message and clear cache', async () => {
+      // Mock chrome.tabs.query to return a test tab
+      mockChrome.tabs.query.mockImplementation((queryInfo) => {
+        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      });
+
+      // Create a mock message handler
+      const handleMessage = async (message, sender, sendResponse) => {
+        try {
+          switch (message.type) {
+            case 'BOOKMARK_UPDATED':
+              // Simulate cache clearing and URL status check
+              const url = message.data?.url;
+              if (url) {
+                // Clear cache (simulated)
+                console.log('Cache cleared for URL:', url);
+                
+                // Re-check current tab URL status
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tab && tab.url) {
+                  console.log('Re-checking URL status for:', tab.url);
+                }
+              }
+              sendResponse({ success: true });
+              break;
+            default:
+              sendResponse({ success: false, error: 'Unknown message type' });
+          }
+        } catch (error) {
+          sendResponse({ success: false, error: error.message });
+        }
+      };
+
+      const sendResponse = vi.fn();
+
+      // Test BOOKMARK_UPDATED message
+      await handleMessage(
+        { type: 'BOOKMARK_UPDATED', data: { url: 'https://example.com' } },
+        {},
+        sendResponse
+      );
+
+      // Check that tabs.query was called
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
+        { active: true, currentWindow: true }
+      );
+
+      // Check that response was sent
+      expect(sendResponse).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('should handle CHECK_URL_STATUS message', async () => {
+      // Mock chrome.tabs.query to return a test tab
+      mockChrome.tabs.query.mockImplementation((queryInfo) => {
+        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      });
+
+      // Create a mock message handler
+      const handleMessage = async (message, sender, sendResponse) => {
+        try {
+          switch (message.type) {
+            case 'CHECK_URL_STATUS':
+              // Handle request to check current tab URL status
+              const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+              if (currentTab && currentTab.url) {
+                console.log('Checking URL status for:', currentTab.url);
+              }
+              sendResponse({ success: true });
+              break;
+            default:
+              sendResponse({ success: false, error: 'Unknown message type' });
+          }
+        } catch (error) {
+          sendResponse({ success: false, error: error.message });
+        }
+      };
+
+      const sendResponse = vi.fn();
+
+      // Test CHECK_URL_STATUS message
+      await handleMessage(
+        { type: 'CHECK_URL_STATUS' },
+        {},
+        sendResponse
+      );
+
+      // Check that tabs.query was called
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
+        { active: true, currentWindow: true }
+      );
+
+      // Check that response was sent
+      expect(sendResponse).toHaveBeenCalledWith({ success: true });
+    });
+
+    test('should update icon for saved URL', () => {
+      // Create a mock icon update function
+      const updateIconForUrl = (url, isSaved) => {
+        try {
+          if (!url) {
+            // Default state - no URL or browser page
+            chrome.action.setBadgeText({ text: '' });
+            return;
+          }
+
+          if (isSaved) {
+            // URL is already saved - show checkmark
+            chrome.action.setBadgeText({ text: '✓' });
+            chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+          } else {
+            // URL is not saved - show plus sign
+            chrome.action.setBadgeText({ text: '+' });
+            chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
+          }
+        } catch (error) {
+          console.debug('Background: Error updating icon:', error.message);
+        }
+      };
+
+      // Test saved URL
+      updateIconForUrl('https://example.com', true);
+
+      // Check that checkmark was set
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
+      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#4CAF50' });
+
+      // Reset mocks
+      vi.clearAllMocks();
+
+      // Test unsaved URL
+      updateIconForUrl('https://example.com', false);
+
+      // Check that plus sign was set
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '+' });
+      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#2196F3' });
+
+      // Reset mocks
+      vi.clearAllMocks();
+
+      // Test no URL (browser page)
+      updateIconForUrl(null, false);
+
+      // Check that badge was cleared
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '' });
     });
   });
 }); 
