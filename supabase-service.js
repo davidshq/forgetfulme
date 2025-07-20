@@ -1,14 +1,61 @@
-// Supabase service for ForgetfulMe extension
+/**
+ * @fileoverview Supabase service for ForgetfulMe extension
+ * @module supabase-service
+ * @description Handles all Supabase database operations and real-time subscriptions
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import ErrorHandler from './utils/error-handler.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
 
+/**
+ * Supabase service for ForgetfulMe extension
+ * @class SupabaseService
+ * @description Manages all Supabase database operations including bookmarks, user preferences,
+ * and real-time subscriptions
+ * 
+ * @example
+ * const supabaseConfig = new SupabaseConfig();
+ * const supabaseService = new SupabaseService(supabaseConfig);
+ * await supabaseService.initialize();
+ * 
+ * // Save a bookmark
+ * const bookmark = await supabaseService.saveBookmark({
+ *   url: 'https://example.com',
+ *   title: 'Example Page',
+ *   readStatus: 'read'
+ * });
+ */
 class SupabaseService {
+  /**
+   * Initialize the Supabase service with configuration
+   * @constructor
+   * @param {SupabaseConfig} supabaseConfig - The Supabase configuration instance
+   * @description Sets up the service with Supabase configuration and real-time manager
+   */
   constructor(supabaseConfig) {
+    /** @type {SupabaseConfig} Supabase configuration instance */
     this.config = supabaseConfig;
+    /** @type {Object|null} Supabase client instance */
     this.supabase = null;
+    /** @type {RealtimeManager|null} Real-time subscription manager */
     this.realtimeManager = null;
   }
 
+  /**
+   * Initialize the Supabase service
+   * @async
+   * @method initialize
+   * @description Initializes the Supabase configuration and sets up the client and real-time manager
+   * @throws {Error} When initialization fails
+   * 
+   * @example
+   * const service = new SupabaseService(config);
+   * await service.initialize();
+   */
   async initialize() {
     console.log('Initializing SupabaseService...');
     await this.config.initialize();
@@ -18,7 +65,27 @@ class SupabaseService {
     this.realtimeManager = new RealtimeManager(this.supabase);
   }
 
-  // Bookmark operations
+  /**
+   * Save a bookmark to the database
+   * @async
+   * @method saveBookmark
+   * @param {Object} bookmark - The bookmark object to save
+   * @param {string} bookmark.url - The URL of the bookmark
+   * @param {string} bookmark.title - The title of the bookmark
+   * @param {string} [bookmark.description] - Optional description
+   * @param {string} bookmark.readStatus - The read status (e.g., 'read', 'good_reference')
+   * @param {string[]} [bookmark.tags] - Optional array of tags
+   * @returns {Promise<Object>} The saved bookmark object
+   * @throws {Error} When user is not authenticated or validation fails
+   * 
+   * @example
+   * const bookmark = await supabaseService.saveBookmark({
+   *   url: 'https://example.com',
+   *   title: 'Example Page',
+   *   readStatus: 'read',
+   *   tags: ['research', 'important']
+   * });
+   */
   async saveBookmark(bookmark) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(

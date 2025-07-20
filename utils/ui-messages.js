@@ -1,6 +1,38 @@
-// UI Message Handler for ForgetfulMe Extension
+/**
+ * @fileoverview UI Message Handler for ForgetfulMe Extension
+ * @module ui-messages
+ * @description Provides centralized message display functionality for user feedback
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
+/**
+ * UI Message Handler for ForgetfulMe Extension
+ * @class UIMessages
+ * @description Provides centralized message display functionality for user feedback
+ * 
+ * @example
+ * // Show a success message
+ * UIMessages.success('Bookmark saved successfully!', container);
+ * 
+ * // Show an error message
+ * UIMessages.error('Failed to save bookmark', container);
+ * 
+ * // Show a confirmation dialog
+ * UIMessages.confirm('Delete this bookmark?', onConfirm, onCancel, container);
+ */
 class UIMessages {
-  // Message types
+  /**
+   * Available message types for UI feedback
+   * @static
+   * @type {Object}
+   * @property {string} SUCCESS - Success message type
+   * @property {string} ERROR - Error message type
+   * @property {string} WARNING - Warning message type
+   * @property {string} INFO - Information message type
+   */
   static MESSAGE_TYPES = {
     SUCCESS: 'success',
     ERROR: 'error',

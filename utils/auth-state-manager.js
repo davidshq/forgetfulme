@@ -1,12 +1,52 @@
-// Authentication State Manager for ForgetfulMe extension
-// Handles authentication state synchronization across all contexts
+/**
+ * @fileoverview Authentication State Manager for ForgetfulMe extension
+ * @module auth-state-manager
+ * @description Handles authentication state synchronization across all extension contexts
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
+/**
+ * Authentication State Manager for ForgetfulMe extension
+ * @class AuthStateManager
+ * @description Manages authentication state synchronization across all extension contexts
+ * including popup, background, and options pages
+ * 
+ * @example
+ * const authManager = new AuthStateManager();
+ * await authManager.initialize();
+ * authManager.addListener('authStateChanged', (session) => {
+ *   console.log('Auth state changed:', session);
+ * });
+ */
 class AuthStateManager {
+  /**
+   * Initialize the authentication state manager
+   * @constructor
+   * @description Sets up the auth state manager with initial state and listener management
+   */
   constructor() {
+    /** @type {Object|null} Current authentication session */
     this.authState = null;
+    /** @type {Set} Set of event listeners */
     this.listeners = new Set();
+    /** @type {boolean} Whether the manager has been initialized */
     this.initialized = false;
   }
 
+  /**
+   * Initialize the authentication state manager
+   * @async
+   * @method initialize
+   * @description Loads current auth state from storage and sets up change listeners
+   * @throws {Error} When initialization fails
+   * 
+   * @example
+   * const authManager = new AuthStateManager();
+   * await authManager.initialize();
+   */
   async initialize() {
     if (this.initialized) return;
 
@@ -33,11 +73,38 @@ class AuthStateManager {
     }
   }
 
+  /**
+   * Get the current authentication state
+   * @async
+   * @method getAuthState
+   * @description Returns the current authentication session object
+   * @returns {Promise<Object|null>} Current authentication session or null if not authenticated
+   * 
+   * @example
+   * const session = await authManager.getAuthState();
+   * if (session) {
+   *   console.log('User is authenticated:', session.user.email);
+   * }
+   */
   async getAuthState() {
     await this.ensureInitialized();
     return this.authState;
   }
 
+  /**
+   * Set the authentication state and notify all contexts
+   * @async
+   * @method setAuthState
+   * @param {Object|null} session - The authentication session object or null to clear
+   * @description Updates the auth state, saves to storage, and notifies all extension contexts
+   * 
+   * @example
+   * // Set authenticated state
+   * await authManager.setAuthState(session);
+   * 
+   * // Clear authentication
+   * await authManager.setAuthState(null);
+   */
   async setAuthState(session) {
     await this.ensureInitialized();
 

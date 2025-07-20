@@ -1,4 +1,14 @@
-// Popup script for ForgetfulMe extension with Supabase integration
+/**
+ * @fileoverview Popup script for ForgetfulMe extension with Supabase integration
+ * @module popup
+ * @description Main popup interface for the ForgetfulMe Chrome extension.
+ * Handles user authentication, bookmark management, and UI interactions.
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import UIComponents from './utils/ui-components.js';
 import AuthStateManager from './utils/auth-state-manager.js';
 import ErrorHandler from './utils/error-handler.js';
@@ -9,12 +19,31 @@ import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
 
+/**
+ * Main popup class for the ForgetfulMe Chrome extension
+ * @class ForgetfulMePopup
+ * @description Manages the popup interface, user authentication, and bookmark operations
+ * 
+ * @example
+ * // The popup is automatically instantiated when the popup.html loads
+ * // No manual instantiation required
+ */
 class ForgetfulMePopup {
+  /**
+   * Initialize the popup with all required services and managers
+   * @constructor
+   * @description Sets up the popup with authentication, configuration, and service dependencies
+   */
   constructor() {
+    /** @type {ConfigManager} Configuration manager for user preferences */
     this.configManager = new ConfigManager();
+    /** @type {AuthStateManager} Authentication state manager */
     this.authStateManager = new AuthStateManager();
+    /** @type {SupabaseConfig} Supabase configuration manager */
     this.supabaseConfig = new SupabaseConfig();
+    /** @type {SupabaseService} Supabase service for data operations */
     this.supabaseService = new SupabaseService(this.supabaseConfig);
+    /** @type {AuthUI} Authentication UI manager */
     this.authUI = new AuthUI(
       this.supabaseConfig,
       () => this.onAuthSuccess(),
@@ -25,6 +54,17 @@ class ForgetfulMePopup {
     this.initializeAsync();
   }
 
+  /**
+   * Initialize the popup asynchronously after DOM is ready
+   * @async
+   * @method initializeAsync
+   * @description Performs all initialization tasks including DOM setup, app initialization, and auth state setup
+   * @throws {Error} When initialization fails
+   * 
+   * @example
+   * // Called automatically in constructor
+   * await popup.initializeAsync();
+   */
   async initializeAsync() {
     try {
       // Wait for DOM to be ready
@@ -39,6 +79,17 @@ class ForgetfulMePopup {
     }
   }
 
+  /**
+   * Initialize authentication state and set up listeners
+   * @async
+   * @method initializeAuthState
+   * @description Sets up authentication state management and listeners for auth state changes
+   * @throws {Error} When auth state initialization fails
+   * 
+   * @example
+   * // Called during popup initialization
+   * await popup.initializeAuthState();
+   */
   async initializeAuthState() {
     try {
       await this.authStateManager.initialize();
@@ -61,6 +112,16 @@ class ForgetfulMePopup {
     }
   }
 
+  /**
+   * Handle authentication state changes and update UI accordingly
+   * @method handleAuthStateChange
+   * @param {Object|null} session - The current session object or null if not authenticated
+   * @description Updates the UI based on authentication state - shows main interface for authenticated users or auth interface for unauthenticated users
+   * 
+   * @example
+   * // Called automatically when auth state changes
+   * popup.handleAuthStateChange(session);
+   */
   handleAuthStateChange(session) {
     console.log(
       'Popup: Auth state changed:',
@@ -79,15 +140,30 @@ class ForgetfulMePopup {
     }
   }
 
+  /**
+   * Initialize DOM element references
+   * @method initializeElements
+   * @description Sets up references to key DOM elements used throughout the popup
+   * 
+   * @example
+   * // Called during popup initialization
+   * popup.initializeElements();
+   */
   initializeElements() {
     // Initialize elements that exist in the initial HTML
+    /** @type {HTMLElement} Main app container */
     this.appContainer = UIComponents.DOM.getElement('app');
 
     // Try to get dynamically created elements with safe access
+    /** @type {HTMLSelectElement} Status selection dropdown */
     this.readStatusSelect = UIComponents.DOM.getElement('read-status');
+    /** @type {HTMLInputElement} Tags input field */
     this.tagsInput = UIComponents.DOM.getElement('tags');
+    /** @type {HTMLButtonElement} Form submit button */
     this.markReadBtn = UIComponents.DOM.querySelector('button[type="submit"]'); // Form submit button
+    /** @type {HTMLButtonElement} Settings button */
     this.settingsBtn = UIComponents.DOM.getElement('settings-btn');
+    /** @type {HTMLElement} Recent entries list container */
     this.recentList = UIComponents.DOM.getElement('recent-list');
   }
 

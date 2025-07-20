@@ -1,5 +1,20 @@
+/**
+ * @fileoverview Vitest configuration for ForgetfulMe Chrome Extension
+ * @module vitest-config
+ * @description Configuration for unit testing with Vitest including coverage and test setup
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { defineConfig } from 'vitest/config';
 
+/**
+ * Vitest configuration for ForgetfulMe Chrome Extension
+ * @type {import('vitest').UserConfig}
+ * @description Comprehensive test configuration with coverage reporting and proper test environment setup
+ */
 export default defineConfig({
   test: {
     // Test environment

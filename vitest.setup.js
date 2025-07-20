@@ -1,7 +1,20 @@
-// Vitest setup file for ForgetfulMe Chrome Extension tests
+/**
+ * @fileoverview Vitest setup file for ForgetfulMe Chrome Extension tests
+ * @module vitest-setup
+ * @description Provides comprehensive mocking for Chrome APIs and DOM elements for unit testing
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { vi } from 'vitest';
 
-// Mock console methods
+/**
+ * Mock console methods for testing
+ * @type {Object}
+ * @description Provides mocked console methods that can be tracked in tests
+ */
 global.console = {
   error: vi.fn(),
   warn: vi.fn(),
@@ -10,7 +23,11 @@ global.console = {
   debug: vi.fn(),
 };
 
-// Mock Chrome API
+/**
+ * Mock Chrome API for testing
+ * @type {Object}
+ * @description Provides comprehensive mocking of Chrome extension APIs for unit testing
+ */
 global.chrome = {
   storage: {
     sync: {
@@ -55,7 +72,13 @@ global.chrome = {
   }
 };
 
-// Enhanced DOM element mock factory
+/**
+ * Enhanced DOM element mock factory
+ * @function createMockElement
+ * @param {string} tagName - The HTML tag name for the element
+ * @returns {Object} Mock DOM element with full functionality
+ * @description Creates a comprehensive mock DOM element with event handling and DOM manipulation capabilities
+ */
 const createMockElement = (tagName) => {
   const element = {
     tagName: tagName.toUpperCase(),

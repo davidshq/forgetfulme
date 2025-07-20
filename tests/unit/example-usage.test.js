@@ -1,9 +1,19 @@
+/**
+ * @fileoverview Enhanced Test Utilities Example
+ * @module example-usage-test
+ * @description Demonstrates proper usage of test factories and utilities
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { createTestData, createAssertionHelpers } from '../helpers/test-factories.js';
 
 /**
  * Enhanced Test Utilities Example
- * Demonstrates proper usage of test factories and utilities
+ * @description Demonstrates proper usage of test factories and utilities
  */
 
 describe('Enhanced Test Utilities Example', () => {

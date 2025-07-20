@@ -1,17 +1,54 @@
+/**
+ * @fileoverview Extension helper for Playwright E2E testing
+ * @module extension-helper
+ * @description Provides utilities for testing Chrome extension functionality with Playwright
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Extension helper for Playwright E2E testing
+ * @class ExtensionHelper
+ * @description Provides utilities for testing Chrome extension functionality with Playwright
+ * 
+ * @example
+ * const helper = new ExtensionHelper(page, context);
+ * await helper.loadExtension();
+ * await helper.openPopup();
+ */
 class ExtensionHelper {
+  /**
+   * Initialize the extension helper
+   * @constructor
+   * @param {import('@playwright/test').Page} page - Playwright page object
+   * @param {import('@playwright/test').BrowserContext} context - Playwright browser context
+   * @description Sets up the helper with Playwright page and context objects
+   */
   constructor(page, context) {
+    /** @type {import('@playwright/test').Page} Playwright page object */
     this.page = page;
+    /** @type {import('@playwright/test').BrowserContext} Playwright browser context */
     this.context = context;
   }
 
   /**
    * Load the Chrome extension and return the extension ID
+   * @async
+   * @method loadExtension
+   * @returns {Promise<string>} The extension ID
+   * @description Loads the Chrome extension into the browser context and returns the extension ID
+   * 
+   * @example
+   * const extensionId = await helper.loadExtension();
+   * console.log('Extension loaded with ID:', extensionId);
    */
   async loadExtension() {
     const extensionPath = path.join(__dirname, '../../');

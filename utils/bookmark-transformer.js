@@ -1,7 +1,29 @@
 /**
- * BookmarkTransformer - Unified bookmark data transformation utility
- * Consolidates all bookmark data transformation logic to eliminate duplication
+ * @fileoverview BookmarkTransformer - Unified bookmark data transformation utility
+ * @module bookmark-transformer
+ * @description Consolidates all bookmark data transformation logic to eliminate duplication
  * and ensure consistent data handling across the application.
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
+/**
+ * BookmarkTransformer - Unified bookmark data transformation utility
+ * @class BookmarkTransformer
+ * @description Consolidates all bookmark data transformation logic to eliminate duplication
+ * and ensure consistent data handling across the application.
+ * 
+ * @example
+ * // Transform to Supabase format
+ * const supabaseData = BookmarkTransformer.toSupabaseFormat(bookmark, userId);
+ * 
+ * // Transform to UI format
+ * const uiData = BookmarkTransformer.toUIFormat(supabaseBookmark);
+ * 
+ * // Validate bookmark data
+ * const validation = BookmarkTransformer.validate(bookmark);
  */
 class BookmarkTransformer {
   /**

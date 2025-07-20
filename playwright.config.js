@@ -1,5 +1,20 @@
+/**
+ * @fileoverview Playwright configuration for ForgetfulMe Chrome Extension E2E tests
+ * @module playwright-config
+ * @description Configuration for end-to-end testing with Playwright
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { defineConfig, devices } from '@playwright/test';
 
+/**
+ * Playwright configuration for ForgetfulMe Chrome Extension E2E tests
+ * @type {import('@playwright/test').PlaywrightTestConfig}
+ * @description Configuration for end-to-end testing with Playwright including browser setup and test environment
+ */
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,

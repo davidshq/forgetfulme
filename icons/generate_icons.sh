@@ -1,7 +1,14 @@
 #!/bin/bash
 
-# Generate PNG icons from SVG for ForgetfulMe extension
-# Requires ImageMagick to be installed
+/**
+ * @fileoverview Generate PNG icons from SVG for ForgetfulMe extension
+ * @description Script to generate PNG icons at different sizes from SVG source
+ * Requires ImageMagick to be installed
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
 
 echo "Generating ForgetfulMe extension icons..."
 

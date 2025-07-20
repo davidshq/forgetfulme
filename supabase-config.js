@@ -1,21 +1,69 @@
-// Supabase configuration manager for ForgetfulMe extension
+/**
+ * @fileoverview Supabase configuration manager for ForgetfulMe extension
+ * @module supabase-config
+ * @description Manages Supabase configuration, authentication, and client setup
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import ConfigManager from './utils/config-manager.js';
 
+/**
+ * Supabase configuration manager for ForgetfulMe extension
+ * @class SupabaseConfig
+ * @description Manages Supabase configuration, authentication, and client setup
+ * 
+ * @example
+ * const supabaseConfig = new SupabaseConfig();
+ * await supabaseConfig.initialize();
+ * 
+ * if (supabaseConfig.isConfigured()) {
+ *   const client = supabaseConfig.getSupabaseClient();
+ *   // Use client for database operations
+ * }
+ */
 class SupabaseConfig {
+  /**
+   * Initialize the Supabase configuration manager
+   * @constructor
+   * @description Sets up the configuration manager with initial state and dependencies
+   */
   constructor() {
+    /** @type {ConfigManager} Configuration manager instance */
     this.configManager = new ConfigManager();
+    /** @type {string|null} Supabase project URL */
     this.supabaseUrl = null;
+    /** @type {string|null} Supabase anonymous key */
     this.supabaseAnonKey = null;
 
+    /** @type {Object|null} Supabase client instance */
     this.supabase = null;
+    /** @type {Object|null} Supabase auth instance */
     this.auth = null;
+    /** @type {Object|null} Current user object */
     this.user = null;
+    /** @type {Object|null} Current session object */
     this.session = null;
 
-    // Don't load configuration immediately - wait until needed
+    /** @type {boolean} Whether configuration has been loaded */
     this.configLoaded = false;
   }
 
+  /**
+   * Load Supabase configuration from storage or environment variables
+   * @async
+   * @method loadConfiguration
+   * @description Loads configuration from Chrome storage or environment variables for development
+   * @throws {Error} When configuration loading fails
+   * 
+   * @example
+   * await supabaseConfig.loadConfiguration();
+   * if (supabaseConfig.supabaseUrl) {
+   *   console.log('Configuration loaded successfully');
+   * }
+   */
   async loadConfiguration() {
     if (this.configLoaded) {
       return;

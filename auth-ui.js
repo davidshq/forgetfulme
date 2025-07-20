@@ -1,13 +1,44 @@
-// Authentication UI component for ForgetfulMe extension
+/**
+ * @fileoverview Authentication UI component for ForgetfulMe extension
+ * @module auth-ui
+ * @description Handles authentication user interface including login, signup, and user profile
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 
+/**
+ * Authentication UI component for ForgetfulMe extension
+ * @class AuthUI
+ * @description Handles authentication user interface including login, signup, and user profile
+ * 
+ * @example
+ * const authUI = new AuthUI(supabaseConfig, onAuthSuccess, authStateManager);
+ * authUI.showLoginForm(container);
+ * authUI.showSignupForm(container);
+ */
 class AuthUI {
+  /**
+   * Initialize the authentication UI component
+   * @constructor
+   * @param {Object} supabaseConfig - Supabase configuration instance
+   * @param {Function} onAuthSuccess - Callback function called on successful authentication
+   * @param {AuthStateManager} [authStateManager=null] - Authentication state manager
+   * @description Sets up the authentication UI with configuration and callbacks
+   */
   constructor(supabaseConfig, onAuthSuccess, authStateManager = null) {
+    /** @type {Object} Supabase configuration instance */
     this.config = supabaseConfig;
+    /** @type {Function} Callback function called on successful authentication */
     this.onAuthSuccess = onAuthSuccess;
+    /** @type {AuthStateManager|null} Authentication state manager */
     this.authStateManager = authStateManager;
+    /** @type {string} Current view state ('login' or 'signup') */
     this.currentView = 'login'; // 'login' or 'signup'
   }
 

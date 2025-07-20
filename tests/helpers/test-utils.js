@@ -1,11 +1,26 @@
+/**
+ * @fileoverview Enhanced test utilities for ForgetfulMe extension tests
+ * @module test-utils
+ * @description Provides centralized mock creation and test environment setup for comprehensive testing
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { vi } from 'vitest';
 
 /**
  * Enhanced test utilities for ForgetfulMe extension tests
- * Provides centralized mock creation and test environment setup
+ * @description Provides centralized mock creation and test environment setup
  */
 
-// Mock Chrome extension APIs
+/**
+ * Create a mock Chrome extension API
+ * @function createMockChrome
+ * @returns {Object} Mock Chrome API with all extension methods
+ * @description Creates a comprehensive mock of Chrome extension APIs for testing
+ */
 export const createMockChrome = () => ({
   storage: {
     sync: {
@@ -50,7 +65,12 @@ export const createMockChrome = () => ({
   }
 });
 
-// Mock console methods
+/**
+ * Create a mock console object
+ * @function createMockConsole
+ * @returns {Object} Mock console with all methods
+ * @description Creates a mock console object with tracked methods for testing
+ */
 export const createMockConsole = () => ({
   error: vi.fn(),
   warn: vi.fn(),
@@ -59,7 +79,12 @@ export const createMockConsole = () => ({
   debug: vi.fn(),
 });
 
-// Mock ErrorHandler
+/**
+ * Create a mock ErrorHandler
+ * @function createMockErrorHandler
+ * @returns {Object} Mock ErrorHandler with all methods and constants
+ * @description Creates a mock ErrorHandler with predefined responses for testing
+ */
 export const createMockErrorHandler = () => ({
   handle: vi.fn().mockReturnValue({
     errorInfo: {

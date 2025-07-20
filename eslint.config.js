@@ -1,7 +1,22 @@
+/**
+ * @fileoverview ESLint configuration for ForgetfulMe Chrome Extension
+ * @module eslint-config
+ * @description ESLint configuration with Chrome extension specific rules and Prettier integration
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import js from '@eslint/js';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
 
+/**
+ * ESLint configuration for ForgetfulMe Chrome Extension
+ * @type {import('eslint').Linter.Config}
+ * @description Comprehensive ESLint configuration with Chrome extension specific rules, security best practices, and code quality standards
+ */
 export default [
   js.configs.recommended,
   {

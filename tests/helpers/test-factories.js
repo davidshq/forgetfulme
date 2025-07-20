@@ -1,3 +1,13 @@
+/**
+ * @fileoverview Test factories for creating specialized test instances
+ * @module test-factories
+ * @description Provides factory functions for creating specialized test instances with proper mocking
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import { vi } from 'vitest';
 import {
   createTestEnvironment,
@@ -11,8 +21,7 @@ import {
 
 /**
  * Test factories for creating specialized test instances
- * 
- * These factories follow the recommended approach from ES_MODULE_MOCKING_ISSUE.md:
+ * @description These factories follow the recommended approach from ES_MODULE_MOCKING_ISSUE.md:
  * 1. Test individual utility modules separately (working approach)
  * 2. Use Playwright for integration testing (popup functionality)
  * 3. Focus on testing business logic in utility modules

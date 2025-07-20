@@ -1,8 +1,44 @@
-// UI Components for ForgetfulMe Extension
-// Centralized component factory for consistent UI patterns
+/**
+ * @fileoverview UI Components for ForgetfulMe Extension
+ * @module ui-components
+ * @description Centralized component factory for consistent UI patterns and DOM utilities
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
 
+/**
+ * UI Components factory for ForgetfulMe Extension
+ * @class UIComponents
+ * @description Provides centralized component creation and DOM utilities for consistent UI patterns
+ * 
+ * @example
+ * // Create a button
+ * const button = UIComponents.createButton('Click me', () => console.log('clicked'));
+ * 
+ * // Use DOM utilities
+ * const element = UIComponents.DOM.getElement('my-element');
+ */
 class UIComponents {
-  // Component types
+  /**
+   * Available component types for UI creation
+   * @static
+   * @type {Object}
+   * @property {string} BUTTON - Button component type
+   * @property {string} FORM - Form component type
+   * @property {string} INPUT - Input component type
+   * @property {string} SELECT - Select component type
+   * @property {string} LABEL - Label component type
+   * @property {string} CONTAINER - Container component type
+   * @property {string} HEADER - Header component type
+   * @property {string} SECTION - Section component type
+   * @property {string} LIST - List component type
+   * @property {string} LIST_ITEM - List item component type
+   * @property {string} MESSAGE - Message component type
+   * @property {string} CONFIRM - Confirmation dialog component type
+   * @property {string} TOAST - Toast notification component type
+   */
   static COMPONENT_TYPES = {
     BUTTON: 'button',
     FORM: 'form',
@@ -19,7 +55,19 @@ class UIComponents {
     TOAST: 'toast',
   };
 
-  // Button styles
+  /**
+   * Available button styles for consistent UI
+   * @static
+   * @type {Object}
+   * @property {string} PRIMARY - Primary button style
+   * @property {string} SECONDARY - Secondary button style
+   * @property {string} DANGER - Danger/error button style
+   * @property {string} SUCCESS - Success button style
+   * @property {string} WARNING - Warning button style
+   * @property {string} INFO - Info button style
+   * @property {string} SMALL - Small button size
+   * @property {string} LARGE - Large button size
+   */
   static BUTTON_STYLES = {
     PRIMARY: 'primary',
     SECONDARY: 'secondary',
@@ -31,7 +79,20 @@ class UIComponents {
     LARGE: 'large',
   };
 
-  // Form field types
+  /**
+   * Available form field types for form creation
+   * @static
+   * @type {Object}
+   * @property {string} TEXT - Text input field
+   * @property {string} EMAIL - Email input field
+   * @property {string} PASSWORD - Password input field
+   * @property {string} URL - URL input field
+   * @property {string} NUMBER - Number input field
+   * @property {string} SELECT - Select dropdown field
+   * @property {string} TEXTAREA - Textarea field
+   * @property {string} CHECKBOX - Checkbox field
+   * @property {string} RADIO - Radio button field
+   */
   static FIELD_TYPES = {
     TEXT: 'text',
     EMAIL: 'email',
@@ -45,7 +106,10 @@ class UIComponents {
   };
 
   /**
-   * DOM utility class for safe element access
+   * DOM utility class for safe element access and manipulation
+   * @static
+   * @namespace DOM
+   * @description Provides safe DOM element access and manipulation utilities
    */
   static DOM = {
     /**

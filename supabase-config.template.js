@@ -1,16 +1,44 @@
-// Template for Supabase configuration
-// Copy this file to supabase-config.local.js and fill in your credentials
-// This file should NOT be committed to version control
+/**
+ * @fileoverview Template for Supabase configuration
+ * @module supabase-config-template
+ * @description Template file for local Supabase configuration - copy to supabase-config.local.js and fill in credentials
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ * @warning This file should NOT be committed to version control
+ */
 
+/**
+ * Template for Supabase configuration
+ * @class SupabaseConfigTemplate
+ * @description Template class for local Supabase configuration
+ * 
+ * @example
+ * // Copy this file to supabase-config.local.js and update credentials
+ * const config = new SupabaseConfigTemplate();
+ * config.supabaseUrl = 'https://your-project.supabase.co';
+ * config.supabaseAnonKey = 'your-anon-public-key-here';
+ */
 class SupabaseConfigTemplate {
+  /**
+   * Initialize the template configuration
+   * @constructor
+   * @description Sets up the template with placeholder credentials that should be replaced
+   */
   constructor() {
-    // Replace these with your actual Supabase project credentials
+    /** @type {string} Supabase project URL - replace with your actual URL */
     this.supabaseUrl = 'https://your-project.supabase.co';
+    /** @type {string} Supabase anonymous key - replace with your actual key */
     this.supabaseAnonKey = 'your-anon-public-key-here';
 
+    /** @type {Object|null} Supabase client instance */
     this.supabase = null;
+    /** @type {Object|null} Supabase auth instance */
     this.auth = null;
+    /** @type {Object|null} Current user object */
     this.user = null;
+    /** @type {Object|null} Current session object */
     this.session = null;
   }
 

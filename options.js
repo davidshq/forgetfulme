@@ -1,4 +1,13 @@
-// Options page script for ForgetfulMe extension
+/**
+ * @fileoverview Options page script for ForgetfulMe extension
+ * @module options
+ * @description Handles the options/settings page functionality including data management and configuration
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
@@ -10,17 +19,37 @@ import AuthUI from './auth-ui.js';
 import AuthStateManager from './utils/auth-state-manager.js';
 import ConfigUI from './config-ui.js';
 
+/**
+ * Options page class for ForgetfulMe extension
+ * @class ForgetfulMeOptions
+ * @description Manages the options/settings page functionality including data management, configuration, and user preferences
+ * 
+ * @example
+ * // The options page is automatically instantiated when options.html loads
+ * // No manual instantiation required
+ */
 class ForgetfulMeOptions {
+  /**
+   * Initialize the options page with all required services and managers
+   * @constructor
+   * @description Sets up the options page with configuration, authentication, and service dependencies
+   */
   constructor() {
+    /** @type {ConfigManager} Configuration manager for user preferences */
     this.configManager = new ConfigManager();
+    /** @type {AuthStateManager} Authentication state manager */
     this.authStateManager = new AuthStateManager();
+    /** @type {SupabaseConfig} Supabase configuration manager */
     this.supabaseConfig = new SupabaseConfig();
+    /** @type {SupabaseService} Supabase service for data operations */
     this.supabaseService = new SupabaseService(this.supabaseConfig);
+    /** @type {AuthUI} Authentication UI manager */
     this.authUI = new AuthUI(
       this.supabaseConfig,
       () => this.onAuthSuccess(),
       this.authStateManager
     );
+    /** @type {ConfigUI} Configuration UI manager */
     this.configUI = new ConfigUI(this.supabaseConfig);
 
     // Initialize after DOM is ready

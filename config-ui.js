@@ -1,10 +1,36 @@
-// Configuration UI component for ForgetfulMe extension
+/**
+ * @fileoverview Configuration UI component for ForgetfulMe extension
+ * @module config-ui
+ * @description Handles configuration user interface for Supabase setup and settings
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
 import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 
+/**
+ * Configuration UI component for ForgetfulMe extension
+ * @class ConfigUI
+ * @description Handles configuration user interface for Supabase setup and settings
+ * 
+ * @example
+ * const configUI = new ConfigUI(supabaseConfig);
+ * configUI.showConfigForm(container);
+ * configUI.showConfigStatus(container);
+ */
 class ConfigUI {
+  /**
+   * Initialize the configuration UI component
+   * @constructor
+   * @param {Object} supabaseConfig - Supabase configuration instance
+   * @description Sets up the configuration UI with Supabase configuration
+   */
   constructor(supabaseConfig) {
+    /** @type {Object} Supabase configuration instance */
     this.config = supabaseConfig;
   }
 

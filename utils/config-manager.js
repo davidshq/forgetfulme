@@ -1,14 +1,47 @@
-// Unified Configuration Manager for ForgetfulMe Extension
-// Consolidates all configuration logic and storage operations
+/**
+ * @fileoverview Unified Configuration Manager for ForgetfulMe Extension
+ * @module config-manager
+ * @description Consolidates all configuration logic and storage operations
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
 
+/**
+ * Unified Configuration Manager for ForgetfulMe Extension
+ * @class ConfigManager
+ * @description Consolidates all configuration logic and storage operations
+ * 
+ * @example
+ * const configManager = new ConfigManager();
+ * await configManager.initialize();
+ * 
+ * // Get Supabase configuration
+ * const supabaseConfig = await configManager.getSupabaseConfig();
+ * 
+ * // Set custom status types
+ * await configManager.setCustomStatusTypes(['read', 'important', 'review']);
+ */
 class ConfigManager {
+  /**
+   * Initialize the configuration manager
+   * @constructor
+   * @description Sets up the configuration manager with initial state and listener management
+   */
   constructor() {
+    /** @type {Object} Configuration object containing all settings */
     this.config = {
+      /** @type {Object|null} Supabase configuration */
       supabase: null,
+      /** @type {Object|null} User preferences */
       preferences: null,
+      /** @type {Object|null} Authentication session */
       auth: null,
     };
+    /** @type {boolean} Whether the manager has been initialized */
     this.initialized = false;
+    /** @type {Set} Set of event listeners */
     this.listeners = new Set();
   }
 

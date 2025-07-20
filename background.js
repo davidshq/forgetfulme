@@ -1,12 +1,46 @@
-// Background service worker for ForgetfulMe extension
+/**
+ * @fileoverview Background service worker for ForgetfulMe extension
+ * @module background
+ * @description Handles background tasks, keyboard shortcuts, and message routing
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
 
+/**
+ * Background service worker for the ForgetfulMe Chrome extension
+ * @class ForgetfulMeBackground
+ * @description Manages background tasks, keyboard shortcuts, and communication between extension contexts
+ * 
+ * @example
+ * // Automatically instantiated when the service worker loads
+ * // No manual instantiation required
+ */
 class ForgetfulMeBackground {
+  /**
+   * Initialize the background service worker
+   * @constructor
+   * @description Sets up event listeners and initializes authentication state
+   */
   constructor() {
+    /** @type {Object|null} Current authentication state */
     this.authState = null;
     this.initializeEventListeners();
     this.initializeAuthState();
   }
 
+  /**
+   * Initialize authentication state from Chrome storage
+   * @async
+   * @method initializeAuthState
+   * @description Loads the current authentication state from Chrome sync storage
+   * @throws {Error} When storage access fails
+   * 
+   * @example
+   * // Called during background initialization
+   * await background.initializeAuthState();
+   */
   async initializeAuthState() {
     try {
       // Load current auth state from storage
@@ -22,6 +56,15 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Set up all Chrome extension event listeners
+   * @method initializeEventListeners
+   * @description Configures listeners for keyboard shortcuts, installation events, runtime messages, and storage changes
+   * 
+   * @example
+   * // Called during background initialization
+   * background.initializeEventListeners();
+   */
   initializeEventListeners() {
     // Handle keyboard shortcuts
     chrome.commands.onCommand.addListener(command => {

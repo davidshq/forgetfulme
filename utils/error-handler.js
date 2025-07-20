@@ -1,6 +1,39 @@
-// Centralized Error Handler for ForgetfulMe Extension
+/**
+ * @fileoverview Centralized Error Handler for ForgetfulMe Extension
+ * @module error-handler
+ * @description Provides comprehensive error handling, categorization, and user-friendly error messages
+ * 
+ * @author ForgetfulMe Team
+ * @version 1.0.0
+ * @since 2024-01-01
+ */
+
+/**
+ * Centralized Error Handler for ForgetfulMe Extension
+ * @class ErrorHandler
+ * @description Handles error categorization, logging, and user-friendly error messages
+ * 
+ * @example
+ * // Handle an error
+ * const result = ErrorHandler.handle(error, 'popup.initialize');
+ * console.log(result.userMessage);
+ * 
+ * // Create a custom error
+ * const error = ErrorHandler.createError('Custom error message', ErrorHandler.ERROR_TYPES.VALIDATION);
+ */
 class ErrorHandler {
-  // Error types for categorization
+  /**
+   * Error types for categorization
+   * @static
+   * @type {Object}
+   * @property {string} NETWORK - Network-related errors
+   * @property {string} AUTH - Authentication-related errors
+   * @property {string} VALIDATION - Data validation errors
+   * @property {string} DATABASE - Database operation errors
+   * @property {string} CONFIG - Configuration errors
+   * @property {string} UI - User interface errors
+   * @property {string} UNKNOWN - Unknown or uncategorized errors
+   */
   static ERROR_TYPES = {
     NETWORK: 'NETWORK',
     AUTH: 'AUTH',
@@ -11,7 +44,15 @@ class ErrorHandler {
     UNKNOWN: 'UNKNOWN',
   };
 
-  // Error severity levels
+  /**
+   * Error severity levels
+   * @static
+   * @type {Object}
+   * @property {string} LOW - Low severity errors (e.g., validation warnings)
+   * @property {string} MEDIUM - Medium severity errors (e.g., network issues)
+   * @property {string} HIGH - High severity errors (e.g., authentication failures)
+   * @property {string} CRITICAL - Critical errors (e.g., data corruption)
+   */
   static SEVERITY = {
     LOW: 'LOW',
     MEDIUM: 'MEDIUM',
