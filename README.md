@@ -43,12 +43,16 @@ Before using the extension, you need to set up a Supabase backend:
 ### For Development
 
 1. **Clone or download** this repository
-2. **Set up Supabase** following the setup guide
-3. **Configure your extension** with your credentials (see Configuration section below)
-4. **Open Chrome** and navigate to `chrome://extensions/`
-5. **Enable Developer mode** (toggle in top right)
-6. **Click "Load unpacked"** and select the extension directory
-7. **Pin the extension** to your toolbar for easy access
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Set up Supabase** following the setup guide
+4. **Configure your extension** with your credentials (see Configuration section below)
+5. **Open Chrome** and navigate to `chrome://extensions/`
+6. **Enable Developer mode** (toggle in top right)
+7. **Click "Load unpacked"** and select the extension directory
+8. **Pin the extension** to your toolbar for easy access
 
 ### For Users (Future Chrome Web Store Release)
 
@@ -108,79 +112,6 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 - ✅ **CSP compliant** - no external scripts loaded
 - ⚠️ **Never commit** `supabase-config.local.js` or `.env` files
 
-## Usage
-
-### First Time Setup
-
-1. **Click the extension icon** in your browser toolbar
-2. **Configure Supabase** (if not already done)
-3. **Create an account** or sign in with existing credentials
-4. **Start marking pages** as read!
-
-### Basic Usage
-
-1. **Click the extension icon** in your browser toolbar
-2. **Select a status type** from the dropdown
-3. **Add tags** (optional) - comma separated
-4. **Click "Mark as Read"** to save the entry
-
-### Keyboard Shortcuts
-
-- **Ctrl+Shift+R** (Windows/Linux) or **Cmd+Shift+R** (Mac)
-  - Quickly mark the current page as "read" with default settings
-
-### Settings
-
-1. **Click the extension icon**
-2. **Click "Settings"** button
-3. **Customize your status types** and manage data
-
-## Data Structure
-
-Each bookmark contains:
-```json
-{
-  "id": "uuid",
-  "user_id": "user-uuid",
-  "url": "https://example.com",
-  "title": "Page Title",
-  "description": "Optional description",
-  "read_status": "read",
-  "tags": ["research", "important"],
-  "created_at": "2024-01-01T00:00:00Z",
-  "updated_at": "2024-01-01T00:00:00Z",
-  "last_accessed": "2024-01-01T00:00:00Z",
-  "access_count": 1
-}
-```
-
-## Browser Compatibility
-
-### Primary Support
-- ✅ Chrome (Chromium-based)
-- ✅ Edge (Chromium-based)
-- ✅ Other Chromium browsers
-
-### Future Support
-- 🔄 Firefox (planned)
-- 🔄 Safari (planned)
-
-## Backend Architecture
-
-Uses **Supabase** for:
-- **PostgreSQL database** with real-time capabilities
-- **Built-in authentication** system
-- **Row Level Security** for data protection
-- **Automatic backups** and scaling
-- **Cross-browser compatibility**
-
-### Security Features
-- **Row Level Security (RLS)** - Users can only access their own data
-- **JWT authentication** - Secure session management
-- **Encrypted data transmission** - HTTPS by default
-- **User isolation** - Complete data separation between users
-- **CSP compliance** - No external scripts, all functionality self-contained
-
 ## Development
 
 ### Project Structure
@@ -201,9 +132,28 @@ forgetfulme/
 ├── config-ui.js          # Configuration UI
 ├── supabase-schema.sql   # Database schema
 ├── supabase-config.template.js  # Template for local config
-├── .gitignore           # Git ignore rules
-├── SUPABASE_SETUP.md    # Setup guide
+├── utils/                # Utility modules
+│   ├── auth-state-manager.js
+│   ├── bookmark-transformer.js
+│   ├── config-manager.js
+│   ├── error-handler.js
+│   ├── ui-components.js
+│   └── ui-messages.js
+├── tests/                # Comprehensive test suite
+│   ├── unit/            # Unit tests (Vitest)
+│   ├── helpers/         # Test utilities
+│   ├── popup.test.js    # Integration tests (Playwright)
+│   └── options.test.js  # Integration tests (Playwright)
+├── docs/                 # Documentation
+│   ├── architecture/    # Architecture guides
+│   └── cursor-reports/  # Development reports
 ├── icons/               # Extension icons
+├── package.json         # Dependencies and scripts
+├── vitest.config.js     # Unit test configuration
+├── playwright.config.js # Integration test configuration
+├── eslint.config.js     # Code linting configuration
+├── .gitignore          # Git ignore rules
+├── SUPABASE_SETUP.md   # Setup guide
 └── README.md           # This file
 ```
 
@@ -214,21 +164,94 @@ forgetfulme/
 - **Modern JavaScript** - ES6+ features
 - **Row Level Security** - Database-level security
 - **CSP Compliant** - Self-contained, no external dependencies
+- **Vitest** - Fast unit testing framework
+- **Playwright** - End-to-end testing
+- **ESLint & Prettier** - Code quality and formatting
+
+### Development Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Run unit tests
+npm test
+
+# Run unit tests with UI
+npm run test:unit:ui
+
+# Run unit tests with coverage
+npm run test:unit:coverage
+
+# Run integration tests
+npm run test:playwright
+
+# Run integration tests with UI
+npm run test:playwright:ui
+
+# Lint code
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Format code
+npm run format
+
+# Check code quality
+npm run check
+```
 
 ### Setting Up Development Environment
 
 1. **Clone the repository**
-2. **Set up Supabase project** following the setup guide
-3. **Configure credentials** using one of the methods above
-4. **Run database schema** from `supabase-schema.sql`
-5. **Load extension** in Chrome for testing
+2. **Install dependencies**: `npm install`
+3. **Set up Supabase project** following the setup guide
+4. **Configure credentials** using one of the methods above
+5. **Run database schema** from `supabase-schema.sql`
+6. **Load extension** in Chrome for testing
+7. **Run tests** to ensure everything works: `npm test`
+
+### Testing Strategy
+
+The project uses a comprehensive testing approach:
+
+#### Unit Tests (Vitest)
+- **Location**: `tests/unit/`
+- **Focus**: Individual utility modules and business logic
+- **Coverage**: 90%+ target for utility modules
+- **Framework**: Vitest with JSDOM environment
+
+#### Integration Tests (Playwright)
+- **Location**: `tests/` (popup.test.js, options.test.js)
+- **Focus**: End-to-end user workflows
+- **Browser**: Chromium-based browsers
+- **Framework**: Playwright
+
+#### Test Utilities
+- **Test Factories**: Specialized test instance creation
+- **Mock Utilities**: Chrome API and dependency mocking
+- **Helper Functions**: Common test setup and teardown
+
+### Code Quality
+
+The project maintains high code quality through:
+
+- **ESLint**: Code linting with custom rules
+- **Prettier**: Code formatting
+- **TypeScript-like JSDoc**: Type safety through documentation
+- **Comprehensive Testing**: Unit and integration tests
+- **Error Handling**: Robust error management
+- **Security**: CSP compliance and secure practices
 
 ### Building for Distribution
 
 1. **Add proper icons** to the `icons/` directory
 2. **Update version** in `manifest.json`
-3. **Test thoroughly** across different browsers
-4. **Package for Chrome Web Store**
+3. **Run all tests**: `npm test && npm run test:playwright`
+4. **Check code quality**: `npm run check`
+5. **Test thoroughly** across different browsers
+6. **Package for Chrome Web Store**
 
 ## Contributing
 
@@ -237,8 +260,9 @@ forgetfulme/
 3. **Configure credentials** securely (see Configuration section)
 4. **Create a feature branch**
 5. **Make your changes**
-6. **Test thoroughly**
-7. **Submit a pull request**
+6. **Run tests**: `npm test && npm run test:playwright`
+7. **Check code quality**: `npm run check`
+8. **Submit a pull request**
 
 ### Development Guidelines
 
@@ -247,6 +271,9 @@ forgetfulme/
 - **Follow the security best practices** outlined in the setup guide
 - **Test authentication flows** thoroughly
 - **Maintain CSP compliance** - no external scripts
+- **Write tests** for new functionality
+- **Follow code style** guidelines (ESLint + Prettier)
+- **Update documentation** for new features
 
 ## Roadmap
 
@@ -260,15 +287,19 @@ forgetfulme/
 - ✅ User authentication
 - ✅ Secure configuration management
 - ✅ CSP compliant implementation
+- ✅ Comprehensive testing suite
+- ✅ Code quality tools
+- ✅ Enhanced documentation
 
 ### Phase 2 (Planned)
-- 🔄 Firefox support
 - 🔄 Advanced search and filtering
 - 🔄 Bulk operations
 - 🔄 Data analytics dashboard
 - 🔄 Real-time collaboration features
+- 🔄 Enhanced accessibility features
 
 ### Phase 3 (Future)
+- 🔄 Firefox support
 - 🔄 Safari support
 - 🔄 Mobile companion app
 - 🔄 Advanced analytics
@@ -309,6 +340,7 @@ For issues, feature requests, or questions:
 3. Include browser version and extension version
 4. For Supabase-related issues, check the [setup guide](./SUPABASE_SETUP.md)
 5. For configuration issues, see the Configuration section above
+6. For testing issues, check the [testing documentation](./tests/README.md)
 
 ---
 
