@@ -71,7 +71,7 @@ class ConfigUI {
   }
 
   bindConfigEvents(container) {
-    const configForm = container.querySelector('#configForm')
+    const configForm = UIComponents.DOM.querySelector('#configForm', container)
     
     if (configForm) {
       configForm.addEventListener('submit', (e) => {
@@ -86,8 +86,8 @@ class ConfigUI {
       const currentConfig = await this.config.getConfiguration()
       
       if (currentConfig) {
-        const urlInput = container.querySelector('#supabaseUrl')
-        const keyInput = container.querySelector('#supabaseAnonKey')
+        const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container)
+        const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container)
         
         if (urlInput) urlInput.value = currentConfig.url || ''
         if (keyInput) keyInput.value = currentConfig.anonKey || ''
@@ -101,11 +101,11 @@ class ConfigUI {
   }
 
   async handleConfigSubmit(container) {
-    const urlInput = container.querySelector('#supabaseUrl')
-    const keyInput = container.querySelector('#supabaseAnonKey')
+    const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container)
+    const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container)
     
-    const url = urlInput.value.trim()
-    const anonKey = keyInput.value.trim()
+    const url = urlInput ? urlInput.value.trim() : ''
+    const anonKey = keyInput ? keyInput.value.trim() : ''
     
     if (!url || !anonKey) {
       UIMessages.error('Please fill in all fields', container)

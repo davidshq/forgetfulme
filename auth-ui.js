@@ -122,10 +122,10 @@ class AuthUI {
   }
 
   bindAuthEvents(container) {
-    const loginForm = container.querySelector('#loginForm')
-    const signupForm = container.querySelector('#signupForm')
-    const showSignupLink = container.querySelector('#showSignup')
-    const showLoginLink = container.querySelector('#showLogin')
+    const loginForm = UIComponents.DOM.querySelector('#loginForm', container)
+    const signupForm = UIComponents.DOM.querySelector('#signupForm', container)
+    const showSignupLink = UIComponents.DOM.querySelector('#showSignup', container)
+    const showLoginLink = UIComponents.DOM.querySelector('#showLogin', container)
 
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
@@ -157,8 +157,8 @@ class AuthUI {
   }
 
   async handleLogin(container) {
-    const email = container.querySelector('#loginEmail').value
-    const password = container.querySelector('#loginPassword').value
+    const email = UIComponents.DOM.getValue('loginEmail', container)
+    const password = UIComponents.DOM.getValue('loginPassword', container)
 
     if (!email || !password) {
       UIMessages.error('Please fill in all fields', container)
@@ -186,9 +186,9 @@ class AuthUI {
   }
 
   async handleSignup(container) {
-    const email = container.querySelector('#signupEmail').value
-    const password = container.querySelector('#signupPassword').value
-    const confirmPassword = container.querySelector('#confirmPassword').value
+    const email = UIComponents.DOM.getValue('signupEmail', container)
+    const password = UIComponents.DOM.getValue('signupPassword', container)
+    const confirmPassword = UIComponents.DOM.getValue('confirmPassword', container)
 
     if (!email || !password || !confirmPassword) {
       UIMessages.error('Please fill in all fields', container)

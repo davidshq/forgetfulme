@@ -7,9 +7,22 @@ class ForgetfulMePopup {
     this.supabaseService = new SupabaseService(this.supabaseConfig)
     this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess(), this.authStateManager)
     
-    this.initializeElements()
-    this.initializeApp()
-    this.initializeAuthState()
+    // Initialize after DOM is ready
+    this.initializeAsync()
+  }
+
+  async initializeAsync() {
+    try {
+      // Wait for DOM to be ready
+      await UIComponents.DOM.ready()
+      
+      this.initializeElements()
+      await this.initializeApp()
+      this.initializeAuthState()
+    } catch (error) {
+      const errorResult = ErrorHandler.handle(error, 'popup.initializeAsync')
+      console.error('Failed to initialize popup:', errorResult)
+    }
   }
 
   async initializeAuthState() {
@@ -51,21 +64,18 @@ class ForgetfulMePopup {
 
   initializeElements() {
     // Initialize elements that exist in the initial HTML
-    this.appContainer = document.getElementById('app')
+    this.appContainer = UIComponents.DOM.getElement('app')
     
-    // Try to get dynamically created elements
-    this.readStatusSelect = document.getElementById('read-status')
-    this.tagsInput = document.getElementById('tags')
-    this.markReadBtn = document.querySelector('button[type="submit"]') // Form submit button
-    this.settingsBtn = document.getElementById('settings-btn')
-    this.recentList = document.getElementById('recent-list')
+    // Try to get dynamically created elements with safe access
+    this.readStatusSelect = UIComponents.DOM.getElement('read-status')
+    this.tagsInput = UIComponents.DOM.getElement('tags')
+    this.markReadBtn = UIComponents.DOM.querySelector('button[type="submit"]') // Form submit button
+    this.settingsBtn = UIComponents.DOM.getElement('settings-btn')
+    this.recentList = UIComponents.DOM.getElement('recent-list')
   }
 
   bindEvents() {
-    // Only bind events if elements exist
-    // Note: Form submit is handled by the form's onSubmit event
-    // No need to bind click event to submit button
-    
+    // Only bind events if elements exist using safe DOM utilities
     if (this.settingsBtn) {
       this.settingsBtn.addEventListener('click', () => this.openSettings())
     }
@@ -360,7 +370,5 @@ class ForgetfulMePopup {
   }
 }
 
-// Initialize popup when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new ForgetfulMePopup()
-}) 
+// Initialize popup immediately (DOM ready is handled in constructor)
+new ForgetfulMePopup() 

@@ -8,9 +8,22 @@ class ForgetfulMeOptions {
     this.authUI = new AuthUI(this.supabaseConfig, () => this.onAuthSuccess(), this.authStateManager)
     this.configUI = new ConfigUI(this.supabaseConfig)
     
-    this.initializeElements()
-    this.initializeApp()
-    this.initializeAuthState()
+    // Initialize after DOM is ready
+    this.initializeAsync()
+  }
+
+  async initializeAsync() {
+    try {
+      // Wait for DOM to be ready
+      await UIComponents.DOM.ready()
+      
+      this.initializeElements()
+      await this.initializeApp()
+      this.initializeAuthState()
+    } catch (error) {
+      const errorResult = ErrorHandler.handle(error, 'options.initializeAsync')
+      console.error('Failed to initialize options:', errorResult)
+    }
   }
 
   async initializeAuthState() {
@@ -51,27 +64,27 @@ class ForgetfulMeOptions {
 
   initializeElements() {
     // Initialize elements that exist in the initial HTML
-    this.appContainer = document.getElementById('app')
+    this.appContainer = UIComponents.DOM.getElement('app')
     
-    // Re-initialize dynamically created elements
-    this.statusTypesList = document.getElementById('status-types-list')
-    this.newStatusInput = document.getElementById('new-status')
-    this.addStatusBtn = document.getElementById('add-status-btn')
-    this.exportDataBtn = document.getElementById('export-data-btn')
-    this.importDataBtn = document.getElementById('import-data-btn')
-    this.importFile = document.getElementById('import-file')
-    this.clearDataBtn = document.getElementById('clear-data-btn')
-    this.viewAllBtn = document.getElementById('view-all-btn')
-    this.recentEntriesList = document.getElementById('recent-entries-list')
+    // Re-initialize dynamically created elements with safe access
+    this.statusTypesList = UIComponents.DOM.getElement('status-types-list')
+    this.newStatusInput = UIComponents.DOM.getElement('new-status')
+    this.addStatusBtn = UIComponents.DOM.getElement('add-status-btn')
+    this.exportDataBtn = UIComponents.DOM.getElement('export-data-btn')
+    this.importDataBtn = UIComponents.DOM.getElement('import-data-btn')
+    this.importFile = UIComponents.DOM.getElement('import-file')
+    this.clearDataBtn = UIComponents.DOM.getElement('clear-data-btn')
+    this.viewAllBtn = UIComponents.DOM.getElement('view-all-btn')
+    this.recentEntriesList = UIComponents.DOM.getElement('recent-entries-list')
     
     // Stats elements
-    this.totalEntries = document.getElementById('total-entries')
-    this.statusTypesCount = document.getElementById('status-types-count')
-    this.mostUsedStatus = document.getElementById('most-used-status')
+    this.totalEntries = UIComponents.DOM.getElement('total-entries')
+    this.statusTypesCount = UIComponents.DOM.getElement('status-types-count')
+    this.mostUsedStatus = UIComponents.DOM.getElement('most-used-status')
   }
 
   bindEvents() {
-    // Only bind events if elements exist
+    // Only bind events if elements exist using safe DOM utilities
     if (this.addStatusBtn) {
       this.addStatusBtn.addEventListener('click', () => this.addStatusType())
     }
@@ -509,7 +522,5 @@ class ForgetfulMeOptions {
   }
 }
 
-// Initialize options page when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new ForgetfulMeOptions()
-}) 
+// Initialize options page immediately (DOM ready is handled in constructor)
+new ForgetfulMeOptions() 
