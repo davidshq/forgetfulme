@@ -11,23 +11,28 @@ This implementation adds a dedicated bookmark management interface that allows u
 - **Navigation**: Back button to return to main interface
 - **Separation**: Completely separate from settings page
 
-### 2. **Search and Filtering**
+### 2. **Settings Page Integration**
+- **Bookmark Management Button**: Added "📚 Manage Bookmarks" button to settings page
+- **Removed Recent Entries**: Replaced the recent entries section with bookmark management access
+- **Clean Interface**: Settings page now focuses on configuration and data management
+
+### 3. **Search and Filtering**
 - **Text Search**: Search by title, URL, or tags
 - **Status Filter**: Filter by read status (All, Read, Good Reference, Low Value, Revisit Later)
 - **Real-time Results**: Immediate search results as you type
 
-### 3. **Bookmark List Display**
+### 4. **Bookmark List Display**
 - **Checkbox Selection**: Individual bookmarks can be selected for bulk operations
 - **Action Buttons**: Each bookmark has Edit (✏️), Delete (🗑️), and Open (🔗) buttons
 - **Rich Information**: Shows title, status, creation date, and tags
 - **Visual Status**: Color-coded status indicators
 
-### 4. **Individual Bookmark Actions**
+### 5. **Individual Bookmark Actions**
 - **Edit**: Opens the existing edit interface for the bookmark
 - **Delete**: Confirms deletion with the bookmark title
 - **Open**: Opens the bookmark URL in a new tab
 
-### 5. **Bulk Operations**
+### 6. **Bulk Operations**
 - **Select All/Deselect All**: Toggle selection of all visible bookmarks
 - **Delete Selected**: Delete multiple bookmarks with confirmation
 - **Export Selected**: Export selected bookmarks to JSON format
@@ -93,6 +98,21 @@ This implementation adds a dedicated bookmark management interface that allows u
 - Downloads file with timestamp
 - Includes bookmark metadata and export timestamp
 
+### Options Script Updates (`options.js`)
+
+#### Removed Methods
+- **`loadRecentEntries()`**: Removed recent entries loading functionality
+- **`viewAllEntries()`**: Removed view all entries functionality
+
+#### New Methods
+- **`openBookmarkManagement()`**: Opens bookmark management interface in new tab
+
+#### Updated Methods
+- **`showMainInterface()`**: Replaced recent entries section with bookmark management section
+- **`loadData()`**: Removed call to `loadRecentEntries()`
+- **`initializeElements()`**: Removed references to recent entries elements
+- **`bindEvents()`**: Removed event binding for view all button
+
 ### Supabase Service Updates (`supabase-service.js`)
 
 #### New Method
@@ -103,9 +123,16 @@ This implementation adds a dedicated bookmark management interface that allows u
 - Returns null if bookmark doesn't exist
 - Used for export functionality
 
-### CSS Styling (`popup.css`)
+### CSS Styling Updates
 
-#### New Styles
+#### Removed Styles (`options.css`)
+- `.recent-entries-container`: Removed recent entries container styling
+- `.recent-entry-item`: Removed recent entry item styling
+- `.recent-entry-item .entry-title`: Removed entry title styling
+- `.recent-entry-item .entry-meta`: Removed entry meta styling
+- `.recent-entry-item .entry-status`: Removed entry status styling
+
+#### New Styles (`popup.css`)
 
 **Bookmark Management Interface**
 - `.manage-btn`: Styling for the management button
@@ -130,15 +157,18 @@ This implementation adds a dedicated bookmark management interface that allows u
 - Limited to editing when marking duplicate pages
 - No search or filtering capabilities
 - No bulk operations
+- Recent entries section in settings page
 
 ### After Implementation
-- **Dedicated Management Interface**: Easy access via 📚 button
+- **Dedicated Management Interface**: Easy access via 📚 button in popup
+- **Settings Page Integration**: "📚 Manage Bookmarks" button in settings
 - **Comprehensive Search**: Find bookmarks by title, URL, or tags
 - **Status Filtering**: Filter by read status
 - **Individual Actions**: Edit, delete, or open any bookmark
 - **Bulk Operations**: Select multiple bookmarks for batch operations
 - **Export Functionality**: Export selected bookmarks to JSON
 - **Visual Feedback**: Clear status indicators and action buttons
+- **Clean Settings Page**: Focused on configuration and data management
 
 ## Technical Benefits
 
@@ -148,13 +178,17 @@ This implementation adds a dedicated bookmark management interface that allows u
 4. **Performance**: Efficient loading and searching
 5. **Error Handling**: Graceful error handling throughout
 6. **Extensible**: Easy to add new bulk operations
+7. **Clean Architecture**: Settings page focuses on configuration
 
 ## Files Modified
 
 - `popup.js`: Added bookmark management interface and all related methods
+- `options.js`: Removed recent entries section, added bookmark management button
 - `supabase-service.js`: Added `getBookmarkById` method
 - `popup.css`: Added comprehensive styling for management interface
+- `options.css`: Removed recent entries related styles
 - `tests/unit/popup.test.js`: Added tests for bookmark management functionality
+- `tests/unit/options.test.js`: Added tests for options page bookmark management
 - `TODO.md`: Updated to mark feature as completed
 
 ## Testing
@@ -165,6 +199,7 @@ Added comprehensive tests covering:
 - Individual bookmark actions (delete, open)
 - Bulk operations (select all, delete selected, export)
 - Error handling for all operations
+- Settings page bookmark management button functionality
 
 ## Future Enhancements
 

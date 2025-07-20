@@ -121,8 +121,7 @@ class ForgetfulMeOptions {
     this.importDataBtn = UIComponents.DOM.getElement('import-data-btn');
     this.importFile = UIComponents.DOM.getElement('import-file');
     this.clearDataBtn = UIComponents.DOM.getElement('clear-data-btn');
-    this.viewAllBtn = UIComponents.DOM.getElement('view-all-btn');
-    this.recentEntriesList = UIComponents.DOM.getElement('recent-entries-list');
+
 
     // Stats elements
     this.totalEntries = UIComponents.DOM.getElement('total-entries');
@@ -165,9 +164,7 @@ class ForgetfulMeOptions {
       this.clearDataBtn.addEventListener('click', () => this.clearData());
     }
 
-    if (this.viewAllBtn) {
-      this.viewAllBtn.addEventListener('click', () => this.viewAllEntries());
-    }
+
   }
 
   async initializeApp() {
@@ -361,24 +358,22 @@ class ForgetfulMeOptions {
     dataSection.appendChild(dataActions);
     mainContainer.appendChild(dataSection);
 
-    // Create recent entries section
-    const recentSection = UIComponents.createSection(
-      'Recent Entries',
-      'recent-section'
+    // Create bookmark management section
+    const bookmarkSection = UIComponents.createSection(
+      'Bookmark Management',
+      'bookmark-section'
     );
-    const viewAllBtn = UIComponents.createButton(
-      'View All Entries',
-      () => this.viewAllEntries(),
+    const manageBookmarksBtn = UIComponents.createButton(
+      '📚 Manage Bookmarks',
+      () => this.openBookmarkManagement(),
       'ui-btn-secondary',
       {
-        id: 'view-all-btn',
+        id: 'manage-bookmarks-btn',
+        title: 'Open bookmark management interface',
       }
     );
-    const recentEntriesList = UIComponents.createList('recent-entries-list');
-
-    recentSection.appendChild(viewAllBtn);
-    recentSection.appendChild(recentEntriesList);
-    mainContainer.appendChild(recentSection);
+    bookmarkSection.appendChild(manageBookmarksBtn);
+    mainContainer.appendChild(bookmarkSection);
 
     // Assemble the interface
     this.appContainer.innerHTML = '';
@@ -404,7 +399,6 @@ class ForgetfulMeOptions {
 
       this.loadStatusTypes(customStatusTypes);
       this.loadStatistics(bookmarks, customStatusTypes);
-      this.loadRecentEntries(bookmarks);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.loadData');
       UIMessages.error(errorResult.userMessage, this.appContainer);
@@ -534,50 +528,7 @@ class ForgetfulMeOptions {
     }
   }
 
-  loadRecentEntries(bookmarks) {
-    const recentEntriesListEl = UIComponents.DOM.getElement(
-      'recent-entries-list'
-    );
-    if (!recentEntriesListEl) return;
 
-    recentEntriesListEl.innerHTML = '';
-
-    if (bookmarks.length === 0) {
-      const emptyItem = UIComponents.createListItem(
-        {
-          title: 'No entries yet',
-          meta: {
-            status: 'info',
-            statusText: 'No entries',
-          },
-        },
-        { className: 'recent-item empty' }
-      );
-      recentEntriesListEl.appendChild(emptyItem);
-      return;
-    }
-
-    const recentBookmarks = bookmarks.slice(0, 10);
-
-    recentBookmarks.forEach(bookmark => {
-      const uiBookmark = BookmarkTransformer.toUIFormat(bookmark);
-      const listItem = UIComponents.createListItem(
-        {
-          title: uiBookmark.title,
-          titleTooltip: uiBookmark.title,
-          meta: {
-            status: uiBookmark.status,
-            statusText: this.formatStatus(uiBookmark.status),
-            time: this.formatTime(new Date(uiBookmark.created_at).getTime()),
-            tags: uiBookmark.tags,
-          },
-        },
-        { className: 'recent-item' }
-      );
-
-      recentEntriesListEl.appendChild(listItem);
-    });
-  }
 
   async exportData() {
     try {
@@ -654,9 +605,14 @@ class ForgetfulMeOptions {
     );
   }
 
-  viewAllEntries() {
-    // Open a new tab with all entries
-    chrome.tabs.create({ url: 'options.html?view=all' });
+  /**
+   * Open bookmark management interface in a new tab
+   * @method openBookmarkManagement
+   * @description Opens the bookmark management interface in a new tab for better usability
+   */
+  openBookmarkManagement() {
+    // Open bookmark management page in a new tab
+    chrome.tabs.create({ url: chrome.runtime.getURL('bookmark-management.html') });
   }
 
   formatStatus(status) {
