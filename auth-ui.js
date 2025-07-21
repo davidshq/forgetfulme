@@ -194,20 +194,21 @@ class AuthUI {
   }
 
   async handleLogin(container) {
+    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
     const email = UIComponents.DOM.getValue('loginEmail', container);
     const password = UIComponents.DOM.getValue('loginPassword', container);
 
     if (!email || !password) {
-      UIMessages.error('Please fill in all fields', container);
+      UIMessages.error('Please fill in all fields', messageContainer);
       return;
     }
 
     try {
-      UIMessages.loading('Signing in...', container);
+      UIMessages.loading('Signing in...', messageContainer);
 
       await this.config.signIn(email, password);
 
-      UIMessages.success('Successfully signed in!', container);
+      UIMessages.success('Successfully signed in!', messageContainer);
 
       // Call the success callback
       if (this.onAuthSuccess) {
@@ -217,11 +218,12 @@ class AuthUI {
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'auth-ui.handleLogin');
-      UIMessages.error(errorResult.userMessage, container);
+      UIMessages.error(errorResult.userMessage, messageContainer);
     }
   }
 
   async handleSignup(container) {
+    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
     const email = UIComponents.DOM.getValue('signupEmail', container);
     const password = UIComponents.DOM.getValue('signupPassword', container);
     const confirmPassword = UIComponents.DOM.getValue(
@@ -230,22 +232,22 @@ class AuthUI {
     );
 
     if (!email || !password || !confirmPassword) {
-      UIMessages.error('Please fill in all fields', container);
+      UIMessages.error('Please fill in all fields', messageContainer);
       return;
     }
 
     if (password !== confirmPassword) {
-      UIMessages.error('Passwords do not match', container);
+      UIMessages.error('Passwords do not match', messageContainer);
       return;
     }
 
     if (password.length < 6) {
-      UIMessages.error('Password must be at least 6 characters', container);
+      UIMessages.error('Password must be at least 6 characters', messageContainer);
       return;
     }
 
     try {
-      UIMessages.loading('Creating account...', container);
+      UIMessages.loading('Creating account...', messageContainer);
 
       const result = await this.config.signUp(email, password);
 
@@ -257,7 +259,7 @@ class AuthUI {
           await this.config.signIn(email, password);
           UIMessages.success(
             'Account created and signed in successfully!',
-            container
+            messageContainer
           );
 
           // Call the success callback
@@ -270,7 +272,7 @@ class AuthUI {
           // If auto-signin fails, show the email verification message
           UIMessages.success(
             'Account created! Please check your email to verify your account, then sign in.',
-            container
+            messageContainer
           );
 
           // Switch to login form after successful signup
@@ -281,7 +283,7 @@ class AuthUI {
       } else {
         UIMessages.success(
           'Account created! Please check your email to verify your account.',
-          container
+          messageContainer
         );
 
         // Switch to login form after successful signup
@@ -291,7 +293,7 @@ class AuthUI {
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignup');
-      UIMessages.error(errorResult.userMessage, container);
+      UIMessages.error(errorResult.userMessage, messageContainer);
     }
   }
 
@@ -320,7 +322,8 @@ class AuthUI {
 
   showAuthMessage(container, message, type) {
     // Use the centralized UIMessages system
-    UIMessages.show(message, type, container);
+    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
+    UIMessages.show(message, type, messageContainer);
   }
 
   getErrorMessage(error) {

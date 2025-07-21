@@ -112,6 +112,7 @@ class ForgetfulMeOptions {
   initializeElements() {
     // Initialize elements that exist in the initial HTML
     this.appContainer = UIComponents.DOM.getElement('app');
+    this.messageContainer = UIComponents.DOM.getElement('message-container');
 
     // Re-initialize dynamically created elements with safe access
     this.statusTypesList = UIComponents.DOM.getElement('status-types-list');
@@ -208,7 +209,7 @@ class ForgetfulMeOptions {
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.initializeApp');
       if (errorResult.shouldShowToUser) {
-        UIMessages.error(errorResult.userMessage, this.appContainer);
+        UIMessages.error(errorResult.userMessage, this.messageContainer);
       }
       this.showConfigInterface();
     }
@@ -237,6 +238,12 @@ class ForgetfulMeOptions {
       '',
       'main-container'
     );
+
+    // Add message container at the top
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'message-container';
+    messageContainer.className = 'message-container';
+    mainContainer.appendChild(messageContainer);
 
     // Create config section
     const configSection = UIComponents.createSection(
@@ -343,19 +350,18 @@ class ForgetfulMeOptions {
       }
     );
 
+    // Create hidden file input for import
+    const importFile = document.createElement('input');
+    importFile.type = 'file';
+    importFile.accept = '.json';
+    importFile.id = 'import-file';
+    importFile.style.display = 'none';
+
     dataActions.appendChild(exportBtn);
     dataActions.appendChild(importBtn);
     dataActions.appendChild(clearBtn);
-
-    // Hidden file input
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = 'import-file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    dataActions.appendChild(fileInput);
-
     dataSection.appendChild(dataActions);
+    dataSection.appendChild(importFile);
     mainContainer.appendChild(dataSection);
 
     // Create bookmark management section
@@ -363,30 +369,21 @@ class ForgetfulMeOptions {
       'Bookmark Management',
       'bookmark-section'
     );
-    const manageBookmarksBtn = UIComponents.createButton(
-      '📚 Manage Bookmarks',
+    const bookmarkBtn = UIComponents.createButton(
+      'Open Bookmark Management',
       () => this.openBookmarkManagement(),
-      'ui-btn-secondary',
-      {
-        id: 'manage-bookmarks-btn',
-        title: 'Open bookmark management interface',
-      }
+      'ui-btn-primary'
     );
-    bookmarkSection.appendChild(manageBookmarksBtn);
+    bookmarkSection.appendChild(bookmarkBtn);
     mainContainer.appendChild(bookmarkSection);
 
-    // Assemble the interface
+    // Clear and set content
     this.appContainer.innerHTML = '';
     this.appContainer.appendChild(mainContainer);
 
     // Re-initialize elements after DOM update
     this.initializeElements();
     this.bindEvents();
-
-    // Show configuration status
-    if (configStatusContainer) {
-      this.configUI.showConfigStatus(configStatusContainer);
-    }
   }
 
   async loadData() {
@@ -401,7 +398,7 @@ class ForgetfulMeOptions {
       this.loadStatistics(bookmarks, customStatusTypes);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.loadData');
-      UIMessages.error(errorResult.userMessage, this.appContainer);
+      UIMessages.error(errorResult.userMessage, this.messageContainer);
     }
   }
 

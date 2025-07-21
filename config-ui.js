@@ -129,7 +129,7 @@ class ConfigUI {
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
 
-        UIMessages.info('Current configuration loaded', container);
+        UIMessages.info('Current configuration loaded', messageContainer);
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(
@@ -142,6 +142,7 @@ class ConfigUI {
   }
 
   async handleConfigSubmit(container) {
+    const messageContainer = UIComponents.DOM.querySelector('#configMessage', container);
     const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
     const keyInput = UIComponents.DOM.querySelector(
       '#supabaseAnonKey',
@@ -152,17 +153,17 @@ class ConfigUI {
     const anonKey = keyInput ? keyInput.value.trim() : '';
 
     if (!url || !anonKey) {
-      UIMessages.error('Please fill in all fields', container);
+      UIMessages.error('Please fill in all fields', messageContainer);
       return;
     }
 
     try {
-      UIMessages.loading('Saving configuration...', container);
+      UIMessages.loading('Saving configuration...', messageContainer);
 
       const result = await this.config.setConfiguration(url, anonKey);
 
       if (result.success) {
-        UIMessages.success('Configuration saved successfully!', container);
+        UIMessages.success('Configuration saved successfully!', messageContainer);
 
         // Test the configuration
         setTimeout(async () => {
@@ -170,7 +171,7 @@ class ConfigUI {
             await this.config.initialize();
             UIMessages.success(
               'Configuration test successful! You can now use the extension.',
-              container
+              messageContainer
             );
           } catch (error) {
             const errorResult = ErrorHandler.handle(
@@ -179,19 +180,19 @@ class ConfigUI {
             );
             UIMessages.error(
               'Configuration saved but test failed. Please check your credentials.',
-              container
+              messageContainer
             );
           }
         }, 1000);
       } else {
-        UIMessages.error(`Error: ${result.message}`, container);
+        UIMessages.error(`Error: ${result.message}`, messageContainer);
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(
         error,
         'config-ui.handleConfigSubmit'
       );
-      UIMessages.error(errorResult.userMessage, container);
+      UIMessages.error(errorResult.userMessage, messageContainer);
     }
   }
 
