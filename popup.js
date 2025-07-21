@@ -315,7 +315,7 @@ class ForgetfulMePopup {
     headerActions.setAttribute('aria-label', 'Extension actions');
 
     const settingsBtn = document.createElement('button');
-    settingsBtn.className = 'settings-btn';
+    settingsBtn.className = 'btn btn-secondary settings-btn';
     settingsBtn.setAttribute('aria-label', 'Open settings');
     settingsBtn.setAttribute('title', 'Settings');
     settingsBtn.addEventListener('click', () => this.openSettings());
@@ -333,7 +333,7 @@ class ForgetfulMePopup {
     headerActions.appendChild(settingsBtn);
 
     const manageBtn = document.createElement('button');
-    manageBtn.className = 'manage-btn';
+    manageBtn.className = 'btn btn-secondary manage-btn';
     manageBtn.setAttribute('aria-label', 'Manage bookmarks');
     manageBtn.setAttribute('title', 'Manage Bookmarks');
     manageBtn.addEventListener('click', () => this.showBookmarkManagement());

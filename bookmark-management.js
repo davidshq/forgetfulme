@@ -199,7 +199,7 @@ class BookmarkManagementPage {
     const settingsBtn = UIComponents.createButton(
       'Open Settings',
       () => this.openSettings(),
-      'ui-btn-primary'
+      'btn-primary'
     );
     setupSection.appendChild(settingsBtn);
     container.appendChild(setupSection);
@@ -233,7 +233,7 @@ class BookmarkManagementPage {
       <div class="auth-container">
         <h2>Authentication Required</h2>
         <p>Please authenticate in the extension popup to access bookmark management.</p>
-        <button onclick="window.close()" class="ui-btn-primary">Close</button>
+        <button onclick="window.close()" class="btn btn-primary">Close</button>
       </div>
     `;
   }
@@ -259,7 +259,7 @@ class BookmarkManagementPage {
     headerActions.setAttribute('aria-label', 'Page actions');
 
     const backBtn = document.createElement('button');
-    backBtn.className = 'ui-btn-secondary';
+    backBtn.className = 'btn btn-secondary';
     backBtn.setAttribute('aria-label', 'Close bookmark management and return to extension');
     backBtn.setAttribute('title', 'Close bookmark management');
     backBtn.addEventListener('click', () => window.close());
@@ -403,14 +403,14 @@ class BookmarkManagementPage {
 
     const selectAllBtn = document.createElement('button');
     selectAllBtn.id = 'select-all';
-    selectAllBtn.className = 'ui-btn-secondary';
+    selectAllBtn.className = 'btn btn-secondary btn-small';
     selectAllBtn.textContent = 'Select All';
     selectAllBtn.setAttribute('aria-label', 'Select all visible bookmarks');
     bulkActions.appendChild(selectAllBtn);
 
     const deleteSelectedBtn = document.createElement('button');
     deleteSelectedBtn.id = 'delete-selected';
-    deleteSelectedBtn.className = 'ui-btn-danger';
+    deleteSelectedBtn.className = 'btn btn-danger btn-small';
     deleteSelectedBtn.textContent = 'Delete Selected';
     deleteSelectedBtn.disabled = true;
     deleteSelectedBtn.setAttribute('aria-label', 'Delete selected bookmarks');
@@ -418,7 +418,7 @@ class BookmarkManagementPage {
 
     const exportSelectedBtn = document.createElement('button');
     exportSelectedBtn.id = 'export-selected';
-    exportSelectedBtn.className = 'ui-btn-secondary';
+    exportSelectedBtn.className = 'btn btn-secondary btn-small';
     exportSelectedBtn.textContent = 'Export Selected';
     exportSelectedBtn.disabled = true;
     exportSelectedBtn.setAttribute('aria-label', 'Export selected bookmarks');
@@ -601,7 +601,7 @@ class BookmarkManagementPage {
     actionsDiv.setAttribute('aria-label', `Actions for ${bookmark.title}`);
 
     const editBtn = document.createElement('button');
-    editBtn.className = 'ui-btn-small ui-btn-secondary';
+    editBtn.className = 'btn btn-secondary btn-small';
     editBtn.textContent = '✏️ Edit';
     editBtn.setAttribute('aria-label', `Edit bookmark: ${bookmark.title}`);
     editBtn.setAttribute('title', 'Edit bookmark');
@@ -609,7 +609,7 @@ class BookmarkManagementPage {
     actionsDiv.appendChild(editBtn);
 
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'ui-btn-small ui-btn-danger';
+    deleteBtn.className = 'btn btn-danger btn-small';
     deleteBtn.textContent = '🗑️ Delete';
     deleteBtn.setAttribute('aria-label', `Delete bookmark: ${bookmark.title}`);
     deleteBtn.setAttribute('title', 'Delete bookmark');
@@ -617,7 +617,7 @@ class BookmarkManagementPage {
     actionsDiv.appendChild(deleteBtn);
 
     const openBtn = document.createElement('button');
-    openBtn.className = 'ui-btn-small ui-btn-secondary';
+    openBtn.className = 'btn btn-secondary btn-small';
     openBtn.textContent = '🔗 Open';
     openBtn.setAttribute('aria-label', `Open bookmark: ${bookmark.title}`);
     openBtn.setAttribute('title', 'Open bookmark in new tab');
@@ -697,7 +697,7 @@ class BookmarkManagementPage {
     const backBtn = UIComponents.createButton(
       '← Back to List',
       () => this.showMainInterface(),
-      'ui-btn-secondary',
+      'btn-secondary',
       { title: 'Back to bookmark list' }
     );
     header.appendChild(backBtn);
