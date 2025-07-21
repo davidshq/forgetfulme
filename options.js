@@ -17,6 +17,7 @@ import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
 import AuthStateManager from './utils/auth-state-manager.js';
 import ConfigUI from './config-ui.js';
+import ThemeManager from './utils/theme-manager.js';
 
 /**
  * Options page class for ForgetfulMe extension
@@ -50,6 +51,8 @@ class ForgetfulMeOptions {
     );
     /** @type {ConfigUI} Configuration UI manager */
     this.configUI = new ConfigUI(this.supabaseConfig);
+    /** @type {ThemeManager} Theme manager for manual theme settings */
+    this.themeManager = new ThemeManager();
 
     // Initialize after DOM is ready
     this.initializeAsync();
@@ -62,10 +65,26 @@ class ForgetfulMeOptions {
 
       this.initializeElements();
       await this.initializeApp();
+      await this.initializeThemeManager();
       this.initializeAuthState();
     } catch (error) {
       ErrorHandler.handle(error, 'options.initializeAsync');
       // Failed to initialize options: errorResult
+    }
+  }
+
+  async initializeThemeManager() {
+    try {
+      await this.themeManager.initialize();
+
+      // Listen for theme changes
+      this.themeManager.addListener('themeChanged', theme => {
+        this.handleThemeChange(theme);
+      });
+
+      // Options: Theme manager initialized
+    } catch (error) {
+      console.warn('Failed to initialize theme manager:', error);
     }
   }
 
@@ -91,6 +110,11 @@ class ForgetfulMeOptions {
     } catch {
       // Options: Error initializing auth state: error
     }
+  }
+
+  handleThemeChange(theme) {
+    // Options: Theme changed to: theme
+    console.log('Theme changed to:', theme);
   }
 
   handleAuthStateChange(session) {
@@ -365,6 +389,50 @@ class ForgetfulMeOptions {
     dataSection.appendChild(dataActions);
     dataSection.appendChild(importFile);
     mainContainer.appendChild(dataSection);
+
+    // Create theme settings section
+    const themeSection = UIComponents.createSection(
+      'Theme Settings',
+      'theme-section'
+    );
+    
+    const themeContainer = document.createElement('div');
+    themeContainer.className = 'theme-container';
+    
+    // Create theme selector
+    const themeSelect = UIComponents.createFormField('select', 'theme-select', '', {
+      options: [
+        { value: '', text: 'Use System Preference' },
+        { value: 'light', text: 'Light Theme' },
+        { value: 'dark', text: 'Dark Theme' }
+      ]
+    });
+    
+    // Set current theme value
+    const currentTheme = this.themeManager.getManualTheme();
+    themeSelect.value = currentTheme || '';
+    
+    // Add change event listener
+    themeSelect.addEventListener('change', async (event) => {
+      const selectedTheme = event.target.value || null;
+      try {
+        await this.themeManager.setTheme(selectedTheme);
+        this.showMessage('Theme updated successfully', 'success');
+      } catch (error) {
+        this.showMessage('Failed to update theme', 'error');
+        console.error('Theme update error:', error);
+      }
+    });
+    
+    const themeLabel = document.createElement('label');
+    themeLabel.textContent = 'Theme:';
+    themeLabel.setAttribute('for', 'theme-select');
+    themeLabel.className = 'form-label';
+    
+    themeContainer.appendChild(themeLabel);
+    themeContainer.appendChild(themeSelect);
+    themeSection.appendChild(themeContainer);
+    mainContainer.appendChild(themeSection);
 
     // Create bookmark management section
     const bookmarkSection = UIComponents.createSection(

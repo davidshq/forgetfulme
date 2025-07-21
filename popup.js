@@ -18,6 +18,7 @@ import BookmarkTransformer from './utils/bookmark-transformer.js';
 import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
+import ThemeManager from './utils/theme-manager.js';
 
 /**
  * Main popup class for the ForgetfulMe Chrome extension
@@ -49,6 +50,8 @@ class ForgetfulMePopup {
       () => this.onAuthSuccess(),
       this.authStateManager
     );
+    /** @type {ThemeManager} Theme manager for manual theme settings */
+    this.themeManager = new ThemeManager();
 
     /** @type {string|null} Current bookmark URL being edited */
     this.currentBookmarkUrl = null;
@@ -75,10 +78,37 @@ class ForgetfulMePopup {
 
       this.initializeElements();
       await this.initializeApp();
+      await this.initializeThemeManager();
       this.initializeAuthState();
     } catch (error) {
       ErrorHandler.handle(error, 'popup.initializeAsync');
       // Failed to initialize popup: errorResult
+    }
+  }
+
+  /**
+   * Initialize theme manager and set up listeners
+   * @async
+   * @method initializeThemeManager
+   * @description Sets up theme management and listeners for theme changes
+   * @throws {Error} When theme manager initialization fails
+   *
+   * @example
+   * // Called during popup initialization
+   * await popup.initializeThemeManager();
+   */
+  async initializeThemeManager() {
+    try {
+      await this.themeManager.initialize();
+
+      // Listen for theme changes
+      this.themeManager.addListener('themeChanged', theme => {
+        this.handleThemeChange(theme);
+      });
+
+      // Popup: Theme manager initialized
+    } catch (error) {
+      console.warn('Failed to initialize theme manager:', error);
     }
   }
 
@@ -127,6 +157,11 @@ class ForgetfulMePopup {
    * // Called automatically when auth state changes
    * popup.handleAuthStateChange(session);
    */
+  handleThemeChange(theme) {
+    // Popup: Theme changed to: theme
+    console.log('Theme changed to:', theme);
+  }
+
   handleAuthStateChange(session) {
     // Popup: Auth state changed: session ? 'authenticated' : 'not authenticated'
 

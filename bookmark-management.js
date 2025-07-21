@@ -16,6 +16,7 @@ import ConfigManager from './utils/config-manager.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
 import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
+import ThemeManager from './utils/theme-manager.js';
 
 /**
  * Bookmark management page class
@@ -37,6 +38,8 @@ class BookmarkManagementPage {
     this.supabaseConfig = new SupabaseConfig();
     /** @type {SupabaseService} Supabase service for data operations */
     this.supabaseService = new SupabaseService(this.supabaseConfig);
+    /** @type {ThemeManager} Theme manager for manual theme settings */
+    this.themeManager = new ThemeManager();
 
     /** @type {HTMLElement} Main app container */
     this.appContainer = null;
@@ -59,6 +62,7 @@ class BookmarkManagementPage {
 
       this.initializeElements();
       await this.initializeApp();
+      await this.initializeThemeManager();
       this.initializeAuthState();
     } catch (error) {
       ErrorHandler.handle(error, 'bookmark-management.initializeAsync');
@@ -66,6 +70,28 @@ class BookmarkManagementPage {
       //   'Failed to initialize bookmark management page:',
       //   errorResult
       // );
+    }
+  }
+
+  /**
+   * Initialize theme manager and set up listeners
+   * @async
+   * @method initializeThemeManager
+   * @description Sets up theme management and listeners for theme changes
+   * @throws {Error} When theme manager initialization fails
+   */
+  async initializeThemeManager() {
+    try {
+      await this.themeManager.initialize();
+
+      // Listen for theme changes
+      this.themeManager.addListener('themeChanged', theme => {
+        this.handleThemeChange(theme);
+      });
+
+      // Bookmark management: Theme manager initialized
+    } catch (error) {
+      console.warn('Failed to initialize theme manager:', error);
     }
   }
 
@@ -88,6 +114,17 @@ class BookmarkManagementPage {
       ErrorHandler.handle(error, 'bookmark-management.initializeAuthState');
       // console.error('Failed to initialize auth state:', errorResult);
     }
+  }
+
+  /**
+   * Handle theme changes
+   * @method handleThemeChange
+   * @param {string} theme - The current theme ('light' or 'dark')
+   * @description Handles theme change events
+   */
+  handleThemeChange(theme) {
+    // Bookmark management: Theme changed to: theme
+    console.log('Theme changed to:', theme);
   }
 
   /**

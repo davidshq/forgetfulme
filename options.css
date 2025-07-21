@@ -52,6 +52,25 @@
 
 /* Config message and status styles - Now handled by components.css */
 
+/* Theme container styles */
+.theme-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.theme-container label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.theme-container select {
+  width: 100%;
+  max-width: 300px;
+}
+
 /* Enhanced responsive design */
 @media (max-width: 768px) {
   .add-status-form {
@@ -64,5 +83,9 @@
   
   .stats-container {
     grid-template-columns: 1fr;
+  }
+  
+  .theme-container select {
+    max-width: 100%;
   }
 }

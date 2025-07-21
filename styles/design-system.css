@@ -129,8 +129,9 @@ body {
 }
 
 /* ===== DARK MODE SUPPORT ===== */
+/* System preference-based dark mode */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --color-text-primary: #e9ecef;
     --color-text-secondary: #adb5bd;
     --color-text-muted: #6c757d;
@@ -139,6 +140,27 @@ body {
     --color-background: #2d2d2d;
     --color-background-secondary: #343a40;
   }
+}
+
+/* Manual theme overrides */
+[data-theme="dark"] {
+  --color-text-primary: #e9ecef;
+  --color-text-secondary: #adb5bd;
+  --color-text-muted: #6c757d;
+  --color-border: #495057;
+  --color-border-hover: #6c757d;
+  --color-background: #2d2d2d;
+  --color-background-secondary: #343a40;
+}
+
+[data-theme="light"] {
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #495057;
+  --color-text-muted: #6c757d;
+  --color-border: #e1e5e9;
+  --color-border-hover: #adb5bd;
+  --color-background: #ffffff;
+  --color-background-secondary: #f8f9fa;
 }
 
 /* ===== ACCESSIBILITY SUPPORT ===== */
