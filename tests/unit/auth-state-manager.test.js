@@ -31,11 +31,11 @@ describe('AuthStateManager', () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Setup global mocks
     global.chrome = mockChrome;
     global.console = mockConsole;
-    
+
     // Create new instance for each test
     authManager = new AuthStateManager();
   });
@@ -63,7 +63,9 @@ describe('AuthStateManager', () => {
 
       expect(authManager.initialized).toBe(true);
       expect(authManager.authState).toBeNull();
-      expect(mockChrome.storage.sync.get).toHaveBeenCalledWith(['auth_session']);
+      expect(mockChrome.storage.sync.get).toHaveBeenCalledWith([
+        'auth_session',
+      ]);
       expect(mockChrome.storage.onChanged.addListener).toHaveBeenCalled();
       expect(mockConsole.log).toHaveBeenCalledWith(
         'AuthStateManager initialized, current state:',
@@ -73,7 +75,9 @@ describe('AuthStateManager', () => {
 
     test('should initialize with existing auth state', async () => {
       const mockSession = { user: { id: '123', email: 'test@example.com' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
 
       await authManager.initialize();
 
@@ -109,8 +113,10 @@ describe('AuthStateManager', () => {
   describe('getAuthState', () => {
     test('should return current auth state', async () => {
       const mockSession = { user: { id: '123' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
-      
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
+
       await authManager.initialize();
       const result = await authManager.getAuthState();
 
@@ -164,7 +170,9 @@ describe('AuthStateManager', () => {
 
     test('should handle runtime message errors gracefully', async () => {
       mockChrome.storage.sync.get.mockResolvedValue({ auth_session: null });
-      mockChrome.runtime.sendMessage.mockRejectedValue(new Error('No listeners'));
+      mockChrome.runtime.sendMessage.mockRejectedValue(
+        new Error('No listeners')
+      );
       await authManager.initialize();
 
       const mockSession = { user: { id: '123' } };
@@ -180,13 +188,17 @@ describe('AuthStateManager', () => {
   describe('clearAuthState', () => {
     test('should clear auth state', async () => {
       const mockSession = { user: { id: '123' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
       await authManager.initialize();
 
       await authManager.clearAuthState();
 
       expect(authManager.authState).toBeNull();
-      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith(['auth_session']);
+      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith([
+        'auth_session',
+      ]);
       expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
         type: 'AUTH_STATE_CHANGED',
         session: null,
@@ -210,7 +222,9 @@ describe('AuthStateManager', () => {
   describe('isAuthenticated', () => {
     test('should return true when authenticated', async () => {
       const mockSession = { user: { id: '123' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
       await authManager.initialize();
 
       const result = await authManager.isAuthenticated();
@@ -245,7 +259,9 @@ describe('AuthStateManager', () => {
 
     test('should not notify listeners if state did not change', async () => {
       const mockSession = { user: { id: '123' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
       await authManager.initialize();
 
       const mockCallback = vi.fn();
@@ -274,7 +290,7 @@ describe('AuthStateManager', () => {
   describe('Listener Management', () => {
     test('should add and remove listeners', () => {
       const mockCallback = vi.fn();
-      
+
       authManager.addListener('authStateChanged', mockCallback);
       expect(authManager.listeners.size).toBe(1);
 
@@ -321,7 +337,9 @@ describe('AuthStateManager', () => {
   describe('getAuthSummary', () => {
     test('should provide auth summary when authenticated', async () => {
       const mockSession = { user: { id: '123', email: 'test@example.com' } };
-      mockChrome.storage.sync.get.mockResolvedValue({ auth_session: mockSession });
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: mockSession,
+      });
       await authManager.initialize();
 
       const summary = authManager.getAuthSummary();

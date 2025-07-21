@@ -2,7 +2,7 @@
  * @fileoverview Bookmark management page for ForgetfulMe extension
  * @module bookmark-management
  * @description Full-page interface for managing bookmarks with search, filter, and bulk operations
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -61,8 +61,11 @@ class BookmarkManagementPage {
       await this.initializeApp();
       this.initializeAuthState();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.initializeAsync');
-      console.error('Failed to initialize bookmark management page:', errorResult);
+      ErrorHandler.handle(error, 'bookmark-management.initializeAsync');
+      // console.error(
+      //   'Failed to initialize bookmark management page:',
+      //   errorResult
+      // );
     }
   }
 
@@ -78,12 +81,12 @@ class BookmarkManagementPage {
       await this.authStateManager.initialize();
 
       // Listen for auth state changes
-      this.authStateManager.addListener((session) => {
+      this.authStateManager.addListener(session => {
         this.handleAuthStateChange(session);
       });
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.initializeAuthState');
-      console.error('Failed to initialize auth state:', errorResult);
+      ErrorHandler.handle(error, 'bookmark-management.initializeAuthState');
+      // console.error('Failed to initialize auth state:', errorResult);
     }
   }
 
@@ -133,19 +136,22 @@ class BookmarkManagementPage {
       // Initialize Supabase with retry mechanism
       let retryCount = 0;
       const maxRetries = 3;
-      
+
       while (retryCount < maxRetries) {
         try {
           await this.supabaseService.initialize();
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(`Supabase initialization attempt ${retryCount} failed:`, error);
-          
+          // console.log(
+          //   `Supabase initialization attempt ${retryCount} failed:`,
+          //   error
+          // );
+
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries
           }
-          
+
           // Wait a bit before retrying
           await new Promise(resolve => setTimeout(resolve, 500));
         }
@@ -160,7 +166,10 @@ class BookmarkManagementPage {
         this.showAuthInterface();
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.initializeApp');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.initializeApp'
+      );
       if (errorResult.shouldShowToUser) {
         UIMessages.error(errorResult.userMessage, this.appContainer);
       }
@@ -247,7 +256,7 @@ class BookmarkManagementPage {
     // Create header with better accessibility
     const header = document.createElement('header');
     header.setAttribute('role', 'banner');
-    
+
     const title = document.createElement('h1');
     title.textContent = 'ForgetfulMe - Bookmark Management';
     title.setAttribute('id', 'page-title');
@@ -260,20 +269,23 @@ class BookmarkManagementPage {
 
     const backBtn = document.createElement('button');
     backBtn.className = 'btn btn-secondary';
-    backBtn.setAttribute('aria-label', 'Close bookmark management and return to extension');
+    backBtn.setAttribute(
+      'aria-label',
+      'Close bookmark management and return to extension'
+    );
     backBtn.setAttribute('title', 'Close bookmark management');
     backBtn.addEventListener('click', () => window.close());
-    
+
     const backIcon = document.createElement('span');
     backIcon.textContent = '←';
     backIcon.style.fontSize = '16px';
     backIcon.style.fontWeight = 'bold';
     backBtn.appendChild(backIcon);
-    
+
     const backText = document.createElement('span');
     backText.textContent = 'Back to Extension';
     backBtn.appendChild(backText);
-    
+
     headerActions.appendChild(backBtn);
     header.appendChild(headerActions);
 
@@ -371,7 +383,10 @@ class BookmarkManagementPage {
     searchBtn.type = 'submit';
     searchBtn.className = 'btn btn-primary';
     searchBtn.textContent = 'Search';
-    searchBtn.setAttribute('aria-label', 'Search bookmarks with current filters');
+    searchBtn.setAttribute(
+      'aria-label',
+      'Search bookmarks with current filters'
+    );
 
     // Add form elements
     searchForm.appendChild(searchGroup);
@@ -379,7 +394,7 @@ class BookmarkManagementPage {
     searchForm.appendChild(searchBtn);
 
     // Add form submit handler
-    searchForm.addEventListener('submit', (e) => {
+    searchForm.addEventListener('submit', e => {
       e.preventDefault();
       this.searchBookmarks();
     });
@@ -479,7 +494,10 @@ class BookmarkManagementPage {
       const bookmarks = await this.supabaseService.getBookmarks({ limit: 100 });
       this.displayBookmarks(bookmarks);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.loadAllBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.loadAllBookmarks'
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -501,28 +519,31 @@ class BookmarkManagementPage {
       emptyState.className = 'empty-state';
       emptyState.setAttribute('role', 'status');
       emptyState.setAttribute('aria-live', 'polite');
-      
+
       const emptyIcon = document.createElement('div');
       emptyIcon.style.fontSize = '48px';
       emptyIcon.style.marginBottom = '16px';
       emptyIcon.textContent = '📚';
       emptyState.appendChild(emptyIcon);
-      
+
       const emptyTitle = document.createElement('h4');
       emptyTitle.textContent = 'No bookmarks found';
       emptyState.appendChild(emptyTitle);
-      
+
       const emptyText = document.createElement('p');
-      emptyText.textContent = 'Try adjusting your search criteria or add some bookmarks from the extension popup.';
+      emptyText.textContent =
+        'Try adjusting your search criteria or add some bookmarks from the extension popup.';
       emptyState.appendChild(emptyText);
-      
+
       bookmarksList.appendChild(emptyState);
       return;
     }
 
     // Convert to UI format and create list items
-    const uiBookmarks = bookmarks.map(bookmark => BookmarkTransformer.toUIFormat(bookmark));
-    
+    const uiBookmarks = bookmarks.map(bookmark =>
+      BookmarkTransformer.toUIFormat(bookmark)
+    );
+
     uiBookmarks.forEach((bookmark, index) => {
       const listItem = this.createBookmarkListItem(bookmark, index);
       bookmarksList.appendChild(listItem);
@@ -543,14 +564,20 @@ class BookmarkManagementPage {
     const listItem = document.createElement('div');
     listItem.className = 'bookmark-item';
     listItem.setAttribute('role', 'listitem');
-    listItem.setAttribute('aria-label', `Bookmark ${index + 1}: ${bookmark.title}`);
+    listItem.setAttribute(
+      'aria-label',
+      `Bookmark ${index + 1}: ${bookmark.title}`
+    );
 
     // Add checkbox for bulk selection
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'bookmark-checkbox';
     checkbox.dataset.bookmarkId = bookmark.id;
-    checkbox.setAttribute('aria-label', `Select ${bookmark.title} for bulk action`);
+    checkbox.setAttribute(
+      'aria-label',
+      `Select ${bookmark.title} for bulk action`
+    );
     checkbox.addEventListener('change', () => this.updateBulkActions());
     listItem.appendChild(checkbox);
 
@@ -573,14 +600,22 @@ class BookmarkManagementPage {
     const statusSpan = document.createElement('span');
     statusSpan.className = `status ${bookmark.status}`;
     statusSpan.textContent = this.formatStatus(bookmark.status);
-    statusSpan.setAttribute('aria-label', `Status: ${this.formatStatus(bookmark.status)}`);
+    statusSpan.setAttribute(
+      'aria-label',
+      `Status: ${this.formatStatus(bookmark.status)}`
+    );
     metaDiv.appendChild(statusSpan);
 
     // Add time
     const timeSpan = document.createElement('span');
     timeSpan.className = 'bookmark-time';
-    timeSpan.textContent = this.formatTime(new Date(bookmark.created_at).getTime());
-    timeSpan.setAttribute('aria-label', `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`);
+    timeSpan.textContent = this.formatTime(
+      new Date(bookmark.created_at).getTime()
+    );
+    timeSpan.setAttribute(
+      'aria-label',
+      `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`
+    );
     metaDiv.appendChild(timeSpan);
 
     // Add tags if they exist
@@ -613,7 +648,9 @@ class BookmarkManagementPage {
     deleteBtn.textContent = '🗑️ Delete';
     deleteBtn.setAttribute('aria-label', `Delete bookmark: ${bookmark.title}`);
     deleteBtn.setAttribute('title', 'Delete bookmark');
-    deleteBtn.addEventListener('click', () => this.deleteBookmark(bookmark.id, bookmark.title));
+    deleteBtn.addEventListener('click', () =>
+      this.deleteBookmark(bookmark.id, bookmark.title)
+    );
     actionsDiv.appendChild(deleteBtn);
 
     const openBtn = document.createElement('button');
@@ -643,11 +680,11 @@ class BookmarkManagementPage {
       const statusFilter = UIComponents.DOM.getValue('status-filter') || '';
 
       const filters = { limit: 100 };
-      
+
       if (searchQuery.trim()) {
         filters.search = searchQuery.trim();
       }
-      
+
       if (statusFilter) {
         filters.status = statusFilter;
       }
@@ -655,7 +692,10 @@ class BookmarkManagementPage {
       const bookmarks = await this.supabaseService.getBookmarks(filters);
       this.displayBookmarks(bookmarks);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.searchBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.searchBookmarks'
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -728,7 +768,7 @@ class BookmarkManagementPage {
       { value: 'low-value', text: 'Low Value' },
       { value: 'revisit-later', text: 'Revisit Later' },
     ];
-    
+
     // Mark the current status as selected
     statusOptions.forEach(option => {
       if (option.value === existingBookmark.read_status) {
@@ -738,7 +778,7 @@ class BookmarkManagementPage {
 
     const editForm = UIComponents.createForm(
       'editBookmarkForm',
-      (e) => {
+      e => {
         e.preventDefault();
         this.updateBookmark(existingBookmark.id);
       },
@@ -748,7 +788,7 @@ class BookmarkManagementPage {
           id: 'edit-read-status',
           label: 'Update Status:',
           options: {
-            options: statusOptions
+            options: statusOptions,
           },
         },
         {
@@ -757,12 +797,14 @@ class BookmarkManagementPage {
           label: 'Update Tags (comma separated):',
           options: {
             placeholder: 'research, tutorial, important',
-            value: existingBookmark.tags ? existingBookmark.tags.join(', ') : ''
+            value: existingBookmark.tags
+              ? existingBookmark.tags.join(', ')
+              : '',
           },
         },
       ],
       {
-        submitText: 'Update Bookmark'
+        submitText: 'Update Bookmark',
       }
     );
 
@@ -789,20 +831,28 @@ class BookmarkManagementPage {
 
       const updateData = {
         read_status: status,
-        tags: tags.trim() ? tags.trim().split(',').map(tag => tag.trim()) : [],
+        tags: tags.trim()
+          ? tags
+              .trim()
+              .split(',')
+              .map(tag => tag.trim())
+          : [],
         updated_at: new Date().toISOString(),
       };
 
       await this.supabaseService.updateBookmark(bookmarkId, updateData);
-      
+
       UIMessages.success('Bookmark updated successfully!', this.appContainer);
-      
+
       // Return to main interface after a short delay
       setTimeout(() => {
         this.showMainInterface();
       }, 1500);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.updateBookmark');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.updateBookmark'
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -822,10 +872,16 @@ class BookmarkManagementPage {
       async () => {
         try {
           await this.supabaseService.deleteBookmark(bookmarkId);
-          UIMessages.success('Bookmark deleted successfully!', this.appContainer);
+          UIMessages.success(
+            'Bookmark deleted successfully!',
+            this.appContainer
+          );
           this.loadAllBookmarks();
         } catch (error) {
-          const errorResult = ErrorHandler.handle(error, 'bookmark-management.deleteBookmark');
+          const errorResult = ErrorHandler.handle(
+            error,
+            'bookmark-management.deleteBookmark'
+          );
           UIMessages.error(errorResult.userMessage, this.appContainer);
         }
       },
@@ -861,11 +917,15 @@ class BookmarkManagementPage {
     }
 
     if (deleteSelectedBtn) {
-      deleteSelectedBtn.addEventListener('click', () => this.deleteSelectedBookmarks());
+      deleteSelectedBtn.addEventListener('click', () =>
+        this.deleteSelectedBookmarks()
+      );
     }
 
     if (exportSelectedBtn) {
-      exportSelectedBtn.addEventListener('click', () => this.exportSelectedBookmarks());
+      exportSelectedBtn.addEventListener('click', () =>
+        this.exportSelectedBookmarks()
+      );
     }
   }
 
@@ -877,11 +937,11 @@ class BookmarkManagementPage {
   toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.bookmark-checkbox');
     const selectAllBtn = document.getElementById('select-all');
-    
+
     if (!checkboxes.length) return;
 
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
+
     checkboxes.forEach(checkbox => {
       checkbox.checked = !allChecked;
     });
@@ -900,8 +960,10 @@ class BookmarkManagementPage {
    */
   updateBulkActions() {
     const checkboxes = document.querySelectorAll('.bookmark-checkbox');
-    const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    
+    const selectedCount = Array.from(checkboxes).filter(
+      cb => cb.checked
+    ).length;
+
     const deleteSelectedBtn = document.getElementById('delete-selected');
     const exportSelectedBtn = document.getElementById('export-selected');
 
@@ -934,10 +996,16 @@ class BookmarkManagementPage {
             await this.supabaseService.deleteBookmark(bookmarkId);
           }
 
-          UIMessages.success(`${selectedIds.length} bookmark(s) deleted successfully!`, this.appContainer);
+          UIMessages.success(
+            `${selectedIds.length} bookmark(s) deleted successfully!`,
+            this.appContainer
+          );
           this.loadAllBookmarks();
         } catch (error) {
-          const errorResult = ErrorHandler.handle(error, 'bookmark-management.deleteSelectedBookmarks');
+          const errorResult = ErrorHandler.handle(
+            error,
+            'bookmark-management.deleteSelectedBookmarks'
+          );
           UIMessages.error(errorResult.userMessage, this.appContainer);
         }
       },
@@ -974,9 +1042,11 @@ class BookmarkManagementPage {
         bookmarks: bookmarks,
       };
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json',
+      });
       const url = URL.createObjectURL(blob);
-      
+
       const a = document.createElement('a');
       a.href = url;
       a.download = `forgetfulme-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
@@ -985,9 +1055,15 @@ class BookmarkManagementPage {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      UIMessages.success(`${bookmarks.length} bookmark(s) exported successfully!`, this.appContainer);
+      UIMessages.success(
+        `${bookmarks.length} bookmark(s) exported successfully!`,
+        this.appContainer
+      );
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.exportSelectedBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.exportSelectedBookmarks'
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -1014,7 +1090,7 @@ class BookmarkManagementPage {
   formatTime(timestamp) {
     const now = Date.now();
     const diff = now - timestamp;
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
@@ -1035,4 +1111,4 @@ class BookmarkManagementPage {
 new BookmarkManagementPage();
 
 // Export for testing
-export default BookmarkManagementPage; 
+export default BookmarkManagementPage;

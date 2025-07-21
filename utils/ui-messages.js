@@ -2,7 +2,7 @@
  * @fileoverview UI Message Handler for ForgetfulMe Extension
  * @module ui-messages
  * @description Provides centralized message display functionality for user feedback
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,14 +12,14 @@
  * UI Message Handler for ForgetfulMe Extension
  * @class UIMessages
  * @description Provides centralized message display functionality for user feedback
- * 
+ *
  * @example
  * // Show a success message
  * UIMessages.success('Bookmark saved successfully!', container);
- * 
+ *
  * // Show an error message
  * UIMessages.error('Failed to save bookmark', container);
- * 
+ *
  * // Show a confirmation dialog
  * UIMessages.confirm('Delete this bookmark?', onConfirm, onCancel, container);
  */
@@ -72,7 +72,7 @@ class UIMessages {
     // Add to container
     try {
       container.appendChild(messageEl);
-    } catch (error) {
+    } catch {
       console.warn(
         'UIMessages.show: Error adding message to container, falling back to console'
       );
@@ -86,7 +86,7 @@ class UIMessages {
       if (messageEl.parentNode) {
         try {
           messageEl.parentNode.removeChild(messageEl);
-        } catch (error) {
+        } catch {
           // Ignore removal errors
         }
       }

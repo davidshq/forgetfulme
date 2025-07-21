@@ -2,7 +2,7 @@
  * @fileoverview Unit tests for ForgetfulMe options page
  * @module tests/unit/options
  * @description Tests for the options page functionality including bookmark management
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -17,7 +17,7 @@ global.chrome = {
     create: vi.fn(),
   },
   runtime: {
-    getURL: vi.fn((url) => `chrome-extension://test/${url}`),
+    getURL: vi.fn(url => `chrome-extension://test/${url}`),
     onMessage: {
       addListener: vi.fn(),
     },
@@ -41,7 +41,7 @@ vi.mock('../../utils/ui-components.js', () => ({
   default: {
     DOM: {
       ready: vi.fn().mockResolvedValue(),
-      getElement: vi.fn((id) => {
+      getElement: vi.fn(id => {
         if (id === 'app') return mockAppContainer;
         return null;
       }),
@@ -137,9 +137,9 @@ describe('ForgetfulMeOptions', () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Mock document.createElement
-    document.createElement = vi.fn((tagName) => {
+    document.createElement = vi.fn(tagName => {
       const element = {
         tagName: tagName.toUpperCase(),
         innerHTML: '',
@@ -156,12 +156,12 @@ describe('ForgetfulMeOptions', () => {
         setAttribute: vi.fn(),
         getAttribute: vi.fn(),
       };
-      
+
       return element;
     });
 
     // Mock document.getElementById
-    document.getElementById = vi.fn((id) => {
+    document.getElementById = vi.fn(id => {
       if (id === 'app') return mockAppContainer;
       return null;
     });
@@ -181,7 +181,7 @@ describe('ForgetfulMeOptions', () => {
 
       // Verify chrome.tabs.create was called with correct URL
       expect(chrome.tabs.create).toHaveBeenCalledWith({
-        url: 'chrome-extension://test/bookmark-management.html'
+        url: 'chrome-extension://test/bookmark-management.html',
       });
     });
 
@@ -190,11 +190,11 @@ describe('ForgetfulMeOptions', () => {
       options.openBookmarkManagement();
 
       // Verify chrome.runtime.getURL was called
-      expect(chrome.runtime.getURL).toHaveBeenCalledWith('bookmark-management.html');
+      expect(chrome.runtime.getURL).toHaveBeenCalledWith(
+        'bookmark-management.html'
+      );
     });
   });
-
-
 
   describe('loadData', () => {
     it('should load data without recent entries', async () => {
@@ -215,4 +215,4 @@ describe('ForgetfulMeOptions', () => {
       expect(options.configManager.getCustomStatusTypes).toHaveBeenCalled();
     });
   });
-}); 
+});

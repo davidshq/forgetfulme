@@ -2,7 +2,7 @@
  * @fileoverview Vitest configuration for ForgetfulMe Chrome Extension
  * @module vitest-config
  * @description Configuration for unit testing with Vitest including coverage and test setup
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -19,22 +19,20 @@ export default defineConfig({
   test: {
     // Test environment
     environment: 'jsdom',
-    
+
     // Test file patterns
-    include: [
-      'tests/unit/**/*.test.js'
-    ],
+    include: ['tests/unit/**/*.test.js'],
     exclude: [
       'tests/popup.test.js',
       'tests/options.test.js',
       'tests/auth.test.js',
       'tests/helpers/**',
-      '**/node_modules/**'
+      '**/node_modules/**',
     ],
-    
+
     // Setup files
     setupFiles: ['./vitest.setup.js'],
-    
+
     // Coverage configuration
     coverage: {
       provider: 'v8',
@@ -48,38 +46,38 @@ export default defineConfig({
         'tests/unit/**/*.test.js',
         'vitest.config.js',
         'vitest.setup.js',
-        'playwright.config.js'
+        'playwright.config.js',
       ],
       thresholds: {
         global: {
           branches: 70,
           functions: 70,
           lines: 70,
-          statements: 70
-        }
-      }
+          statements: 70,
+        },
+      },
     },
-    
+
     // Test timeout
     testTimeout: 10000,
-    
+
     // Verbose output
     reporters: ['verbose'],
-    
+
     // Clear mocks between tests
     clearMocks: true,
-    
+
     // Restore mocks between tests
     restoreMocks: true,
-    
+
     // Global test setup
-    globals: true
+    globals: true,
   },
-  
+
   // Resolve configuration
   resolve: {
     alias: {
-      '@': '.'
-    }
-  }
-}); 
+      '@': '.',
+    },
+  },
+});

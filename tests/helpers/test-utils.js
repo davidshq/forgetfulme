@@ -2,7 +2,7 @@
  * @fileoverview Enhanced test utilities for ForgetfulMe extension tests
  * @module test-utils
  * @description Provides centralized mock creation and test environment setup for comprehensive testing
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -30,39 +30,39 @@ export const createMockChrome = () => ({
       clear: vi.fn(),
       onChanged: {
         addListener: vi.fn(),
-        removeListener: vi.fn()
-      }
+        removeListener: vi.fn(),
+      },
     },
     local: {
       get: vi.fn(),
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn()
-    }
+      clear: vi.fn(),
+    },
   },
   runtime: {
     sendMessage: vi.fn(),
     onMessage: {
       addListener: vi.fn(),
-      removeListener: vi.fn()
+      removeListener: vi.fn(),
     },
     openOptionsPage: vi.fn(),
-    getURL: vi.fn((path) => `chrome-extension://test-id/${path}`)
+    getURL: vi.fn(path => `chrome-extension://test-id/${path}`),
   },
   tabs: {
     query: vi.fn(),
     get: vi.fn(),
     update: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
   },
   action: {
     setBadgeText: vi.fn(),
-    setBadgeBackgroundColor: vi.fn()
+    setBadgeBackgroundColor: vi.fn(),
   },
   notifications: {
     create: vi.fn(),
-    clear: vi.fn()
-  }
+    clear: vi.fn(),
+  },
 });
 
 /**
@@ -92,7 +92,7 @@ export const createMockErrorHandler = () => ({
       severity: 'MEDIUM',
       message: 'Test error message',
       context: 'test',
-      originalError: new Error('Test error message')
+      originalError: new Error('Test error message'),
     },
     userMessage: 'Test error message',
     shouldRetry: false,
@@ -119,7 +119,7 @@ export const createMockErrorHandler = () => ({
     MEDIUM: 'MEDIUM',
     HIGH: 'HIGH',
     CRITICAL: 'CRITICAL',
-  }
+  },
 });
 
 // Mock UIComponents
@@ -189,7 +189,7 @@ export const createMockUIComponents = () => ({
     TEXTAREA: 'textarea',
     CHECKBOX: 'checkbox',
     RADIO: 'radio',
-  }
+  },
 });
 
 // Mock UIMessages
@@ -211,7 +211,7 @@ export const createMockUIMessages = () => ({
     WARNING: 'warning',
     INFO: 'info',
     LOADING: 'loading',
-  }
+  },
 });
 
 // Mock SupabaseService
@@ -337,7 +337,7 @@ export const setupTestWithMocks = (customMocks = {}) => {
       search: '',
       hash: '',
     },
-    writable: true
+    writable: true,
   });
 
   return {
@@ -345,7 +345,7 @@ export const setupTestWithMocks = (customMocks = {}) => {
     cleanup: () => {
       vi.clearAllMocks();
       vi.restoreAllMocks();
-    }
+    },
   };
 };
 
@@ -364,7 +364,7 @@ export const setupModuleMocks = () => {
           severity: 'MEDIUM',
           message: 'Test error message',
           context: 'test',
-          originalError: new Error('Test error message')
+          originalError: new Error('Test error message'),
         },
         userMessage: 'Test error message',
         shouldRetry: false,
@@ -391,8 +391,8 @@ export const setupModuleMocks = () => {
         MEDIUM: 'MEDIUM',
         HIGH: 'HIGH',
         CRITICAL: 'CRITICAL',
-      }
-    }
+      },
+    },
   }));
 
   vi.mock('../../utils/ui-components.js', () => ({
@@ -462,8 +462,8 @@ export const setupModuleMocks = () => {
         TEXTAREA: 'textarea',
         CHECKBOX: 'checkbox',
         RADIO: 'radio',
-      }
-    }
+      },
+    },
   }));
 
   vi.mock('../../utils/ui-messages.js', () => ({
@@ -485,8 +485,8 @@ export const setupModuleMocks = () => {
         WARNING: 'warning',
         INFO: 'info',
         LOADING: 'loading',
-      }
-    }
+      },
+    },
   }));
 
   vi.mock('../../utils/config-manager.js', () => ({
@@ -505,7 +505,7 @@ export const setupModuleMocks = () => {
       removeListener: vi.fn(),
       reset: vi.fn(),
       getConfigSummary: vi.fn(),
-    }))
+    })),
   }));
 
   vi.mock('../../utils/auth-state-manager.js', () => ({
@@ -519,7 +519,7 @@ export const setupModuleMocks = () => {
       removeListener: vi.fn(),
       getAuthSummary: vi.fn(),
       notifyAllContexts: vi.fn(),
-    }))
+    })),
   }));
 
   vi.mock('../../supabase-config.js', () => ({
@@ -531,7 +531,7 @@ export const setupModuleMocks = () => {
       signUp: vi.fn(),
       signOut: vi.fn(),
       session: null,
-    }))
+    })),
   }));
 
   vi.mock('../../supabase-service.js', () => ({
@@ -542,7 +542,7 @@ export const setupModuleMocks = () => {
       updateBookmark: vi.fn(),
       getBookmarkByUrl: vi.fn(),
       deleteBookmark: vi.fn(),
-    }))
+    })),
   }));
 
   vi.mock('../../auth-ui.js', () => ({
@@ -552,7 +552,7 @@ export const setupModuleMocks = () => {
       handleLogin: vi.fn(),
       handleSignup: vi.fn(),
       handleSignOut: vi.fn(),
-    }))
+    })),
   }));
 
   vi.mock('../../utils/bookmark-transformer.js', () => ({
@@ -567,7 +567,7 @@ export const setupModuleMocks = () => {
       toExportFormat: vi.fn(),
       transformMultiple: vi.fn(),
       getDefaultStructure: vi.fn(),
-    }
+    },
   }));
 };
 
@@ -588,21 +588,23 @@ export const createMockElement = (tagName = 'div', options = {}) => {
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @returns {Object} DOM setup with common elements
  */
-export const setupPopupDOM = (mocks) => {
+export const setupPopupDOM = mocks => {
   const mockAppContainer = createMockElement('div', { id: 'app' });
   const mockReadStatus = createMockElement('select', { id: 'read-status' });
   const mockTags = createMockElement('input', { id: 'tags' });
   const mockSettingsBtn = createMockElement('button', { id: 'settings-btn' });
   const mockRecentList = createMockElement('div', { id: 'recent-list' });
-  const mockEditReadStatus = createMockElement('select', { id: 'edit-read-status' });
+  const mockEditReadStatus = createMockElement('select', {
+    id: 'edit-read-status',
+  });
   const mockEditTags = createMockElement('input', { id: 'edit-tags' });
 
   // Setup DOM element mapping
-  mocks.uiComponents.DOM.getElement.mockImplementation((id) => {
+  mocks.uiComponents.DOM.getElement.mockImplementation(id => {
     const elementMap = {
-      'app': mockAppContainer,
+      app: mockAppContainer,
       'read-status': mockReadStatus,
-      'tags': mockTags,
+      tags: mockTags,
       'settings-btn': mockSettingsBtn,
       'recent-list': mockRecentList,
       'edit-read-status': mockEditReadStatus,
@@ -627,10 +629,13 @@ export const setupPopupDOM = (mocks) => {
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @param {Object} tabData - Tab data to return
  */
-export const setupChromeTabs = (mocks, tabData = {
-  url: 'https://example.com',
-  title: 'Test Page',
-}) => {
+export const setupChromeTabs = (
+  mocks,
+  tabData = {
+    url: 'https://example.com',
+    title: 'Test Page',
+  }
+) => {
   mocks.chrome.tabs.query.mockResolvedValue([tabData]);
 };
 
@@ -639,12 +644,15 @@ export const setupChromeTabs = (mocks, tabData = {
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @param {Object} bookmarkData - Bookmark data to return
  */
-export const setupBookmarkData = (mocks, bookmarkData = {
-  url: 'https://example.com',
-  title: 'Test Page',
-  read_status: 'read',
-  tags: ['test'],
-}) => {
+export const setupBookmarkData = (
+  mocks,
+  bookmarkData = {
+    url: 'https://example.com',
+    title: 'Test Page',
+    read_status: 'read',
+    tags: ['test'],
+  }
+) => {
   mocks.bookmarkTransformer.fromCurrentTab.mockReturnValue(bookmarkData);
 };
 
@@ -655,16 +663,16 @@ export const setupBookmarkData = (mocks, bookmarkData = {
  */
 export const createPopupTestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks();
-  
+
   // Setup DOM
   const domElements = setupPopupDOM(mocks);
-  
+
   // Setup Chrome tabs
   setupChromeTabs(mocks);
-  
+
   // Setup bookmark data
   setupBookmarkData(mocks);
 
@@ -682,10 +690,10 @@ export const createPopupTestInstance = (customMocks = {}) => {
  */
 export const createAuthUITestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks();
-  
+
   // Create mock container
   const mockContainer = createMockElement('div', { id: 'test-container' });
 
@@ -718,4 +726,4 @@ export const setupTest = () => {
 export const cleanupTest = () => {
   vi.clearAllMocks();
   vi.restoreAllMocks();
-}; 
+};

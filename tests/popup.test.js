@@ -18,7 +18,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
   });
 
   test('should display setup interface when not configured', async ({
-    page,
+    _page,
   }) => {
     // Test that the setup interface is shown
     const setupContainer =

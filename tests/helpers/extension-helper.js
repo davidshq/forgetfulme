@@ -2,7 +2,7 @@
  * @fileoverview Extension helper for Playwright E2E testing
  * @module extension-helper
  * @description Provides utilities for testing Chrome extension functionality with Playwright
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
  * Extension helper for Playwright E2E testing
  * @class ExtensionHelper
  * @description Provides utilities for testing Chrome extension functionality with Playwright
- * 
+ *
  * @example
  * const helper = new ExtensionHelper(page, context);
  * await helper.loadExtension();
@@ -45,14 +45,12 @@ class ExtensionHelper {
    * @method loadExtension
    * @returns {Promise<string>} The extension ID
    * @description Loads the Chrome extension into the browser context and returns the extension ID
-   * 
+   *
    * @example
    * const extensionId = await helper.loadExtension();
    * console.log('Extension loaded with ID:', extensionId);
    */
   async loadExtension() {
-    const extensionPath = path.join(__dirname, '../../');
-
     // Load the extension into the browser context
     const extensionId = await this.context.addInitScript(() => {
       return new Promise(resolve => {

@@ -2,7 +2,7 @@
  * @fileoverview Configuration UI component for ForgetfulMe extension
  * @module config-ui
  * @description Handles configuration user interface for Supabase setup and settings
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -16,7 +16,7 @@ import UIMessages from './utils/ui-messages.js';
  * Configuration UI component for ForgetfulMe extension
  * @class ConfigUI
  * @description Handles configuration user interface for Supabase setup and settings
- * 
+ *
  * @example
  * const configUI = new ConfigUI(supabaseConfig);
  * configUI.showConfigForm(container);
@@ -45,7 +45,7 @@ class ConfigUI {
     // Create config form
     const configForm = UIComponents.createForm(
       'configForm',
-      (e, form) => this.handleConfigSubmit(document),
+      (_e, _form) => this.handleConfigSubmit(document),
       [
         {
           type: 'url',
@@ -108,7 +108,7 @@ class ConfigUI {
     this.loadCurrentConfig(container);
   }
 
-  bindConfigEvents(container) {
+  bindConfigEvents(_container) {
     // Form event is handled by createForm, no additional binding needed
   }
 
@@ -129,20 +129,24 @@ class ConfigUI {
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
 
-        UIMessages.info('Current configuration loaded', messageContainer);
+        UIMessages.info(
+          'Current configuration loaded',
+          container.querySelector('#configMessage')
+        );
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-ui.loadCurrentConfig',
-        { silent: true }
-      );
+      ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
+        silent: true,
+      });
       // Don't show user for this error as it's not critical
     }
   }
 
   async handleConfigSubmit(container) {
-    const messageContainer = UIComponents.DOM.querySelector('#configMessage', container);
+    const messageContainer = UIComponents.DOM.querySelector(
+      '#configMessage',
+      container
+    );
     const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
     const keyInput = UIComponents.DOM.querySelector(
       '#supabaseAnonKey',
@@ -163,7 +167,10 @@ class ConfigUI {
       const result = await this.config.setConfiguration(url, anonKey);
 
       if (result.success) {
-        UIMessages.success('Configuration saved successfully!', messageContainer);
+        UIMessages.success(
+          'Configuration saved successfully!',
+          messageContainer
+        );
 
         // Test the configuration
         setTimeout(async () => {
@@ -174,10 +181,7 @@ class ConfigUI {
               messageContainer
             );
           } catch (error) {
-            const errorResult = ErrorHandler.handle(
-              error,
-              'config-ui.testConfiguration'
-            );
+            ErrorHandler.handle(error, 'config-ui.testConfiguration');
             UIMessages.error(
               'Configuration saved but test failed. Please check your credentials.',
               messageContainer
@@ -257,11 +261,9 @@ class ConfigUI {
         if (connectionEl) connectionEl.textContent = 'Not configured';
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-ui.loadConfigStatus',
-        { silent: true }
-      );
+      ErrorHandler.handle(error, 'config-ui.loadConfigStatus', {
+        silent: true,
+      });
       // Don't show user for this error as it's not critical
     }
   }
@@ -278,7 +280,7 @@ class ConfigUI {
         connectionEl.textContent = 'Connected';
         connectionEl.className = 'status-value connected';
       }
-    } catch (error) {
+    } catch {
       if (connectionEl) {
         connectionEl.textContent = 'Failed';
         connectionEl.className = 'status-value failed';

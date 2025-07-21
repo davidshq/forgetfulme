@@ -2,7 +2,7 @@
  * @fileoverview Authentication UI component for ForgetfulMe extension
  * @module auth-ui
  * @description Handles authentication user interface including login, signup, and user profile
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -16,7 +16,7 @@ import UIMessages from './utils/ui-messages.js';
  * Authentication UI component for ForgetfulMe extension
  * @class AuthUI
  * @description Handles authentication user interface including login, signup, and user profile
- * 
+ *
  * @example
  * const authUI = new AuthUI(supabaseConfig, onAuthSuccess, authStateManager);
  * authUI.showLoginForm(container);
@@ -53,7 +53,7 @@ class AuthUI {
     // Create login form
     const loginForm = UIComponents.createForm(
       'loginForm',
-      (e, form) => this.handleLogin(container),
+      (_e, _form) => this.handleLogin(container),
       [
         {
           type: 'email',
@@ -111,7 +111,7 @@ class AuthUI {
     // Create signup form
     const signupForm = UIComponents.createForm(
       'signupForm',
-      (e, form) => this.handleSignup(container),
+      (_e, _form) => this.handleSignup(container),
       [
         {
           type: 'email',
@@ -194,7 +194,10 @@ class AuthUI {
   }
 
   async handleLogin(container) {
-    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
+    const messageContainer = UIComponents.DOM.querySelector(
+      '#authMessage',
+      container
+    );
     const email = UIComponents.DOM.getValue('loginEmail', container);
     const password = UIComponents.DOM.getValue('loginPassword', container);
 
@@ -223,7 +226,10 @@ class AuthUI {
   }
 
   async handleSignup(container) {
-    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
+    const messageContainer = UIComponents.DOM.querySelector(
+      '#authMessage',
+      container
+    );
     const email = UIComponents.DOM.getValue('signupEmail', container);
     const password = UIComponents.DOM.getValue('signupPassword', container);
     const confirmPassword = UIComponents.DOM.getValue(
@@ -242,7 +248,10 @@ class AuthUI {
     }
 
     if (password.length < 6) {
-      UIMessages.error('Password must be at least 6 characters', messageContainer);
+      UIMessages.error(
+        'Password must be at least 6 characters',
+        messageContainer
+      );
       return;
     }
 
@@ -268,7 +277,7 @@ class AuthUI {
               this.onAuthSuccess();
             }, 1000);
           }
-        } catch (signInError) {
+        } catch {
           // If auto-signin fails, show the email verification message
           UIMessages.success(
             'Account created! Please check your email to verify your account, then sign in.',
@@ -307,22 +316,25 @@ class AuthUI {
         await this.authStateManager.clearAuthState();
       }
 
-      console.log('Successfully signed out');
+      // Successfully signed out
 
       // Refresh the page or show login form
       location.reload();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
+      ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
         silent: true,
       });
-      console.error('Error during sign out:', errorResult);
+      // Error during sign out: errorResult
       // Don't show user for sign out errors as they're not critical
     }
   }
 
   showAuthMessage(container, message, type) {
     // Use the centralized UIMessages system
-    const messageContainer = UIComponents.DOM.querySelector('#authMessage', container);
+    const messageContainer = UIComponents.DOM.querySelector(
+      '#authMessage',
+      container
+    );
     UIMessages.show(message, type, messageContainer);
   }
 

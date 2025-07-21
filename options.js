@@ -2,7 +2,7 @@
  * @fileoverview Options page script for ForgetfulMe extension
  * @module options
  * @description Handles the options/settings page functionality including data management and configuration
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,7 +12,6 @@ import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 import ConfigManager from './utils/config-manager.js';
-import BookmarkTransformer from './utils/bookmark-transformer.js';
 import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
@@ -23,7 +22,7 @@ import ConfigUI from './config-ui.js';
  * Options page class for ForgetfulMe extension
  * @class ForgetfulMeOptions
  * @description Manages the options/settings page functionality including data management, configuration, and user preferences
- * 
+ *
  * @example
  * // The options page is automatically instantiated when options.html loads
  * // No manual instantiation required
@@ -65,8 +64,8 @@ class ForgetfulMeOptions {
       await this.initializeApp();
       this.initializeAuthState();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'options.initializeAsync');
-      console.error('Failed to initialize options:', errorResult);
+      ErrorHandler.handle(error, 'options.initializeAsync');
+      // Failed to initialize options: errorResult
     }
   }
 
@@ -80,23 +79,22 @@ class ForgetfulMeOptions {
       });
 
       // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.type === 'AUTH_STATE_CHANGED') {
-          this.handleAuthStateChange(message.session);
+      chrome.runtime.onMessage.addListener(
+        (message, _sender, _sendResponse) => {
+          if (message.type === 'AUTH_STATE_CHANGED') {
+            this.handleAuthStateChange(message.session);
+          }
         }
-      });
+      );
 
-      console.log('Options: Auth state initialized');
-    } catch (error) {
-      console.error('Options: Error initializing auth state:', error);
+      // Options: Auth state initialized
+    } catch {
+      // Options: Error initializing auth state: error
     }
   }
 
   handleAuthStateChange(session) {
-    console.log(
-      'Options: Auth state changed:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // Options: Auth state changed: session ? 'authenticated' : 'not authenticated'
 
     // Update UI based on auth state
     if (session) {
@@ -122,7 +120,6 @@ class ForgetfulMeOptions {
     this.importDataBtn = UIComponents.DOM.getElement('import-data-btn');
     this.importFile = UIComponents.DOM.getElement('import-file');
     this.clearDataBtn = UIComponents.DOM.getElement('clear-data-btn');
-
 
     // Stats elements
     this.totalEntries = UIComponents.DOM.getElement('total-entries');
@@ -164,8 +161,6 @@ class ForgetfulMeOptions {
     if (this.clearDataBtn) {
       this.clearDataBtn.addEventListener('click', () => this.clearData());
     }
-
-
   }
 
   async initializeApp() {
@@ -179,19 +174,22 @@ class ForgetfulMeOptions {
       // Initialize Supabase with retry mechanism
       let retryCount = 0;
       const maxRetries = 3;
-      
+
       while (retryCount < maxRetries) {
         try {
           await this.supabaseService.initialize();
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(`Supabase initialization attempt ${retryCount} failed:`, error);
-          
+          // console.log(
+          //   `Supabase initialization attempt ${retryCount} failed:`,
+          //   error
+          // );
+
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries
           }
-          
+
           // Wait a bit before retrying
           await new Promise(resolve => setTimeout(resolve, 500));
         }
@@ -301,7 +299,7 @@ class ForgetfulMeOptions {
       '',
       {
         id: 'add-status-btn',
-        variant: 'primary'
+        variant: 'primary',
       }
     );
 
@@ -327,7 +325,7 @@ class ForgetfulMeOptions {
       '',
       {
         id: 'export-data-btn',
-        variant: 'secondary'
+        variant: 'secondary',
       }
     );
     const importBtn = UIComponents.createButton(
@@ -341,7 +339,7 @@ class ForgetfulMeOptions {
       '',
       {
         id: 'import-data-btn',
-        variant: 'secondary'
+        variant: 'secondary',
       }
     );
     const clearBtn = UIComponents.createButton(
@@ -350,7 +348,7 @@ class ForgetfulMeOptions {
       '',
       {
         id: 'clear-data-btn',
-        variant: 'danger'
+        variant: 'danger',
       }
     );
 
@@ -529,8 +527,6 @@ class ForgetfulMeOptions {
     }
   }
 
-
-
   async exportData() {
     try {
       const exportData = await this.supabaseService.exportData();
@@ -613,7 +609,9 @@ class ForgetfulMeOptions {
    */
   openBookmarkManagement() {
     // Open bookmark management page in a new tab
-    chrome.tabs.create({ url: chrome.runtime.getURL('bookmark-management.html') });
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('bookmark-management.html'),
+    });
   }
 
   formatStatus(status) {

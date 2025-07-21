@@ -2,7 +2,7 @@
  * @fileoverview Authentication State Manager for ForgetfulMe extension
  * @module auth-state-manager
  * @description Handles authentication state synchronization across all extension contexts
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -13,7 +13,7 @@
  * @class AuthStateManager
  * @description Manages authentication state synchronization across all extension contexts
  * including popup, background, and options pages
- * 
+ *
  * @example
  * const authManager = new AuthStateManager();
  * await authManager.initialize();
@@ -42,7 +42,7 @@ class AuthStateManager {
    * @method initialize
    * @description Loads current auth state from storage and sets up change listeners
    * @throws {Error} When initialization fails
-   * 
+   *
    * @example
    * const authManager = new AuthStateManager();
    * await authManager.initialize();
@@ -50,27 +50,22 @@ class AuthStateManager {
   async initialize() {
     if (this.initialized) return;
 
-    try {
-      // Load current auth state from storage
-      const result = await chrome.storage.sync.get(['auth_session']);
-      this.authState = result.auth_session || null;
+    // Load current auth state from storage
+    const result = await chrome.storage.sync.get(['auth_session']);
+    this.authState = result.auth_session || null;
 
-      // Set up storage change listener
-      chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (namespace === 'sync' && changes.auth_session) {
-          this.handleAuthStateChange(changes.auth_session.newValue);
-        }
-      });
+    // Set up storage change listener
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'sync' && changes.auth_session) {
+        this.handleAuthStateChange(changes.auth_session.newValue);
+      }
+    });
 
-      this.initialized = true;
-      console.log(
-        'AuthStateManager initialized, current state:',
-        this.authState ? 'authenticated' : 'not authenticated'
-      );
-    } catch (error) {
-      console.error('Error initializing AuthStateManager:', error);
-      throw error;
-    }
+    this.initialized = true;
+    // console.log(
+    //   'AuthStateManager initialized, current state:',
+    //   this.authState ? 'authenticated' : 'not authenticated'
+    // );
   }
 
   /**
@@ -79,7 +74,7 @@ class AuthStateManager {
    * @method getAuthState
    * @description Returns the current authentication session object
    * @returns {Promise<Object|null>} Current authentication session or null if not authenticated
-   * 
+   *
    * @example
    * const session = await authManager.getAuthState();
    * if (session) {
@@ -97,11 +92,11 @@ class AuthStateManager {
    * @method setAuthState
    * @param {Object|null} session - The authentication session object or null to clear
    * @description Updates the auth state, saves to storage, and notifies all extension contexts
-   * 
+   *
    * @example
    * // Set authenticated state
    * await authManager.setAuthState(session);
-   * 
+   *
    * // Clear authentication
    * await authManager.setAuthState(null);
    */
@@ -119,10 +114,10 @@ class AuthStateManager {
     // Notify local listeners
     this.notifyListeners('authStateChanged', session);
 
-    console.log(
-      'Auth state updated:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // console.log(
+    //   'Auth state updated:',
+    //   session ? 'authenticated' : 'not authenticated'
+    // );
   }
 
   async clearAuthState() {
@@ -139,7 +134,7 @@ class AuthStateManager {
     // Notify local listeners
     this.notifyListeners('authStateChanged', null);
 
-    console.log('Auth state cleared');
+    // console.log('Auth state cleared');
   }
 
   async isAuthenticated() {
@@ -154,10 +149,10 @@ class AuthStateManager {
     // Only notify if state actually changed
     if (oldAuthState !== newAuthState) {
       this.notifyListeners('authStateChanged', newAuthState);
-      console.log(
-        'Auth state changed via storage:',
-        newAuthState ? 'authenticated' : 'not authenticated'
-      );
+      // console.log(
+      //   'Auth state changed via storage:',
+      //   newAuthState ? 'authenticated' : 'not authenticated'
+      // );
     }
   }
 
@@ -168,15 +163,15 @@ class AuthStateManager {
           type: 'AUTH_STATE_CHANGED',
           session: session,
         })
-        .catch(error => {
+        .catch(() => {
           // Ignore errors when no listeners are available
-          console.debug(
-            'No runtime message listeners available:',
-            error.message
-          );
+          // console.debug(
+          //   'No runtime message listeners available:',
+          //   error.message
+          // );
         });
-    } catch (error) {
-      console.debug('Error sending auth state message:', error.message);
+    } catch {
+      // console.debug('Error sending auth state message:', error.message);
     }
   }
 
@@ -199,8 +194,8 @@ class AuthStateManager {
       if (listener.event === event) {
         try {
           listener.callback(data);
-        } catch (error) {
-          console.error('Error in auth state listener:', error);
+        } catch {
+          // console.error('Error in auth state listener:', error);
         }
       }
     }

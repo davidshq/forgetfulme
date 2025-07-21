@@ -3,7 +3,7 @@
  * @module popup
  * @description Main popup interface for the ForgetfulMe Chrome extension.
  * Handles user authentication, bookmark management, and UI interactions.
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -23,7 +23,7 @@ import AuthUI from './auth-ui.js';
  * Main popup class for the ForgetfulMe Chrome extension
  * @class ForgetfulMePopup
  * @description Manages the popup interface, user authentication, and bookmark operations
- * 
+ *
  * @example
  * // The popup is automatically instantiated when the popup.html loads
  * // No manual instantiation required
@@ -63,7 +63,7 @@ class ForgetfulMePopup {
    * @method initializeAsync
    * @description Performs all initialization tasks including DOM setup, app initialization, and auth state setup
    * @throws {Error} When initialization fails
-   * 
+   *
    * @example
    * // Called automatically in constructor
    * await popup.initializeAsync();
@@ -77,8 +77,8 @@ class ForgetfulMePopup {
       await this.initializeApp();
       this.initializeAuthState();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'popup.initializeAsync');
-      console.error('Failed to initialize popup:', errorResult);
+      ErrorHandler.handle(error, 'popup.initializeAsync');
+      // Failed to initialize popup: errorResult
     }
   }
 
@@ -88,7 +88,7 @@ class ForgetfulMePopup {
    * @method initializeAuthState
    * @description Sets up authentication state management and listeners for auth state changes
    * @throws {Error} When auth state initialization fails
-   * 
+   *
    * @example
    * // Called during popup initialization
    * await popup.initializeAuthState();
@@ -103,15 +103,17 @@ class ForgetfulMePopup {
       });
 
       // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.type === 'AUTH_STATE_CHANGED') {
-          this.handleAuthStateChange(message.session);
+      chrome.runtime.onMessage.addListener(
+        (message, _sender, _sendResponse) => {
+          if (message.type === 'AUTH_STATE_CHANGED') {
+            this.handleAuthStateChange(message.session);
+          }
         }
-      });
+      );
 
-      console.log('Popup: Auth state initialized');
-    } catch (error) {
-      console.error('Popup: Error initializing auth state:', error);
+      // Popup: Auth state initialized
+    } catch {
+      // Popup: Error initializing auth state: error
     }
   }
 
@@ -120,16 +122,13 @@ class ForgetfulMePopup {
    * @method handleAuthStateChange
    * @param {Object|null} session - The current session object or null if not authenticated
    * @description Updates the UI based on authentication state - shows main interface for authenticated users or auth interface for unauthenticated users
-   * 
+   *
    * @example
    * // Called automatically when auth state changes
    * popup.handleAuthStateChange(session);
    */
   handleAuthStateChange(session) {
-    console.log(
-      'Popup: Auth state changed:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // Popup: Auth state changed: session ? 'authenticated' : 'not authenticated'
 
     // Update UI based on auth state
     if (session) {
@@ -147,7 +146,7 @@ class ForgetfulMePopup {
    * Initialize DOM element references
    * @method initializeElements
    * @description Sets up references to key DOM elements used throughout the popup
-   * 
+   *
    * @example
    * // Called during popup initialization
    * popup.initializeElements();
@@ -197,19 +196,22 @@ class ForgetfulMePopup {
       // Initialize Supabase with retry mechanism
       let retryCount = 0;
       const maxRetries = 3;
-      
+
       while (retryCount < maxRetries) {
         try {
           await this.supabaseService.initialize();
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(`Supabase initialization attempt ${retryCount} failed:`, error);
-          
+          // console.log(
+          //   `Supabase initialization attempt ${retryCount} failed:`,
+          //   error
+          // );
+
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries
           }
-          
+
           // Wait a bit before retrying
           await new Promise(resolve => setTimeout(resolve, 500));
         }
@@ -262,7 +264,7 @@ class ForgetfulMePopup {
     const settingsBtn = UIComponents.createButton(
       'Open Settings',
       () => this.openSettings(),
-              'btn-primary'
+      'btn-primary'
     );
     setupSection.appendChild(settingsBtn);
     container.appendChild(setupSection);
@@ -303,7 +305,7 @@ class ForgetfulMePopup {
     // Create header with better accessibility
     const header = document.createElement('header');
     header.setAttribute('role', 'banner');
-    
+
     const title = document.createElement('h1');
     title.textContent = 'ForgetfulMe';
     title.setAttribute('id', 'popup-title');
@@ -319,17 +321,17 @@ class ForgetfulMePopup {
     settingsBtn.setAttribute('aria-label', 'Open settings');
     settingsBtn.setAttribute('title', 'Settings');
     settingsBtn.addEventListener('click', () => this.openSettings());
-    
+
     const settingsIcon = document.createElement('span');
     settingsIcon.className = 'icon';
     settingsIcon.textContent = '⚙️';
     settingsBtn.appendChild(settingsIcon);
-    
+
     const settingsText = document.createElement('span');
     settingsText.className = 'text';
     settingsText.textContent = 'Settings';
     settingsBtn.appendChild(settingsText);
-    
+
     headerActions.appendChild(settingsBtn);
 
     const manageBtn = document.createElement('button');
@@ -337,17 +339,17 @@ class ForgetfulMePopup {
     manageBtn.setAttribute('aria-label', 'Manage bookmarks');
     manageBtn.setAttribute('title', 'Manage Bookmarks');
     manageBtn.addEventListener('click', () => this.showBookmarkManagement());
-    
+
     const manageIcon = document.createElement('span');
     manageIcon.className = 'icon';
     manageIcon.textContent = '📚';
     manageBtn.appendChild(manageIcon);
-    
+
     const manageText = document.createElement('span');
     manageText.className = 'text';
     manageText.textContent = 'Manage URLs';
     manageBtn.appendChild(manageText);
-    
+
     headerActions.appendChild(manageBtn);
 
     header.appendChild(headerActions);
@@ -431,7 +433,10 @@ class ForgetfulMePopup {
     submitBtn.type = 'submit';
     submitBtn.className = 'btn btn-primary';
     submitBtn.textContent = 'Mark as Read';
-    submitBtn.setAttribute('aria-label', 'Mark current page as read with selected status and tags');
+    submitBtn.setAttribute(
+      'aria-label',
+      'Mark current page as read with selected status and tags'
+    );
 
     // Add form elements
     form.appendChild(statusGroup);
@@ -439,7 +444,7 @@ class ForgetfulMePopup {
     form.appendChild(submitBtn);
 
     // Add form submit handler
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', e => {
       e.preventDefault();
       this.markAsRead();
     });
@@ -504,7 +509,7 @@ class ForgetfulMePopup {
       );
 
       const result = await this.supabaseService.saveBookmark(bookmark);
-      
+
       if (result.isDuplicate) {
         // Show edit interface for existing bookmark
         this.showEditInterface(result);
@@ -520,10 +525,13 @@ class ForgetfulMePopup {
         try {
           await chrome.runtime.sendMessage({
             type: 'BOOKMARK_SAVED',
-            data: { url: bookmark.url }
+            data: { url: bookmark.url },
           });
-        } catch (error) {
-          console.debug('Popup: Error notifying background about saved bookmark:', error.message);
+        } catch {
+          // console.debug(
+          //   'Popup: Error notifying background about saved bookmark:',
+          //   error.message
+          // );
         }
 
         // Close popup after a short delay
@@ -551,25 +559,26 @@ class ForgetfulMePopup {
         emptyItem.className = 'recent-item empty';
         emptyItem.setAttribute('role', 'listitem');
         emptyItem.setAttribute('aria-label', 'No recent entries');
-        
+
         const emptyIcon = document.createElement('div');
         emptyIcon.style.fontSize = '24px';
         emptyIcon.style.marginBottom = '8px';
         emptyIcon.textContent = '📚';
         emptyItem.appendChild(emptyIcon);
-        
+
         const emptyTitle = document.createElement('div');
         emptyTitle.className = 'title';
         emptyTitle.textContent = 'No entries yet';
         emptyTitle.style.fontWeight = '600';
         emptyTitle.style.color = '#495057';
         emptyItem.appendChild(emptyTitle);
-        
+
         const emptyMeta = document.createElement('div');
         emptyMeta.className = 'meta';
-        emptyMeta.innerHTML = '<span class="status status-info">No entries</span>';
+        emptyMeta.innerHTML =
+          '<span class="status status-info">No entries</span>';
         emptyItem.appendChild(emptyMeta);
-        
+
         recentListEl.appendChild(emptyItem);
         return;
       }
@@ -587,18 +596,18 @@ class ForgetfulMePopup {
         errorItem.className = 'recent-item error';
         errorItem.setAttribute('role', 'listitem');
         errorItem.setAttribute('aria-label', 'Error loading entries');
-        
+
         const errorTitle = document.createElement('div');
         errorTitle.className = 'title';
         errorTitle.textContent = 'Error loading entries';
         errorTitle.style.color = '#dc3545';
         errorItem.appendChild(errorTitle);
-        
+
         const errorMeta = document.createElement('div');
         errorMeta.className = 'meta';
         errorMeta.innerHTML = '<span class="status status-error">Error</span>';
         errorItem.appendChild(errorMeta);
-        
+
         recentListEl.appendChild(errorItem);
       }
 
@@ -619,7 +628,10 @@ class ForgetfulMePopup {
     const listItem = document.createElement('div');
     listItem.className = 'recent-item';
     listItem.setAttribute('role', 'listitem');
-    listItem.setAttribute('aria-label', `Recent bookmark ${index + 1}: ${bookmark.title}`);
+    listItem.setAttribute(
+      'aria-label',
+      `Recent bookmark ${index + 1}: ${bookmark.title}`
+    );
 
     // Add title
     const titleDiv = document.createElement('div');
@@ -636,13 +648,21 @@ class ForgetfulMePopup {
     const statusSpan = document.createElement('span');
     statusSpan.className = `status status-${bookmark.status}`;
     statusSpan.textContent = this.formatStatus(bookmark.status);
-    statusSpan.setAttribute('aria-label', `Status: ${this.formatStatus(bookmark.status)}`);
+    statusSpan.setAttribute(
+      'aria-label',
+      `Status: ${this.formatStatus(bookmark.status)}`
+    );
     metaDiv.appendChild(statusSpan);
 
     // Add time
     const timeSpan = document.createElement('span');
-    timeSpan.textContent = this.formatTime(new Date(bookmark.created_at).getTime());
-    timeSpan.setAttribute('aria-label', `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`);
+    timeSpan.textContent = this.formatTime(
+      new Date(bookmark.created_at).getTime()
+    );
+    timeSpan.setAttribute(
+      'aria-label',
+      `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`
+    );
     metaDiv.appendChild(timeSpan);
 
     // Add tags if they exist
@@ -678,11 +698,9 @@ class ForgetfulMePopup {
         }
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'popup.loadCustomStatusTypes',
-        { silent: true }
-      );
+      ErrorHandler.handle(error, 'popup.loadCustomStatusTypes', {
+        silent: true,
+      });
       // Don't show user for this error as it's not critical
     }
   }
@@ -725,7 +743,9 @@ class ForgetfulMePopup {
    */
   showBookmarkManagement() {
     // Open bookmark management page in a new tab
-    chrome.tabs.create({ url: chrome.runtime.getURL('bookmark-management.html') });
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('bookmark-management.html'),
+    });
   }
 
   /**
@@ -737,16 +757,21 @@ class ForgetfulMePopup {
   async checkCurrentTabUrlStatus() {
     try {
       // Get current tab
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       if (!tab || !tab.url) {
         return;
       }
 
       // Skip browser pages and extension pages
-      if (tab.url.startsWith('chrome://') || 
-          tab.url.startsWith('chrome-extension://') ||
-          tab.url.startsWith('about:') ||
-          tab.url.startsWith('moz-extension://')) {
+      if (
+        tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('chrome-extension://') ||
+        tab.url.startsWith('about:') ||
+        tab.url.startsWith('moz-extension://')
+      ) {
         return;
       }
 
@@ -758,18 +783,18 @@ class ForgetfulMePopup {
         // Send result to background script
         await chrome.runtime.sendMessage({
           type: 'URL_STATUS_RESULT',
-          data: { url: tab.url, isSaved }
+          data: { url: tab.url, isSaved },
         });
-      } catch (error) {
-        console.debug('Popup: Error checking URL in database:', error.message);
+      } catch {
+        // console.debug('Popup: Error checking URL in database:', error.message);
         // Send default state on error
         await chrome.runtime.sendMessage({
           type: 'URL_STATUS_RESULT',
-          data: { url: tab.url, isSaved: false }
+          data: { url: tab.url, isSaved: false },
         });
       }
-    } catch (error) {
-      console.debug('Popup: Error checking URL status:', error.message);
+    } catch {
+      // console.debug('Popup: Error checking URL status:', error.message);
     }
   }
 
@@ -784,7 +809,7 @@ class ForgetfulMePopup {
     const backBtn = UIComponents.createButton(
       '← Back',
       () => this.showMainInterface(),
-              'btn-secondary',
+      'btn-secondary',
       { title: 'Back to main interface' }
     );
     header.appendChild(backBtn);
@@ -815,7 +840,7 @@ class ForgetfulMePopup {
       { value: 'low-value', text: 'Low Value' },
       { value: 'revisit-later', text: 'Revisit Later' },
     ];
-    
+
     // Mark the current status as selected
     statusOptions.forEach(option => {
       if (option.value === existingBookmark.read_status) {
@@ -825,7 +850,7 @@ class ForgetfulMePopup {
 
     const editForm = UIComponents.createForm(
       'editBookmarkForm',
-      (e) => {
+      e => {
         e.preventDefault();
         this.updateBookmark(existingBookmark.id);
       },
@@ -835,7 +860,7 @@ class ForgetfulMePopup {
           id: 'edit-read-status',
           label: 'Update Status:',
           options: {
-            options: statusOptions
+            options: statusOptions,
           },
         },
         {
@@ -844,12 +869,14 @@ class ForgetfulMePopup {
           label: 'Update Tags (comma separated):',
           options: {
             placeholder: 'research, tutorial, important',
-            value: existingBookmark.tags ? existingBookmark.tags.join(', ') : ''
+            value: existingBookmark.tags
+              ? existingBookmark.tags.join(', ')
+              : '',
           },
         },
       ],
       {
-        submitText: 'Update Bookmark'
+        submitText: 'Update Bookmark',
       }
     );
 
@@ -868,8 +895,14 @@ class ForgetfulMePopup {
 
       const updates = {
         read_status: status,
-        tags: tags.trim() ? tags.trim().split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-        updated_at: new Date().toISOString()
+        tags: tags.trim()
+          ? tags
+              .trim()
+              .split(',')
+              .map(tag => tag.trim())
+              .filter(tag => tag)
+          : [],
+        updated_at: new Date().toISOString(),
       };
 
       await this.supabaseService.updateBookmark(bookmarkId, updates);
@@ -879,10 +912,13 @@ class ForgetfulMePopup {
       try {
         await chrome.runtime.sendMessage({
           type: 'BOOKMARK_UPDATED',
-          data: { url: updates.url || this.currentBookmarkUrl }
+          data: { url: updates.url || this.currentBookmarkUrl },
         });
-      } catch (error) {
-        console.debug('Popup: Error notifying background about updated bookmark:', error.message);
+      } catch {
+        // console.debug(
+        //   'Popup: Error notifying background about updated bookmark:',
+        //   error.message
+        // );
       }
 
       // Return to main interface after a short delay
@@ -895,8 +931,6 @@ class ForgetfulMePopup {
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
-
-
 }
 
 // Initialize popup immediately (DOM ready is handled in constructor)

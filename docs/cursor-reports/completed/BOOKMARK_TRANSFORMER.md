@@ -27,10 +27,12 @@ The `BookmarkTransformer` utility class consolidates all bookmark data transform
 - `toUIFormat()` - Transform database data to UI display format
 - `fromCurrentTab()` - Transform Chrome tab data to bookmark format
 - `fromImportData()` - Transform imported data for database storage
+- `toExportFormat()` - Transform data for export operations
+- `getDefaultStructure()` - Get default bookmark structure template
 
 ### 2. Data Validation
-- **URL validation** - Ensures valid URL format
-- **Required field validation** - Checks for essential fields
+- **URL validation** - Ensures valid URL format using native URL constructor
+- **Required field validation** - Checks for essential fields (URL, title)
 - **Data type validation** - Ensures tags are arrays, etc.
 - **Comprehensive error reporting** - Detailed error messages for debugging
 
@@ -38,12 +40,13 @@ The `BookmarkTransformer` utility class consolidates all bookmark data transform
 - **String to array conversion** - Handles comma-separated tag strings
 - **Whitespace trimming** - Removes extra spaces from tags
 - **Empty tag filtering** - Removes empty or whitespace-only tags
-- **Type safety** - Handles various input types gracefully
+- **Type safety** - Handles various input types gracefully (null, undefined, empty strings)
 
 ### 4. Timestamp Handling
 - **Flexible timestamp preservation** - Option to keep original timestamps or generate new ones
 - **Default value handling** - Provides sensible defaults for missing timestamps
 - **ISO format consistency** - Ensures all timestamps are in ISO format
+- **Multiple timestamp sources** - Supports both `created_at` and `timestamp` fields
 
 ## Usage Examples
 
@@ -76,6 +79,11 @@ if (!validation.isValid) {
 const tags1 = BookmarkTransformer.normalizeTags('tag1, tag2, tag3')
 const tags2 = BookmarkTransformer.normalizeTags(['tag1', 'tag2', 'tag3'])
 // Both return: ['tag1', 'tag2', 'tag3']
+
+// Handle edge cases
+BookmarkTransformer.normalizeTags(null) // Returns: []
+BookmarkTransformer.normalizeTags('') // Returns: []
+BookmarkTransformer.normalizeTags(['tag1', '', 'tag2']) // Returns: ['tag1', 'tag2']
 ```
 
 ### Batch Transformation
@@ -88,19 +96,33 @@ const transformedBookmarks = BookmarkTransformer.transformMultiple(
 )
 ```
 
+### Export Format
+```javascript
+// Transform bookmark for export
+const exportData = BookmarkTransformer.toExportFormat(supabaseBookmark)
+```
+
+### Default Structure
+```javascript
+// Get default bookmark structure
+const defaultBookmark = BookmarkTransformer.getDefaultStructure(userId)
+```
+
 ## Implementation Details
 
 ### File Structure
 ```
 utils/
 ├── bookmark-transformer.js      # Main transformer utility
-└── bookmark-transformer.test.js # Test suite
+└── tests/unit/
+    └── bookmark-transformer.test.js # Comprehensive test suite
 ```
 
 ### Integration Points
 - **popup.js** - Uses `fromCurrentTab()` and `toUIFormat()`
-- **options.js** - Uses `toUIFormat()` for display
+- **bookmark-management.js** - Uses `toUIFormat()` for display
 - **supabase-service.js** - Uses `toSupabaseFormat()` and validation
+- **options.js** - Imports for potential future use
 
 ### Error Handling
 The transformer integrates with the existing `ErrorHandler` system:
@@ -115,11 +137,27 @@ if (!validation.isValid) {
 }
 ```
 
+## Available Methods
+
+### Core Transformation Methods
+- `toSupabaseFormat(entry, userId, options)` - Transform to database format
+- `toUIFormat(bookmark)` - Transform to UI display format
+- `fromCurrentTab(tab, status, tags)` - Transform Chrome tab data
+- `fromImportData(bookmark, userId)` - Transform import data
+- `toExportFormat(bookmark)` - Transform for export operations
+
+### Utility Methods
+- `validate(bookmark)` - Validate bookmark data structure
+- `isValidUrl(url)` - Validate URL format
+- `normalizeTags(tags)` - Normalize tag arrays/strings
+- `transformMultiple(bookmarks, userId, options)` - Batch transformation
+- `getDefaultStructure(userId)` - Get default bookmark template
+
 ## Benefits Achieved
 
 ### 1. **Reduced Code Duplication**
 - **Before**: ~50 lines of duplicated transformation logic
-- **After**: Single utility class with ~200 lines of comprehensive functionality
+- **After**: Single utility class with ~240 lines of comprehensive functionality
 
 ### 2. **Improved Data Consistency**
 - All bookmark data now follows the same transformation rules
@@ -143,15 +181,57 @@ if (!validation.isValid) {
 
 ## Testing
 
-The implementation includes a comprehensive test suite (`bookmark-transformer.test.js`) that can be run in the browser console:
+The implementation includes a comprehensive test suite using **Vitest** (not Jest as previously documented). Tests can be run using:
 
+```bash
+# Run all tests
+npm test
+
+# Run unit tests with UI
+npm run test:unit:ui
+
+# Run with coverage
+npm run test:unit:coverage
+```
+
+The test suite covers:
+- All transformation methods
+- Edge cases and error conditions
+- Tag normalization scenarios
+- URL validation
+- Batch operations
+- Default structure generation
+
+## Current Usage Patterns
+
+### In popup.js
 ```javascript
-// Run all tests
-BookmarkTransformerTest.runAllTests()
+// Transform current tab to bookmark format
+const bookmark = BookmarkTransformer.fromCurrentTab(tab, status, tags)
 
-// Run individual tests
-BookmarkTransformerTest.testToSupabaseFormat()
-BookmarkTransformerTest.testValidate()
+// Transform database data for UI display
+const uiBookmark = BookmarkTransformer.toUIFormat(bookmark)
+```
+
+### In supabase-service.js
+```javascript
+// Validate before saving
+const validation = BookmarkTransformer.validate(bookmark)
+if (!validation.isValid) {
+  throw ErrorHandler.createError(...)
+}
+
+// Transform to database format
+const bookmarkData = BookmarkTransformer.toSupabaseFormat(bookmark, userId)
+
+// Batch transformation for imports
+const transformedBookmarks = BookmarkTransformer.transformMultiple(bookmarks, userId)
+```
+
+### In bookmark-management.js
+```javascript
+// Transform database bookmarks for UI display
+const uiBookmarks = bookmarks.map(bookmark => BookmarkTransformer.toUIFormat(bookmark))
 ```
 
 ## Future Enhancements
@@ -177,7 +257,7 @@ The implementation follows best practices for utility classes:
 - **Single responsibility** - Focused on data transformation
 - **Static methods** - No state management required
 - **Comprehensive documentation** - Clear API and usage examples
-- **Extensive testing** - Validates all functionality
+- **Extensive testing** - Validates all functionality with Vitest
 - **Error handling** - Graceful handling of edge cases
 
 This refactoring represents a significant improvement in code quality and maintainability while providing a solid foundation for future enhancements. 

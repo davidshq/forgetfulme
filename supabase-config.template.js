@@ -2,7 +2,7 @@
  * @fileoverview Template for Supabase configuration
  * @module supabase-config-template
  * @description Template file for local Supabase configuration - copy to supabase-config.local.js and fill in credentials
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -13,7 +13,7 @@
  * Template for Supabase configuration
  * @class SupabaseConfigTemplate
  * @description Template class for local Supabase configuration
- * 
+ *
  * @example
  * // Copy this file to supabase-config.local.js and update credentials
  * const config = new SupabaseConfigTemplate();

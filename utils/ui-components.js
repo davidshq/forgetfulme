@@ -2,7 +2,7 @@
  * @fileoverview UI Components for ForgetfulMe Extension
  * @module ui-components
  * @description Centralized component factory for consistent UI patterns and DOM utilities
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,11 +12,11 @@
  * UI Components factory for ForgetfulMe Extension
  * @class UIComponents
  * @description Provides centralized component creation and DOM utilities for consistent UI patterns
- * 
+ *
  * @example
  * // Create a button
  * const button = UIComponents.createButton('Click me', () => console.log('clicked'));
- * 
+ *
  * // Use DOM utilities
  * const element = UIComponents.DOM.getElement('my-element');
  */
@@ -351,10 +351,12 @@ class UIComponents {
   static createButton(text, onClick, className = '', options = {}) {
     const button = document.createElement('button');
     button.textContent = text;
-    
+
     // Use shared button classes
     const baseClass = 'btn';
-    const variantClass = options.variant ? `btn-${options.variant}` : 'btn-primary';
+    const variantClass = options.variant
+      ? `btn-${options.variant}`
+      : 'btn-primary';
     button.className = `${baseClass} ${variantClass} ${className}`.trim();
 
     if (onClick) {
@@ -673,12 +675,11 @@ class UIComponents {
    */
   static createStatusIndicator(status, text, className = '') {
     const indicator = document.createElement('div');
-    indicator.className =
-      `status status-${status} ${className}`.trim();
+    indicator.className = `status status-${status} ${className}`.trim();
 
     const icon = document.createElement('span');
     icon.className = 'status-icon';
-    
+
     // Add appropriate icon based on status
     switch (status) {
       case 'success':
@@ -696,7 +697,7 @@ class UIComponents {
       default:
         icon.textContent = '•';
     }
-    
+
     indicator.appendChild(icon);
 
     if (text) {
@@ -715,7 +716,7 @@ class UIComponents {
    * @param {Object} options - Tab options
    * @returns {HTMLElement}
    */
-  static createTabs(tabs, options = {}) {
+  static createTabs(tabs, _options = {}) {
     const tabContainer = document.createElement('div');
     tabContainer.className = 'tab-container';
 
@@ -770,7 +771,7 @@ class UIComponents {
    * @param {Object} options - Modal options
    * @returns {HTMLElement}
    */
-  static createModal(title, content, options = {}) {
+  static createModal(title, content, _options = {}) {
     const modal = document.createElement('div');
     modal.className = 'modal';
 

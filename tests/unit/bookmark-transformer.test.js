@@ -3,13 +3,13 @@ import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 
 /**
  * BookmarkTransformer Unit Tests
- * 
+ *
  * Tests the bookmark data transformation functionality.
  * This module is critical for converting between different data formats:
  * - UI format (for display)
  * - Supabase format (for database storage)
  * - Import/Export format (for data portability)
- * 
+ *
  * Following the recommended approach: test individual utility modules separately
  * with proper mocking and focus on business logic.
  */
@@ -236,7 +236,10 @@ describe('BookmarkTransformer', () => {
         title: 'Current Tab Title',
       };
 
-      const result = BookmarkTransformer.fromCurrentTab(tab, 'read', ['current', 'tab']);
+      const result = BookmarkTransformer.fromCurrentTab(tab, 'read', [
+        'current',
+        'tab',
+      ]);
 
       expect(result).toEqual({
         url: 'https://example.com',
@@ -382,8 +385,12 @@ describe('BookmarkTransformer', () => {
     test('should validate correct URLs', () => {
       expect(BookmarkTransformer.isValidUrl('https://example.com')).toBe(true);
       expect(BookmarkTransformer.isValidUrl('http://example.com')).toBe(true);
-      expect(BookmarkTransformer.isValidUrl('https://example.com/path')).toBe(true);
-      expect(BookmarkTransformer.isValidUrl('https://example.com?param=value')).toBe(true);
+      expect(BookmarkTransformer.isValidUrl('https://example.com/path')).toBe(
+        true
+      );
+      expect(
+        BookmarkTransformer.isValidUrl('https://example.com?param=value')
+      ).toBe(true);
     });
 
     test('should reject invalid URLs', () => {
@@ -439,7 +446,10 @@ describe('BookmarkTransformer', () => {
         },
       ];
 
-      const result = BookmarkTransformer.transformMultiple(bookmarks, mockUserId);
+      const result = BookmarkTransformer.transformMultiple(
+        bookmarks,
+        mockUserId
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0].user_id).toBe(mockUserId);
@@ -457,9 +467,13 @@ describe('BookmarkTransformer', () => {
         },
       ];
 
-      const result = BookmarkTransformer.transformMultiple(bookmarks, mockUserId, {
-        setDefaults: false,
-      });
+      const result = BookmarkTransformer.transformMultiple(
+        bookmarks,
+        mockUserId,
+        {
+          setDefaults: false,
+        }
+      );
 
       expect(result[0].access_count).toBe(5);
     });

@@ -13,7 +13,7 @@ describe('UIMessages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.console = mockConsole;
-    
+
     // Setup test container
     container = document.createElement('div');
     container.id = 'test-container';
@@ -257,7 +257,7 @@ describe('UIMessages', () => {
     test('should show error message with retry button', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
-      
+
       const mockRetryFunction = vi.fn();
       const messageEl = UIMessages.showWithRetry(
         'Operation failed',
@@ -267,13 +267,15 @@ describe('UIMessages', () => {
 
       expect(messageEl.className).toContain('message-error');
       expect(messageEl.querySelector('.message-retry-btn')).toBeTruthy();
-      expect(messageEl.querySelector('.message-retry-btn').textContent).toBe('Retry');
+      expect(messageEl.querySelector('.message-retry-btn').textContent).toBe(
+        'Retry'
+      );
     });
 
     test('should call retry function when retry button is clicked', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
-      
+
       const mockRetryFunction = vi.fn();
       const messageEl = UIMessages.showWithRetry(
         'Operation failed',
@@ -291,7 +293,7 @@ describe('UIMessages', () => {
     test('should remove message when retry button is clicked', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
-      
+
       const mockRetryFunction = vi.fn();
       const messageEl = UIMessages.showWithRetry(
         'Operation failed',
@@ -308,8 +310,12 @@ describe('UIMessages', () => {
     test('should handle missing retry function', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
-      
-      const messageEl = UIMessages.showWithRetry('Operation failed', null, container);
+
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        null,
+        container
+      );
 
       expect(messageEl.className).toContain('message-error');
       expect(messageEl.querySelector('.message-retry-btn')).toBeFalsy();
@@ -318,7 +324,7 @@ describe('UIMessages', () => {
     test('should handle retry function errors', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
-      
+
       const mockRetryFunction = vi.fn().mockImplementation(() => {
         throw new Error('Retry error');
       });
@@ -330,7 +336,7 @@ describe('UIMessages', () => {
       );
 
       const retryBtn = messageEl.querySelector('.message-retry-btn');
-      
+
       // The implementation doesn't have a try-catch around the retry function
       // so the error will be thrown, which is expected behavior
       expect(() => retryBtn.click()).toThrow('Retry error');
@@ -342,7 +348,9 @@ describe('UIMessages', () => {
     test('should create confirmation dialog with UIComponents', () => {
       // Mock UIComponents
       global.UIComponents = {
-        createConfirmDialog: vi.fn().mockReturnValue(document.createElement('div')),
+        createConfirmDialog: vi
+          .fn()
+          .mockReturnValue(document.createElement('div')),
       };
 
       const mockConfirm = vi.fn();
@@ -367,7 +375,9 @@ describe('UIMessages', () => {
     test('should create confirmation dialog with custom options', () => {
       // Mock UIComponents
       global.UIComponents = {
-        createConfirmDialog: vi.fn().mockReturnValue(document.createElement('div')),
+        createConfirmDialog: vi
+          .fn()
+          .mockReturnValue(document.createElement('div')),
       };
 
       const options = {
@@ -402,9 +412,11 @@ describe('UIMessages', () => {
       expect(confirmEl.tagName).toBe('DIV');
       expect(confirmEl.className).toContain('confirm-dialog');
       expect(confirmEl.querySelector('.confirm-message')).toBeTruthy();
-      expect(confirmEl.querySelector('.confirm-message').textContent).toBe('Are you sure?');
-          expect(confirmEl.querySelector('.btn-primary')).toBeTruthy();
-    expect(confirmEl.querySelector('.btn-secondary')).toBeTruthy();
+      expect(confirmEl.querySelector('.confirm-message').textContent).toBe(
+        'Are you sure?'
+      );
+      expect(confirmEl.querySelector('.btn-primary')).toBeTruthy();
+      expect(confirmEl.querySelector('.btn-secondary')).toBeTruthy();
     });
 
     test('should call confirm function when confirm button is clicked', () => {
@@ -448,7 +460,12 @@ describe('UIMessages', () => {
     test('should handle missing callback functions', () => {
       delete global.UIComponents;
 
-      const confirmEl = UIMessages.confirm('Are you sure?', null, null, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        null,
+        null,
+        container
+      );
 
       const confirmBtn = confirmEl.querySelector('.btn-primary');
       const cancelBtn = confirmEl.querySelector('.btn-secondary');
@@ -574,4 +591,4 @@ describe('UIMessages', () => {
       }).not.toThrow();
     });
   });
-}); 
+});
