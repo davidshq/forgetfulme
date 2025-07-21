@@ -336,63 +336,38 @@ class ForgetfulMePopup {
     this.loadCustomStatusTypes();
   }
 
+  /**
+   * Show the main interface with separate containers for ForgetfulMe and Actions
+   * @method showMainInterface
+   * @description Creates a structured interface with:
+   * - ForgetfulMe container: Contains the main bookmark form and recent entries
+   * - Actions container: Contains Settings and Manage URLs buttons
+   * Both containers are styled independently for better visual separation
+   *
+   * @example
+   * // Called when user is authenticated
+   * popup.showMainInterface();
+   */
   showMainInterface() {
-    // Create header with better accessibility
-    const header = document.createElement('header');
-    header.setAttribute('role', 'banner');
+    // Create ForgetfulMe container
+    const forgetfulMeContainer = document.createElement('div');
+    forgetfulMeContainer.className = 'forgetfulme-container';
+    forgetfulMeContainer.setAttribute('role', 'main');
+
+    // Create ForgetfulMe header
+    const forgetfulMeHeader = document.createElement('header');
+    forgetfulMeHeader.setAttribute('role', 'banner');
+    forgetfulMeHeader.className = 'forgetfulme-header';
 
     const title = document.createElement('h1');
     title.textContent = 'ForgetfulMe';
     title.setAttribute('id', 'popup-title');
-    header.appendChild(title);
+    forgetfulMeHeader.appendChild(title);
 
-    const headerActions = document.createElement('div');
-    headerActions.className = 'header-actions';
-    headerActions.setAttribute('role', 'toolbar');
-    headerActions.setAttribute('aria-label', 'Extension actions');
-
-    const settingsBtn = document.createElement('button');
-    settingsBtn.className = 'btn btn-secondary settings-btn';
-    settingsBtn.setAttribute('aria-label', 'Open settings');
-    settingsBtn.setAttribute('title', 'Settings');
-    settingsBtn.addEventListener('click', () => this.openSettings());
-
-    const settingsIcon = document.createElement('span');
-    settingsIcon.className = 'icon';
-    settingsIcon.textContent = '⚙️';
-    settingsBtn.appendChild(settingsIcon);
-
-    const settingsText = document.createElement('span');
-    settingsText.className = 'text';
-    settingsText.textContent = 'Settings';
-    settingsBtn.appendChild(settingsText);
-
-    headerActions.appendChild(settingsBtn);
-
-    const manageBtn = document.createElement('button');
-    manageBtn.className = 'btn btn-secondary manage-btn';
-    manageBtn.setAttribute('aria-label', 'Manage bookmarks');
-    manageBtn.setAttribute('title', 'Manage Bookmarks');
-    manageBtn.addEventListener('click', () => this.showBookmarkManagement());
-
-    const manageIcon = document.createElement('span');
-    manageIcon.className = 'icon';
-    manageIcon.textContent = '📚';
-    manageBtn.appendChild(manageIcon);
-
-    const manageText = document.createElement('span');
-    manageText.className = 'text';
-    manageText.textContent = 'Manage URLs';
-    manageBtn.appendChild(manageText);
-
-    headerActions.appendChild(manageBtn);
-
-    header.appendChild(headerActions);
-
-    // Create main content container
-    const mainContent = document.createElement('div');
-    mainContent.className = 'main-content';
-    mainContent.setAttribute('role', 'main');
+    // Create ForgetfulMe main content container
+    const forgetfulMeContent = document.createElement('div');
+    forgetfulMeContent.className = 'forgetfulme-content';
+    forgetfulMeContent.setAttribute('role', 'main');
 
     // Create form with better accessibility
     const form = document.createElement('form');
@@ -484,7 +459,7 @@ class ForgetfulMePopup {
       this.markAsRead();
     });
 
-    mainContent.appendChild(form);
+    forgetfulMeContent.appendChild(form);
 
     // Create recent section with better accessibility
     const recentSection = document.createElement('section');
@@ -502,11 +477,75 @@ class ForgetfulMePopup {
     recentList.setAttribute('aria-label', 'Recent bookmarks');
     recentSection.appendChild(recentList);
 
-    // Assemble the interface
+    // Assemble ForgetfulMe container
+    forgetfulMeContainer.appendChild(forgetfulMeHeader);
+    forgetfulMeContainer.appendChild(forgetfulMeContent);
+    forgetfulMeContainer.appendChild(recentSection);
+
+    // Create Settings/Manage URLs container
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = 'actions-container';
+    actionsContainer.setAttribute('role', 'complementary');
+    actionsContainer.setAttribute('aria-label', 'Extension actions');
+
+    const actionsHeader = document.createElement('header');
+    actionsHeader.className = 'actions-header';
+    actionsHeader.setAttribute('role', 'banner');
+
+    const actionsTitle = document.createElement('h2');
+    actionsTitle.textContent = 'Actions';
+    actionsTitle.className = 'actions-title';
+    actionsHeader.appendChild(actionsTitle);
+
+    const actionsContent = document.createElement('div');
+    actionsContent.className = 'actions-content';
+    actionsContent.setAttribute('role', 'toolbar');
+    actionsContent.setAttribute('aria-label', 'Extension actions');
+
+    const settingsBtn = document.createElement('button');
+    settingsBtn.className = 'btn btn-secondary settings-btn';
+    settingsBtn.setAttribute('aria-label', 'Open settings');
+    settingsBtn.setAttribute('title', 'Settings');
+    settingsBtn.addEventListener('click', () => this.openSettings());
+
+    const settingsIcon = document.createElement('span');
+    settingsIcon.className = 'icon';
+    settingsIcon.textContent = '⚙️';
+    settingsBtn.appendChild(settingsIcon);
+
+    const settingsText = document.createElement('span');
+    settingsText.className = 'text';
+    settingsText.textContent = 'Settings';
+    settingsBtn.appendChild(settingsText);
+
+    actionsContent.appendChild(settingsBtn);
+
+    const manageBtn = document.createElement('button');
+    manageBtn.className = 'btn btn-secondary manage-btn';
+    manageBtn.setAttribute('aria-label', 'Manage bookmarks');
+    manageBtn.setAttribute('title', 'Manage Bookmarks');
+    manageBtn.addEventListener('click', () => this.showBookmarkManagement());
+
+    const manageIcon = document.createElement('span');
+    manageIcon.className = 'icon';
+    manageIcon.textContent = '📚';
+    manageBtn.appendChild(manageIcon);
+
+    const manageText = document.createElement('span');
+    manageText.className = 'text';
+    manageText.textContent = 'Manage URLs';
+    manageBtn.appendChild(manageText);
+
+    actionsContent.appendChild(manageBtn);
+
+    // Assemble actions container
+    actionsContainer.appendChild(actionsHeader);
+    actionsContainer.appendChild(actionsContent);
+
+    // Assemble the main interface
     this.appContainer.innerHTML = '';
-    this.appContainer.appendChild(header);
-    this.appContainer.appendChild(mainContent);
-    this.appContainer.appendChild(recentSection);
+    this.appContainer.appendChild(actionsContainer);
+    this.appContainer.appendChild(forgetfulMeContainer);
 
     // Re-initialize elements after DOM update
     this.initializeElements();

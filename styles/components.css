@@ -1,9 +1,80 @@
-/* Component Library for ForgetfulMe Extension - Consolidated Components */
+/**
+ * Component Library for ForgetfulMe Extension
+ * ==========================================
+ * 
+ * This file contains all reusable UI components for the ForgetfulMe browser extension.
+ * Components are built using design tokens from the design system and follow
+ * consistent patterns for styling, behavior, and accessibility.
+ * 
+ * ORGANIZATION:
+ * - Buttons (Primary, Secondary, Variants)
+ * - Forms (Inputs, Labels, Groups)
+ * - Cards (Containers, Content)
+ * - Messages (Alerts, Notifications)
+ * - Status Indicators (Bookmark Status)
+ * - Layout Components (Headers, Sections)
+ * - Interactive Elements (Items, Actions)
+ * - Loading States
+ * - Responsive Design
+ * 
+ * USAGE:
+ * - Import design-system.css first
+ * - Use semantic class names
+ * - Follow component composition patterns
+ * - Test across different screen sizes
+ * 
+ * COMPONENT PATTERNS:
+ * - Base class provides core styling
+ * - Modifier classes for variants
+ * - State classes for interactions
+ * - Responsive classes for different screens
+ * 
+ * ACCESSIBILITY:
+ * - Proper focus indicators
+ * - Keyboard navigation support
+ * - Screen reader compatibility
+ * - High contrast support
+ * 
+ * @version 1.0.0
+ * @author ForgetfulMe Extension Team
+ */
 
 /* Import design system */
 @import url('design-system.css');
 
-/* ===== BUTTONS ===== */
+/* ===== BUTTON COMPONENTS ===== */
+/**
+ * Button Component System
+ * 
+ * Provides a comprehensive button system with multiple variants and states.
+ * All buttons follow accessibility guidelines and provide consistent interaction feedback.
+ * 
+ * BASE CLASS: .btn
+ * - Provides core button styling and behavior
+ * - Includes hover, focus, active, and disabled states
+ * - Ensures minimum touch target size (44px)
+ * - Supports both mouse and keyboard interactions
+ * 
+ * VARIANTS:
+ * - .btn-primary: Main actions and primary interactions
+ * - .btn-secondary: Secondary actions and less prominent interactions
+ * - .btn-danger: Destructive actions and error states
+ * - .btn-success: Positive actions and confirmation states
+ * - .btn-warning: Caution actions and warning states
+ * - .btn-info: Informational actions and help states
+ * 
+ * SIZES:
+ * - Default: Standard button size
+ * - .btn-small: Compact button for tight spaces
+ * - .btn-large: Prominent button for important actions
+ * 
+ * STATES:
+ * - :hover: Visual feedback on mouse hover
+ * - :focus: Keyboard navigation indicator
+ * - :active: Pressed state feedback
+ * - :disabled: Disabled state styling
+ */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -120,12 +191,37 @@
 }
 
 .btn-large {
-  padding: var(--spacing-lg) var(--spacing-2xl);
+  padding: var(--spacing-lg) var(--spacing-xl);
   font-size: var(--font-size-lg);
-  min-height: 52px;
+  min-height: 48px;
 }
 
-/* ===== FORMS ===== */
+/* ===== FORM COMPONENTS ===== */
+/**
+ * Form Component System
+ * 
+ * Provides consistent form styling and behavior across the extension.
+ * All form elements follow accessibility guidelines and provide clear
+ * visual feedback for different states.
+ * 
+ * COMPONENTS:
+ * - .form-group: Container for form field groups
+ * - .form-control: Standard input styling
+ * - .form: Complete form container
+ * 
+ * STATES:
+ * - Default: Normal input appearance
+ * - :hover: Subtle border color change
+ * - :focus: Clear focus indicator with primary color
+ * - :disabled: Muted appearance for disabled state
+ * 
+ * ACCESSIBILITY:
+ * - Proper label associations
+ * - Clear focus indicators
+ * - Descriptive error messages
+ * - Keyboard navigation support
+ */
+
 .form-group {
   margin-bottom: var(--spacing-xl);
 }

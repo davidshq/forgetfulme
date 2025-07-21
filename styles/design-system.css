@@ -1,18 +1,78 @@
-/* Design System for ForgetfulMe Extension - Consolidated Design Tokens */
+/**
+ * Design System for ForgetfulMe Extension
+ * ======================================
+ * 
+ * This file contains all design tokens and foundational styles for the ForgetfulMe
+ * browser extension. It serves as the single source of truth for colors, spacing,
+ * typography, shadows, and other design variables.
+ * 
+ * ORGANIZATION:
+ * - CSS Variables (Design Tokens)
+ * - Base Styles (HTML, Body)
+ * - Responsive Design Tokens
+ * - Theme Support (Light/Dark)
+ * - Accessibility Features
+ * - Print Styles
+ * 
+ * USAGE:
+ * - Import this file first in other CSS files
+ * - Use CSS variables for consistent styling
+ * - Follow the established naming conventions
+ * - Test across different screen sizes and themes
+ * 
+ * MAINTENANCE:
+ * - Update variables here to change the entire design system
+ * - Ensure all color combinations meet WCAG contrast requirements
+ * - Test with high contrast and reduced motion preferences
+ * 
+ * @version 1.0.0
+ * @author ForgetfulMe Extension Team
+ */
 
-/* ===== CSS VARIABLES ===== */
+/* ===== CSS VARIABLES (DESIGN TOKENS) ===== */
+/**
+ * Design tokens are organized by category and follow a consistent naming pattern:
+ * - Colors: --color-{category}-{variant}
+ * - Spacing: --spacing-{size}
+ * - Typography: --font-{property}-{size}
+ * - Shadows: --shadow-{size}
+ * - Transitions: --transition-{speed}
+ */
+
 :root {
-  /* Colors - Primary */
+  /* ===== COLOR SYSTEM ===== */
+  /**
+   * Primary Colors
+   * Used for main actions, links, and primary UI elements
+   * - Primary: Main brand color (#007bff)
+   * - Primary-hover: Darker shade for hover states
+   * - Primary-light: Semi-transparent for focus rings
+   */
   --color-primary: #007bff;
   --color-primary-hover: #0056b3;
   --color-primary-light: rgba(0, 123, 255, 0.25);
   
-  /* Colors - Secondary */
+  /**
+   * Secondary Colors
+   * Used for secondary actions and less prominent UI elements
+   * - Secondary: Neutral gray for secondary actions
+   * - Secondary-hover: Darker shade for hover states
+   * - Secondary-light: Semi-transparent for focus rings
+   */
   --color-secondary: #6c757d;
   --color-secondary-hover: #5a6268;
   --color-secondary-light: rgba(108, 117, 125, 0.25);
   
-  /* Colors - Success */
+  /**
+   * Success Colors
+   * Used for positive actions, confirmations, and success states
+   * - Success: Green for success actions and states
+   * - Success-hover: Darker shade for hover states
+   * - Success-light: Semi-transparent for focus rings
+   * - Success-bg: Light background for success messages
+   * - Success-text: Dark text for success backgrounds
+   * - Success-border: Border color for success elements
+   */
   --color-success: #28a745;
   --color-success-hover: #218838;
   --color-success-light: rgba(40, 167, 69, 0.25);
@@ -20,7 +80,16 @@
   --color-success-text: #0f5132;
   --color-success-border: #badbcc;
   
-  /* Colors - Danger */
+  /**
+   * Danger Colors
+   * Used for destructive actions, errors, and warning states
+   * - Danger: Red for destructive actions and errors
+   * - Danger-hover: Darker shade for hover states
+   * - Danger-light: Semi-transparent for focus rings
+   * - Danger-bg: Light background for error messages
+   * - Danger-text: Dark text for error backgrounds
+   * - Danger-border: Border color for error elements
+   */
   --color-danger: #dc3545;
   --color-danger-hover: #c82333;
   --color-danger-light: rgba(220, 53, 69, 0.25);
@@ -28,7 +97,16 @@
   --color-danger-text: #721c24;
   --color-danger-border: #f5c2c7;
   
-  /* Colors - Warning */
+  /**
+   * Warning Colors
+   * Used for warnings, alerts, and caution states
+   * - Warning: Yellow for warnings and alerts
+   * - Warning-hover: Darker shade for hover states
+   * - Warning-light: Semi-transparent for focus rings
+   * - Warning-bg: Light background for warning messages
+   * - Warning-text: Dark text for warning backgrounds
+   * - Warning-border: Border color for warning elements
+   */
   --color-warning: #ffc107;
   --color-warning-hover: #e0a800;
   --color-warning-light: rgba(255, 193, 7, 0.25);
@@ -36,7 +114,16 @@
   --color-warning-text: #664d03;
   --color-warning-border: #ffecb5;
   
-  /* Colors - Info */
+  /**
+   * Info Colors
+   * Used for informational messages and neutral states
+   * - Info: Blue for informational content
+   * - Info-hover: Darker shade for hover states
+   * - Info-light: Semi-transparent for focus rings
+   * - Info-bg: Light background for info messages
+   * - Info-text: Dark text for info backgrounds
+   * - Info-border: Border color for info elements
+   */
   --color-info: #17a2b8;
   --color-info-hover: #138496;
   --color-info-light: rgba(23, 162, 184, 0.25);
@@ -44,7 +131,13 @@
   --color-info-text: #055160;
   --color-info-border: #b6effb;
   
-  /* Colors - Neutral */
+  /**
+   * Neutral Colors
+   * Used for text, backgrounds, and borders
+   * - Text colors: Different shades for hierarchy
+   * - Border colors: For dividers and borders
+   * - Background colors: For containers and surfaces
+   */
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #495057;
   --color-text-muted: #6c757d;
@@ -53,7 +146,12 @@
   --color-background: #ffffff;
   --color-background-secondary: #f8f9fa;
   
-  /* Colors - Text on colored backgrounds */
+  /**
+   * Text Colors for Colored Backgrounds
+   * Ensures proper contrast when text is placed on colored backgrounds
+   * - Text-on-{color}: White or dark text for colored backgrounds
+   * - Warning uses dark text due to yellow background
+   */
   --color-text-on-primary: #ffffff;
   --color-text-on-secondary: #ffffff;
   --color-text-on-success: #ffffff;
@@ -61,7 +159,18 @@
   --color-text-on-warning: #212529;
   --color-text-on-info: #ffffff;
   
-  /* Spacing */
+  /* ===== SPACING SYSTEM ===== */
+  /**
+   * Spacing Scale
+   * Based on 4px grid system for consistent spacing
+   * - xs: 4px - Minimal spacing
+   * - sm: 8px - Small spacing
+   * - md: 12px - Medium spacing
+   * - lg: 16px - Large spacing
+   * - xl: 20px - Extra large spacing
+   * - 2xl: 24px - Double extra large spacing
+   * - 3xl: 28px - Triple extra large spacing
+   */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
@@ -70,26 +179,67 @@
   --spacing-2xl: 24px;
   --spacing-3xl: 28px;
   
-  /* Border Radius */
+  /* ===== BORDER RADIUS SYSTEM ===== */
+  /**
+   * Border Radius Scale
+   * Provides consistent corner rounding across components
+   * - xs: 2px - Subtle rounding
+   * - sm: 6px - Small rounding
+   * - md: 8px - Medium rounding (default)
+   * - lg: 12px - Large rounding
+   * - xl: 16px - Extra large rounding
+   */
   --border-radius-xs: 2px;
   --border-radius-sm: 6px;
   --border-radius-md: 8px;
   --border-radius-lg: 12px;
   --border-radius-xl: 16px;
   
-  /* Shadows */
+  /* ===== SHADOW SYSTEM ===== */
+  /**
+   * Shadow Scale
+   * Provides depth and elevation to UI elements
+   * - sm: Subtle shadow for cards and buttons
+   * - md: Medium shadow for elevated elements
+   * - lg: Large shadow for modals and overlays
+   * - xl: Extra large shadow for highest elevation
+   */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 4px 12px rgba(0, 123, 255, 0.15);
   
-  /* Colored Shadows */
+  /**
+   * Colored Shadows
+   * Used for interactive elements to provide visual feedback
+   * - Primary: Blue shadow for primary actions
+   * - Secondary: Gray shadow for secondary actions
+   * - Danger: Red shadow for destructive actions
+   */
   --shadow-primary: 0 2px 8px rgba(0, 123, 255, 0.3);
   --shadow-secondary: 0 2px 8px rgba(108, 117, 125, 0.3);
   --shadow-danger: 0 2px 8px rgba(220, 53, 69, 0.3);
   
-  /* Typography */
+  /* ===== TYPOGRAPHY SYSTEM ===== */
+  /**
+   * Font Family
+   * System font stack for optimal performance and native feel
+   * Falls back gracefully across different operating systems
+   */
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /**
+   * Font Size Scale
+   * Responsive typography scale for different content types
+   * - xs: 11px - Small labels and captions
+   * - sm: 12px - Body text and small content
+   * - md: 14px - Default body text
+   * - lg: 16px - Large body text
+   * - xl: 18px - Subheadings
+   * - 2xl: 20px - Section headings
+   * - 3xl: 24px - Page headings
+   * - 4xl: 32px - Hero headings
+   */
   --font-size-xs: 11px;
   --font-size-sm: 12px;
   --font-size-md: 14px;
@@ -99,71 +249,62 @@
   --font-size-3xl: 24px;
   --font-size-4xl: 32px;
   
-  /* Transitions */
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  
-  /* Z-index */
-  --z-dropdown: 1000;
-  --z-sticky: 1020;
-  --z-fixed: 1030;
-  --z-modal-backdrop: 1040;
-  --z-modal: 1050;
-  --z-popover: 1060;
-  --z-tooltip: 1070;
-  
-  /* Responsive Breakpoints - Standardized */
-  --breakpoint-xs: 480px;
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1536px;
-  
-  /* Touch Targets - Improved for mobile */
-  --touch-target-min: 44px;
-  --touch-target-ideal: 48px;
-  --touch-target-large: 56px;
-  
-  /* Container Max Widths */
-  --container-xs: 100%;
-  --container-sm: 640px;
-  --container-md: 768px;
-  --container-lg: 1024px;
-  --container-xl: 1280px;
-  --container-2xl: 1536px;
+  /* ===== TRANSITION SYSTEM ===== */
+  /**
+   * Transition Durations
+   * Provides consistent animation timing across the interface
+   * - Fast: 150ms for immediate feedback
+   * - Normal: 250ms for standard interactions
+   * - Slow: 350ms for complex animations
+   */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 }
 
 /* ===== BASE STYLES ===== */
+/**
+ * Global Reset and Base Styles
+ * Ensures consistent rendering across browsers
+ */
+
 * {
   box-sizing: border-box;
 }
 
 html {
-  /* Prevent font size scaling on mobile */
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-text-size-adjust: 100%;
-  -moz-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-family);
   font-size: var(--font-size-md);
   line-height: 1.5;
   color: var(--color-text-primary);
-  background: var(--color-background-secondary);
-  margin: 0;
-  padding: 0;
-  /* Improve text rendering */
+  background-color: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Prevent horizontal scroll on mobile */
-  overflow-x: hidden;
 }
 
-/* ===== RESPONSIVE TYPOGRAPHY - IMPROVED ===== */
-/* Mobile-first typography scaling with better breakpoints */
+/* ===== RESPONSIVE DESIGN TOKENS ===== */
+/**
+ * Mobile-First Responsive Design
+ * Adjusts design tokens for different screen sizes
+ */
+
 @media (max-width: 480px) {
+  /**
+   * Extra Small Screens (Mobile)
+   * - Reduced font sizes for better readability
+   * - Tighter spacing for compact layouts
+   * - Optimized for touch interactions
+   */
   :root {
     --font-size-xs: 10px;
     --font-size-sm: 11px;
@@ -173,16 +314,25 @@ body {
     --font-size-2xl: 19px;
     --font-size-3xl: 22px;
     --font-size-4xl: 28px;
-    /* Reduce spacing for mobile */
-    --spacing-lg: 12px;
-    --spacing-xl: 16px;
-    --spacing-2xl: 20px;
+    
+    --spacing-xs: 3px;
+    --spacing-sm: 6px;
+    --spacing-md: 10px;
+    --spacing-lg: 14px;
+    --spacing-xl: 18px;
+    --spacing-2xl: 22px;
+    --spacing-3xl: 26px;
   }
 }
 
 @media (min-width: 481px) and (max-width: 640px) {
+  /**
+   * Small Screens (Large Mobile/Small Tablet)
+   * - Slightly larger than mobile for better readability
+   * - Maintains touch-friendly sizing
+   */
   :root {
-    --font-size-xs: 11px;
+    --font-size-xs: 10px;
     --font-size-sm: 12px;
     --font-size-md: 14px;
     --font-size-lg: 16px;
@@ -194,19 +344,11 @@ body {
 }
 
 @media (min-width: 641px) and (max-width: 768px) {
-  :root {
-    --font-size-xs: 11px;
-    --font-size-sm: 12px;
-    --font-size-md: 14px;
-    --font-size-lg: 16px;
-    --font-size-xl: 18px;
-    --font-size-2xl: 20px;
-    --font-size-3xl: 24px;
-    --font-size-4xl: 30px;
-  }
-}
-
-@media (min-width: 769px) {
+  /**
+   * Medium Screens (Tablet)
+   * - Standard desktop sizes for better content display
+   * - Optimized for both touch and mouse interactions
+   */
   :root {
     --font-size-xs: 11px;
     --font-size-sm: 12px;
@@ -219,32 +361,73 @@ body {
   }
 }
 
-/* ===== DARK MODE SUPPORT ===== */
-/* System preference-based dark mode */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    --color-text-primary: #e9ecef;
-    --color-text-secondary: #adb5bd;
-    --color-text-muted: #6c757d;
-    --color-border: #495057;
-    --color-border-hover: #6c757d;
-    --color-background: #2d2d2d;
-    --color-background-secondary: #343a40;
+@media (min-width: 769px) {
+  /**
+   * Large Screens (Desktop)
+   * - Full desktop experience
+   * - Larger text for better readability on high-DPI displays
+   */
+  :root {
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 32px;
   }
 }
 
-/* Manual theme overrides */
+/* ===== THEME SUPPORT ===== */
+/**
+ * Dark Mode Support
+ * Automatically switches to dark theme based on system preference
+ * Can be overridden with data-theme attribute
+ */
+
+@media (prefers-color-scheme: dark) {
+  /**
+   * System Dark Mode
+   * Automatically applied when user has dark mode enabled
+   * Provides dark background with light text
+   */
+  :root:not([data-theme]) {
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b0b0b0;
+    --color-text-muted: #888888;
+    --color-border: #404040;
+    --color-border-hover: #606060;
+    --color-background: #1a1a1a;
+    --color-background-secondary: #2d2d2d;
+  }
+}
+
+/**
+ * Explicit Theme Overrides
+ * Allows manual control of theme regardless of system preference
+ */
+
 [data-theme="dark"] {
-  --color-text-primary: #e9ecef;
-  --color-text-secondary: #adb5bd;
-  --color-text-muted: #6c757d;
-  --color-border: #495057;
-  --color-border-hover: #6c757d;
-  --color-background: #2d2d2d;
-  --color-background-secondary: #343a40;
+  /**
+   * Explicit Dark Theme
+   * Applied when data-theme="dark" is set on html or body
+   */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0b0;
+  --color-text-muted: #888888;
+  --color-border: #404040;
+  --color-border-hover: #606060;
+  --color-background: #1a1a1a;
+  --color-background-secondary: #2d2d2d;
 }
 
 [data-theme="light"] {
+  /**
+   * Explicit Light Theme
+   * Applied when data-theme="light" is set on html or body
+   * Forces light theme even in dark mode
+   */
   --color-text-primary: #1a1a1a;
   --color-text-secondary: #495057;
   --color-text-muted: #6c757d;
@@ -254,70 +437,128 @@ body {
   --color-background-secondary: #f8f9fa;
 }
 
-/* ===== ACCESSIBILITY SUPPORT ===== */
+/* ===== ACCESSIBILITY FEATURES ===== */
+/**
+ * High Contrast Mode Support
+ * Enhances contrast for users with visual impairments
+ */
+
 @media (prefers-contrast: high) {
+  /**
+   * High Contrast Mode
+   * Increases contrast ratios for better visibility
+   * - Darker borders for better definition
+   * - Higher contrast text colors
+   */
   :root {
     --color-border: #000000;
-    --color-border-hover: #000000;
+    --color-border-hover: #333333;
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
   }
 }
+
+/**
+ * Reduced Motion Support
+ * Respects user's motion sensitivity preferences
+ */
 
 @media (prefers-reduced-motion: reduce) {
+  /**
+   * Reduced Motion Mode
+   * Disables or reduces animations for users with motion sensitivity
+   * - Removes transitions that could cause discomfort
+   * - Maintains functionality without motion
+   */
   :root {
-    --transition-fast: none;
-    --transition-normal: none;
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+    --transition-slow: 0ms;
   }
 }
 
-/* ===== VIEWPORT HEIGHT SUPPORT - IMPROVED ===== */
-/* Handle mobile browser address bar and landscape mode */
+/* ===== COMPACT LAYOUT SUPPORT ===== */
+/**
+ * Compact Layout for Small Screens
+ * Optimizes spacing for limited screen real estate
+ */
+
 @media (max-height: 600px) {
+  /**
+   * Short Screen Height
+   * Reduces vertical spacing for compact layouts
+   * Useful for browser extensions with limited height
+   */
   :root {
+    --spacing-xs: 2px;
+    --spacing-sm: 4px;
+    --spacing-md: 8px;
+    --spacing-lg: 12px;
     --spacing-xl: 16px;
     --spacing-2xl: 20px;
     --spacing-3xl: 24px;
   }
 }
 
-/* ===== ORIENTATION SUPPORT - IMPROVED ===== */
 @media (orientation: landscape) and (max-height: 500px) {
+  /**
+   * Landscape Mode with Limited Height
+   * Further reduces spacing for very compact layouts
+   * Optimized for mobile landscape orientation
+   */
   :root {
-    --spacing-lg: 12px;
-    --spacing-xl: 16px;
-    --spacing-2xl: 20px;
+    --spacing-xs: 1px;
+    --spacing-sm: 3px;
+    --spacing-md: 6px;
+    --spacing-lg: 10px;
+    --spacing-xl: 14px;
+    --spacing-2xl: 18px;
+    --spacing-3xl: 22px;
   }
 }
 
-/* ===== HIGH DPI DISPLAY SUPPORT ===== */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  /* Ensure crisp borders and shadows on high DPI displays */
-  :root {
-    --shadow-sm: 0 0.5px 1.5px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 1px 4px rgba(0, 0, 0, 0.1);
-    --shadow-xl: 0 2px 6px rgba(0, 123, 255, 0.15);
-  }
-}
+/* ===== TOUCH DEVICE OPTIMIZATION ===== */
+/**
+ * Touch Device Optimization
+ * Adjusts design tokens for touch interfaces
+ */
 
-/* ===== NEW: IMPROVED TOUCH SUPPORT ===== */
 @media (hover: none) and (pointer: coarse) {
+  /**
+   * Touch Devices
+   * Optimizes for touch interactions
+   * - Larger touch targets
+   * - Reduced hover effects
+   * - Touch-friendly spacing
+   */
   :root {
-    /* Increase touch targets for mobile */
-    --touch-target-min: 48px;
-    --touch-target-ideal: 56px;
-    --touch-target-large: 64px;
-    /* Reduce spacing for better mobile layout */
-    --spacing-md: 10px;
-    --spacing-lg: 14px;
-    --spacing-xl: 18px;
+    --spacing-sm: 10px;
+    --spacing-md: 14px;
+    --spacing-lg: 18px;
+    --spacing-xl: 22px;
+    --spacing-2xl: 26px;
+    --spacing-3xl: 30px;
   }
 }
 
-/* ===== NEW: IMPROVED PRINT SUPPORT ===== */
+/* ===== PRINT STYLES ===== */
+/**
+ * Print-Optimized Styles
+ * Ensures proper printing of extension content
+ */
+
 @media print {
+  /**
+   * Print Styles
+   * Optimizes content for printing
+   * - Removes unnecessary visual elements
+   * - Ensures text is readable
+   * - Maintains content structure
+   */
   :root {
     --color-background: #ffffff;
     --color-text-primary: #000000;
+    --color-text-secondary: #333333;
     --shadow-sm: none;
     --shadow-md: none;
     --shadow-lg: none;

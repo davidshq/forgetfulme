@@ -1,14 +1,92 @@
-/* Utility Classes for ForgetfulMe Extension - Consolidated Utilities */
+/**
+ * Utility Classes for ForgetfulMe Extension
+ * ========================================
+ * 
+ * This file contains utility classes that provide common styling patterns
+ * and helper functions for the ForgetfulMe browser extension. These utilities
+ * follow a consistent naming convention and are designed to be composable.
+ * 
+ * ORGANIZATION:
+ * - Text Utilities (Alignment, Size, Weight)
+ * - Spacing Utilities (Margin, Padding)
+ * - Layout Utilities (Display, Flex, Grid)
+ * - Positioning Utilities (Position, Z-index)
+ * - Visual Utilities (Borders, Shadows, Colors)
+ * - Interactive Utilities (Cursor, User-select)
+ * - Responsive Utilities (Breakpoint-specific)
+ * - Accessibility Utilities (Focus, Motion)
+ * 
+ * NAMING CONVENTIONS:
+ * - {property}-{value}: Standard utility pattern
+ * - {breakpoint}:{utility}: Responsive utilities
+ * - {state}:{utility}: State-based utilities
+ * 
+ * USAGE:
+ * - Combine multiple utilities for complex layouts
+ * - Use responsive prefixes for different screen sizes
+ * - Follow mobile-first responsive design
+ * - Test across different devices and orientations
+ * 
+ * PERFORMANCE:
+ * - Utilities are optimized for minimal CSS output
+ * - Classes are designed to be reusable
+ * - No unnecessary specificity or conflicts
+ * 
+ * @version 1.0.0
+ * @author ForgetfulMe Extension Team
+ */
 
 /* Import design system */
 @import url('design-system.css');
 
 /* ===== TEXT UTILITIES ===== */
+/**
+ * Text Alignment and Typography Utilities
+ * 
+ * Provides consistent text alignment and typography helpers.
+ * All text utilities respect the design system's typography scale.
+ * 
+ * ALIGNMENT:
+ * - .text-center: Center-aligned text
+ * - .text-left: Left-aligned text
+ * - .text-right: Right-aligned text
+ * 
+ * USAGE:
+ * - Apply to any text-containing element
+ * - Works with all text sizes and weights
+ * - Responsive variants available
+ */
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
 
 /* ===== MARGIN UTILITIES ===== */
+/**
+ * Margin Spacing Utilities
+ * 
+ * Provides consistent margin spacing using the design system's spacing scale.
+ * All margin utilities use CSS custom properties for maintainability.
+ * 
+ * SCALE:
+ * - 0: No margin
+ * - 1: Extra small (4px)
+ * - 2: Small (8px)
+ * - 3: Medium (12px)
+ * - 4: Large (16px)
+ * - 5: Extra large (20px)
+ * 
+ * DIRECTIONS:
+ * - mb: Margin bottom
+ * - mt: Margin top
+ * - ml: Margin left
+ * - mr: Margin right
+ * - m: Margin all sides
+ * 
+ * USAGE:
+ * - Use for consistent spacing between elements
+ * - Combine with padding utilities for complex layouts
+ * - Responsive variants available for different screen sizes
+ */
 .mb-0 { margin-bottom: 0; }
 .mb-1 { margin-bottom: var(--spacing-xs); }
 .mb-2 { margin-bottom: var(--spacing-sm); }
@@ -24,6 +102,25 @@
 .mt-5 { margin-top: var(--spacing-xl); }
 
 /* ===== PADDING UTILITIES ===== */
+/**
+ * Padding Spacing Utilities
+ * 
+ * Provides consistent padding spacing using the design system's spacing scale.
+ * All padding utilities use CSS custom properties for maintainability.
+ * 
+ * SCALE:
+ * - 0: No padding
+ * - 1: Extra small (4px)
+ * - 2: Small (8px)
+ * - 3: Medium (12px)
+ * - 4: Large (16px)
+ * - 5: Extra large (20px)
+ * 
+ * USAGE:
+ * - Use for internal spacing within elements
+ * - Combine with margin utilities for complex layouts
+ * - Responsive variants available for different screen sizes
+ */
 .p-0 { padding: 0; }
 .p-1 { padding: var(--spacing-xs); }
 .p-2 { padding: var(--spacing-sm); }
@@ -32,12 +129,55 @@
 .p-5 { padding: var(--spacing-xl); }
 
 /* ===== DISPLAY UTILITIES ===== */
+/**
+ * Display Property Utilities
+ * 
+ * Provides utilities for controlling element display behavior.
+ * Essential for layout and responsive design patterns.
+ * 
+ * VALUES:
+ * - .d-flex: Flexbox container
+ * - .d-block: Block-level element
+ * - .d-inline: Inline element
+ * - .d-inline-block: Inline-block element
+ * - .d-none: Hidden element
+ * 
+ * USAGE:
+ * - Foundation for layout systems
+ * - Essential for responsive design
+ * - Works with all other utility classes
+ */
 .d-flex { display: flex; }
 .d-block { display: block; }
 .d-inline { display: inline; }
 .d-inline-block { display: inline-block; }
 
 /* ===== FLEX UTILITIES ===== */
+/**
+ * Flexbox Layout Utilities
+ * 
+ * Provides comprehensive flexbox layout helpers for modern CSS layouts.
+ * All flex utilities follow flexbox best practices and accessibility guidelines.
+ * 
+ * JUSTIFY CONTENT:
+ * - .justify-content-center: Center items horizontally
+ * - .justify-content-between: Space items evenly
+ * - .justify-content-end: Align items to end
+ * 
+ * ALIGN ITEMS:
+ * - .align-items-center: Center items vertically
+ * - .align-items-start: Align items to start
+ * - .align-items-end: Align items to end
+ * 
+ * DIRECTION:
+ * - .flex-column: Stack items vertically
+ * - .flex-row: Arrange items horizontally
+ * 
+ * USAGE:
+ * - Primary layout system for the extension
+ * - Responsive variants available
+ * - Combines with spacing utilities
+ */
 .justify-content-center { justify-content: center; }
 .justify-content-between { justify-content: space-between; }
 .justify-content-end { justify-content: flex-end; }
@@ -50,6 +190,24 @@
 .flex-row { flex-direction: row; }
 
 /* ===== GAP UTILITIES ===== */
+/**
+ * Flexbox Gap Utilities
+ * 
+ * Provides consistent spacing between flex items using the design system's spacing scale.
+ * Modern alternative to margin-based spacing in flex layouts.
+ * 
+ * SCALE:
+ * - 1: Extra small (4px)
+ * - 2: Small (8px)
+ * - 3: Medium (12px)
+ * - 4: Large (16px)
+ * - 5: Extra large (20px)
+ * 
+ * USAGE:
+ * - Use in flex containers for consistent item spacing
+ * - More efficient than margin-based spacing
+ * - Responsive variants available
+ */
 .gap-1 { gap: var(--spacing-xs); }
 .gap-2 { gap: var(--spacing-sm); }
 .gap-3 { gap: var(--spacing-md); }
@@ -57,24 +215,111 @@
 .gap-5 { gap: var(--spacing-xl); }
 
 /* ===== WIDTH/HEIGHT UTILITIES ===== */
+/**
+ * Dimension Utilities
+ * 
+ * Provides utilities for controlling element dimensions.
+ * Essential for responsive design and layout control.
+ * 
+ * VALUES:
+ * - .w-100: Full width
+ * - .h-100: Full height
+ * - .w-auto: Auto width
+ * - .h-auto: Auto height
+ * 
+ * USAGE:
+ * - Control element sizing
+ * - Essential for responsive layouts
+ * - Works with all display types
+ */
 .w-100 { width: 100%; }
 .h-100 { height: 100%; }
 
 /* ===== VISIBILITY UTILITIES ===== */
+/**
+ * Visibility Control Utilities
+ * 
+ * Provides utilities for controlling element visibility and display.
+ * Includes both display and visibility-based approaches.
+ * 
+ * VALUES:
+ * - .hidden: Completely hidden (display: none)
+ * - .visible: Visible (display: block)
+ * - .invisible: Hidden but preserves space
+ * 
+ * USAGE:
+ * - Control element visibility
+ * - Essential for responsive design
+ * - Accessibility considerations included
+ */
 .hidden { display: none; }
 .visible { display: block; }
 
 /* ===== POSITION UTILITIES ===== */
+/**
+ * Positioning Utilities
+ * 
+ * Provides utilities for controlling element positioning behavior.
+ * Essential for complex layouts and overlays.
+ * 
+ * VALUES:
+ * - .position-relative: Relative positioning
+ * - .position-absolute: Absolute positioning
+ * - .position-fixed: Fixed positioning
+ * - .position-sticky: Sticky positioning
+ * 
+ * USAGE:
+ * - Control element positioning
+ * - Essential for overlays and modals
+ * - Works with z-index utilities
+ */
 .position-relative { position: relative; }
 .position-absolute { position: absolute; }
 .position-fixed { position: fixed; }
 
 /* ===== OVERFLOW UTILITIES ===== */
+/**
+ * Overflow Control Utilities
+ * 
+ * Provides utilities for controlling how content behaves when it exceeds container bounds.
+ * Essential for scrollable content and layout control.
+ * 
+ * VALUES:
+ * - .overflow-hidden: Hide overflow content
+ * - .overflow-auto: Show scrollbars when needed
+ * - .overflow-scroll: Always show scrollbars
+ * 
+ * USAGE:
+ * - Control content overflow behavior
+ * - Essential for scrollable containers
+ * - Accessibility considerations included
+ */
 .overflow-hidden { overflow: hidden; }
 .overflow-auto { overflow: auto; }
 .overflow-scroll { overflow: scroll; }
 
 /* ===== BORDER UTILITIES ===== */
+/**
+ * Border Utilities
+ * 
+ * Provides utilities for adding and controlling element borders.
+ * All border utilities use design system colors for consistency.
+ * 
+ * SIDES:
+ * - .border: All sides
+ * - .border-top: Top border only
+ * - .border-bottom: Bottom border only
+ * - .border-left: Left border only
+ * - .border-right: Right border only
+ * 
+ * STATES:
+ * - .no-border: Remove all borders
+ * 
+ * USAGE:
+ * - Add visual separation between elements
+ * - Use design system colors for consistency
+ * - Responsive variants available
+ */
 .border { border: 1px solid var(--color-border); }
 .border-top { border-top: 1px solid var(--color-border); }
 .border-bottom { border-bottom: 1px solid var(--color-border); }
@@ -84,6 +329,24 @@
 .no-border { border: none; }
 
 /* ===== BORDER RADIUS UTILITIES ===== */
+/**
+ * Border Radius Utilities
+ * 
+ * Provides utilities for controlling element corner rounding.
+ * All radius values use the design system's border radius scale.
+ * 
+ * SCALE:
+ * - .rounded: Medium radius (8px)
+ * - .rounded-sm: Small radius (6px)
+ * - .rounded-lg: Large radius (12px)
+ * - .rounded-xl: Extra large radius (16px)
+ * - .rounded-full: Circular (50%)
+ * 
+ * USAGE:
+ * - Add visual polish to elements
+ * - Consistent with design system
+ * - Works with all element types
+ */
 .rounded { border-radius: var(--border-radius-md); }
 .rounded-sm { border-radius: var(--border-radius-sm); }
 .rounded-lg { border-radius: var(--border-radius-lg); }
@@ -91,6 +354,24 @@
 .rounded-full { border-radius: 50%; }
 
 /* ===== SHADOW UTILITIES ===== */
+/**
+ * Shadow Utilities
+ * 
+ * Provides utilities for adding depth and elevation to elements.
+ * All shadow utilities use the design system's shadow scale.
+ * 
+ * SCALE:
+ * - .shadow-sm: Subtle shadow
+ * - .shadow-md: Medium shadow
+ * - .shadow-lg: Large shadow
+ * - .shadow-xl: Extra large shadow
+ * - .no-shadow: Remove shadows
+ * 
+ * USAGE:
+ * - Add depth to UI elements
+ * - Create visual hierarchy
+ * - Consistent with design system
+ */
 .shadow-sm { box-shadow: var(--shadow-sm); }
 .shadow-md { box-shadow: var(--shadow-md); }
 .shadow-lg { box-shadow: var(--shadow-lg); }
@@ -98,22 +379,87 @@
 .no-shadow { box-shadow: none; }
 
 /* ===== CURSOR UTILITIES ===== */
+/**
+ * Cursor Utilities
+ * 
+ * Provides utilities for controlling cursor appearance and behavior.
+ * Essential for interactive elements and user feedback.
+ * 
+ * VALUES:
+ * - .cursor-pointer: Pointer cursor for clickable elements
+ * - .cursor-default: Default cursor
+ * - .cursor-not-allowed: Disabled state cursor
+ * 
+ * USAGE:
+ * - Provide visual feedback for interactive elements
+ * - Essential for accessibility
+ * - Works with all interactive elements
+ */
 .cursor-pointer { cursor: pointer; }
 .cursor-default { cursor: default; }
 .cursor-not-allowed { cursor: not-allowed; }
 
 /* ===== USER SELECT UTILITIES ===== */
+/**
+ * User Selection Utilities
+ * 
+ * Provides utilities for controlling text selection behavior.
+ * Essential for interactive elements and user experience.
+ * 
+ * VALUES:
+ * - .select-none: Prevent text selection
+ * - .select-text: Allow text selection
+ * - .select-all: Select all text on click
+ * 
+ * USAGE:
+ * - Control text selection behavior
+ * - Essential for interactive elements
+ * - Accessibility considerations included
+ */
 .select-none { user-select: none; }
 .select-text { user-select: text; }
 .select-all { user-select: all; }
 
-/* ===== WORD BREAK UTILITIES ===== */
+/* ===== TEXT UTILITIES (CONTINUED) ===== */
+/**
+ * Text Handling Utilities
+ * 
+ * Provides utilities for controlling text wrapping and overflow behavior.
+ * Essential for responsive text layouts.
+ * 
+ * VALUES:
+ * - .break-words: Break long words
+ * - .break-all: Break at any character
+ * - .whitespace-nowrap: Prevent line breaks
+ * - .whitespace-normal: Normal line breaking
+ * 
+ * USAGE:
+ * - Control text layout behavior
+ * - Essential for responsive design
+ * - Works with all text elements
+ */
 .break-words { word-break: break-word; }
 .break-all { word-break: break-all; }
 .whitespace-nowrap { white-space: nowrap; }
 .whitespace-normal { white-space: normal; }
 
-/* ===== TEXT OVERFLOW UTILITIES ===== */
+/* ===== TEXT TRUNCATION ===== */
+/**
+ * Text Truncation Utility
+ * 
+ * Provides a utility for truncating long text with ellipsis.
+ * Essential for maintaining layout consistency with variable content.
+ * 
+ * FEATURES:
+ * - Truncates text with ellipsis
+ * - Prevents text overflow
+ * - Maintains layout integrity
+ * 
+ * USAGE:
+ * - Use for long text in constrained spaces
+ * - Essential for responsive layouts
+ * - Works with all text elements
+ */
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -121,6 +467,25 @@
 }
 
 /* ===== Z-INDEX UTILITIES ===== */
+/**
+ * Z-Index Utilities
+ * 
+ * Provides utilities for controlling element stacking order.
+ * Essential for overlays, modals, and complex layouts.
+ * 
+ * SCALE:
+ * - 0: Base level
+ * - 10: Low elevation
+ * - 20: Medium elevation
+ * - 30: High elevation
+ * - 40: Very high elevation
+ * - 50: Maximum elevation
+ * 
+ * USAGE:
+ * - Control element stacking order
+ * - Essential for overlays and modals
+ * - Use with positioning utilities
+ */
 .z-0 { z-index: 0; }
 .z-10 { z-index: 10; }
 .z-20 { z-index: 20; }
@@ -129,6 +494,24 @@
 .z-50 { z-index: 50; }
 
 /* ===== OPACITY UTILITIES ===== */
+/**
+ * Opacity Utilities
+ * 
+ * Provides utilities for controlling element transparency.
+ * Essential for visual effects and state changes.
+ * 
+ * SCALE:
+ * - 0: Completely transparent
+ * - 25: 25% opacity
+ * - 50: 50% opacity
+ * - 75: 75% opacity
+ * - 100: Completely opaque
+ * 
+ * USAGE:
+ * - Create visual effects
+ * - Indicate element states
+ * - Works with all elements
+ */
 .opacity-0 { opacity: 0; }
 .opacity-25 { opacity: 0.25; }
 .opacity-50 { opacity: 0.5; }
@@ -136,6 +519,25 @@
 .opacity-100 { opacity: 1; }
 
 /* ===== TRANSFORM UTILITIES ===== */
+/**
+ * Transform Utilities
+ * 
+ * Provides utilities for scaling elements.
+ * Essential for hover effects and visual feedback.
+ * 
+ * SCALE VALUES:
+ * - 0: Completely scaled down
+ * - 50: Half size
+ * - 75: Three-quarter size
+ * - 100: Normal size
+ * - 125: 25% larger
+ * - 150: 50% larger
+ * 
+ * USAGE:
+ * - Create hover effects
+ * - Provide visual feedback
+ * - Works with transitions
+ */
 .scale-0 { transform: scale(0); }
 .scale-50 { transform: scale(0.5); }
 .scale-75 { transform: scale(0.75); }
@@ -144,18 +546,92 @@
 .scale-150 { transform: scale(1.5); }
 
 /* ===== TRANSITION UTILITIES ===== */
+/**
+ * Transition Utilities
+ * 
+ * Provides utilities for controlling element transitions and animations.
+ * Essential for smooth user interactions and visual feedback.
+ * 
+ * VALUES:
+ * - .transition: Standard transition
+ * - .transition-none: No transitions
+ * 
+ * USAGE:
+ * - Add smooth transitions to elements
+ * - Essential for interactive elements
+ * - Respects reduced motion preferences
+ */
 .transition { transition: all var(--transition-fast); }
 .transition-none { transition: none; }
 
 /* ===== FOCUS UTILITIES ===== */
+/**
+ * Focus State Utilities
+ * 
+ * Provides utilities for controlling focus indicator appearance.
+ * Essential for accessibility and keyboard navigation.
+ * 
+ * VALUES:
+ * - .focus\:outline-none: Remove default focus outline
+ * - .focus\:ring: Add custom focus ring
+ * 
+ * USAGE:
+ * - Customize focus indicators
+ * - Essential for accessibility
+ * - Works with all interactive elements
+ */
 .focus\:outline-none:focus { outline: none; }
 .focus\:ring:focus { box-shadow: 0 0 0 3px var(--color-primary-light); }
 
 /* ===== HOVER UTILITIES ===== */
+/**
+ * Hover State Utilities
+ * 
+ * Provides utilities for controlling hover state transformations.
+ * Essential for interactive feedback and user experience.
+ * 
+ * VALUES:
+ * - .hover\:scale-105: Slight scale increase on hover
+ * - .hover\:scale-110: Larger scale increase on hover
+ * 
+ * USAGE:
+ * - Add hover effects to elements
+ * - Provide visual feedback
+ * - Works with transitions
+ */
 .hover\:scale-105:hover { transform: scale(1.05); }
 .hover\:scale-110:hover { transform: scale(1.1); }
 
 /* ===== RESPONSIVE UTILITIES ===== */
+/**
+ * Responsive Design Utilities
+ * 
+ * Provides utilities that adapt to different screen sizes and device capabilities.
+ * Follows mobile-first responsive design principles with progressive enhancement.
+ * 
+ * BREAKPOINTS:
+ * - xs: Extra small screens (≤480px) - Mobile phones
+ * - sm: Small screens (481px-768px) - Large phones/small tablets
+ * - md: Medium screens (769px-1024px) - Tablets
+ * - lg: Large screens (≥1025px) - Desktop
+ * 
+ * DEVICE CAPABILITIES:
+ * - touch: Touch devices (no hover capability)
+ * - landscape: Landscape orientation with limited height
+ * - contrast: High contrast mode
+ * - motion: Reduced motion preferences
+ * - print: Print media
+ * 
+ * NAMING CONVENTION:
+ * - {breakpoint}:{utility} - Apply utility at specific breakpoint
+ * - {capability}:{utility} - Apply utility based on device capability
+ * 
+ * USAGE:
+ * - Start with mobile-first base styles
+ * - Use responsive prefixes for larger screens
+ * - Test across different devices and orientations
+ * - Consider accessibility and user preferences
+ */
 
 /* Responsive display utilities */
 @media (max-width: 480px) {
@@ -271,6 +747,18 @@
 }
 
 /* Touch device utilities */
+/**
+ * Touch Device Utilities
+ * 
+ * Provides utilities optimized for touch devices without hover capability.
+ * Focuses on touch-friendly interactions and larger touch targets.
+ * 
+ * FEATURES:
+ * - Larger touch targets for better accessibility
+ * - Simplified interactions without hover states
+ * - Touch-optimized spacing and sizing
+ * - Improved tap targets for mobile users
+ */
 @media (hover: none) and (pointer: coarse) {
   .touch\:hidden { display: none; }
   .touch\:block { display: block; }
@@ -286,6 +774,18 @@
 }
 
 /* Landscape orientation utilities */
+/**
+ * Landscape Orientation Utilities
+ * 
+ * Provides utilities optimized for landscape orientation with limited height.
+ * Focuses on compact layouts and efficient use of horizontal space.
+ * 
+ * FEATURES:
+ * - Compact spacing for limited vertical space
+ * - Optimized for horizontal layouts
+ * - Efficient use of available width
+ * - Reduced vertical spacing for better fit
+ */
 @media (orientation: landscape) and (max-height: 600px) {
   .landscape\:hidden { display: none; }
   .landscape\:block { display: block; }
@@ -301,12 +801,36 @@
 }
 
 /* High contrast mode utilities */
+/**
+ * High Contrast Mode Utilities
+ * 
+ * Provides utilities for users with high contrast mode enabled.
+ * Enhances visibility and accessibility for users with visual impairments.
+ * 
+ * FEATURES:
+ * - Thicker borders for better definition
+ * - Enhanced contrast for improved visibility
+ * - Respects user's accessibility preferences
+ * - Maintains functionality with visual enhancements
+ */
 @media (prefers-contrast: high) {
   .contrast\:border-2 { border-width: 2px; }
   .contrast\:border-3 { border-width: 3px; }
 }
 
 /* Reduced motion utilities */
+/**
+ * Reduced Motion Utilities
+ * 
+ * Provides utilities for users who prefer reduced motion.
+ * Respects accessibility preferences for users with motion sensitivity.
+ * 
+ * FEATURES:
+ * - Disables transitions and animations
+ * - Removes motion-based effects
+ * - Respects user's motion preferences
+ * - Maintains functionality without motion
+ */
 @media (prefers-reduced-motion: reduce) {
   .motion\:no-transition { transition: none; }
   .motion\:no-transform { transform: none; }
@@ -314,6 +838,18 @@
 }
 
 /* Print utilities */
+/**
+ * Print Media Utilities
+ * 
+ * Provides utilities optimized for print media.
+ * Ensures proper printing of extension content with appropriate styling.
+ * 
+ * FEATURES:
+ * - Hides unnecessary elements for printing
+ * - Optimizes layout for paper output
+ * - Ensures text readability
+ * - Maintains content structure for print
+ */
 @media print {
   .print\:hidden { display: none !important; }
   .print\:block { display: block !important; }
