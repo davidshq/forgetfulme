@@ -260,18 +260,18 @@ class UIMessages {
 
     // Fallback to manual creation
     const confirmEl = document.createElement('div');
-    confirmEl.className = 'ui-confirm';
+    confirmEl.className = 'confirm-dialog';
 
     const messageEl = document.createElement('div');
-    messageEl.className = 'ui-confirm-message';
+    messageEl.className = 'confirm-message';
     messageEl.textContent = message;
 
     const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'ui-confirm-buttons';
+    buttonContainer.className = 'confirm-buttons';
 
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = options.confirmText || 'Confirm';
-    confirmBtn.className = 'ui-confirm-btn ui-confirm-btn-primary';
+    confirmBtn.className = 'btn btn-primary';
     confirmBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
         confirmEl.parentNode.removeChild(confirmEl);
@@ -281,7 +281,7 @@ class UIMessages {
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = options.cancelText || 'Cancel';
-    cancelBtn.className = 'ui-confirm-btn ui-confirm-btn-secondary';
+    cancelBtn.className = 'btn btn-secondary';
     cancelBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
         confirmEl.parentNode.removeChild(confirmEl);

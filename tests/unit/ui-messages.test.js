@@ -400,11 +400,11 @@ describe('UIMessages', () => {
       );
 
       expect(confirmEl.tagName).toBe('DIV');
-      expect(confirmEl.className).toContain('ui-confirm');
-      expect(confirmEl.querySelector('.ui-confirm-message')).toBeTruthy();
-      expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe('Are you sure?');
-      expect(confirmEl.querySelector('.ui-confirm-btn-primary')).toBeTruthy();
-      expect(confirmEl.querySelector('.ui-confirm-btn-secondary')).toBeTruthy();
+      expect(confirmEl.className).toContain('confirm-dialog');
+      expect(confirmEl.querySelector('.confirm-message')).toBeTruthy();
+      expect(confirmEl.querySelector('.confirm-message').textContent).toBe('Are you sure?');
+          expect(confirmEl.querySelector('.btn-primary')).toBeTruthy();
+    expect(confirmEl.querySelector('.btn-secondary')).toBeTruthy();
     });
 
     test('should call confirm function when confirm button is clicked', () => {
@@ -419,7 +419,7 @@ describe('UIMessages', () => {
         container
       );
 
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
+      const confirmBtn = confirmEl.querySelector('.btn-primary');
       confirmBtn.click();
 
       expect(mockConfirm).toHaveBeenCalled();
@@ -438,7 +438,7 @@ describe('UIMessages', () => {
         container
       );
 
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
+      const cancelBtn = confirmEl.querySelector('.btn-secondary');
       cancelBtn.click();
 
       expect(mockCancel).toHaveBeenCalled();
@@ -450,8 +450,8 @@ describe('UIMessages', () => {
 
       const confirmEl = UIMessages.confirm('Are you sure?', null, null, container);
 
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
+      const confirmBtn = confirmEl.querySelector('.btn-primary');
+      const cancelBtn = confirmEl.querySelector('.btn-secondary');
 
       // Should not throw errors
       expect(() => confirmBtn.click()).not.toThrow();
@@ -472,8 +472,8 @@ describe('UIMessages', () => {
         }
       );
 
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
+      const confirmBtn = confirmEl.querySelector('.btn-primary');
+      const cancelBtn = confirmEl.querySelector('.btn-secondary');
 
       expect(confirmBtn.textContent).toBe('Yes');
       expect(cancelBtn.textContent).toBe('No');

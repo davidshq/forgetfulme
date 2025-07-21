@@ -375,6 +375,7 @@ class ForgetfulMePopup {
     const statusSelect = document.createElement('select');
     statusSelect.id = 'read-status';
     statusSelect.name = 'read-status';
+    statusSelect.className = 'form-control';
     statusSelect.setAttribute('aria-describedby', 'status-help');
     statusGroup.appendChild(statusSelect);
 
@@ -413,6 +414,7 @@ class ForgetfulMePopup {
     tagsInput.type = 'text';
     tagsInput.id = 'tags';
     tagsInput.name = 'tags';
+    tagsInput.className = 'form-control';
     tagsInput.placeholder = 'research, tutorial, important';
     tagsInput.setAttribute('aria-describedby', 'tags-help');
     tagsGroup.appendChild(tagsInput);
@@ -427,7 +429,7 @@ class ForgetfulMePopup {
     // Submit button
     const submitBtn = document.createElement('button');
     submitBtn.type = 'submit';
-    submitBtn.className = 'primary-btn';
+    submitBtn.className = 'btn btn-primary';
     submitBtn.textContent = 'Mark as Read';
     submitBtn.setAttribute('aria-label', 'Mark current page as read with selected status and tags');
 

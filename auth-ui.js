@@ -353,7 +353,7 @@ class AuthUI {
         </div>
         
         <div class="profile-actions">
-          <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
+          <button id="signOutBtn" class="btn btn-secondary">Sign Out</button>
         </div>
       </div>
     `;

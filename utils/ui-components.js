@@ -345,13 +345,17 @@ class UIComponents {
    * @param {string} text - Button text
    * @param {Function} onClick - Click handler
    * @param {string} className - Additional CSS classes
-   * @param {Object} options - Additional options
+   * @param {Object} options - Button options
    * @returns {HTMLButtonElement}
    */
   static createButton(text, onClick, className = '', options = {}) {
     const button = document.createElement('button');
     button.textContent = text;
-    button.className = `btn ${className}`.trim();
+    
+    // Use shared button classes
+    const baseClass = 'btn';
+    const variantClass = options.variant ? `btn-${options.variant}` : 'btn-primary';
+    button.className = `${baseClass} ${variantClass} ${className}`.trim();
 
     if (onClick) {
       button.addEventListener('click', onClick);
@@ -376,7 +380,7 @@ class UIComponents {
    */
   static createFormField(type, id, label, options = {}) {
     const formGroup = document.createElement('div');
-    formGroup.className = 'ui-form-group';
+    formGroup.className = 'form-group';
 
     // Create label
     const labelEl = document.createElement('label');
@@ -434,7 +438,7 @@ class UIComponents {
   static createForm(id, onSubmit, fields = [], options = {}) {
     const form = document.createElement('form');
     form.id = id;
-    form.className = `ui-form ${options.className || ''}`.trim();
+    form.className = `form ${options.className || ''}`.trim();
 
     if (onSubmit) {
       form.addEventListener('submit', e => {
@@ -454,22 +458,11 @@ class UIComponents {
       form.appendChild(field);
     });
 
-    // Add submit button if specified
-    if (options.submitText) {
-      const submitBtn = this.createButton(
-        options.submitText,
-        null,
-        'btn-primary',
-        { type: 'submit' }
-      );
-      form.appendChild(submitBtn);
-    }
-
     return form;
   }
 
   /**
-   * Create a container with header
+   * Create a container with title and subtitle
    * @param {string} title - Container title
    * @param {string} subtitle - Container subtitle
    * @param {string} className - Additional CSS classes
@@ -477,11 +470,11 @@ class UIComponents {
    */
   static createContainer(title, subtitle = '', className = '') {
     const container = document.createElement('div');
-    container.className = `ui-container ${className}`.trim();
+    container.className = `container ${className}`.trim();
 
     if (title) {
-      const header = document.createElement('div');
-      header.className = 'ui-container-header';
+      const header = document.createElement('header');
+      header.className = 'container-header';
 
       const titleEl = document.createElement('h2');
       titleEl.textContent = title;
@@ -520,18 +513,16 @@ class UIComponents {
    */
   static createListItem(data, options = {}) {
     const item = document.createElement('div');
-    item.className = `list-item ${options.className || ''}`.trim();
+    item.className = `item ${options.className || ''}`.trim();
 
-    // Add title if provided
-    if (data.title) {
-      const title = document.createElement('div');
-      title.className = 'item-title';
-      title.textContent = data.title;
-      if (data.titleTooltip) title.title = data.titleTooltip;
-      item.appendChild(title);
-    }
+    const content = document.createElement('div');
+    content.className = 'item-content';
 
-    // Add meta information
+    const title = document.createElement('div');
+    title.className = 'item-title';
+    title.textContent = data.title || data.name || '';
+    content.appendChild(title);
+
     if (data.meta) {
       const meta = document.createElement('div');
       meta.className = 'item-meta';
@@ -539,7 +530,7 @@ class UIComponents {
       if (data.meta.status) {
         const status = document.createElement('span');
         status.className = `status status-${data.meta.status}`;
-        status.textContent = data.meta.statusText || data.meta.status;
+        status.textContent = data.meta.status;
         meta.appendChild(status);
       }
 
@@ -549,17 +540,10 @@ class UIComponents {
         meta.appendChild(time);
       }
 
-      if (data.meta.tags && data.meta.tags.length > 0) {
-        const tags = document.createElement('span');
-        tags.textContent = ` • ${data.meta.tags.join(', ')}`;
-        meta.appendChild(tags);
-      }
-
-      item.appendChild(meta);
+      content.appendChild(meta);
     }
 
-    // Add actions if provided
-    if (data.actions) {
+    if (data.actions && data.actions.length > 0) {
       const actions = document.createElement('div');
       actions.className = 'item-actions';
 
@@ -572,9 +556,10 @@ class UIComponents {
         actions.appendChild(actionBtn);
       });
 
-      item.appendChild(actions);
+      content.appendChild(actions);
     }
 
+    item.appendChild(content);
     return item;
   }
 
@@ -610,7 +595,7 @@ class UIComponents {
     items.forEach(item => {
       const gridItem = document.createElement('div');
       gridItem.className = `grid-item ${item.className || ''}`.trim();
-      gridItem.textContent = item.text;
+      gridItem.textContent = item.text || '';
       grid.appendChild(gridItem);
     });
 
@@ -619,7 +604,7 @@ class UIComponents {
 
   /**
    * Create a confirmation dialog
-   * @param {string} message - Confirmation message
+   * @param {string} message - Dialog message
    * @param {Function} onConfirm - Confirm handler
    * @param {Function} onCancel - Cancel handler
    * @param {Object} options - Dialog options
@@ -642,17 +627,16 @@ class UIComponents {
       onConfirm,
       'btn-primary'
     );
+    buttonContainer.appendChild(confirmBtn);
 
     const cancelBtn = this.createButton(
       options.cancelText || 'Cancel',
       onCancel,
       'btn-secondary'
     );
-
-    buttonContainer.appendChild(confirmBtn);
     buttonContainer.appendChild(cancelBtn);
-    dialog.appendChild(buttonContainer);
 
+    dialog.appendChild(buttonContainer);
     return dialog;
   }
 
@@ -664,15 +648,15 @@ class UIComponents {
    */
   static createLoadingSpinner(text = 'Loading...', className = '') {
     const spinner = document.createElement('div');
-    spinner.className = `loading-spinner ${className}`.trim();
+    spinner.className = `loading ${className}`.trim();
 
     const spinnerEl = document.createElement('div');
-    spinnerEl.className = 'spinner';
+    spinnerEl.className = 'loading-spinner';
     spinner.appendChild(spinnerEl);
 
     if (text) {
       const textEl = document.createElement('div');
-      textEl.className = 'spinner-text';
+      textEl.className = 'loading-text';
       textEl.textContent = text;
       spinner.appendChild(textEl);
     }
@@ -690,12 +674,12 @@ class UIComponents {
   static createStatusIndicator(status, text, className = '') {
     const indicator = document.createElement('div');
     indicator.className =
-      `status-indicator status-${status} ${className}`.trim();
+      `status status-${status} ${className}`.trim();
 
     const icon = document.createElement('span');
     icon.className = 'status-icon';
-
-    // Set appropriate icon based on status
+    
+    // Add appropriate icon based on status
     switch (status) {
       case 'success':
         icon.textContent = '✓';
@@ -712,13 +696,15 @@ class UIComponents {
       default:
         icon.textContent = '•';
     }
-
-    const textEl = document.createElement('span');
-    textEl.className = 'status-text';
-    textEl.textContent = text;
-
+    
     indicator.appendChild(icon);
-    indicator.appendChild(textEl);
+
+    if (text) {
+      const textEl = document.createElement('span');
+      textEl.className = 'status-text';
+      textEl.textContent = text;
+      indicator.appendChild(textEl);
+    }
 
     return indicator;
   }

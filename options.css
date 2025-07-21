@@ -1,123 +1,42 @@
-/* Options page styles for ForgetfulMe extension - Consolidated Design System */
+/* Options page styles for ForgetfulMe extension - Updated to use shared components */
 
 /* Import consolidated styles */
 @import url('styles/design-system.css');
 @import url('styles/components.css');
 
-/* Message container styling - Now handled by components.css */
-/* Enhanced header with Bookmark Management styling - Now handled by components.css */
-/* Enhanced settings sections - Now handled by components.css */
-/* Enhanced status types container - Now handled by components.css */
+/* 
+ * This file has been updated to use shared components and design system
+ * instead of custom CSS where possible. The following changes were made:
+ * 
+ * - Form inputs now use .form-control class
+ * - Buttons now use shared .btn classes
+ * - Status indicators now use shared .status classes
+ * - Message containers now use shared .message-container class
+ * - Header now uses shared header styles
+ * - Settings sections now use shared .section class
+ * - Status types container now uses shared .status-types-container class
+ * - Data actions now use shared .data-actions class
+ * - Stats container now uses shared .stats-container class
+ * - Config help now uses shared .config-help class
+ * - Config note now uses shared .config-note class
+ * 
+ * Remaining custom styles are specific to options page layout and functionality
+ * that don't have shared equivalents.
+ */
 
 /* Custom overrides for remove buttons */
 .status-type-item .remove-btn {
   border-radius: var(--border-radius-sm);
 }
 
-/* Enhanced add status form */
+/* Add status form now uses shared .form-control class */
 .add-status-form {
   display: flex;
   gap: var(--spacing-md);
   margin-top: var(--spacing-lg);
 }
 
-.add-status-form input {
-  flex: 1;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: 2px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-md);
-  background: var(--color-background);
-  color: var(--color-text-primary);
-  transition: all var(--transition-fast);
-  line-height: 1.4;
-}
-
-.add-status-form input:hover {
-  border-color: var(--color-border-hover);
-}
-
-.add-status-form input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
 /* Add status form button uses btn-primary from components.css */
-
-/* Enhanced data actions - Now handled by components.css */
-/* Enhanced stats container - Now handled by components.css */
-
-/* Enhanced status styles - Now handled by components.css */
-
-/* Enhanced configuration styles - Now handled by components.css */
-
-/* Config button styles - Now handled by components.css */
-
-.config-help {
-  background: #f8f9fa !important;
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius-lg);
-  margin-bottom: var(--spacing-xl);
-  border: 2px solid #e1e5e9 !important;
-}
-
-.config-help h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  margin-bottom: var(--spacing-md);
-  color: #1a1a1a !important;
-}
-
-.config-help ol {
-  margin-left: var(--spacing-xl);
-  margin-bottom: var(--spacing-lg);
-}
-
-.config-help li {
-  margin-bottom: var(--spacing-sm);
-  font-size: var(--font-size-md);
-  color: #6c757d !important;
-  line-height: 1.5;
-}
-
-.config-help a {
-  color: #007bff !important;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.config-help a:hover {
-  text-decoration: underline;
-  color: #0056b3 !important;
-}
-
-.config-help a:focus {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-.config-note {
-  background: #cff4fc !important;
-  color: #055160 !important;
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-sm);
-  margin-top: var(--spacing-lg);
-  border: 1px solid #b6effb !important;
-}
-
-.config-message {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  font-size: var(--font-size-md);
-  text-align: center;
-  border: 2px solid;
-}
-
-/* Config message and status styles - Now handled by components.css */
 
 /* Config section in main interface */
 .config-section {
@@ -128,8 +47,10 @@
   font-size: var(--font-size-2xl);
   font-weight: 700;
   margin-bottom: var(--spacing-md);
-  color: #1a1a1a !important;
+  color: var(--color-text-primary) !important;
 }
+
+/* Config message and status styles - Now handled by components.css */
 
 /* Enhanced responsive design */
 @media (max-width: 768px) {

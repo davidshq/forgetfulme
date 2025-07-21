@@ -265,14 +265,12 @@ class BookmarkManagementPage {
     backBtn.addEventListener('click', () => window.close());
     
     const backIcon = document.createElement('span');
-    backIcon.className = 'icon';
     backIcon.textContent = '←';
     backIcon.style.fontSize = '16px';
     backIcon.style.fontWeight = 'bold';
     backBtn.appendChild(backIcon);
     
     const backText = document.createElement('span');
-    backText.className = 'text';
     backText.textContent = 'Back to Extension';
     backBtn.appendChild(backText);
     
@@ -318,6 +316,7 @@ class BookmarkManagementPage {
     searchInput.type = 'text';
     searchInput.id = 'search-query';
     searchInput.name = 'search-query';
+    searchInput.className = 'form-control';
     searchInput.placeholder = 'Search by title, URL, or tags...';
     searchInput.setAttribute('aria-describedby', 'search-help');
     searchGroup.appendChild(searchInput);
@@ -341,6 +340,7 @@ class BookmarkManagementPage {
     const statusSelect = document.createElement('select');
     statusSelect.id = 'status-filter';
     statusSelect.name = 'status-filter';
+    statusSelect.className = 'form-control';
     statusSelect.setAttribute('aria-describedby', 'status-help');
     statusGroup.appendChild(statusSelect);
 
@@ -369,7 +369,7 @@ class BookmarkManagementPage {
     // Search button
     const searchBtn = document.createElement('button');
     searchBtn.type = 'submit';
-    searchBtn.className = 'search-btn';
+    searchBtn.className = 'btn btn-primary';
     searchBtn.textContent = 'Search';
     searchBtn.setAttribute('aria-label', 'Search bookmarks with current filters');
 
@@ -571,7 +571,7 @@ class BookmarkManagementPage {
 
     // Add status badge
     const statusSpan = document.createElement('span');
-    statusSpan.className = `bookmark-status status-${bookmark.status}`;
+    statusSpan.className = `status ${bookmark.status}`;
     statusSpan.textContent = this.formatStatus(bookmark.status);
     statusSpan.setAttribute('aria-label', `Status: ${this.formatStatus(bookmark.status)}`);
     metaDiv.appendChild(statusSpan);

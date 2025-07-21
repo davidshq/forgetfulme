@@ -623,7 +623,7 @@ describe('UIComponents', () => {
         const item = UIComponents.createListItem(data);
 
         expect(item.tagName).toBe('DIV');
-        expect(item.className).toContain('list-item');
+        expect(item.className).toContain('item');
         expect(item.querySelector('.item-title')).toBeTruthy();
         expect(item.querySelector('.item-title').textContent).toBe('Test Item');
       });
@@ -706,10 +706,10 @@ describe('UIComponents', () => {
         const spinner = UIComponents.createLoadingSpinner('Loading...');
 
         expect(spinner.tagName).toBe('DIV');
-        expect(spinner.className).toContain('loading-spinner');
-        expect(spinner.querySelector('.spinner')).toBeTruthy();
-        expect(spinner.querySelector('.spinner-text')).toBeTruthy();
-        expect(spinner.querySelector('.spinner-text').textContent).toBe('Loading...');
+        expect(spinner.className).toContain('loading');
+        expect(spinner.querySelector('.loading-spinner')).toBeTruthy();
+        expect(spinner.querySelector('.loading-text')).toBeTruthy();
+        expect(spinner.querySelector('.loading-text').textContent).toBe('Loading...');
       });
 
       test('should create loading spinner with custom class', () => {
@@ -724,7 +724,7 @@ describe('UIComponents', () => {
         const indicator = UIComponents.createStatusIndicator('success', 'Success!');
 
         expect(indicator.tagName).toBe('DIV');
-        expect(indicator.className).toContain('status-indicator');
+        expect(indicator.className).toContain('status');
         expect(indicator.className).toContain('status-success');
         expect(indicator.querySelector('.status-icon')).toBeTruthy();
       });

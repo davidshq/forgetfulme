@@ -298,9 +298,10 @@ class ForgetfulMeOptions {
     const addStatusBtn = UIComponents.createButton(
       'Add',
       () => this.addStatusType(),
-              'btn-primary',
+      '',
       {
         id: 'add-status-btn',
+        variant: 'primary'
       }
     );
 
@@ -323,9 +324,10 @@ class ForgetfulMeOptions {
     const exportBtn = UIComponents.createButton(
       'Export Data',
       () => this.exportData(),
-      'btn-secondary',
+      '',
       {
         id: 'export-data-btn',
+        variant: 'secondary'
       }
     );
     const importBtn = UIComponents.createButton(
@@ -336,17 +338,19 @@ class ForgetfulMeOptions {
           importFileEl.click();
         }
       },
-      'btn-secondary',
+      '',
       {
         id: 'import-data-btn',
+        variant: 'secondary'
       }
     );
     const clearBtn = UIComponents.createButton(
       'Clear All Data',
       () => this.clearData(),
-      'btn-danger',
+      '',
       {
         id: 'clear-data-btn',
+        variant: 'danger'
       }
     );
 
