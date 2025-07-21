@@ -140,7 +140,7 @@ export const createOptionsTestInstance = async (customMocks = {}) => {
   setupModuleMocks(mocks);
   
   // Setup DOM elements for options page
-  const mockForm = createMockElement('form', { id: 'config-form' });
+  const mockForm = createMockElement('form', { id: 'form' });
   const mockUrlInput = createMockElement('input', { id: 'supabase-url' });
   const mockKeyInput = createMockElement('input', { id: 'supabase-key' });
   const mockSaveBtn = createMockElement('button', { id: 'save-config' });
@@ -149,7 +149,7 @@ export const createOptionsTestInstance = async (customMocks = {}) => {
   // Setup DOM element mapping for options
   mocks.uiComponents.DOM.getElement.mockImplementation((id) => {
     const elementMap = {
-      'config-form': mockForm,
+      'form': mockForm,
       'supabase-url': mockUrlInput,
       'supabase-key': mockKeyInput,
       'save-config': mockSaveBtn,

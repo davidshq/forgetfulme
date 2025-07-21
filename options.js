@@ -251,7 +251,7 @@ class ForgetfulMeOptions {
       'config-section'
     );
     const configStatusContainer = document.createElement('div');
-    configStatusContainer.id = 'config-status-container';
+    configStatusContainer.id = 'status-container';
     configSection.appendChild(configStatusContainer);
     mainContainer.appendChild(configSection);
 

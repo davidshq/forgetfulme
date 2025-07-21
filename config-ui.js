@@ -70,7 +70,7 @@ class ConfigUI {
       ],
       {
         submitText: 'Save Configuration',
-        className: 'config-form',
+        className: 'form',
       }
     );
 
@@ -99,7 +99,7 @@ class ConfigUI {
     // Create message container
     const messageContainer = document.createElement('div');
     messageContainer.id = 'configMessage';
-    messageContainer.className = 'config-message';
+    messageContainer.className = 'message';
     containerEl.appendChild(messageContainer);
 
     container.innerHTML = '';
@@ -203,7 +203,7 @@ class ConfigUI {
 
   showConfigStatus(container) {
     const statusHTML = `
-      <div class="config-status">
+      <div class="status">
         <h3>Configuration Status</h3>
         <div class="status-item">
           <span class="status-label">Supabase URL:</span>
