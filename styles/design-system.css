@@ -111,11 +111,39 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+  
+  /* Responsive Breakpoints - Standardized */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* Touch Targets - Improved for mobile */
+  --touch-target-min: 44px;
+  --touch-target-ideal: 48px;
+  --touch-target-large: 56px;
+  
+  /* Container Max Widths */
+  --container-xs: 100%;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
 }
 
 /* ===== BASE STYLES ===== */
 * {
   box-sizing: border-box;
+}
+
+html {
+  /* Prevent font size scaling on mobile */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -126,6 +154,69 @@ body {
   background: var(--color-background-secondary);
   margin: 0;
   padding: 0;
+  /* Improve text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY - IMPROVED ===== */
+/* Mobile-first typography scaling with better breakpoints */
+@media (max-width: 480px) {
+  :root {
+    --font-size-xs: 10px;
+    --font-size-sm: 11px;
+    --font-size-md: 13px;
+    --font-size-lg: 15px;
+    --font-size-xl: 17px;
+    --font-size-2xl: 19px;
+    --font-size-3xl: 22px;
+    --font-size-4xl: 28px;
+    /* Reduce spacing for mobile */
+    --spacing-lg: 12px;
+    --spacing-xl: 16px;
+    --spacing-2xl: 20px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 640px) {
+  :root {
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 30px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  :root {
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 30px;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 32px;
+  }
 }
 
 /* ===== DARK MODE SUPPORT ===== */
@@ -175,5 +266,61 @@ body {
   :root {
     --transition-fast: none;
     --transition-normal: none;
+  }
+}
+
+/* ===== VIEWPORT HEIGHT SUPPORT - IMPROVED ===== */
+/* Handle mobile browser address bar and landscape mode */
+@media (max-height: 600px) {
+  :root {
+    --spacing-xl: 16px;
+    --spacing-2xl: 20px;
+    --spacing-3xl: 24px;
+  }
+}
+
+/* ===== ORIENTATION SUPPORT - IMPROVED ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --spacing-lg: 12px;
+    --spacing-xl: 16px;
+    --spacing-2xl: 20px;
+  }
+}
+
+/* ===== HIGH DPI DISPLAY SUPPORT ===== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure crisp borders and shadows on high DPI displays */
+  :root {
+    --shadow-sm: 0 0.5px 1.5px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 1px 4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 2px 6px rgba(0, 123, 255, 0.15);
+  }
+}
+
+/* ===== NEW: IMPROVED TOUCH SUPPORT ===== */
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    /* Increase touch targets for mobile */
+    --touch-target-min: 48px;
+    --touch-target-ideal: 56px;
+    --touch-target-large: 64px;
+    /* Reduce spacing for better mobile layout */
+    --spacing-md: 10px;
+    --spacing-lg: 14px;
+    --spacing-xl: 18px;
+  }
+}
+
+/* ===== NEW: IMPROVED PRINT SUPPORT ===== */
+@media print {
+  :root {
+    --color-background: #ffffff;
+    --color-text-primary: #000000;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
   }
 } 

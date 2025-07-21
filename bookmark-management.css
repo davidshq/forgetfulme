@@ -51,12 +51,14 @@ body {
 
 /* Header actions buttons now use shared .btn classes */
 
-/* Enhanced main content layout */
+/* Enhanced main content layout - Improved responsive */
 .main-content {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: var(--spacing-2xl);
   align-items: start;
+  /* Improve mobile layout */
+  min-height: 100vh;
 }
 
 .sidebar {
@@ -162,23 +164,17 @@ body {
   flex-wrap: wrap;
 }
 
-/* Bookmark actions buttons now use shared .btn classes */
-
-/* Status colors now use shared .status classes from components.css */
-
-/* Form styles now use shared .form-group and .form-control classes */
-
-/* Search button now uses shared .btn .btn-primary classes */
-
-/* Empty states now use shared .empty-state class from components.css */
-
-/* Loading states now use shared .loading-state class from components.css */
-
 /* Responsive design */
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 280px 1fr;
     gap: var(--spacing-xl);
+  }
+  
+  .sidebar {
+    /* Improve tablet layout */
+    position: static;
+    margin-bottom: var(--spacing-xl);
   }
 }
 
@@ -190,6 +186,8 @@ body {
   
   body {
     padding: var(--spacing-lg);
+    /* Improve mobile experience */
+    font-size: var(--font-size-sm);
   }
   
   header {
@@ -206,10 +204,26 @@ body {
   .sidebar {
     position: static;
     order: 2;
+    /* Better mobile sidebar */
+    padding: var(--spacing-lg);
   }
   
   .content-area {
     order: 1;
+    /* Improve mobile content area */
+    min-height: auto;
+  }
+  
+  /* Improve mobile touch targets */
+  .btn {
+    min-height: var(--touch-target-ideal);
+    font-size: var(--font-size-md);
+  }
+  
+  /* Better mobile form controls */
+  .form-control {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: var(--spacing-md);
   }
 }
 

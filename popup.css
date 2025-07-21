@@ -1,37 +1,28 @@
-/* Popup styles for ForgetfulMe extension - Updated to use shared components */
+/* Popup styles for ForgetfulMe extension */
 
-/* Import consolidated styles */
+/* Import styles */
 @import url('styles/design-system.css');
 @import url('styles/components.css');
 
-/* 
- * This file has been updated to use shared components and design system
- * instead of custom CSS where possible. The following changes were made:
- * 
- * - Submit button now uses .btn .btn-primary classes
- * - Form inputs now use .form-control class
- * - Header actions buttons now use .btn classes
- * - Search sections now use shared .search-section class
- * - Setup sections now use shared .setup-container and .setup-section classes
- * - Auth sections now use shared .auth-container class
- * - Bookmark info now uses shared .bookmark-info class
- * - Recent sections now use shared .recent-section class
- * - Bookmark items now use shared .bookmark-item classes
- * - Loading states now use shared .loading-state class
- * 
- * Remaining custom styles are specific to popup layout and functionality
- * that don't have shared equivalents.
- */
-
+/* Responsive popup body */
 body {
-  width: 400px;
-  min-height: 500px;
+  width: 100%;
+  min-width: 320px;
+  max-width: 500px;
+  min-height: 400px;
+  max-height: 80vh;
   margin: 0;
   padding: var(--spacing-lg);
   background: var(--color-background-secondary);
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Improve mobile experience */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent horizontal scroll */
+  box-sizing: border-box;
 }
 
-/* Enhanced edit interface */
+/* edit interface */
 #editBookmarkForm {
   background: var(--color-background);
   border-radius: var(--border-radius-lg);
@@ -40,7 +31,7 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* Enhanced bookmark management interface */
+/* bookmark management interface */
 .manage-btn {
   margin-left: var(--spacing-sm);
 }
@@ -55,7 +46,7 @@ body {
   min-width: 120px;
 }
 
-/* Enhanced search and filter */
+/* search and filter */
 .search-section .form-group {
   margin-bottom: var(--spacing-md);
 }
@@ -68,7 +59,7 @@ body {
   display: block;
 }
 
-/* Enhanced bookmark list styling */
+/* bookmark list styling */
 .bookmarks-section {
   margin-bottom: var(--spacing-lg);
 }
@@ -92,6 +83,104 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ===== RESPONSIVE POPUP DESIGN ===== */
+
+/* Small popup (320px - 400px) */
+@media (max-width: 400px) {
+  body {
+    min-width: 320px;
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+  
+  #editBookmarkForm {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-sm);
+  }
+  
+  .search-section label {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .bookmark-item .list-item-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+  }
+  
+  .bookmark-item .list-item-meta span {
+    margin-right: 0;
+    line-height: 1.4;
+  }
+  
+  /* Improve button layout on mobile */
+  .btn {
+    min-height: var(--touch-target-ideal);
+    font-size: var(--font-size-md);
+  }
+  
+  /* Better form controls on mobile */
+  .form-control {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: var(--spacing-md);
+  }
+}
+
+/* Medium popup (401px - 500px) */
+@media (min-width: 401px) and (max-width: 500px) {
+  body {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Large popup (501px and up) */
+@media (min-width: 501px) {
+  body {
+    max-width: 600px;
+    padding: var(--spacing-xl);
+  }
+  
+  #editBookmarkForm {
+    padding: var(--spacing-2xl);
+  }
+}
+
+/* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    min-height: 450px;
+  }
+  
+  .bookmark-item .list-item-meta .status {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+  
+  .search-section label {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* ===== LANDSCAPE ORIENTATION SUPPORT ===== */
+@media (orientation: landscape) and (max-height: 500px) {
+  body {
+    min-height: 300px;
+    max-height: 70vh;
+    padding: var(--spacing-sm);
+  }
+  
+  #editBookmarkForm {
+    padding: var(--spacing-lg);
+  }
+  
+  .bookmarks-section {
+    margin-bottom: var(--spacing-md);
+  }
 }
 
 
