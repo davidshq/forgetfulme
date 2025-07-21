@@ -53,7 +53,7 @@ class AuthUI {
     // Create login form
     const loginForm = UIComponents.createForm(
       'loginForm',
-      (e, form) => this.handleLogin(document),
+      (e, form) => this.handleLogin(container),
       [
         {
           type: 'email',
@@ -111,7 +111,7 @@ class AuthUI {
     // Create signup form
     const signupForm = UIComponents.createForm(
       'signupForm',
-      (e, form) => this.handleSignup(document),
+      (e, form) => this.handleSignup(container),
       [
         {
           type: 'email',

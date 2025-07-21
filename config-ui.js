@@ -218,8 +218,8 @@ class ConfigUI {
           <span class="status-value" id="statusConnection">-</span>
         </div>
         
-        <button id="testConnectionBtn" class="config-btn secondary">Test Connection</button>
-        <button id="editConfigBtn" class="config-btn secondary">Edit Configuration</button>
+              <button id="testConnectionBtn" class="btn btn-secondary">Test Connection</button>
+      <button id="editConfigBtn" class="btn btn-secondary">Edit Configuration</button>
       </div>
     `;
 

@@ -137,9 +137,15 @@ describe('AuthUI', () => {
       clearAuthState: vi.fn()
     };
 
-    // Create mock container
+    // Create mock container with proper structure
     mockContainer = document.createElement('div');
     mockContainer.id = 'test-container';
+    
+    // Create the authMessage element that the implementation expects
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'authMessage';
+    messageContainer.className = 'auth-message';
+    mockContainer.appendChild(messageContainer);
 
     // Create AuthUI instance using the imported class
     authUI = new AuthUI(mockSupabaseConfig, mockOnAuthSuccess, mockAuthStateManager);
@@ -177,7 +183,7 @@ describe('AuthUI', () => {
       
       expect(UIMessages.error).toHaveBeenCalledWith(
         'Please fill in all fields',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
     });
 
@@ -196,7 +202,7 @@ describe('AuthUI', () => {
       
       await authUI.handleLogin(mockContainer);
       
-      expect(UIMessages.loading).toHaveBeenCalledWith('Signing in...', mockContainer);
+      expect(UIMessages.loading).toHaveBeenCalledWith('Signing in...', mockContainer.querySelector('#authMessage'));
     });
 
     it('should show success message and call onAuthSuccess on successful login', async () => {
@@ -205,7 +211,7 @@ describe('AuthUI', () => {
       
       await authUI.handleLogin(mockContainer);
       
-      expect(UIMessages.success).toHaveBeenCalledWith('Successfully signed in!', mockContainer);
+      expect(UIMessages.success).toHaveBeenCalledWith('Successfully signed in!', mockContainer.querySelector('#authMessage'));
       
       // Wait for setTimeout to execute
       await new Promise(resolve => setTimeout(resolve, 1100));
@@ -243,7 +249,7 @@ describe('AuthUI', () => {
       
       expect(UIMessages.error).toHaveBeenCalledWith(
         'Please fill in all fields',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
     });
 
@@ -260,7 +266,7 @@ describe('AuthUI', () => {
       
       expect(UIMessages.error).toHaveBeenCalledWith(
         'Passwords do not match',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
     });
 
@@ -277,7 +283,7 @@ describe('AuthUI', () => {
       
       expect(UIMessages.error).toHaveBeenCalledWith(
         'Password must be at least 6 characters',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
     });
 
@@ -296,7 +302,7 @@ describe('AuthUI', () => {
       
       await authUI.handleSignup(mockContainer);
       
-      expect(UIMessages.loading).toHaveBeenCalledWith('Creating account...', mockContainer);
+      expect(UIMessages.loading).toHaveBeenCalledWith('Creating account...', mockContainer.querySelector('#authMessage'));
     });
 
     it('should show success message and call onAuthSuccess on successful signup', async () => {
@@ -307,7 +313,7 @@ describe('AuthUI', () => {
       
       expect(UIMessages.success).toHaveBeenCalledWith(
         'Account created! Please check your email to verify your account.',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
       
       // The signup flow doesn't automatically call onAuthSuccess
@@ -335,7 +341,7 @@ describe('AuthUI', () => {
       // instead of calling ErrorHandler for the signin error
       expect(UIMessages.success).toHaveBeenCalledWith(
         'Account created! Please check your email to verify your account.',
-        mockContainer
+        mockContainer.querySelector('#authMessage')
       );
     });
   });

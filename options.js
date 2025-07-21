@@ -298,7 +298,7 @@ class ForgetfulMeOptions {
     const addStatusBtn = UIComponents.createButton(
       'Add',
       () => this.addStatusType(),
-      'ui-btn-primary',
+              'btn-primary',
       {
         id: 'add-status-btn',
       }
@@ -323,7 +323,7 @@ class ForgetfulMeOptions {
     const exportBtn = UIComponents.createButton(
       'Export Data',
       () => this.exportData(),
-      'ui-btn-secondary',
+      'btn-secondary',
       {
         id: 'export-data-btn',
       }
@@ -336,7 +336,7 @@ class ForgetfulMeOptions {
           importFileEl.click();
         }
       },
-      'ui-btn-secondary',
+      'btn-secondary',
       {
         id: 'import-data-btn',
       }
@@ -344,7 +344,7 @@ class ForgetfulMeOptions {
     const clearBtn = UIComponents.createButton(
       'Clear All Data',
       () => this.clearData(),
-      'ui-btn-danger',
+      'btn-danger',
       {
         id: 'clear-data-btn',
       }
@@ -372,7 +372,7 @@ class ForgetfulMeOptions {
     const bookmarkBtn = UIComponents.createButton(
       'Open Bookmark Management',
       () => this.openBookmarkManagement(),
-      'ui-btn-primary'
+      'btn-primary'
     );
     bookmarkSection.appendChild(bookmarkBtn);
     mainContainer.appendChild(bookmarkSection);

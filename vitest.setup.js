@@ -472,7 +472,7 @@ global.UIComponents = {
     }
     
     fieldElement.id = id;
-    fieldElement.className = 'ui-form-control';
+    fieldElement.className = 'form-control';
     fieldElement.required = options?.required || false;
     if (options?.placeholder) fieldElement.placeholder = options.placeholder;
     if (options?.value) fieldElement.value = options.value;
@@ -491,7 +491,7 @@ global.UIComponents = {
   createButton: vi.fn((text, onClick, options) => {
     const button = global.document.createElement('button');
     button.textContent = text;
-    button.className = options?.className || 'ui-btn';
+    button.className = options?.className || 'btn';
     button.type = 'button';
     if (onClick) {
       button.addEventListener('click', onClick);
@@ -551,13 +551,13 @@ global.UIComponents = {
       </div>
       <div class="ui-confirm-content">${message}</div>
       <div class="ui-confirm-actions">
-        <button class="ui-btn-primary">Confirm</button>
-        <button class="ui-btn-secondary">Cancel</button>
+            <button class="btn-primary">Confirm</button>
+    <button class="btn-secondary">Cancel</button>
       </div>
     `;
     
-    const confirmBtn = dialog.querySelector('.ui-btn-primary');
-    const cancelBtn = dialog.querySelector('.ui-btn-secondary');
+    const confirmBtn = dialog.querySelector('.btn-primary');
+    const cancelBtn = dialog.querySelector('.btn-secondary');
     
     if (onConfirm) confirmBtn.addEventListener('click', onConfirm);
     if (onCancel) cancelBtn.addEventListener('click', onCancel);

@@ -172,13 +172,13 @@ class ExtensionHelper {
   async waitForMessage(messageType = 'any') {
     try {
       if (messageType === 'success') {
-        await this.page.waitForSelector('.ui-message.success', {
+        await this.page.waitForSelector('.message.success', {
           timeout: 5000,
         });
       } else if (messageType === 'error') {
-        await this.page.waitForSelector('.ui-message.error', { timeout: 5000 });
+        await this.page.waitForSelector('.message.error', { timeout: 5000 });
       } else {
-        await this.page.waitForSelector('.ui-message', { timeout: 5000 });
+        await this.page.waitForSelector('.message', { timeout: 5000 });
       }
       return true;
     } catch {

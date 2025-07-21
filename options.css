@@ -1,325 +1,114 @@
-/* Options page styles for ForgetfulMe extension */
+/* Options page styles for ForgetfulMe extension - Consolidated Design System */
 
-/* Import shared styles */
-@import url('utils/shared-styles.css');
+/* Import consolidated styles */
+@import url('styles/design-system.css');
+@import url('styles/components.css');
 
-body {
-  background: var(--color-background-secondary);
-}
-
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--spacing-xl);
-}
-
-/* Message container styling */
-.message-container {
-  margin-bottom: var(--spacing-lg);
-  min-height: 20px;
-}
-
-.message-container:empty {
-  display: none;
-}
-
-header {
-  background: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-secondary) 100%);
-  color: var(--color-text-on-primary);
-  padding: 30px;
-  border-radius: var(--border-radius-lg);
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-header h1 {
-  font-size: var(--font-size-4xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-}
-
-header p {
-  font-size: var(--font-size-lg);
-  opacity: 0.9;
-}
-
-.settings-section {
-  background: var(--color-background);
-  border-radius: var(--border-radius-lg);
-  padding: var(--spacing-2xl);
-  margin-bottom: var(--spacing-xl);
-  box-shadow: var(--shadow-lg);
-}
-
-.settings-section h2 {
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-  color: var(--color-text-primary);
-}
-
-.description {
-  color: var(--color-text-muted);
-  margin-bottom: var(--spacing-xl);
-  font-size: var(--font-size-md);
-}
-
-.status-types-container {
-  margin-bottom: var(--spacing-xl);
-}
-
-.status-type-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-md);
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--spacing-sm);
-  border: 1px solid var(--color-border);
-}
-
-.status-type-item .status-name {
-  font-weight: 500;
-  color: var(--color-text-primary);
-}
+/* Message container styling - Now handled by components.css */
+/* Enhanced header with Bookmark Management styling - Now handled by components.css */
+/* Enhanced settings sections - Now handled by components.css */
+/* Enhanced status types container - Now handled by components.css */
 
 .status-type-item .remove-btn {
   background: var(--color-danger);
   color: var(--color-text-on-danger);
-  border: none;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: 3px;
+  border: 2px solid var(--color-danger);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
+  font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .status-type-item .remove-btn:hover {
   background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
+.status-type-item .remove-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-danger-light);
+}
+
+/* Enhanced add status form */
 .add-status-form {
   display: flex;
-  gap: 10px;
+  gap: var(--spacing-md);
   margin-top: var(--spacing-lg);
 }
 
 .add-status-form input {
   flex: 1;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
   font-size: var(--font-size-md);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.add-status-form input:hover {
+  border-color: var(--color-border-hover);
 }
 
 .add-status-form input:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .add-status-form button {
-  padding: 10px 16px;
-  background: var(--color-brand-primary);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: var(--color-primary);
   color: var(--color-text-on-primary);
-  border: none;
-  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius-md);
   font-size: var(--font-size-md);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
+  line-height: 1.4;
 }
 
 .add-status-form button:hover {
-  background: var(--color-brand-hover);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
-.data-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  padding: 10px 16px;
-  background: var(--color-secondary);
-  color: var(--color-text-on-secondary);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.action-btn:hover {
-  background: var(--color-secondary-hover);
-}
-
-.action-btn.danger {
-  background: var(--color-danger);
-}
-
-.action-btn.danger:hover {
-  background: var(--color-danger-hover);
-}
-
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.stat-item {
-  background: var(--color-background-secondary);
-  padding: var(--spacing-lg);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border);
-}
-
-.stat-label {
-  display: block;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xs);
-}
-
-.stat-value {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-/* Status styles - using shared status classes */
-.status-read {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
-
-.status-good-reference {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-.status-low-value {
-  background: var(--color-danger-bg);
-  color: var(--color-danger-text);
-}
-
-.status-revisit-later {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-}
-
-/* Configuration Styles */
-.config-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: var(--spacing-xl);
-}
-
-.config-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.config-header h2 {
-  font-size: var(--font-size-3xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-sm);
-  color: var(--color-text-primary);
-}
-
-.config-header p {
-  font-size: var(--font-size-md);
-  color: var(--color-text-muted);
-}
-
-.config-form {
-  background: var(--color-background);
-  padding: var(--spacing-2xl);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
-  margin-bottom: var(--spacing-2xl);
-}
-
-.config-form .form-group {
-  margin-bottom: var(--spacing-xl);
-}
-
-.config-form label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 6px;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-md);
-}
-
-.config-form input {
-  width: 100%;
-  padding: var(--spacing-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-md);
-  background: var(--color-background);
-}
-
-.config-form input:focus {
+.add-status-form button:focus {
   outline: none;
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
-.config-form small {
-  display: block;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  margin-top: var(--spacing-xs);
-}
+/* Enhanced data actions - Now handled by components.css */
+/* Enhanced stats container - Now handled by components.css */
 
-.config-btn {
-  width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border: none;
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-md);
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  margin-bottom: var(--spacing-sm);
-}
+/* Enhanced status styles - Now handled by components.css */
 
-.config-btn.primary {
-  background: var(--color-brand-primary);
-  color: var(--color-text-on-primary);
-}
+/* Enhanced configuration styles - Now handled by components.css */
 
-.config-btn.primary:hover {
-  background: var(--color-brand-hover);
-}
-
-.config-btn.secondary {
-  background: var(--color-secondary);
-  color: var(--color-text-on-secondary);
-}
-
-.config-btn.secondary:hover {
-  background: var(--color-secondary-hover);
-}
+/* Config button styles - Now handled by components.css */
 
 .config-help {
-  background: var(--color-background-secondary);
+  background: #f8f9fa !important;
   padding: var(--spacing-xl);
   border-radius: var(--border-radius-lg);
   margin-bottom: var(--spacing-xl);
+  border: 2px solid #e1e5e9 !important;
 }
 
 .config-help h3 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
   margin-bottom: var(--spacing-md);
-  color: var(--color-text-primary);
+  color: #1a1a1a !important;
 }
 
 .config-help ol {
@@ -330,126 +119,71 @@ header p {
 .config-help li {
   margin-bottom: var(--spacing-sm);
   font-size: var(--font-size-md);
-  color: var(--color-text-secondary);
+  color: #6c757d !important;
+  line-height: 1.5;
 }
 
 .config-help a {
-  color: var(--color-brand-primary);
+  color: #007bff !important;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .config-help a:hover {
   text-decoration: underline;
+  color: #0056b3 !important;
+}
+
+.config-help a:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .config-note {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
+  background: #cff4fc !important;
+  color: #055160 !important;
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   font-size: var(--font-size-sm);
   margin-top: var(--spacing-lg);
+  border: 1px solid #b6effb !important;
 }
 
 .config-message {
   margin-top: var(--spacing-lg);
   padding: var(--spacing-md);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-md);
   font-size: var(--font-size-md);
   text-align: center;
+  border: 2px solid;
 }
 
-.config-message.success {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-}
+/* Config message and status styles - Now handled by components.css */
 
-.config-message.error {
-  background: var(--color-danger-bg);
-  color: var(--color-danger-text);
-}
-
-.config-message.info {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-}
-
-/* Configuration Status Styles */
-.config-status {
-  background: var(--color-background);
-  padding: var(--spacing-xl);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+/* Config section in main interface */
+.config-section {
   margin-bottom: var(--spacing-2xl);
 }
 
-.config-status h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-lg);
-  color: var(--color-text-primary);
-}
-
-.status-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-sm) 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.status-item:last-child {
-  border-bottom: none;
-}
-
-.status-label {
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-md);
-}
-
-.status-value {
-  font-size: var(--font-size-md);
-  color: var(--color-text-muted);
-  font-family: monospace;
-}
-
-.status-value.connected {
-  color: var(--color-success-text);
-  font-weight: 500;
-}
-
-.status-value.failed {
-  color: var(--color-danger-text);
-  font-weight: 500;
-}
-
-/* Config Section in Main Interface */
-.config-section {
-  margin-bottom: 30px;
-}
-
 .config-section h2 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
   margin-bottom: var(--spacing-md);
-  color: var(--color-text-primary);
+  color: #1a1a1a !important;
 }
 
-@media (max-width: 600px) {
-  .container {
-    padding: var(--spacing-md);
+/* Enhanced responsive design */
+@media (max-width: 768px) {
+  .add-status-form {
+    flex-direction: column;
   }
-
-  .settings-section {
-    padding: var(--spacing-lg);
-  }
-
+  
   .data-actions {
     flex-direction: column;
   }
-
-  .add-status-form {
-    flex-direction: column;
+  
+  .stats-container {
+    grid-template-columns: 1fr;
   }
 }

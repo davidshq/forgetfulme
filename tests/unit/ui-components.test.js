@@ -673,12 +673,12 @@ describe('UIComponents', () => {
         expect(dialog.querySelector('.confirm-message').textContent).toBe('Are you sure?');
 
         // Test confirm button
-        const confirmBtn = dialog.querySelector('.ui-btn-primary');
+        const confirmBtn = dialog.querySelector('.btn-primary');
         confirmBtn.click();
         expect(mockConfirm).toHaveBeenCalled();
 
         // Test cancel button
-        const cancelBtn = dialog.querySelector('.ui-btn-secondary');
+        const cancelBtn = dialog.querySelector('.btn-secondary');
         cancelBtn.click();
         expect(mockCancel).toHaveBeenCalled();
       });
@@ -693,8 +693,8 @@ describe('UIComponents', () => {
           { confirmText: 'Yes', cancelText: 'No' }
         );
 
-        const confirmBtn = dialog.querySelector('.ui-btn-primary');
-        const cancelBtn = dialog.querySelector('.ui-btn-secondary');
+            const confirmBtn = dialog.querySelector('.btn-primary');
+    const cancelBtn = dialog.querySelector('.btn-secondary');
 
         expect(confirmBtn.textContent).toBe('Yes');
         expect(cancelBtn.textContent).toBe('No');
@@ -823,7 +823,7 @@ describe('UIComponents', () => {
 
         // Find close button in header
         const header = modal.querySelector('.modal-header');
-        const closeBtn = header.querySelector('.ui-btn');
+        const closeBtn = header.querySelector('.btn');
         expect(closeBtn).toBeTruthy();
 
         // Test close functionality

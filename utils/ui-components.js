@@ -351,7 +351,7 @@ class UIComponents {
   static createButton(text, onClick, className = '', options = {}) {
     const button = document.createElement('button');
     button.textContent = text;
-    button.className = `ui-btn ${className}`.trim();
+    button.className = `btn ${className}`.trim();
 
     if (onClick) {
       button.addEventListener('click', onClick);
@@ -404,7 +404,7 @@ class UIComponents {
 
     // Apply common attributes
     field.id = id;
-    field.className = 'ui-form-control';
+    field.className = 'form-control';
 
     if (options.placeholder) field.placeholder = options.placeholder;
     if (options.required) field.required = options.required;
@@ -640,13 +640,13 @@ class UIComponents {
     const confirmBtn = this.createButton(
       options.confirmText || 'Confirm',
       onConfirm,
-      'ui-btn-primary'
+      'btn-primary'
     );
 
     const cancelBtn = this.createButton(
       options.cancelText || 'Cancel',
       onCancel,
-      'ui-btn-secondary'
+      'btn-secondary'
     );
 
     buttonContainer.appendChild(confirmBtn);

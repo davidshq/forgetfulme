@@ -58,13 +58,13 @@ class UIMessages {
 
     // Create message element
     const messageEl = document.createElement('div');
-    messageEl.className = `ui-message ui-message-${type}`;
+    messageEl.className = `message message-${type}`;
     messageEl.textContent = message;
 
     // Add icon if specified
     if (options.icon) {
       const iconEl = document.createElement('span');
-      iconEl.className = 'ui-message-icon';
+      iconEl.className = 'message-icon';
       iconEl.textContent = options.icon;
       messageEl.insertBefore(iconEl, messageEl.firstChild);
     }
@@ -168,7 +168,7 @@ class UIMessages {
   static clear(container) {
     if (!container) return;
 
-    const messages = container.querySelectorAll('.ui-message');
+    const messages = container.querySelectorAll('.message');
     messages.forEach(message => {
       if (message.parentNode) {
         message.parentNode.removeChild(message);
@@ -217,13 +217,13 @@ class UIMessages {
             }
             retryFunction();
           },
-          'ui-message-retry-btn'
+          'message-retry-btn'
         );
         messageEl.appendChild(retryBtn);
       } else {
         const retryBtn = document.createElement('button');
         retryBtn.textContent = 'Retry';
-        retryBtn.className = 'ui-message-retry-btn';
+        retryBtn.className = 'message-retry-btn';
         retryBtn.addEventListener('click', () => {
           if (messageEl.parentNode) {
             messageEl.parentNode.removeChild(messageEl);

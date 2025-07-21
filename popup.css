@@ -1,30 +1,18 @@
-/* Popup styles for ForgetfulMe extension - Enhanced Accessibility */
+/* Popup styles for ForgetfulMe extension - Consolidated Design System */
 
-/* Import shared styles */
-@import url('utils/shared-styles.css');
+/* Import consolidated styles */
+@import url('styles/design-system.css');
+@import url('styles/components.css');
 
 body {
   width: 400px;
   min-height: 500px;
-}
-
-/* Header */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 2px solid var(--color-border);
-}
-
-header h1 {
   margin: 0;
-  font-size: var(--font-size-2xl);
-  color: var(--color-text-primary);
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  padding: var(--spacing-lg);
+  background: var(--color-background-secondary);
 }
+
+/* Enhanced header - Now handled by components.css */
 
 .header-actions {
   display: flex;
@@ -104,7 +92,7 @@ header h1 {
   }
 }
 
-/* Setup Interface */
+/* Enhanced setup interface */
 .setup-container {
   padding: var(--spacing-lg);
 }
@@ -120,6 +108,7 @@ header h1 {
   margin: 0 0 var(--spacing-lg) 0;
   color: var(--color-text-secondary);
   line-height: 1.6;
+  font-size: var(--font-size-md);
 }
 
 .setup-section {
@@ -128,14 +117,14 @@ header h1 {
   padding: var(--spacing-xl);
   margin-bottom: var(--spacing-lg);
   border: 2px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
 }
 
 .setup-section h3 {
   margin: 0 0 var(--spacing-md) 0;
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .setup-section ol,
@@ -144,6 +133,7 @@ header h1 {
   padding-left: var(--spacing-2xl);
   color: var(--color-text-secondary);
   line-height: 1.6;
+  font-size: var(--font-size-md);
 }
 
 .setup-section li {
@@ -167,12 +157,12 @@ header h1 {
   border-radius: 2px;
 }
 
-/* Main Content */
+/* Enhanced main content */
 .main-content {
   margin-bottom: var(--spacing-xl);
 }
 
-/* Recent Section */
+/* Enhanced recent section */
 .recent-section {
   border-top: 2px solid var(--color-border);
   padding-top: var(--spacing-lg);
@@ -182,7 +172,7 @@ header h1 {
   margin: 0 0 var(--spacing-md) 0;
   font-size: var(--font-size-lg);
   color: var(--color-text-primary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .recent-item {
@@ -192,12 +182,12 @@ header h1 {
   margin-bottom: var(--spacing-sm);
   background: var(--color-background);
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
 }
 
 .recent-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px var(--color-primary-light);
+  box-shadow: var(--shadow-xl);
   transform: translateY(-1px);
 }
 
@@ -227,32 +217,9 @@ header h1 {
   line-height: 1.4;
 }
 
-/* Status styles - using shared status classes */
-.status-read {
-  background: var(--color-success-bg);
-  color: var(--color-success-text);
-  border: 1px solid var(--color-success-border);
-}
 
-.status-good-reference {
-  background: var(--color-info-bg);
-  color: var(--color-info-text);
-  border: 1px solid var(--color-info-border);
-}
 
-.status-low-value {
-  background: var(--color-danger-bg);
-  color: var(--color-danger-text);
-  border: 1px solid var(--color-danger-border);
-}
-
-.status-revisit-later {
-  background: var(--color-warning-bg);
-  color: var(--color-warning-text);
-  border: 1px solid var(--color-warning-border);
-}
-
-/* Auth Interface */
+/* Enhanced auth interface */
 .auth-container {
   padding: var(--spacing-lg);
   text-align: center;
@@ -296,7 +263,7 @@ header h1 {
   border-radius: 2px;
 }
 
-/* Edit Interface */
+/* Enhanced edit interface */
 .bookmark-info {
   background: var(--color-background-secondary);
   border-radius: var(--border-radius-lg);
@@ -339,16 +306,16 @@ header h1 {
   border-radius: 2px;
 }
 
-/* Edit Form */
+/* Enhanced edit form */
 #editBookmarkForm {
   background: var(--color-background);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-xl);
   border: 2px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
 }
 
-/* Bookmark Management Interface */
+/* Enhanced bookmark management interface */
 .manage-btn {
   margin-left: var(--spacing-sm);
 }
@@ -395,6 +362,22 @@ header h1 {
   flex: 1;
   min-width: 120px;
   font-weight: 600;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bulk-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.bulk-actions button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .bulk-actions button:disabled {
@@ -404,7 +387,7 @@ header h1 {
   box-shadow: none;
 }
 
-/* Search and Filter */
+/* Enhanced search and filter */
 .search-section {
   margin-bottom: var(--spacing-lg);
 }
@@ -421,7 +404,7 @@ header h1 {
   display: block;
 }
 
-/* Bookmark list styling */
+/* Enhanced bookmark list styling */
 .bookmarks-section {
   margin-bottom: var(--spacing-lg);
 }
@@ -432,12 +415,12 @@ header h1 {
   margin-bottom: var(--spacing-sm);
   background: var(--color-background);
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-lg);
 }
 
 .bookmark-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 2px 8px var(--color-primary-light);
+  box-shadow: var(--shadow-xl);
   transform: translateY(-1px);
 }
 
@@ -463,6 +446,7 @@ header h1 {
   color: var(--color-text-primary);
   margin-bottom: 6px;
   line-height: 1.4;
+  font-size: var(--font-size-md);
 }
 
 .bookmark-item .list-item-meta {
@@ -484,7 +468,7 @@ header h1 {
   letter-spacing: 0.5px;
 }
 
-/* Use shared status classes for bookmark status indicators */
+/* Enhanced status classes for bookmark status indicators */
 .bookmark-item .list-item-meta .status.read {
   background: var(--color-success-bg);
   color: var(--color-success-text);
@@ -508,3 +492,5 @@ header h1 {
   color: var(--color-warning-text);
   border: 1px solid var(--color-warning-border);
 }
+
+
