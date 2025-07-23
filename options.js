@@ -239,21 +239,16 @@ class ForgetfulMeOptions {
       'main-container'
     );
 
-    // Create config section
-    const configSection = UIComponents.createSection(
+    // Create config card
+    const configCard = UIComponents.createCard(
       'Supabase Configuration',
-      'config-section'
+      '<div id="config-status-container"></div>',
+      '',
+      'config-card'
     );
-    const configStatusContainer = document.createElement('div');
-    configStatusContainer.id = 'config-status-container';
-    configSection.appendChild(configStatusContainer);
-    mainContainer.appendChild(configSection);
+    mainContainer.appendChild(configCard);
 
-    // Create stats section
-    const statsSection = UIComponents.createSection(
-      'Statistics',
-      'stats-section'
-    );
+    // Create stats card
     const statsGrid = UIComponents.createGrid(
       [
         { text: 'Total Entries:', className: 'stat-item' },
@@ -274,96 +269,93 @@ class ForgetfulMeOptions {
         '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>';
     }
 
-    statsSection.appendChild(statsGrid);
-    mainContainer.appendChild(statsSection);
-
-    // Create status types section
-    const statusSection = UIComponents.createSection(
-      'Custom Status Types',
-      'status-types-section'
+    const statsCard = UIComponents.createCard(
+      'Statistics',
+      statsGrid.outerHTML,
+      '',
+      'stats-card'
     );
+    mainContainer.appendChild(statsCard);
 
+    // Create status types card
     const addStatusContainer = document.createElement('div');
     addStatusContainer.className = 'add-status';
 
-    const statusInput = UIComponents.createFormField('text', 'new-status', '', {
-      placeholder: 'Enter new status type',
-    });
-    const addStatusBtn = UIComponents.createButton(
-      'Add',
-      () => this.addStatusType(),
-      'primary',
-      {
-        id: 'add-status-btn',
-      }
-    );
-
-    addStatusContainer.appendChild(statusInput);
-    addStatusContainer.appendChild(addStatusBtn);
-    statusSection.appendChild(addStatusContainer);
-
-    const statusTypesList = UIComponents.createList('status-types-list');
-    statusSection.appendChild(statusTypesList);
-    mainContainer.appendChild(statusSection);
-
-    // Create data management section
-    const dataSection = UIComponents.createSection(
-      'Data Management',
-      'data-section'
-    );
-    const dataActions = document.createElement('div');
-    dataActions.className = 'data-actions';
-
-    const exportBtn = UIComponents.createButton(
-      'Export Data',
-      () => this.exportData(),
-      'secondary',
-      {
-        id: 'export-data-btn',
-      }
-    );
-    const importBtn = UIComponents.createButton(
-      'Import Data',
-      () => {
-        const importFileEl = UIComponents.DOM.getElement('import-file');
-        if (importFileEl) {
-          importFileEl.click();
-        }
+    const addStatusForm = UIComponents.createForm(
+      'add-status-form',
+      e => {
+        e.preventDefault();
+        this.addCustomStatus();
       },
-      'secondary',
+      [
+        {
+          type: 'text',
+          id: 'new-status-name',
+          label: 'Status Name:',
+          options: {
+            placeholder: 'e.g., Important, Reference',
+            required: true,
+          },
+        },
+        {
+          type: 'text',
+          id: 'new-status-description',
+          label: 'Description:',
+          options: {
+            placeholder: 'Brief description of this status',
+          },
+        },
+      ],
       {
-        id: 'import-data-btn',
+        submitText: 'Add Status',
+        className: 'add-status-form',
       }
     );
-    const clearBtn = UIComponents.createButton(
-      'Clear All Data',
-      () => this.clearData(),
-      'contrast',
+
+    addStatusContainer.appendChild(addStatusForm);
+
+    const statusListContainer = document.createElement('div');
+    statusListContainer.id = 'status-list-container';
+    statusListContainer.className = 'status-list';
+
+    addStatusContainer.appendChild(statusListContainer);
+
+    const statusCard = UIComponents.createCard(
+      'Custom Status Types',
+      addStatusContainer.outerHTML,
+      '',
+      'status-card'
+    );
+    mainContainer.appendChild(statusCard);
+
+    // Create data management card
+    const dataActions = [
       {
-        id: 'clear-data-btn',
-      }
+        text: 'Export All Data',
+        onClick: () => this.exportAllData(),
+        className: 'secondary',
+      },
+      {
+        text: 'Import Data',
+        onClick: () => this.importData(),
+        className: 'secondary',
+      },
+      {
+        text: 'Clear All Data',
+        onClick: () => this.clearAllData(),
+        className: 'contrast',
+      },
+    ];
+
+    const dataCard = UIComponents.createCardWithActions(
+      'Data Management',
+      '<p>Export your bookmarks to JSON format, import data from a backup, or clear all stored data.</p>',
+      dataActions,
+      'data-card'
     );
+    mainContainer.appendChild(dataCard);
 
-    dataActions.appendChild(exportBtn);
-    dataActions.appendChild(importBtn);
-    dataActions.appendChild(clearBtn);
-
-    // Hidden file input
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = 'import-file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    dataActions.appendChild(fileInput);
-
-    dataSection.appendChild(dataActions);
-    mainContainer.appendChild(dataSection);
-
-    // Create bookmark management section
-    const bookmarkSection = UIComponents.createSection(
-      'Bookmark Management',
-      'bookmark-section'
-    );
+    // Create bookmark management card
     const manageBookmarksBtn = UIComponents.createButton(
       '📚 Manage Bookmarks',
       () => this.openBookmarkManagement(),
@@ -373,8 +365,14 @@ class ForgetfulMeOptions {
         title: 'Open bookmark management interface',
       }
     );
-    bookmarkSection.appendChild(manageBookmarksBtn);
-    mainContainer.appendChild(bookmarkSection);
+
+    const bookmarkCard = UIComponents.createCard(
+      'Bookmark Management',
+      '<p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>',
+      manageBookmarksBtn.outerHTML,
+      'bookmark-card'
+    );
+    mainContainer.appendChild(bookmarkCard);
 
     // Assemble the interface
     this.appContainer.innerHTML = '';
@@ -385,6 +383,7 @@ class ForgetfulMeOptions {
     this.bindEvents();
 
     // Show configuration status
+    const configStatusContainer = document.getElementById('config-status-container');
     if (configStatusContainer) {
       this.configUI.showConfigStatus(configStatusContainer);
     }

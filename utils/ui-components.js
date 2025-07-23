@@ -386,7 +386,7 @@ class UIComponents {
   static createFormField(type, id, label, options = {}) {
     const formGroup = document.createElement('div');
 
-    // Create label
+    // Create label with Pico styling
     const labelEl = document.createElement('label');
     labelEl.htmlFor = id;
     labelEl.textContent = label;
@@ -412,11 +412,17 @@ class UIComponents {
 
     // Apply common attributes
     field.id = id;
+    field.name = id; // Add name attribute for form submission
 
     if (options.placeholder) field.placeholder = options.placeholder;
     if (options.required) field.required = options.required;
     if (options.value) field.value = options.value;
     if (options.disabled) field.disabled = options.disabled;
+
+    // Apply accessibility attributes
+    if (options['aria-describedby']) {
+      field.setAttribute('aria-describedby', options['aria-describedby']);
+    }
 
     formGroup.appendChild(field);
 
@@ -424,6 +430,9 @@ class UIComponents {
     if (options.helpText) {
       const helpEl = document.createElement('small');
       helpEl.textContent = options.helpText;
+      if (options['aria-describedby']) {
+        helpEl.id = options['aria-describedby'];
+      }
       formGroup.appendChild(helpEl);
     }
 
@@ -442,6 +451,12 @@ class UIComponents {
     const form = document.createElement('form');
     form.id = id;
     form.className = options.className || '';
+
+    // Add form accessibility attributes
+    if (options['aria-label']) {
+      form.setAttribute('aria-label', options['aria-label']);
+    }
+    form.setAttribute('role', 'form');
 
     if (onSubmit) {
       form.addEventListener('submit', e => {
@@ -465,6 +480,7 @@ class UIComponents {
     if (options.submitText) {
       const submitBtn = this.createButton(options.submitText, null, 'primary', {
         type: 'submit',
+        'aria-label': options.submitText,
       });
       form.appendChild(submitBtn);
     }
@@ -583,38 +599,264 @@ class UIComponents {
   }
 
   /**
-   * Create a section with title
+   * Create a section with title using Pico styling
    * @param {string} title - Section title
    * @param {string} className - Additional CSS classes
+   * @param {Object} options - Section options
    * @returns {HTMLElement}
    */
-  static createSection(title, className = '') {
-    const section = document.createElement('div');
-    section.className = `section ${className}`.trim();
+  static createSection(title, className = '', options = {}) {
+    // Use article element for card-like sections when specified
+    const element = options.useCard ? document.createElement('article') : document.createElement('section');
+    element.className = `section ${className}`.trim();
 
     if (title) {
-      const titleEl = document.createElement('h3');
-      titleEl.textContent = title;
-      section.appendChild(titleEl);
+      const titleEl = document.createElement(options.useCard ? 'header' : 'h3');
+      if (options.useCard) {
+        const titleH3 = document.createElement('h3');
+        titleH3.textContent = title;
+        titleEl.appendChild(titleH3);
+      } else {
+        titleEl.textContent = title;
+      }
+      element.appendChild(titleEl);
     }
 
-    return section;
+    return element;
   }
 
   /**
-   * Create a grid layout
+   * Create a card using Pico's article element with header, content, and footer
+   * @param {string} title - Card title (optional)
+   * @param {string|HTMLElement} content - Card content
+   * @param {string|HTMLElement} footer - Card footer content (optional)
+   * @param {string} className - Additional CSS classes
+   * @param {Object} options - Card options
+   * @returns {HTMLElement}
+   */
+  static createCard(title, content, footer = '', className = '', options = {}) {
+    const article = document.createElement('article');
+    article.className = `card ${className}`.trim();
+    
+    // Add header if title is provided
+    if (title) {
+      const header = document.createElement('header');
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
+    
+    // Add main content
+    const mainContent = document.createElement('div');
+    if (typeof content === 'string') {
+      mainContent.innerHTML = content;
+    } else {
+      mainContent.appendChild(content);
+    }
+    article.appendChild(mainContent);
+    
+    // Add footer if provided
+    if (footer) {
+      const footerElement = document.createElement('footer');
+      if (typeof footer === 'string') {
+        footerElement.innerHTML = footer;
+      } else {
+        footerElement.appendChild(footer);
+      }
+      article.appendChild(footerElement);
+    }
+    
+    return article;
+  }
+
+  /**
+   * Create a card with actions in the footer
+   * @param {string} title - Card title
+   * @param {string|HTMLElement} content - Card content
+   * @param {Array} actions - Array of action objects with text, onClick, and className
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createCardWithActions(title, content, actions = [], className = '') {
+    const article = document.createElement('article');
+    article.className = `card ${className}`.trim();
+    
+    // Add header
+    if (title) {
+      const header = document.createElement('header');
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
+    
+    // Add main content
+    const mainContent = document.createElement('div');
+    if (typeof content === 'string') {
+      mainContent.innerHTML = content;
+    } else {
+      mainContent.appendChild(content);
+    }
+    article.appendChild(mainContent);
+    
+    // Add footer with actions
+    if (actions.length > 0) {
+      const footer = document.createElement('footer');
+      footer.className = 'card-actions';
+      
+      actions.forEach(action => {
+        const button = this.createButton(
+          action.text,
+          action.onClick,
+          action.className || 'secondary'
+        );
+        footer.appendChild(button);
+      });
+      
+      article.appendChild(footer);
+    }
+    
+    return article;
+  }
+
+  /**
+   * Create a card with form elements
+   * @param {string} title - Card title
+   * @param {Array} formFields - Array of form field configurations
+   * @param {Function} onSubmit - Form submit handler
+   * @param {string} submitText - Submit button text
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createFormCard(title, formFields, onSubmit, submitText = 'Submit', className = '') {
+    const article = document.createElement('article');
+    article.className = `card form-card ${className}`.trim();
+    
+    // Add header
+    if (title) {
+      const header = document.createElement('header');
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
+    
+    // Add form content
+    const form = this.createForm('card-form', onSubmit, formFields, {
+      submitText,
+      className: 'card-form'
+    });
+    article.appendChild(form);
+    
+    return article;
+  }
+
+  /**
+   * Create a card with list items
+   * @param {string} title - Card title
+   * @param {Array} items - Array of item data objects
+   * @param {Object} options - List options
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createListCard(title, items, options = {}, className = '') {
+    const article = document.createElement('article');
+    article.className = `card list-card ${className}`.trim();
+    
+    // Add header
+    if (title) {
+      const header = document.createElement('header');
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
+    
+    // Add list content
+    const listContainer = document.createElement('div');
+    listContainer.className = 'card-list';
+    
+    items.forEach(item => {
+      const listItem = this.createListItem(item, options);
+      listContainer.appendChild(listItem);
+    });
+    
+    article.appendChild(listContainer);
+    
+    return article;
+  }
+
+  /**
+   * Create a responsive layout container
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createLayoutContainer(className = '') {
+    const container = document.createElement('div');
+    container.className = `container ${className}`.trim();
+    return container;
+  }
+
+  /**
+   * Create a sidebar layout
+   * @param {HTMLElement} sidebar - Sidebar content
+   * @param {HTMLElement} main - Main content
+   * @param {Object} options - Layout options
+   * @returns {HTMLElement}
+   */
+  static createSidebarLayout(sidebar, main, options = {}) {
+    const layout = document.createElement('div');
+    layout.className = `sidebar-layout ${options.className || ''}`.trim();
+
+    // Create sidebar container
+    const sidebarContainer = document.createElement('aside');
+    sidebarContainer.className = 'sidebar';
+    sidebarContainer.appendChild(sidebar);
+    layout.appendChild(sidebarContainer);
+
+    // Create main content container
+    const mainContainer = document.createElement('main');
+    mainContainer.className = 'main-content';
+    mainContainer.appendChild(main);
+    layout.appendChild(mainContainer);
+
+    return layout;
+  }
+
+  /**
+   * Create a grid layout with Pico CSS classes
    * @param {Array} items - Grid items
    * @param {Object} options - Grid options
    * @returns {HTMLElement}
    */
   static createGrid(items, options = {}) {
     const grid = document.createElement('div');
-    grid.className = `grid ${options.className || ''}`.trim();
+
+    // Use Pico's grid system with responsive classes
+    let gridClass = 'grid';
+    if (options.columns) {
+      gridClass += ` grid-${options.columns}`;
+    }
+    if (options.gap) {
+      gridClass += ` gap-${options.gap}`;
+    }
+    grid.className = `${gridClass} ${options.className || ''}`.trim();
 
     items.forEach(item => {
       const gridItem = document.createElement('div');
+      // Use Pico's grid item styling
       gridItem.className = `grid-item ${item.className || ''}`.trim();
-      gridItem.textContent = item.text;
+
+      // Support for complex content (not just text)
+      if (typeof item === 'string') {
+        gridItem.textContent = item;
+      } else if (item.content) {
+        gridItem.innerHTML = item.content;
+      } else if (item.text) {
+        gridItem.textContent = item.text;
+      }
+
       grid.appendChild(gridItem);
     });
 
@@ -622,7 +864,7 @@ class UIComponents {
   }
 
   /**
-   * Create a confirmation dialog
+   * Create a confirmation dialog using Pico's dialog system
    * @param {string} message - Confirmation message
    * @param {Function} onConfirm - Confirm handler
    * @param {Function} onCancel - Cancel handler
@@ -630,55 +872,116 @@ class UIComponents {
    * @returns {HTMLElement}
    */
   static createConfirmDialog(message, onConfirm, onCancel, options = {}) {
-    const dialog = document.createElement('div');
+    const actions = [
+      {
+        text: options.confirmText || 'Confirm',
+        onClick: () => {
+          this.closeModal(dialog);
+          if (onConfirm) onConfirm();
+        },
+        className: 'primary',
+      },
+      {
+        text: options.cancelText || 'Cancel',
+        onClick: () => {
+          this.closeModal(dialog);
+          if (onCancel) onCancel();
+        },
+        className: 'secondary',
+      },
+    ];
 
-    const messageEl = document.createElement('div');
-    messageEl.textContent = message;
-    dialog.appendChild(messageEl);
-
-    const buttonContainer = document.createElement('div');
-
-    const confirmBtn = this.createButton(
-      options.confirmText || 'Confirm',
-      onConfirm,
-      'primary'
+    const dialog = this.createModal(
+      options.title || 'Confirm',
+      message,
+      actions,
+      {
+        showClose: false,
+        className: 'confirm-dialog',
+        ...options,
+      }
     );
-
-    const cancelBtn = this.createButton(
-      options.cancelText || 'Cancel',
-      onCancel,
-      'secondary'
-    );
-
-    buttonContainer.appendChild(confirmBtn);
-    buttonContainer.appendChild(cancelBtn);
-    dialog.appendChild(buttonContainer);
 
     return dialog;
   }
 
   /**
-   * Create a loading spinner
+   * Create a Pico progress indicator (indeterminate)
+   * @param {string} ariaLabel - ARIA label for accessibility
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createProgressIndicator(ariaLabel = 'Loading', className = '') {
+    const progress = document.createElement('progress');
+    progress.setAttribute('aria-label', ariaLabel);
+    progress.className = className.trim();
+    // Indeterminate progress (no value attribute)
+    return progress;
+  }
+
+  /**
+   * Create a Pico progress bar with specific value
+   * @param {number} value - Progress value (0-100)
+   * @param {number} max - Maximum value (default: 100)
+   * @param {string} ariaLabel - ARIA label for accessibility
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createProgressBar(value, max = 100, ariaLabel = 'Progress', className = '') {
+    const progress = document.createElement('progress');
+    progress.value = Math.min(Math.max(value, 0), max);
+    progress.max = max;
+    progress.setAttribute('aria-label', ariaLabel);
+    progress.className = className.trim();
+    return progress;
+  }
+
+  /**
+   * Create a loading state with Pico progress indicator
    * @param {string} text - Loading text
    * @param {string} className - Additional CSS classes
    * @returns {HTMLElement}
    */
-  static createLoadingSpinner(text = 'Loading...', className = '') {
-    const spinner = document.createElement('div');
-    spinner.className = `loading-spinner ${className}`.trim();
+  static createLoadingState(text = 'Loading...', className = '') {
+    const container = document.createElement('div');
+    container.className = `loading-state ${className}`.trim();
 
-    const spinnerEl = document.createElement('div');
-    spinnerEl.className = 'spinner';
-    spinner.appendChild(spinnerEl);
+    const progress = this.createProgressIndicator('Loading', 'loading-progress');
+    container.appendChild(progress);
 
-    if (text) {
+    if (text && text.trim()) {
       const textEl = document.createElement('div');
-      textEl.className = 'spinner-text';
+      textEl.className = 'loading-text';
       textEl.textContent = text;
-      spinner.appendChild(textEl);
+      container.appendChild(textEl);
     }
 
-    return spinner;
+    return container;
+  }
+
+  /**
+   * Set busy state on an element using Pico's aria-busy attribute
+   * @param {HTMLElement} element - Element to set busy state on
+   * @param {boolean} isBusy - Whether element is busy
+   */
+  static setBusyState(element, isBusy) {
+    if (isBusy) {
+      element.setAttribute('aria-busy', 'true');
+    } else {
+      element.removeAttribute('aria-busy');
+    }
+  }
+
+  /**
+   * Create a loading spinner (legacy method - now uses Pico progress)
+   * @param {string} text - Loading text
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   * @deprecated Use createLoadingState() instead for Pico integration
+   */
+  static createLoadingSpinner(text = 'Loading...', className = '') {
+    // Use the new Pico-based loading state
+    return this.createLoadingState(text, className);
   }
 
   /**
@@ -779,45 +1082,80 @@ class UIComponents {
   }
 
   /**
-   * Create a modal dialog
+   * Create a modal dialog using Pico's dialog system
    * @param {string} title - Modal title
-   * @param {HTMLElement} content - Modal content
+   * @param {HTMLElement|string} content - Modal content
+   * @param {Array} actions - Array of action buttons
    * @param {Object} options - Modal options
    * @returns {HTMLElement}
    */
-  static createModal(title, content, _options = {}) {
-    const modal = document.createElement('div');
+  static createModal(title, content, actions = [], options = {}) {
+    const dialog = document.createElement('dialog');
+    dialog.className = options.className || '';
 
-    const modalContent = document.createElement('div');
+    // Create article container for Pico styling
+    const article = document.createElement('article');
+    
+    // Add header if title is provided
+    if (title) {
+      const header = document.createElement('header');
+      const titleEl = document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
 
-    const header = document.createElement('div');
+    // Add main content
+    const mainContent = document.createElement('div');
+    if (typeof content === 'string') {
+      mainContent.innerHTML = content;
+    } else {
+      mainContent.appendChild(content);
+    }
+    article.appendChild(mainContent);
 
-    const titleEl = document.createElement('h3');
-    titleEl.textContent = title;
-    header.appendChild(titleEl);
+    // Add footer with actions if provided
+    if (actions.length > 0) {
+      const footer = document.createElement('footer');
+      actions.forEach(action => {
+        const button = this.createButton(
+          action.text,
+          action.onClick,
+          action.className || 'outline',
+          action.options || {}
+        );
+        footer.appendChild(button);
+      });
+      article.appendChild(footer);
+    }
 
-    const closeBtn = this.createButton(
-      '×',
-      () => this.closeModal(modal),
-      'outline'
-    );
-    header.appendChild(closeBtn);
+    // Add close button if not disabled
+    if (options.showClose !== false) {
+      const closeBtn = this.createButton(
+        '×',
+        () => this.closeModal(dialog),
+        'outline',
+        {
+          'aria-label': 'Close modal',
+          title: 'Close',
+        }
+      );
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '1rem';
+      closeBtn.style.right = '1rem';
+      article.appendChild(closeBtn);
+    }
 
-    const body = document.createElement('div');
-    body.appendChild(content);
-
-    modalContent.appendChild(header);
-    modalContent.appendChild(body);
-    modal.appendChild(modalContent);
+    dialog.appendChild(article);
 
     // Add backdrop click to close
-    modal.addEventListener('click', e => {
-      if (e.target === modal) {
-        this.closeModal(modal);
+    dialog.addEventListener('click', e => {
+      if (e.target === dialog) {
+        this.closeModal(dialog);
       }
     });
 
-    return modal;
+    return dialog;
   }
 
   /**
@@ -825,7 +1163,10 @@ class UIComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static closeModal(modal) {
-    if (modal.parentNode) {
+    if (modal && modal.tagName === 'DIALOG') {
+      modal.close();
+    }
+    if (modal && modal.parentNode) {
       modal.parentNode.removeChild(modal);
     }
   }
@@ -835,7 +1176,11 @@ class UIComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static showModal(modal) {
-    document.body.appendChild(modal);
+    if (modal && modal.tagName === 'DIALOG') {
+      modal.showModal();
+    } else {
+      document.body.appendChild(modal);
+    }
   }
 
   /**
@@ -894,6 +1239,196 @@ class UIComponents {
 
     tooltip.style.top = `${top}px`;
     tooltip.style.left = `${left}px`;
+  }
+
+  /**
+   * Create a navigation menu using Pico's nav structure
+   * @param {Array} items - Array of navigation items with text, href, and optional active state
+   * @param {string} ariaLabel - ARIA label for the navigation
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createNavigation(items, ariaLabel = 'Main navigation', className = '') {
+    const nav = document.createElement('nav');
+    nav.setAttribute('aria-label', ariaLabel);
+    nav.className = className.trim();
+
+    const ul = document.createElement('ul');
+    items.forEach(item => {
+      const li = document.createElement('li');
+      
+      if (item.href) {
+        const a = document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.text;
+        if (item.active) {
+          a.setAttribute('aria-current', 'page');
+        }
+        if (item.title) {
+          a.title = item.title;
+        }
+        li.appendChild(a);
+      } else if (item.onClick) {
+        const button = this.createButton(
+          item.text,
+          item.onClick,
+          item.className || 'outline',
+          {
+            title: item.title,
+            'aria-label': item['aria-label'],
+          }
+        );
+        li.appendChild(button);
+      }
+      
+      ul.appendChild(li);
+    });
+
+    nav.appendChild(ul);
+    return nav;
+  }
+
+  /**
+   * Create a breadcrumb navigation using Pico's nav structure
+   * @param {Array} items - Array of breadcrumb items with text and href
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createBreadcrumb(items, className = '') {
+    const nav = document.createElement('nav');
+    nav.setAttribute('aria-label', 'Breadcrumb');
+    nav.className = `breadcrumb ${className}`.trim();
+
+    const ol = document.createElement('ol');
+    items.forEach((item, index) => {
+      const li = document.createElement('li');
+      
+      if (index === items.length - 1) {
+        // Last item (current page)
+        const span = document.createElement('span');
+        span.textContent = item.text;
+        span.setAttribute('aria-current', 'page');
+        li.appendChild(span);
+      } else {
+        // Navigation items
+        const a = document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.text;
+        li.appendChild(a);
+      }
+      
+      ol.appendChild(li);
+    });
+
+    nav.appendChild(ol);
+    return nav;
+  }
+
+  /**
+   * Create a navigation menu with dropdown support
+   * @param {Array} items - Array of navigation items
+   * @param {string} ariaLabel - ARIA label for the navigation
+   * @param {string} className - Additional CSS classes
+   * @returns {HTMLElement}
+   */
+  static createNavMenu(items, ariaLabel = 'Navigation menu', className = '') {
+    const nav = document.createElement('nav');
+    nav.setAttribute('aria-label', ariaLabel);
+    nav.className = `nav-menu ${className}`.trim();
+
+    const ul = document.createElement('ul');
+    items.forEach(item => {
+      const li = document.createElement('li');
+      
+      if (item.dropdown) {
+        // Create dropdown menu
+        const details = document.createElement('details');
+        details.className = 'dropdown';
+        
+        const summary = document.createElement('summary');
+        summary.textContent = item.text;
+        if (item.title) {
+          summary.title = item.title;
+        }
+        details.appendChild(summary);
+        
+        const dropdownUl = document.createElement('ul');
+        item.dropdown.forEach(dropdownItem => {
+          const dropdownLi = document.createElement('li');
+          const dropdownA = document.createElement('a');
+          dropdownA.href = dropdownItem.href;
+          dropdownA.textContent = dropdownItem.text;
+          if (dropdownItem.onClick) {
+            dropdownA.addEventListener('click', dropdownItem.onClick);
+          }
+          dropdownLi.appendChild(dropdownA);
+          dropdownUl.appendChild(dropdownLi);
+        });
+        
+        details.appendChild(dropdownUl);
+        li.appendChild(details);
+      } else {
+        // Regular navigation item
+        if (item.href) {
+          const a = document.createElement('a');
+          a.href = item.href;
+          a.textContent = item.text;
+          if (item.active) {
+            a.setAttribute('aria-current', 'page');
+          }
+          li.appendChild(a);
+        } else if (item.onClick) {
+          const button = this.createButton(
+            item.text,
+            item.onClick,
+            item.className || 'outline',
+            {
+              title: item.title,
+              'aria-label': item['aria-label'],
+            }
+          );
+          li.appendChild(button);
+        }
+      }
+      
+      ul.appendChild(li);
+    });
+
+    nav.appendChild(ul);
+    return nav;
+  }
+
+  /**
+   * Create a header with navigation
+   * @param {string} title - Header title
+   * @param {Array} navItems - Navigation items
+   * @param {Object} options - Header options
+   * @returns {HTMLElement}
+   */
+  static createHeaderWithNav(title, navItems = [], options = {}) {
+    const header = document.createElement('header');
+    header.setAttribute('role', 'banner');
+    header.className = options.className || '';
+
+    // Add title
+    if (title) {
+      const titleEl = document.createElement('h1');
+      titleEl.textContent = title;
+      titleEl.setAttribute('id', options.titleId || 'page-title');
+      header.appendChild(titleEl);
+    }
+
+    // Add navigation if provided
+    if (navItems.length > 0) {
+      const nav = this.createNavigation(
+        navItems,
+        options.navAriaLabel || 'Main navigation',
+        options.navClassName || ''
+      );
+      header.appendChild(nav);
+    }
+
+    return header;
   }
 }
 

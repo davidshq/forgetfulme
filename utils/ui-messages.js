@@ -148,17 +148,52 @@ class UIMessages {
   }
 
   /**
-   * Show loading message
+   * Show loading message with Pico progress indicator
    * @param {string} message - Loading message
    * @param {HTMLElement} container - Container element
    * @param {Object} options - Additional options
    */
   static loading(message, container, options = {}) {
-    return this.show(message, 'loading', container, {
-      icon: '⏳',
-      timeout: 0, // Don't auto-remove loading messages
-      ...options,
-    });
+    if (!container) {
+      console.warn(
+        'UIMessages.loading: No container provided, falling back to console'
+      );
+      console.log(`[LOADING] ${message}`);
+      return;
+    }
+
+    // Create message element
+    const messageEl = document.createElement('div');
+    messageEl.className = 'ui-message ui-message-loading';
+    messageEl.setAttribute('aria-busy', 'true');
+
+    // Add Pico progress indicator
+    const progress = document.createElement('progress');
+    progress.setAttribute('aria-label', 'Loading');
+    progress.className = 'loading-progress';
+    messageEl.appendChild(progress);
+
+    // Add message text
+    if (message) {
+      const textEl = document.createElement('span');
+      textEl.className = 'ui-message-text';
+      textEl.textContent = message;
+      messageEl.appendChild(textEl);
+    }
+
+    // Add to container
+    try {
+      container.appendChild(messageEl);
+    } catch {
+      console.warn(
+        'UIMessages.loading: Error adding message to container, falling back to console'
+      );
+      console.log(`[LOADING] ${message}`);
+      return;
+    }
+
+    // Don't auto-remove loading messages (timeout: 0)
+    return messageEl;
   }
 
   /**
@@ -254,11 +289,11 @@ class UIMessages {
         onCancel,
         options
       );
-      container.appendChild(confirmEl);
+      UIComponents.showModal(confirmEl);
       return confirmEl;
     }
 
-    // Fallback to manual creation
+    // Fallback to manual creation (legacy support)
     const confirmEl = document.createElement('div');
     confirmEl.className = 'ui-confirm';
 

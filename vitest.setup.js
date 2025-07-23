@@ -277,10 +277,27 @@ const createMockElement = tagName => {
     select: vi.fn(),
 
     // Attributes
-    getAttribute: vi.fn(),
-    setAttribute: vi.fn(),
-    removeAttribute: vi.fn(),
-    hasAttribute: vi.fn(),
+    getAttribute: vi.fn(function(name) {
+      return this._attributes?.[name] || null;
+    }),
+    setAttribute: vi.fn(function(name, value) {
+      if (!this._attributes) {
+        this._attributes = {};
+      }
+      this._attributes[name] = value;
+      if (name === 'id') {
+        this.id = value;
+        global.document.registerElement(value, this);
+      }
+    }),
+    removeAttribute: vi.fn(function(name) {
+      if (this._attributes) {
+        delete this._attributes[name];
+      }
+    }),
+    hasAttribute: vi.fn(function(name) {
+      return this._attributes?.[name] !== undefined;
+    }),
 
     // Dimensions
     offsetWidth: 100,
@@ -336,15 +353,7 @@ const createMockElement = tagName => {
     this._eventListeners.push({ type, handler });
   });
 
-  // Override setAttribute to register elements with IDs
-  const originalSetAttribute = element.setAttribute;
-  element.setAttribute = vi.fn(function (name, value) {
-    if (name === 'id') {
-      this.id = value;
-      global.document.registerElement(value, this);
-    }
-    originalSetAttribute.call(this, name, value);
-  });
+
 
   // Override id property to register elements
   Object.defineProperty(element, 'id', {
@@ -543,48 +552,288 @@ global.UIComponents = {
     }
     return item;
   }),
-  createSection: vi.fn(title => {
-    const section = global.document.createElement('div');
-    section.className = 'section';
+  createSection: vi.fn((title, className, options) => {
+    const element = options?.useCard ? global.document.createElement('article') : global.document.createElement('section');
+    element.className = `section ${className || ''}`.trim();
     if (title) {
+      if (options?.useCard) {
+        const header = global.document.createElement('header');
+        const titleElement = global.document.createElement('h3');
+        titleElement.textContent = title;
+        header.appendChild(titleElement);
+        element.appendChild(header);
+      } else {
+        const titleElement = global.document.createElement('h3');
+        titleElement.textContent = title;
+        element.appendChild(titleElement);
+      }
+    }
+    return element;
+  }),
+  createCard: vi.fn((title, content, footer, className) => {
+    const card = global.document.createElement('article');
+    card.className = `card ${className || ''}`.trim();
+    if (title) {
+      const header = global.document.createElement('header');
       const titleElement = global.document.createElement('h3');
       titleElement.textContent = title;
-      section.appendChild(titleElement);
+      header.appendChild(titleElement);
+      card.appendChild(header);
     }
-    return section;
+    const contentDiv = global.document.createElement('div');
+    contentDiv.innerHTML = content;
+    card.appendChild(contentDiv);
+    if (footer) {
+      const footerElement = global.document.createElement('footer');
+      footerElement.innerHTML = footer;
+      card.appendChild(footerElement);
+    }
+    return card;
   }),
-  createModal: vi.fn((title, content, options) => {
-    const modal = global.document.createElement('div');
-    modal.className = 'ui-modal';
-    modal.innerHTML = `
-      <div class="ui-modal-header">
-        <h2>${title}</h2>
-        ${options?.showClose !== false ? '<button class="ui-modal-close">&times;</button>' : ''}
-      </div>
-      <div class="ui-modal-content">${content}</div>
-    `;
-    return modal;
+  createCardWithActions: vi.fn((title, content, actions) => {
+    const card = global.document.createElement('article');
+    card.className = 'card';
+    if (title) {
+      const header = global.document.createElement('header');
+      const titleElement = global.document.createElement('h3');
+      titleElement.textContent = title;
+      header.appendChild(titleElement);
+      card.appendChild(header);
+    }
+    const contentDiv = global.document.createElement('div');
+    contentDiv.innerHTML = content;
+    card.appendChild(contentDiv);
+    if (actions && actions.length > 0) {
+      const footer = global.document.createElement('footer');
+      footer.className = 'card-actions';
+      actions.forEach(action => {
+        const button = global.document.createElement('button');
+        button.textContent = action.text;
+        button.className = action.className || 'secondary';
+        footer.appendChild(button);
+      });
+      card.appendChild(footer);
+    }
+    return card;
   }),
-  createConfirmDialog: vi.fn((title, message, onConfirm, onCancel) => {
-    const dialog = global.document.createElement('div');
-    dialog.className = 'ui-confirm';
-    dialog.innerHTML = `
-      <div class="ui-confirm-header">
-        <h3>${title}</h3>
-      </div>
-      <div class="ui-confirm-content">${message}</div>
-      <div class="ui-confirm-actions">
-        <button class="ui-btn-primary">Confirm</button>
-        <button class="ui-btn-secondary">Cancel</button>
-      </div>
-    `;
-
-    const confirmBtn = dialog.querySelector('.ui-btn-primary');
-    const cancelBtn = dialog.querySelector('.ui-btn-secondary');
-
-    if (onConfirm) confirmBtn.addEventListener('click', onConfirm);
-    if (onCancel) cancelBtn.addEventListener('click', onCancel);
-
+  createFormCard: vi.fn((title, formFields, onSubmit, submitText, className) => {
+    const card = global.document.createElement('article');
+    card.className = `card form-card ${className || ''}`.trim();
+    if (title) {
+      const header = global.document.createElement('header');
+      const titleElement = global.document.createElement('h3');
+      titleElement.textContent = title;
+      header.appendChild(titleElement);
+      card.appendChild(header);
+    }
+    const form = global.document.createElement('form');
+    form.className = 'card-form';
+    card.appendChild(form);
+    return card;
+  }),
+  createListCard: vi.fn((title, items, options, className) => {
+    const card = global.document.createElement('article');
+    card.className = `card list-card ${className || ''}`.trim();
+    if (title) {
+      const header = global.document.createElement('header');
+      const titleElement = global.document.createElement('h3');
+      titleElement.textContent = title;
+      header.appendChild(titleElement);
+      card.appendChild(header);
+    }
+    const listContainer = global.document.createElement('div');
+    listContainer.className = 'card-list';
+    items.forEach(item => {
+      const listItem = global.document.createElement('div');
+      listItem.className = 'list-item';
+      if (item.title) {
+        const titleDiv = global.document.createElement('div');
+        titleDiv.className = 'item-title';
+        titleDiv.textContent = item.title;
+        listItem.appendChild(titleDiv);
+      }
+      listContainer.appendChild(listItem);
+    });
+    card.appendChild(listContainer);
+    return card;
+  }),
+  createNavigation: vi.fn((items, ariaLabel, className) => {
+    const nav = global.document.createElement('nav');
+    nav.setAttribute('aria-label', ariaLabel || 'Main navigation');
+    nav.className = className || '';
+    
+    const ul = global.document.createElement('ul');
+    items.forEach(item => {
+      const li = global.document.createElement('li');
+      if (item.href) {
+        const a = global.document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.text;
+        if (item.active) {
+          a.setAttribute('aria-current', 'page');
+        }
+        li.appendChild(a);
+      } else if (item.onClick) {
+        const button = global.document.createElement('button');
+        button.textContent = item.text;
+        button.className = item.className || 'outline';
+        li.appendChild(button);
+      }
+      ul.appendChild(li);
+    });
+    nav.appendChild(ul);
+    return nav;
+  }),
+  createBreadcrumb: vi.fn((items, className) => {
+    const nav = global.document.createElement('nav');
+    nav.setAttribute('aria-label', 'Breadcrumb');
+    nav.className = `breadcrumb ${className || ''}`.trim();
+    
+    const ol = global.document.createElement('ol');
+    items.forEach((item, index) => {
+      const li = global.document.createElement('li');
+      if (index === items.length - 1) {
+        const span = global.document.createElement('span');
+        span.textContent = item.text;
+        span.setAttribute('aria-current', 'page');
+        li.appendChild(span);
+      } else {
+        const a = global.document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.text;
+        li.appendChild(a);
+      }
+      ol.appendChild(li);
+    });
+    nav.appendChild(ol);
+    return nav;
+  }),
+  createNavMenu: vi.fn((items, ariaLabel, className) => {
+    const nav = global.document.createElement('nav');
+    nav.setAttribute('aria-label', ariaLabel || 'Navigation menu');
+    nav.className = `nav-menu ${className || ''}`.trim();
+    
+    const ul = global.document.createElement('ul');
+    items.forEach(item => {
+      const li = global.document.createElement('li');
+      if (item.dropdown) {
+        const details = global.document.createElement('details');
+        details.className = 'dropdown';
+        const summary = global.document.createElement('summary');
+        summary.textContent = item.text;
+        details.appendChild(summary);
+        li.appendChild(details);
+      } else if (item.href) {
+        const a = global.document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.text;
+        li.appendChild(a);
+      } else if (item.onClick) {
+        const button = global.document.createElement('button');
+        button.textContent = item.text;
+        button.className = item.className || 'outline';
+        li.appendChild(button);
+      }
+      ul.appendChild(li);
+    });
+    nav.appendChild(ul);
+    return nav;
+  }),
+  createHeaderWithNav: vi.fn((title, navItems, options) => {
+    const header = global.document.createElement('header');
+    header.setAttribute('role', 'banner');
+    header.className = options?.className || '';
+    
+    if (title) {
+      const titleEl = global.document.createElement('h1');
+      titleEl.textContent = title;
+      titleEl.setAttribute('id', options?.titleId || 'page-title');
+      header.appendChild(titleEl);
+    }
+    
+    if (navItems && navItems.length > 0) {
+      const nav = global.document.createElement('nav');
+      nav.setAttribute('aria-label', options?.navAriaLabel || 'Main navigation');
+      nav.className = options?.navClassName || '';
+      header.appendChild(nav);
+    }
+    
+    return header;
+  }),
+  createModal: vi.fn((title, content, actions, options) => {
+    const dialog = global.document.createElement('dialog');
+    dialog.className = options?.className || '';
+    
+    const article = global.document.createElement('article');
+    
+    if (title) {
+      const header = global.document.createElement('header');
+      const titleEl = global.document.createElement('h3');
+      titleEl.textContent = title;
+      header.appendChild(titleEl);
+      article.appendChild(header);
+    }
+    
+    const mainContent = global.document.createElement('div');
+    if (typeof content === 'string') {
+      mainContent.innerHTML = content;
+    } else {
+      mainContent.appendChild(content);
+    }
+    article.appendChild(mainContent);
+    
+    if (actions && actions.length > 0) {
+      const footer = global.document.createElement('footer');
+      actions.forEach(action => {
+        const button = global.document.createElement('button');
+        button.textContent = action.text;
+        button.className = action.className || 'outline';
+        footer.appendChild(button);
+      });
+      article.appendChild(footer);
+    }
+    
+    if (options?.showClose !== false) {
+      const closeBtn = global.document.createElement('button');
+      closeBtn.textContent = '×';
+      closeBtn.className = 'outline';
+      closeBtn.setAttribute('aria-label', 'Close modal');
+      article.appendChild(closeBtn);
+    }
+    
+    dialog.appendChild(article);
+    return dialog;
+  }),
+  createConfirmDialog: vi.fn((message, onConfirm, onCancel, options) => {
+    const dialog = global.document.createElement('dialog');
+    dialog.className = 'confirm-dialog';
+    
+    const article = global.document.createElement('article');
+    
+    const header = global.document.createElement('header');
+    const titleEl = global.document.createElement('h3');
+    titleEl.textContent = options?.title || 'Confirm';
+    header.appendChild(titleEl);
+    article.appendChild(header);
+    
+    const mainContent = global.document.createElement('div');
+    mainContent.textContent = message;
+    article.appendChild(mainContent);
+    
+    const footer = global.document.createElement('footer');
+    const confirmBtn = global.document.createElement('button');
+    confirmBtn.textContent = options?.confirmText || 'Confirm';
+    confirmBtn.className = 'primary';
+    footer.appendChild(confirmBtn);
+    
+    const cancelBtn = global.document.createElement('button');
+    cancelBtn.textContent = options?.cancelText || 'Cancel';
+    cancelBtn.className = 'secondary';
+    footer.appendChild(cancelBtn);
+    
+    article.appendChild(footer);
+    dialog.appendChild(article);
+    
     return dialog;
   }),
   createTabs: vi.fn((tabs, options) => {

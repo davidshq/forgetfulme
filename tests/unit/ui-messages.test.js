@@ -195,14 +195,15 @@ describe('UIMessages', () => {
   });
 
   describe('loading', () => {
-    test('should show loading message', () => {
+    test('should show loading message with Pico progress', () => {
       const messageEl = UIMessages.loading('Please wait...', container);
 
       expect(messageEl.className).toContain('ui-message-loading');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '⏳'
-      );
+      expect(messageEl.getAttribute('aria-busy')).toBe('true');
+      expect(messageEl.querySelector('progress')).toBeTruthy();
+      expect(messageEl.querySelector('progress').getAttribute('aria-label')).toBe('Loading');
+      expect(messageEl.querySelector('.ui-message-text')).toBeTruthy();
+      expect(messageEl.querySelector('.ui-message-text').textContent).toBe('Please wait...');
     });
 
     test('should not auto-remove loading message', async () => {
@@ -217,14 +218,27 @@ describe('UIMessages', () => {
       expect(container.querySelector('.ui-message')).toBe(messageEl);
     });
 
-    test('should show loading message with custom options', () => {
-      const messageEl = UIMessages.loading('Loading...', container, {
-        icon: '🔄',
-      });
+    test('should show loading message without text', () => {
+      const messageEl = UIMessages.loading('', container);
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '🔄'
-      );
+      expect(messageEl.className).toContain('ui-message-loading');
+      expect(messageEl.getAttribute('aria-busy')).toBe('true');
+      expect(messageEl.querySelector('progress')).toBeTruthy();
+      expect(messageEl.querySelector('.ui-message-text')).toBeFalsy();
+    });
+
+    test('should handle null container gracefully', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      const result = UIMessages.loading('Loading...', null);
+
+      expect(result).toBeUndefined();
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleLogSpy).toHaveBeenCalledWith('[LOADING] Loading...');
+
+      consoleSpy.mockRestore();
+      consoleLogSpy.mockRestore();
     });
   });
 
@@ -373,6 +387,7 @@ describe('UIMessages', () => {
         createConfirmDialog: vi
           .fn()
           .mockReturnValue(document.createElement('div')),
+        showModal: vi.fn(),
       };
 
       const mockConfirm = vi.fn();
@@ -400,6 +415,7 @@ describe('UIMessages', () => {
         createConfirmDialog: vi
           .fn()
           .mockReturnValue(document.createElement('div')),
+        showModal: vi.fn(),
       };
 
       const options = {

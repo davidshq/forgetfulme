@@ -259,221 +259,141 @@ class BookmarkManagementPage {
    * @description Displays the main bookmark management interface with search, filter, and bulk operations
    */
   showMainInterface() {
-    // Create header with better accessibility
-    const header = document.createElement('header');
-    header.setAttribute('role', 'banner');
+    // Create breadcrumb navigation
+    const breadcrumbItems = [
+      { text: 'ForgetfulMe', href: '#' },
+      { text: 'Bookmark Management' }, // Current page
+    ];
 
-    const title = document.createElement('h1');
-    title.textContent = 'ForgetfulMe - Bookmark Management';
-    title.setAttribute('id', 'page-title');
-    header.appendChild(title);
+    const breadcrumb = UIComponents.createBreadcrumb(breadcrumbItems, 'page-breadcrumb');
 
-    const headerActions = document.createElement('div');
-    headerActions.className = 'header-actions';
-    headerActions.setAttribute('role', 'toolbar');
-    headerActions.setAttribute('aria-label', 'Page actions');
+    // Create header with navigation
+    const navItems = [
+      {
+        text: '← Back to Extension',
+        onClick: () => window.close(),
+        className: 'secondary',
+        title: 'Close bookmark management and return to extension',
+        'aria-label': 'Close bookmark management and return to extension',
+      },
+    ];
 
-    const backBtn = document.createElement('button');
-    backBtn.className = 'secondary';
-    backBtn.setAttribute(
-      'aria-label',
-      'Close bookmark management and return to extension'
+    const header = UIComponents.createHeaderWithNav(
+      'Bookmark Management',
+      navItems,
+      {
+        titleId: 'page-title',
+        navAriaLabel: 'Page actions',
+        navClassName: 'header-nav',
+      }
     );
-    backBtn.setAttribute('title', 'Close bookmark management');
-    backBtn.addEventListener('click', () => window.close());
 
-    const backIcon = document.createElement('span');
-    backIcon.textContent = '←';
-    backIcon.style.fontSize = '16px';
-    backIcon.style.fontWeight = 'bold';
-    backBtn.appendChild(backIcon);
-
-    const backText = document.createElement('span');
-    backText.textContent = ' Back to Extension';
-    backBtn.appendChild(backText);
-
-    headerActions.appendChild(backBtn);
-    header.appendChild(headerActions);
-
-    // Create main content container with sidebar layout
+    // Create main content container with sidebar layout using Pico components
     const mainContent = document.createElement('div');
     mainContent.className = 'main-content';
     mainContent.setAttribute('role', 'main');
 
-    // Create sidebar for search and filters
+    // Create sidebar for search and filters using Pico layout
     const sidebar = document.createElement('aside');
     sidebar.className = 'sidebar';
     sidebar.setAttribute('role', 'complementary');
-    sidebar.setAttribute('aria-label', 'Search and bulk actions');
 
-    // Create search and filter section
-    const searchSection = document.createElement('section');
-    searchSection.className = 'search-section';
-    searchSection.setAttribute('role', 'search');
-
-    const searchTitle = document.createElement('h3');
-    searchTitle.textContent = 'Search & Filter';
-    searchSection.appendChild(searchTitle);
-
-    // Create search form with better accessibility
-    const searchForm = document.createElement('form');
-    searchForm.className = 'search-form';
-    searchForm.setAttribute('role', 'search');
-    searchForm.setAttribute('aria-label', 'Search bookmarks');
-
-    // Search input group
-    const searchGroup = document.createElement('div');
-    searchGroup.className = 'form-group';
-
-    const searchLabel = document.createElement('label');
-    searchLabel.setAttribute('for', 'search-query');
-    searchLabel.textContent = 'Search:';
-    searchGroup.appendChild(searchLabel);
-
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.id = 'search-query';
-    searchInput.name = 'search-query';
-    searchInput.placeholder = 'Search by title, URL, or tags...';
-    searchInput.setAttribute('aria-describedby', 'search-help');
-    searchGroup.appendChild(searchInput);
-
-    const searchHelp = document.createElement('small');
-    searchHelp.id = 'search-help';
-    searchHelp.textContent = 'Enter keywords to search through your bookmarks';
-    searchHelp.style.color = '#6c757d';
-    searchHelp.style.fontSize = '12px';
-    searchGroup.appendChild(searchHelp);
-
-    // Status filter group
-    const statusGroup = document.createElement('div');
-    statusGroup.className = 'form-group';
-
-    const statusLabel = document.createElement('label');
-    statusLabel.setAttribute('for', 'status-filter');
-    statusLabel.textContent = 'Status:';
-    statusGroup.appendChild(statusLabel);
-
-    const statusSelect = document.createElement('select');
-    statusSelect.id = 'status-filter';
-    statusSelect.name = 'status-filter';
-    statusSelect.setAttribute('aria-describedby', 'status-help');
-    statusGroup.appendChild(statusSelect);
-
-    const statusOptions = [
-      { value: '', text: 'All Statuses' },
-      { value: 'read', text: 'Read' },
-      { value: 'good-reference', text: 'Good Reference' },
-      { value: 'low-value', text: 'Low Value' },
-      { value: 'revisit-later', text: 'Revisit Later' },
-    ];
-
-    statusOptions.forEach(option => {
-      const optionElement = document.createElement('option');
-      optionElement.value = option.value;
-      optionElement.textContent = option.text;
-      statusSelect.appendChild(optionElement);
-    });
-
-    const statusHelp = document.createElement('small');
-    statusHelp.id = 'status-help';
-    statusHelp.textContent = 'Filter bookmarks by their status';
-    statusHelp.style.color = '#6c757d';
-    statusHelp.style.fontSize = '12px';
-    statusGroup.appendChild(statusHelp);
-
-    // Search button
-    const searchBtn = document.createElement('button');
-    searchBtn.type = 'submit';
-    searchBtn.className = 'search-btn';
-    searchBtn.textContent = 'Search';
-    searchBtn.setAttribute(
-      'aria-label',
-      'Search bookmarks with current filters'
+    // Create search card
+    const searchForm = UIComponents.createForm(
+      'search-form',
+      e => {
+        e.preventDefault();
+        this.searchBookmarks();
+      },
+      [
+        {
+          type: 'text',
+          id: 'search-query',
+          label: 'Search Bookmarks:',
+          options: {
+            placeholder: 'Search by title, URL, or tags...',
+            helpText: 'Search through your bookmarks',
+          },
+        },
+        {
+          type: 'select',
+          id: 'status-filter',
+          label: 'Filter by Status:',
+          options: {
+            options: [
+              { value: 'all', text: 'All Statuses' },
+              { value: 'read', text: 'Read' },
+              { value: 'good-reference', text: 'Good Reference' },
+              { value: 'low-value', text: 'Low Value' },
+              { value: 'revisit-later', text: 'Revisit Later' },
+            ],
+            helpText: 'Filter bookmarks by their status',
+          },
+        },
+      ],
+      {
+        submitText: 'Search',
+        className: 'search-form',
+      }
     );
 
-    // Add form elements
-    searchForm.appendChild(searchGroup);
-    searchForm.appendChild(statusGroup);
-    searchForm.appendChild(searchBtn);
+    const searchCard = UIComponents.createCard(
+      'Search & Filter',
+      searchForm.outerHTML,
+      '',
+      'search-card'
+    );
+    sidebar.appendChild(searchCard);
 
-    // Add form submit handler
-    searchForm.addEventListener('submit', e => {
-      e.preventDefault();
-      this.searchBookmarks();
-    });
+    // Create bulk actions card
+    const bulkActions = [
+      {
+        text: 'Select All',
+        onClick: () => this.toggleSelectAll(),
+        className: 'secondary',
+      },
+      {
+        text: 'Delete Selected',
+        onClick: () => this.deleteSelectedBookmarks(),
+        className: 'contrast',
+      },
+      {
+        text: 'Export Selected',
+        onClick: () => this.exportSelectedBookmarks(),
+        className: 'secondary',
+      },
+    ];
 
-    searchSection.appendChild(searchForm);
-
-    // Create bulk actions section in sidebar
-    const bulkSection = document.createElement('section');
-    bulkSection.className = 'bulk-section';
-    bulkSection.setAttribute('role', 'toolbar');
-    bulkSection.setAttribute('aria-label', 'Bulk actions');
-
-    const bulkTitle = document.createElement('h3');
-    bulkTitle.textContent = 'Bulk Actions';
-    bulkSection.appendChild(bulkTitle);
-
-    const bulkActions = document.createElement('div');
-    bulkActions.className = 'bulk-actions';
-    bulkActions.setAttribute('role', 'group');
-    bulkActions.setAttribute('aria-label', 'Bulk action buttons');
-
-    const selectAllBtn = document.createElement('button');
-    selectAllBtn.id = 'select-all';
-    selectAllBtn.className = 'secondary';
-    selectAllBtn.textContent = 'Select All';
-    selectAllBtn.setAttribute('aria-label', 'Select all visible bookmarks');
-    bulkActions.appendChild(selectAllBtn);
-
-    const deleteSelectedBtn = document.createElement('button');
-    deleteSelectedBtn.id = 'delete-selected';
-    deleteSelectedBtn.className = 'contrast';
-    deleteSelectedBtn.textContent = 'Delete Selected';
-    deleteSelectedBtn.disabled = true;
-    deleteSelectedBtn.setAttribute('aria-label', 'Delete selected bookmarks');
-    bulkActions.appendChild(deleteSelectedBtn);
-
-    const exportSelectedBtn = document.createElement('button');
-    exportSelectedBtn.id = 'export-selected';
-    exportSelectedBtn.className = 'secondary';
-    exportSelectedBtn.textContent = 'Export Selected';
-    exportSelectedBtn.disabled = true;
-    exportSelectedBtn.setAttribute('aria-label', 'Export selected bookmarks');
-    bulkActions.appendChild(exportSelectedBtn);
-
-    bulkSection.appendChild(bulkActions);
-
-    sidebar.appendChild(searchSection);
-    sidebar.appendChild(bulkSection);
+    const bulkCard = UIComponents.createCardWithActions(
+      'Bulk Actions',
+      '<p>Select multiple bookmarks to perform bulk operations like deletion or export.</p>',
+      bulkActions,
+      'bulk-actions-card'
+    );
+    sidebar.appendChild(bulkCard);
 
     // Create content area for bookmarks
     const contentArea = document.createElement('div');
     contentArea.className = 'content-area';
     contentArea.setAttribute('role', 'main');
 
-    // Create bookmarks section
-    const bookmarksSection = document.createElement('section');
-    bookmarksSection.className = 'bookmarks-section';
-    bookmarksSection.setAttribute('role', 'region');
-    bookmarksSection.setAttribute('aria-label', 'Bookmarks list');
-
-    const bookmarksTitle = document.createElement('h3');
-    bookmarksTitle.textContent = 'Bookmarks';
-    bookmarksSection.appendChild(bookmarksTitle);
-
     // Create bookmarks list container
     const bookmarksList = document.createElement('div');
     bookmarksList.id = 'bookmarks-list';
     bookmarksList.setAttribute('role', 'list');
     bookmarksList.setAttribute('aria-label', 'Bookmarks');
-    bookmarksSection.appendChild(bookmarksList);
 
-    contentArea.appendChild(bookmarksSection);
+    const bookmarksCard = UIComponents.createCard(
+      'Bookmarks',
+      bookmarksList.outerHTML,
+      '',
+      'bookmarks-card'
+    );
+    contentArea.appendChild(bookmarksCard);
 
     // Assemble the interface
     this.appContainer.innerHTML = '';
+    this.appContainer.appendChild(breadcrumb);
     this.appContainer.appendChild(header);
     this.appContainer.appendChild(mainContent);
     mainContent.appendChild(sidebar);
