@@ -2,7 +2,7 @@
  * @fileoverview Unified Configuration Manager for ForgetfulMe Extension
  * @module config-manager
  * @description Consolidates all configuration logic and storage operations
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,14 +12,14 @@
  * Unified Configuration Manager for ForgetfulMe Extension
  * @class ConfigManager
  * @description Consolidates all configuration logic and storage operations
- * 
+ *
  * @example
  * const configManager = new ConfigManager();
  * await configManager.initialize();
- * 
+ *
  * // Get Supabase configuration
  * const supabaseConfig = await configManager.getSupabaseConfig();
- * 
+ *
  * // Set custom status types
  * await configManager.setCustomStatusTypes(['read', 'important', 'review']);
  */
@@ -151,7 +151,7 @@ class ConfigManager {
     try {
       const result = await chrome.storage.sync.get(['configVersion']);
       return result.configVersion || 0;
-    } catch (error) {
+    } catch {
       return 0;
     }
   }

@@ -2,7 +2,7 @@
  * @fileoverview Supabase configuration manager for ForgetfulMe extension
  * @module supabase-config
  * @description Manages Supabase configuration, authentication, and client setup
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -14,11 +14,11 @@ import ConfigManager from './utils/config-manager.js';
  * Supabase configuration manager for ForgetfulMe extension
  * @class SupabaseConfig
  * @description Manages Supabase configuration, authentication, and client setup
- * 
+ *
  * @example
  * const supabaseConfig = new SupabaseConfig();
  * await supabaseConfig.initialize();
- * 
+ *
  * if (supabaseConfig.isConfigured()) {
  *   const client = supabaseConfig.getSupabaseClient();
  *   // Use client for database operations
@@ -57,7 +57,7 @@ class SupabaseConfig {
    * @method loadConfiguration
    * @description Loads configuration from Chrome storage or environment variables for development
    * @throws {Error} When configuration loading fails
-   * 
+   *
    * @example
    * await supabaseConfig.loadConfiguration();
    * if (supabaseConfig.supabaseUrl) {
@@ -149,9 +149,11 @@ class SupabaseConfig {
       // Wait for Supabase client to be available
       let attempts = 0;
       const maxAttempts = 10;
-      
+
       while (typeof supabase === 'undefined' && attempts < maxAttempts) {
-        console.log(`Waiting for Supabase library to load... (attempt ${attempts + 1}/${maxAttempts})`);
+        console.log(
+          `Waiting for Supabase library to load... (attempt ${attempts + 1}/${maxAttempts})`
+        );
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }

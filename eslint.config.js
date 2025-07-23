@@ -2,7 +2,7 @@
  * @fileoverview ESLint configuration for ForgetfulMe Chrome Extension
  * @module eslint-config
  * @description ESLint configuration with Chrome extension specific rules and Prettier integration
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -47,6 +47,18 @@ export default [
         module: 'readonly',
         process: 'readonly',
         __dirname: 'readonly',
+        // Test globals
+        global: 'readonly',
+        expect: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+        Event: 'readonly',
         // Browser APIs
         URL: 'readonly',
         Blob: 'readonly',

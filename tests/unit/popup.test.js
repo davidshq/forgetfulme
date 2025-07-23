@@ -4,19 +4,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * @fileoverview Unit tests for ForgetfulMePopup using Kent Dodds testing methodology
  * @module popup.test
  * @description Tests for the main popup interface using Kent Dodds' testing principles:
- * 
+ *
  * 1. Test behavior, not implementation details
  * 2. Use proper async/await patterns for callback testing
  * 3. Mock at the right level (module boundaries)
  * 4. Focus on user interactions and outcomes
  * 5. Use descriptive test names that explain the scenario
- * 
+ *
  * Key methodology applied:
  * - For async callbacks (like UIMessages.confirm), capture the callback
  * - Use setTimeout(0) to allow async operations to start
  * - Manually trigger callbacks to simulate user interactions
  * - Test the actual behavior rather than internal implementation
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -38,7 +38,7 @@ vi.mock('../../utils/ui-components.js', () => ({
     createContainer: vi.fn(),
     createListItem: vi.fn(),
     createList: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../utils/auth-state-manager.js', () => ({
@@ -46,7 +46,7 @@ vi.mock('../../utils/auth-state-manager.js', () => ({
     initialize: vi.fn().mockResolvedValue(),
     isAuthenticated: vi.fn().mockResolvedValue(true),
     addListener: vi.fn(),
-  }))
+  })),
 }));
 
 vi.mock('../../utils/error-handler.js', () => ({
@@ -66,8 +66,8 @@ vi.mock('../../utils/error-handler.js', () => ({
       MEDIUM: 'MEDIUM',
       HIGH: 'HIGH',
       CRITICAL: 'CRITICAL',
-    }
-  }
+    },
+  },
 }));
 
 vi.mock('../../utils/ui-messages.js', () => ({
@@ -76,21 +76,21 @@ vi.mock('../../utils/ui-messages.js', () => ({
     error: vi.fn(),
     show: vi.fn(),
     confirm: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../utils/config-manager.js', () => ({
   default: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(),
     getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-  }))
+  })),
 }));
 
 vi.mock('../../utils/bookmark-transformer.js', () => ({
   default: {
     toUIFormat: vi.fn(),
     fromCurrentTab: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../supabase-config.js', () => ({
@@ -98,7 +98,7 @@ vi.mock('../../supabase-config.js', () => ({
     isConfigured: vi.fn().mockResolvedValue(true),
     initialize: vi.fn().mockResolvedValue(),
     getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
-  }))
+  })),
 }));
 
 vi.mock('../../supabase-service.js', () => ({
@@ -109,13 +109,13 @@ vi.mock('../../supabase-service.js', () => ({
     updateBookmark: vi.fn(),
     deleteBookmark: vi.fn(),
     getBookmarkById: vi.fn(),
-  }))
+  })),
 }));
 
 vi.mock('../../auth-ui.js', () => ({
   default: vi.fn().mockImplementation(() => ({
     showLoginForm: vi.fn(),
-  }))
+  })),
 }));
 
 // Mock chrome API
@@ -154,7 +154,7 @@ describe('ForgetfulMePopup', () => {
     mockUIComponents = UIComponents;
     mockUIMessages = UIMessages;
     mockErrorHandler = ErrorHandler;
-    
+
     // Directly replace the ErrorHandler.handle method to ensure it returns the correct structure
     ErrorHandler.handle = vi.fn().mockReturnValue({
       errorInfo: {
@@ -162,7 +162,7 @@ describe('ForgetfulMePopup', () => {
         severity: 'MEDIUM',
         message: 'Test error message',
         context: 'test',
-        originalError: new Error('Test error message')
+        originalError: new Error('Test error message'),
       },
       userMessage: 'Test error message',
       shouldRetry: false,
@@ -176,7 +176,7 @@ describe('ForgetfulMePopup', () => {
       read_status: 'read',
       tags: ['test'],
     });
-    
+
     // Create a new instance of SupabaseService and ensure methods are vi.fn() instances
     mockSupabaseService = new SupabaseService();
     mockSupabaseService.saveBookmark = vi.fn();
@@ -187,7 +187,7 @@ describe('ForgetfulMePopup', () => {
 
     // Mock DOM elements
     const mockAppContainer = document.createElement('div');
-    mockUIComponents.DOM.getElement.mockImplementation((id) => {
+    mockUIComponents.DOM.getElement.mockImplementation(id => {
       if (id === 'app') return mockAppContainer;
       if (id === 'read-status') return document.createElement('select');
       if (id === 'tags') return document.createElement('input');
@@ -199,14 +199,16 @@ describe('ForgetfulMePopup', () => {
     });
 
     // Mock chrome tabs
-    chrome.tabs.query.mockResolvedValue([{
-      url: 'https://example.com',
-      title: 'Test Page',
-    }]);
+    chrome.tabs.query.mockResolvedValue([
+      {
+        url: 'https://example.com',
+        title: 'Test Page',
+      },
+    ]);
 
     // Create popup instance
     popup = new ForgetfulMePopup();
-    
+
     // Replace the popup's service instances with our mocked ones
     popup.supabaseService = mockSupabaseService;
     popup.supabaseConfig = {
@@ -238,7 +240,10 @@ describe('ForgetfulMePopup', () => {
       await popup.markAsRead();
 
       expect(mockSupabaseService.saveBookmark).toHaveBeenCalled();
-      expect(mockUIMessages.success).toHaveBeenCalledWith('Page marked as read!', expect.any(Object));
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        'Page marked as read!',
+        expect.any(Object)
+      );
     });
 
     it('should show edit interface when duplicate bookmark exists', async () => {
@@ -263,9 +268,15 @@ describe('ForgetfulMePopup', () => {
         .mockReturnValueOnce('test, tags'); // tags
 
       // Mock UI components for edit interface
-      mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
-      mockUIComponents.createSection.mockReturnValue(document.createElement('div'));
-      mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
+      mockUIComponents.createButton.mockReturnValue(
+        document.createElement('button')
+      );
+      mockUIComponents.createSection.mockReturnValue(
+        document.createElement('div')
+      );
+      mockUIComponents.createForm.mockReturnValue(
+        document.createElement('form')
+      );
 
       await popup.markAsRead();
 
@@ -285,15 +296,21 @@ describe('ForgetfulMePopup', () => {
 
       await popup.markAsRead();
 
-      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.markAsRead');
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'popup.markAsRead'
+      );
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object)
+      );
     });
   });
 
   describe('updateBookmark', () => {
     it('should update bookmark successfully', async () => {
       const bookmarkId = 'test-bookmark-id';
-      
+
       // Mock successful update
       mockSupabaseService.updateBookmark.mockResolvedValue({
         id: bookmarkId,
@@ -308,12 +325,18 @@ describe('ForgetfulMePopup', () => {
 
       await popup.updateBookmark(bookmarkId);
 
-      expect(mockSupabaseService.updateBookmark).toHaveBeenCalledWith(bookmarkId, {
-        read_status: 'good-reference',
-        tags: ['updated', 'tags'],
-        updated_at: expect.any(String),
-      });
-      expect(mockUIMessages.success).toHaveBeenCalledWith('Bookmark updated successfully!', expect.any(Object));
+      expect(mockSupabaseService.updateBookmark).toHaveBeenCalledWith(
+        bookmarkId,
+        {
+          read_status: 'good-reference',
+          tags: ['updated', 'tags'],
+          updated_at: expect.any(String),
+        }
+      );
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        'Bookmark updated successfully!',
+        expect.any(Object)
+      );
     });
 
     it('should handle update errors', async () => {
@@ -328,8 +351,14 @@ describe('ForgetfulMePopup', () => {
 
       await popup.updateBookmark(bookmarkId);
 
-      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.updateBookmark');
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'popup.updateBookmark'
+      );
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object)
+      );
     });
   });
 
@@ -345,10 +374,10 @@ describe('ForgetfulMePopup', () => {
     it('should format time correctly', () => {
       const now = Date.now();
       expect(popup.formatTime(now)).toBe('Just now');
-      
+
       const oneMinuteAgo = now - 60000;
       expect(popup.formatTime(oneMinuteAgo)).toBe('1m ago');
-      
+
       const oneHourAgo = now - 3600000;
       expect(popup.formatTime(oneHourAgo)).toBe('1h ago');
     });
@@ -358,13 +387,15 @@ describe('ForgetfulMePopup', () => {
     it('should open bookmark management in new tab', () => {
       const mockTabsCreate = vi.fn();
       global.chrome.tabs.create = mockTabsCreate;
-      global.chrome.runtime.getURL = vi.fn().mockReturnValue('chrome-extension://test/bookmark-management.html');
+      global.chrome.runtime.getURL = vi
+        .fn()
+        .mockReturnValue('chrome-extension://test/bookmark-management.html');
 
       popup.showBookmarkManagement();
 
-      expect(mockTabsCreate).toHaveBeenCalledWith({ 
-        url: 'chrome-extension://test/bookmark-management.html' 
+      expect(mockTabsCreate).toHaveBeenCalledWith({
+        url: 'chrome-extension://test/bookmark-management.html',
       });
     });
   });
-}); 
+});

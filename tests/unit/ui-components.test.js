@@ -12,7 +12,7 @@ describe('UIComponents', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     global.console = mockConsole;
-    
+
     // Setup DOM environment
     document.body.innerHTML = '';
   });
@@ -116,7 +116,7 @@ describe('UIComponents', () => {
         });
 
         const readyPromise = UIComponents.DOM.ready();
-        
+
         // Simulate DOMContentLoaded event
         setTimeout(() => {
           document.readyState = 'complete';
@@ -173,7 +173,7 @@ describe('UIComponents', () => {
 
         expect(result).toBeNull();
         expect(mockConsole.warn).toHaveBeenCalledWith(
-          'UIComponents.DOM.getElement: Error accessing element with id \'test-element\':',
+          "UIComponents.DOM.getElement: Error accessing element with id 'test-element':",
           expect.any(Error)
         );
 
@@ -222,7 +222,7 @@ describe('UIComponents', () => {
 
         expect(result).toBeNull();
         expect(mockConsole.warn).toHaveBeenCalledWith(
-          'UIComponents.DOM.querySelector: Error accessing element with selector \'.test-class\':',
+          "UIComponents.DOM.querySelector: Error accessing element with selector '.test-class':",
           expect.any(Error)
         );
 
@@ -258,14 +258,17 @@ describe('UIComponents', () => {
         const mockContainer = {
           querySelectorAll: vi.fn().mockImplementation(() => {
             throw new Error('DOM access error');
-          })
+          }),
         };
 
-        const result = UIComponents.DOM.querySelectorAll('.test-class', mockContainer);
+        const result = UIComponents.DOM.querySelectorAll(
+          '.test-class',
+          mockContainer
+        );
 
         expect(result).toHaveLength(0);
         expect(mockConsole.warn).toHaveBeenCalledWith(
-          'UIComponents.DOM.querySelectorAll: Error accessing elements with selector \'.test-class\':',
+          "UIComponents.DOM.querySelectorAll: Error accessing elements with selector '.test-class':",
           expect.any(Error)
         );
       });
@@ -301,7 +304,10 @@ describe('UIComponents', () => {
       });
 
       test('should wait for element to appear', async () => {
-        const waitPromise = UIComponents.DOM.waitForElement('test-element', 1000);
+        const waitPromise = UIComponents.DOM.waitForElement(
+          'test-element',
+          1000
+        );
 
         // Add element after a delay
         setTimeout(() => {
@@ -318,7 +324,9 @@ describe('UIComponents', () => {
       test('should reject if element does not appear within timeout', async () => {
         await expect(
           UIComponents.DOM.waitForElement('non-existent', 10)
-        ).rejects.toThrow('Element with id \'non-existent\' not found within 10ms');
+        ).rejects.toThrow(
+          "Element with id 'non-existent' not found within 10ms"
+        );
       });
     });
 
@@ -329,7 +337,11 @@ describe('UIComponents', () => {
         document.body.appendChild(element);
 
         const mockHandler = vi.fn();
-        const result = UIComponents.DOM.addEventListener('test-button', 'click', mockHandler);
+        const result = UIComponents.DOM.addEventListener(
+          'test-button',
+          'click',
+          mockHandler
+        );
 
         expect(result).toBe(true);
 
@@ -340,11 +352,15 @@ describe('UIComponents', () => {
 
       test('should return false for non-existent element', () => {
         const mockHandler = vi.fn();
-        const result = UIComponents.DOM.addEventListener('non-existent', 'click', mockHandler);
+        const result = UIComponents.DOM.addEventListener(
+          'non-existent',
+          'click',
+          mockHandler
+        );
 
         expect(result).toBe(false);
         expect(mockConsole.warn).toHaveBeenCalledWith(
-          'UIComponents.DOM.addEventListener: Element with id \'non-existent\' not found'
+          "UIComponents.DOM.addEventListener: Element with id 'non-existent' not found"
         );
       });
     });
@@ -366,7 +382,7 @@ describe('UIComponents', () => {
 
         expect(result).toBe(false);
         expect(mockConsole.warn).toHaveBeenCalledWith(
-          'UIComponents.DOM.setValue: Element with id \'non-existent\' not found'
+          "UIComponents.DOM.setValue: Element with id 'non-existent' not found"
         );
       });
     });
@@ -485,7 +501,11 @@ describe('UIComponents', () => {
       });
 
       test('should create button with custom class', () => {
-        const button = UIComponents.createButton('Test', vi.fn(), 'custom-class');
+        const button = UIComponents.createButton(
+          'Test',
+          vi.fn(),
+          'custom-class'
+        );
 
         expect(button.className).toContain('custom-class');
       });
@@ -503,7 +523,11 @@ describe('UIComponents', () => {
 
     describe('createFormField', () => {
       test('should create text input field', () => {
-        const field = UIComponents.createFormField('text', 'test-input', 'Test Label');
+        const field = UIComponents.createFormField(
+          'text',
+          'test-input',
+          'Test Label'
+        );
 
         expect(field.tagName).toBe('DIV');
         expect(field.querySelector('label')).toBeTruthy();
@@ -515,16 +539,25 @@ describe('UIComponents', () => {
 
       test('should create select field', () => {
         const options = ['option1', 'option2'];
-        const field = UIComponents.createFormField('select', 'test-select', 'Test Label', {
-          options,
-        });
+        const field = UIComponents.createFormField(
+          'select',
+          'test-select',
+          'Test Label',
+          {
+            options,
+          }
+        );
 
         expect(field.querySelector('select')).toBeTruthy();
         expect(field.querySelectorAll('option')).toHaveLength(2);
       });
 
       test('should create textarea field', () => {
-        const field = UIComponents.createFormField('textarea', 'test-textarea', 'Test Label');
+        const field = UIComponents.createFormField(
+          'textarea',
+          'test-textarea',
+          'Test Label'
+        );
 
         const input = field.querySelector('input');
         expect(input).toBeTruthy();
@@ -532,17 +565,27 @@ describe('UIComponents', () => {
       });
 
       test('should handle field with placeholder', () => {
-        const field = UIComponents.createFormField('text', 'test-input', 'Test Label', {
-          placeholder: 'Enter text...',
-        });
+        const field = UIComponents.createFormField(
+          'text',
+          'test-input',
+          'Test Label',
+          {
+            placeholder: 'Enter text...',
+          }
+        );
 
         expect(field.querySelector('input').placeholder).toBe('Enter text...');
       });
 
       test('should handle required field', () => {
-        const field = UIComponents.createFormField('text', 'test-input', 'Test Label', {
-          required: true,
-        });
+        const field = UIComponents.createFormField(
+          'text',
+          'test-input',
+          'Test Label',
+          {
+            required: true,
+          }
+        );
 
         expect(field.querySelector('input').required).toBe(true);
       });
@@ -556,7 +599,11 @@ describe('UIComponents', () => {
         ];
 
         const mockSubmitHandler = vi.fn();
-        const form = UIComponents.createForm('test-form', mockSubmitHandler, fields);
+        const form = UIComponents.createForm(
+          'test-form',
+          mockSubmitHandler,
+          fields
+        );
 
         expect(form.tagName).toBe('FORM');
         expect(form.id).toBe('test-form');
@@ -588,14 +635,21 @@ describe('UIComponents', () => {
       });
 
       test('should create container with subtitle', () => {
-        const container = UIComponents.createContainer('Test Title', 'Test Subtitle');
+        const container = UIComponents.createContainer(
+          'Test Title',
+          'Test Subtitle'
+        );
 
         expect(container.querySelector('p')).toBeTruthy();
         expect(container.querySelector('p').textContent).toBe('Test Subtitle');
       });
 
       test('should create container with custom class', () => {
-        const container = UIComponents.createContainer('Test Title', '', 'custom-container');
+        const container = UIComponents.createContainer(
+          'Test Title',
+          '',
+          'custom-container'
+        );
 
         expect(container.className).toContain('custom-container');
       });
@@ -630,7 +684,7 @@ describe('UIComponents', () => {
 
       test('should create list item with custom template', () => {
         const data = { title: 'Test Item' };
-        const template = (data) => data.title;
+        const template = data => data.title;
         const item = UIComponents.createListItem(data, { template });
 
         // The implementation doesn't support custom templates
@@ -651,7 +705,10 @@ describe('UIComponents', () => {
       });
 
       test('should create section with custom class', () => {
-        const section = UIComponents.createSection('Test Section', 'custom-section');
+        const section = UIComponents.createSection(
+          'Test Section',
+          'custom-section'
+        );
 
         expect(section.className).toContain('custom-section');
       });
@@ -708,11 +765,16 @@ describe('UIComponents', () => {
         expect(spinner.className).toContain('loading-spinner');
         expect(spinner.querySelector('.spinner')).toBeTruthy();
         expect(spinner.querySelector('.spinner-text')).toBeTruthy();
-        expect(spinner.querySelector('.spinner-text').textContent).toBe('Loading...');
+        expect(spinner.querySelector('.spinner-text').textContent).toBe(
+          'Loading...'
+        );
       });
 
       test('should create loading spinner with custom class', () => {
-        const spinner = UIComponents.createLoadingSpinner('Loading...', 'custom-spinner');
+        const spinner = UIComponents.createLoadingSpinner(
+          'Loading...',
+          'custom-spinner'
+        );
 
         expect(spinner.className).toContain('custom-spinner');
       });
@@ -720,7 +782,10 @@ describe('UIComponents', () => {
 
     describe('createStatusIndicator', () => {
       test('should create status indicator', () => {
-        const indicator = UIComponents.createStatusIndicator('success', 'Success!');
+        const indicator = UIComponents.createStatusIndicator(
+          'success',
+          'Success!'
+        );
 
         expect(indicator.tagName).toBe('DIV');
         expect(indicator.className).toContain('status-indicator');
@@ -729,9 +794,13 @@ describe('UIComponents', () => {
       });
 
       test('should create status indicator with icon', () => {
-        const indicator = UIComponents.createStatusIndicator('warning', 'Warning!', {
-          icon: '⚠️'
-        });
+        const indicator = UIComponents.createStatusIndicator(
+          'warning',
+          'Warning!',
+          {
+            icon: '⚠️',
+          }
+        );
 
         expect(indicator.querySelector('.status-icon')).toBeTruthy();
         expect(indicator.querySelector('.status-icon').textContent).toBe('⚠');
@@ -764,7 +833,7 @@ describe('UIComponents', () => {
         // The implementation doesn't support custom options, so it uses defaults
         expect(tabContainer.className).toBe('tab-container');
         expect(tabContainer.querySelector('.tab-button')).toBeTruthy();
-        
+
         // Check that the first tab is active by default
         const firstButton = tabContainer.querySelector('.tab-button');
         expect(firstButton.className).toContain('active');
@@ -786,7 +855,7 @@ describe('UIComponents', () => {
 
         expect(navItems.length).toBe(2);
         expect(contents.length).toBe(2);
-        
+
         // The mock DOM implementation doesn't properly handle classList.toggle
         // so we can't test the actual switching, but we can verify the structure
         expect(navItems.length).toBe(2);
@@ -803,12 +872,12 @@ describe('UIComponents', () => {
         expect(modal.tagName).toBe('DIV');
         expect(modal.querySelector('div')).toBeTruthy();
         expect(modal.querySelector('div')).toBeTruthy();
-        
+
         // Check for h3 element in header
         const titleEl = modal.querySelector('h3');
         expect(titleEl).toBeTruthy();
         expect(titleEl.textContent).toBe('Test Modal');
-        
+
         expect(modal.querySelector('div')).toBeTruthy();
         // The modal body contains the content element, not the text directly
         expect(modal.querySelector('div').children.length).toBeGreaterThan(0);
@@ -872,4 +941,4 @@ describe('UIComponents', () => {
       });
     });
   });
-}); 
+});

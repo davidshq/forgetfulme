@@ -18,7 +18,7 @@ test.describe('ForgetfulMe Options Tests', () => {
   });
 
   test('should display configuration interface when not configured', async ({
-    page,
+    _page,
   }) => {
     // Test that the configuration interface is shown
     const configContainer =

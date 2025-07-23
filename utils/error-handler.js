@@ -2,7 +2,7 @@
  * @fileoverview Centralized Error Handler for ForgetfulMe Extension
  * @module error-handler
  * @description Provides comprehensive error handling, categorization, and user-friendly error messages
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,12 +12,12 @@
  * Centralized Error Handler for ForgetfulMe Extension
  * @class ErrorHandler
  * @description Handles error categorization, logging, and user-friendly error messages
- * 
+ *
  * @example
  * // Handle an error
  * const result = ErrorHandler.handle(error, 'popup.initialize');
  * console.log(result.userMessage);
- * 
+ *
  * // Create a custom error
  * const error = ErrorHandler.createError('Custom error message', ErrorHandler.ERROR_TYPES.VALIDATION);
  */
@@ -88,7 +88,7 @@ class ErrorHandler {
    */
   static categorizeError(error, context) {
     const message = error.message || error.toString();
-    const stack = error.stack || '';
+    // const stack = error.stack || '';
 
     // Network errors
     if (
@@ -246,7 +246,7 @@ class ErrorHandler {
    * @returns {string} - User-friendly error message
    */
   static getUserMessage(errorInfo, options = {}) {
-    const { type, message, context } = errorInfo;
+    const { type, message } = errorInfo;
     const showTechnical = options.showTechnical || false;
 
     // If technical details are requested, return the original message
@@ -316,10 +316,13 @@ class ErrorHandler {
    * @returns {boolean} - Whether to retry
    */
   static shouldRetry(errorInfo) {
-    const { type, severity } = errorInfo;
+    const { type } = errorInfo;
 
     // Retry network errors and database errors
-    if (type === this.ERROR_TYPES.NETWORK || type === this.ERROR_TYPES.DATABASE) {
+    if (
+      type === this.ERROR_TYPES.NETWORK ||
+      type === this.ERROR_TYPES.DATABASE
+    ) {
       return true;
     }
 
@@ -450,7 +453,7 @@ class ErrorHandler {
       if (messageDiv.parentNode) {
         messageDiv.parentNode.removeChild(messageDiv);
       }
-        }, timeout);
+    }, timeout);
   }
 
   /**
@@ -463,7 +466,7 @@ class ErrorHandler {
     const trimmed = input.trim();
 
     switch (type) {
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return {
           isValid: emailRegex.test(trimmed),
@@ -471,6 +474,7 @@ class ErrorHandler {
             ? null
             : 'Please enter a valid email address.',
         };
+      }
 
       case 'url':
         try {

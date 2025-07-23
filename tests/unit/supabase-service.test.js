@@ -89,13 +89,21 @@ describe('SupabaseService', () => {
         error: null,
       });
 
-      const result = await supabaseService.getBookmarkByUrl('https://example.com');
+      const result = await supabaseService.getBookmarkByUrl(
+        'https://example.com'
+      );
 
       expect(result).toEqual(mockBookmark);
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('bookmarks');
       expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith('url', 'https://example.com');
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith(
+        'user_id',
+        'test-user-id'
+      );
+      expect(mockSupabaseClient.eq).toHaveBeenCalledWith(
+        'url',
+        'https://example.com'
+      );
       expect(mockSupabaseClient.single).toHaveBeenCalled();
     });
 
@@ -105,7 +113,9 @@ describe('SupabaseService', () => {
         error: { code: 'PGRST116' }, // No rows returned
       });
 
-      const result = await supabaseService.getBookmarkByUrl('https://example.com');
+      const result = await supabaseService.getBookmarkByUrl(
+        'https://example.com'
+      );
 
       expect(result).toBeNull();
     });
@@ -117,13 +127,17 @@ describe('SupabaseService', () => {
         error: mockError,
       });
 
-      await expect(supabaseService.getBookmarkByUrl('https://example.com')).rejects.toThrow('Database error');
+      await expect(
+        supabaseService.getBookmarkByUrl('https://example.com')
+      ).rejects.toThrow('Database error');
     });
 
     it('should throw error when user is not authenticated', async () => {
       mockSupabaseConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(supabaseService.getBookmarkByUrl('https://example.com')).rejects.toThrow('User not authenticated');
+      await expect(
+        supabaseService.getBookmarkByUrl('https://example.com')
+      ).rejects.toThrow('User not authenticated');
     });
   });
 
@@ -139,7 +153,9 @@ describe('SupabaseService', () => {
       };
 
       // Mock getBookmarkByUrl to return existing bookmark
-      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(existingBookmark);
+      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(
+        existingBookmark
+      );
 
       const bookmark = {
         url: 'https://example.com',
@@ -154,7 +170,9 @@ describe('SupabaseService', () => {
         ...existingBookmark,
         isDuplicate: true,
       });
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith('https://example.com');
+      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
+        'https://example.com'
+      );
       expect(mockSupabaseClient.insert).not.toHaveBeenCalled();
     });
 
@@ -186,7 +204,9 @@ describe('SupabaseService', () => {
       const result = await supabaseService.saveBookmark(bookmark);
 
       expect(result).toEqual(newBookmark);
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith('https://example.com');
+      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
+        'https://example.com'
+      );
       expect(mockSupabaseClient.insert).toHaveBeenCalled();
     });
 
@@ -201,7 +221,9 @@ describe('SupabaseService', () => {
         title: 'Test Bookmark',
       };
 
-      await expect(supabaseService.saveBookmark(bookmark)).rejects.toThrow('Invalid bookmark data: Invalid URL');
+      await expect(supabaseService.saveBookmark(bookmark)).rejects.toThrow(
+        'Invalid bookmark data: Invalid URL'
+      );
       expect(BookmarkTransformer.validate).toHaveBeenCalledWith(bookmark);
     });
 
@@ -213,7 +235,9 @@ describe('SupabaseService', () => {
         title: 'Test Bookmark',
       };
 
-      await expect(supabaseService.saveBookmark(bookmark)).rejects.toThrow('User not authenticated');
+      await expect(supabaseService.saveBookmark(bookmark)).rejects.toThrow(
+        'User not authenticated'
+      );
     });
   });
 
@@ -226,4 +250,4 @@ describe('SupabaseService', () => {
       expect(supabaseService.supabase).toBe(mockSupabaseClient);
     });
   });
-}); 
+});

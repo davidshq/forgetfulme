@@ -3,7 +3,7 @@ import ErrorHandler from '../../utils/error-handler.js';
 
 /**
  * ErrorHandler Unit Tests
- * 
+ *
  * Tests the error handling and categorization functionality.
  * This module is critical for providing user-friendly error messages
  * and proper error categorization for different error types.
@@ -342,7 +342,9 @@ describe('ErrorHandler', () => {
         message: 'Technical error message',
       };
 
-      const result = ErrorHandler.getUserMessage(errorInfo, { showTechnical: true });
+      const result = ErrorHandler.getUserMessage(errorInfo, {
+        showTechnical: true,
+      });
 
       expect(result).toBe('Technical error message');
     });
@@ -355,7 +357,9 @@ describe('ErrorHandler', () => {
 
       const result = ErrorHandler.getUserMessage(errorInfo);
 
-      expect(result).toBe('Connection error. Please check your internet connection and try again.');
+      expect(result).toBe(
+        'Connection error. Please check your internet connection and try again.'
+      );
     });
 
     test('should return user-friendly auth error messages', () => {
@@ -374,7 +378,8 @@ describe('ErrorHandler', () => {
         },
         {
           message: 'Email not confirmed',
-          expected: 'Please check your email and click the verification link before signing in.',
+          expected:
+            'Please check your email and click the verification link before signing in.',
         },
         {
           message: 'User not authenticated',
@@ -633,7 +638,9 @@ describe('ErrorHandler', () => {
       const error = new Error('Operation failed');
       const operation = vi.fn().mockRejectedValue(error);
 
-      await expect(ErrorHandler.handleAsync(operation, 'test-context')).rejects.toThrow();
+      await expect(
+        ErrorHandler.handleAsync(operation, 'test-context')
+      ).rejects.toThrow();
     });
 
     test('should pass options to error handler', async () => {
@@ -641,7 +648,9 @@ describe('ErrorHandler', () => {
       const operation = vi.fn().mockRejectedValue(error);
       const options = { silent: true };
 
-      await expect(ErrorHandler.handleAsync(operation, 'test-context', options)).rejects.toThrow();
+      await expect(
+        ErrorHandler.handleAsync(operation, 'test-context', options)
+      ).rejects.toThrow();
     });
   });
 
@@ -707,4 +716,4 @@ describe('ErrorHandler', () => {
       expect(result.isValid).toBe(false);
     });
   });
-}); 
+});

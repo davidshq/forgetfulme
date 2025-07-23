@@ -2,7 +2,7 @@
  * @fileoverview Vitest setup file for ForgetfulMe Chrome Extension tests
  * @module vitest-setup
  * @description Provides comprehensive mocking for Chrome APIs and DOM elements for unit testing
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -37,39 +37,39 @@ global.chrome = {
       clear: vi.fn(),
       onChanged: {
         addListener: vi.fn(),
-        removeListener: vi.fn()
-      }
+        removeListener: vi.fn(),
+      },
     },
     local: {
       get: vi.fn(),
       set: vi.fn(),
       remove: vi.fn(),
-      clear: vi.fn()
-    }
+      clear: vi.fn(),
+    },
   },
   runtime: {
     sendMessage: vi.fn(),
     onMessage: {
       addListener: vi.fn(),
-      removeListener: vi.fn()
+      removeListener: vi.fn(),
     },
     openOptionsPage: vi.fn(),
-    getURL: vi.fn((path) => `chrome-extension://test-id/${path}`)
+    getURL: vi.fn(path => `chrome-extension://test-id/${path}`),
   },
   tabs: {
     query: vi.fn(),
     get: vi.fn(),
     update: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
   },
   action: {
     setBadgeText: vi.fn(),
-    setBadgeBackgroundColor: vi.fn()
+    setBadgeBackgroundColor: vi.fn(),
   },
   notifications: {
     create: vi.fn(),
-    clear: vi.fn()
-  }
+    clear: vi.fn(),
+  },
 };
 
 /**
@@ -79,7 +79,7 @@ global.chrome = {
  * @returns {Object} Mock DOM element with full functionality
  * @description Creates a comprehensive mock DOM element with event handling and DOM manipulation capabilities
  */
-const createMockElement = (tagName) => {
+const createMockElement = tagName => {
   const element = {
     tagName: tagName.toUpperCase(),
     id: '',
@@ -93,11 +93,11 @@ const createMockElement = (tagName) => {
     previousSibling: null,
     firstChild: null,
     lastChild: null,
-    
+
     // Event handling
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(function(event) {
+    dispatchEvent: vi.fn(function (event) {
       // Actually call the event listeners
       const listeners = this._eventListeners || [];
       listeners.forEach(listener => {
@@ -107,18 +107,18 @@ const createMockElement = (tagName) => {
       });
       return true;
     }),
-    
+
     // DOM manipulation
-    appendChild: vi.fn(function(child) {
+    appendChild: vi.fn(function (child) {
       if (child && typeof child === 'object') {
         // Ensure child has required properties
-        if (!child.hasOwnProperty('parentNode')) {
+        if (!Object.prototype.hasOwnProperty.call(child, 'parentNode')) {
           child.parentNode = null;
         }
-        if (!child.hasOwnProperty('children')) {
+        if (!Object.prototype.hasOwnProperty.call(child, 'children')) {
           child.children = [];
         }
-        
+
         child.parentNode = this;
         this.children.push(child);
         if (!this.firstChild) this.firstChild = child;
@@ -126,12 +126,12 @@ const createMockElement = (tagName) => {
       }
       return child;
     }),
-    removeChild: vi.fn(function(child) {
+    removeChild: vi.fn(function (child) {
       if (child && typeof child === 'object') {
         const index = this.children.indexOf(child);
         if (index > -1) {
           this.children.splice(index, 1);
-          if (child.hasOwnProperty('parentNode')) {
+          if (Object.prototype.hasOwnProperty.call(child, 'parentNode')) {
             child.parentNode = null;
           }
           if (this.firstChild === child) {
@@ -144,17 +144,19 @@ const createMockElement = (tagName) => {
       }
       return child;
     }),
-    insertBefore: vi.fn(function(newNode, referenceNode) {
+    insertBefore: vi.fn(function (newNode, referenceNode) {
       if (newNode && typeof newNode === 'object') {
         // Ensure newNode has required properties
-        if (!newNode.hasOwnProperty('parentNode')) {
+        if (!Object.prototype.hasOwnProperty.call(newNode, 'parentNode')) {
           newNode.parentNode = null;
         }
-        if (!newNode.hasOwnProperty('children')) {
+        if (!Object.prototype.hasOwnProperty.call(newNode, 'children')) {
           newNode.children = [];
         }
-        
-        const index = referenceNode ? this.children.indexOf(referenceNode) : this.children.length;
+
+        const index = referenceNode
+          ? this.children.indexOf(referenceNode)
+          : this.children.length;
         this.children.splice(index, 0, newNode);
         newNode.parentNode = this;
         if (!this.firstChild) this.firstChild = newNode;
@@ -162,20 +164,25 @@ const createMockElement = (tagName) => {
       }
       return newNode;
     }),
-    replaceChild: vi.fn(function(newChild, oldChild) {
-      if (newChild && typeof newChild === 'object' && oldChild && typeof oldChild === 'object') {
+    replaceChild: vi.fn(function (newChild, oldChild) {
+      if (
+        newChild &&
+        typeof newChild === 'object' &&
+        oldChild &&
+        typeof oldChild === 'object'
+      ) {
         // Ensure newChild has required properties
-        if (!newChild.hasOwnProperty('parentNode')) {
+        if (!Object.prototype.hasOwnProperty.call(newChild, 'parentNode')) {
           newChild.parentNode = null;
         }
-        if (!newChild.hasOwnProperty('children')) {
+        if (!Object.prototype.hasOwnProperty.call(newChild, 'children')) {
           newChild.children = [];
         }
-        
+
         const index = this.children.indexOf(oldChild);
         if (index > -1) {
           this.children[index] = newChild;
-          if (oldChild.hasOwnProperty('parentNode')) {
+          if (Object.prototype.hasOwnProperty.call(oldChild, 'parentNode')) {
             oldChild.parentNode = null;
           }
           newChild.parentNode = this;
@@ -185,15 +192,21 @@ const createMockElement = (tagName) => {
       }
       return oldChild;
     }),
-    
+
     // Query methods
-    querySelector: vi.fn(function(selector) {
+    querySelector: vi.fn(function (selector) {
       // Return the first child that matches the selector
       for (const child of this.children) {
-        if (child.className && child.className.includes(selector.replace('.', ''))) {
+        if (
+          child.className &&
+          child.className.includes(selector.replace('.', ''))
+        ) {
           return child;
         }
-        if (child.tagName && child.tagName.toLowerCase() === selector.toLowerCase()) {
+        if (
+          child.tagName &&
+          child.tagName.toLowerCase() === selector.toLowerCase()
+        ) {
           return child;
         }
         // Check nested children
@@ -202,36 +215,42 @@ const createMockElement = (tagName) => {
       }
       return null;
     }),
-    querySelectorAll: vi.fn(function(selector) {
+    querySelectorAll: vi.fn(function (selector) {
       const results = [];
       const seen = new Set();
-      
-      const searchElement = (element) => {
+
+      const searchElement = element => {
         if (seen.has(element)) return;
         seen.add(element);
-        
+
         // Handle class selectors
         if (selector.startsWith('.')) {
           const className = selector.substring(1);
-          if (element.className && element.className.split(' ').includes(className)) {
+          if (
+            element.className &&
+            element.className.split(' ').includes(className)
+          ) {
             results.push(element);
           }
         }
         // Handle tag selectors
-        else if (element.tagName && element.tagName.toLowerCase() === selector.toLowerCase()) {
+        else if (
+          element.tagName &&
+          element.tagName.toLowerCase() === selector.toLowerCase()
+        ) {
           results.push(element);
         }
-        
+
         // Search children
         for (const child of element.children) {
           searchElement(child);
         }
       };
-      
+
       searchElement(this);
       return results;
     }),
-    
+
     // Properties
     getBoundingClientRect: vi.fn(() => ({
       top: 0,
@@ -239,7 +258,7 @@ const createMockElement = (tagName) => {
       width: 100,
       height: 50,
       right: 100,
-      bottom: 50
+      bottom: 50,
     })),
     classList: {
       add: vi.fn(),
@@ -247,22 +266,22 @@ const createMockElement = (tagName) => {
       contains: vi.fn(),
       toggle: vi.fn(),
       length: 0,
-      value: ''
+      value: '',
     },
-    click: vi.fn(function() {
+    click: vi.fn(function () {
       const event = { type: 'click', target: this };
       this.dispatchEvent(event);
     }),
     focus: vi.fn(),
     blur: vi.fn(),
     select: vi.fn(),
-    
+
     // Attributes
     getAttribute: vi.fn(),
     setAttribute: vi.fn(),
     removeAttribute: vi.fn(),
     hasAttribute: vi.fn(),
-    
+
     // Dimensions
     offsetWidth: 100,
     offsetHeight: 50,
@@ -274,22 +293,26 @@ const createMockElement = (tagName) => {
     scrollTop: 0,
     offsetLeft: 0,
     offsetTop: 0,
-    
+
     // Node properties
     nodeType: 1,
     nodeName: tagName.toUpperCase(),
     nodeValue: null,
-    
+
     // Form properties
-    type: tagName.toLowerCase() === 'button' ? 'button' : 
-          tagName.toLowerCase() === 'textarea' ? 'textarea' : 'text',
+    type:
+      tagName.toLowerCase() === 'button'
+        ? 'button'
+        : tagName.toLowerCase() === 'textarea'
+          ? 'textarea'
+          : 'text',
     value: '',
     checked: false,
     required: false,
     disabled: false,
-    
+
     // Methods
-    cloneNode: vi.fn(function(deep = false) {
+    cloneNode: vi.fn(function (deep = false) {
       const clone = createMockElement(this.tagName);
       clone.id = this.id;
       clone.className = this.className;
@@ -303,62 +326,62 @@ const createMockElement = (tagName) => {
     }),
     matches: vi.fn(),
     closest: vi.fn(),
-    
+
     // Event listener storage
-    _eventListeners: []
+    _eventListeners: [],
   };
-  
+
   // Override addEventListener to store listeners
-  element.addEventListener = vi.fn(function(type, handler) {
+  element.addEventListener = vi.fn(function (type, handler) {
     this._eventListeners.push({ type, handler });
   });
-  
+
   // Override setAttribute to register elements with IDs
   const originalSetAttribute = element.setAttribute;
-  element.setAttribute = vi.fn(function(name, value) {
+  element.setAttribute = vi.fn(function (name, value) {
     if (name === 'id') {
       this.id = value;
       global.document.registerElement(value, this);
     }
     originalSetAttribute.call(this, name, value);
   });
-  
+
   // Override id property to register elements
   Object.defineProperty(element, 'id', {
-    get: function() {
+    get: function () {
       return this._id || '';
     },
-    set: function(value) {
+    set: function (value) {
       this._id = value;
       if (value) {
         global.document.registerElement(value, this);
       }
-    }
+    },
   });
-  
+
   return element;
 };
 
 // Mock document
 global.document = {
-  createElement: vi.fn((tagName) => createMockElement(tagName)),
-  getElementById: vi.fn((id) => {
+  createElement: vi.fn(tagName => createMockElement(tagName)),
+  getElementById: vi.fn(id => {
     // Store elements by ID in a map
     if (!global.document._elementsById) {
       global.document._elementsById = new Map();
     }
     return global.document._elementsById.get(id) || null;
   }),
-  getElementsByClassName: vi.fn((className) => {
+  getElementsByClassName: vi.fn(className => {
     return global.document.body.querySelectorAll(`.${className}`);
   }),
-  getElementsByTagName: vi.fn((tagName) => {
+  getElementsByTagName: vi.fn(tagName => {
     return global.document.body.querySelectorAll(tagName);
   }),
-  querySelector: vi.fn((selector) => {
+  querySelector: vi.fn(selector => {
     return global.document.body.querySelector(selector);
   }),
-  querySelectorAll: vi.fn((selector) => {
+  querySelectorAll: vi.fn(selector => {
     return global.document.body.querySelectorAll(selector);
   }),
   addEventListener: vi.fn(),
@@ -366,14 +389,14 @@ global.document = {
   body: createMockElement('body'),
   head: createMockElement('head'),
   documentElement: createMockElement('html'),
-  
+
   // Helper method to register elements by ID
   registerElement: vi.fn((id, element) => {
     if (!global.document._elementsById) {
       global.document._elementsById = new Map();
     }
     global.document._elementsById.set(id, element);
-  })
+  }),
 };
 
 // Mock window
@@ -394,20 +417,20 @@ global.window = {
     origin: 'http://localhost:3000',
     pathname: '/',
     search: '',
-    hash: ''
+    hash: '',
   },
   localStorage: {
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
-    clear: vi.fn()
+    clear: vi.fn(),
   },
   sessionStorage: {
     getItem: vi.fn(),
     setItem: vi.fn(),
     removeItem: vi.fn(),
-    clear: vi.fn()
-  }
+    clear: vi.fn(),
+  },
 };
 
 // Mock fetch
@@ -430,7 +453,7 @@ global.UIComponents = {
     const form = global.document.createElement('form');
     form.id = id;
     form.className = options.className || '';
-    
+
     fields.forEach(field => {
       const fieldElement = global.document.createElement('input');
       fieldElement.id = field.id;
@@ -438,22 +461,22 @@ global.UIComponents = {
       fieldElement.required = field.options?.required || false;
       form.appendChild(fieldElement);
     });
-    
+
     if (onSubmit) {
       form.addEventListener('submit', onSubmit);
     }
-    
+
     return form;
   }),
   createFormField: vi.fn((type, id, label, options) => {
     const fieldContainer = global.document.createElement('div');
     fieldContainer.className = 'ui-form-group';
-    
+
     const labelElement = global.document.createElement('label');
     labelElement.htmlFor = id;
     labelElement.textContent = label;
     fieldContainer.appendChild(labelElement);
-    
+
     let fieldElement;
     if (type === 'select') {
       fieldElement = global.document.createElement('select');
@@ -470,22 +493,22 @@ global.UIComponents = {
       fieldElement = global.document.createElement('input');
       fieldElement.type = type;
     }
-    
+
     fieldElement.id = id;
     fieldElement.className = 'ui-form-control';
     fieldElement.required = options?.required || false;
     if (options?.placeholder) fieldElement.placeholder = options.placeholder;
     if (options?.value) fieldElement.value = options.value;
     if (options?.disabled) fieldElement.disabled = options.disabled;
-    
+
     fieldContainer.appendChild(fieldElement);
-    
+
     if (options?.helpText) {
       const helpElement = global.document.createElement('small');
       helpElement.textContent = options.helpText;
       fieldContainer.appendChild(helpElement);
     }
-    
+
     return fieldContainer;
   }),
   createButton: vi.fn((text, onClick, options) => {
@@ -498,7 +521,7 @@ global.UIComponents = {
     }
     return button;
   }),
-  createList: vi.fn((id) => {
+  createList: vi.fn(id => {
     const list = global.document.createElement('div');
     list.id = id;
     list.className = 'list';
@@ -520,7 +543,7 @@ global.UIComponents = {
     }
     return item;
   }),
-  createSection: vi.fn((title) => {
+  createSection: vi.fn(title => {
     const section = global.document.createElement('div');
     section.className = 'section';
     if (title) {
@@ -555,37 +578,37 @@ global.UIComponents = {
         <button class="ui-btn-secondary">Cancel</button>
       </div>
     `;
-    
+
     const confirmBtn = dialog.querySelector('.ui-btn-primary');
     const cancelBtn = dialog.querySelector('.ui-btn-secondary');
-    
+
     if (onConfirm) confirmBtn.addEventListener('click', onConfirm);
     if (onCancel) cancelBtn.addEventListener('click', onCancel);
-    
+
     return dialog;
   }),
   createTabs: vi.fn((tabs, options) => {
     const container = global.document.createElement('div');
     container.className = options?.className || 'tab-container';
-    
+
     const nav = global.document.createElement('div');
     nav.className = 'ui-tabs-nav';
-    
+
     const content = global.document.createElement('div');
     content.className = 'ui-tabs-content';
-    
+
     tabs.forEach((tab, index) => {
       const navItem = global.document.createElement('div');
       navItem.className = `ui-tab-nav-item ${index === 0 ? 'active' : ''}`;
       navItem.textContent = tab.title;
       nav.appendChild(navItem);
-      
+
       const tabContent = global.document.createElement('div');
       tabContent.className = `ui-tab-content ${index === 0 ? 'active' : ''}`;
       tabContent.innerHTML = tab.content;
       content.appendChild(tabContent);
     });
-    
+
     container.appendChild(nav);
     container.appendChild(content);
     return container;
@@ -593,7 +616,7 @@ global.UIComponents = {
   switchTab: vi.fn((container, tabIndex) => {
     const navItems = container.querySelectorAll('.ui-tab-nav-item');
     const contents = container.querySelectorAll('.ui-tab-content');
-    
+
     navItems.forEach((item, index) => {
       if (index === tabIndex) {
         item.classList.add('active');
@@ -604,32 +627,32 @@ global.UIComponents = {
       }
     });
   }),
-  showModal: vi.fn((modal) => {
+  showModal: vi.fn(modal => {
     modal.classList.add('ui-modal-show');
   }),
-  closeModal: vi.fn((modal) => {
+  closeModal: vi.fn(modal => {
     modal.classList.remove('ui-modal-show');
   }),
-  createTooltip: vi.fn((element, text, position = 'top') => {
+  createTooltip: vi.fn((element, text, _position = 'top') => {
     const tooltip = global.document.createElement('div');
     tooltip.className = 'ui-tooltip';
     tooltip.textContent = text;
     return tooltip;
   }),
   DOM: {
-    getElement: vi.fn((id) => {
+    getElement: vi.fn(id => {
       return global.document.getElementById(id);
     }),
-    getElements: vi.fn((selector) => {
+    getElements: vi.fn(selector => {
       return global.document.querySelectorAll(selector);
     }),
-    querySelector: vi.fn((selector) => {
+    querySelector: vi.fn(selector => {
       return global.document.querySelector(selector);
     }),
-    querySelectorAll: vi.fn((selector) => {
+    querySelectorAll: vi.fn(selector => {
       return global.document.querySelectorAll(selector);
     }),
-    initializeElements: vi.fn((elementMap) => {
+    initializeElements: vi.fn(elementMap => {
       const result = { existing: {}, missing: {} };
       for (const [key, selector] of Object.entries(elementMap)) {
         const element = global.document.querySelector(selector);
@@ -641,7 +664,7 @@ global.UIComponents = {
       }
       return result;
     }),
-    bindEvents: vi.fn((eventBindings) => {
+    bindEvents: vi.fn(eventBindings => {
       const results = [];
       for (const [selector, events] of Object.entries(eventBindings)) {
         const element = global.document.querySelector(selector);
@@ -651,13 +674,17 @@ global.UIComponents = {
             results.push({ success: true, element, eventType });
           }
         } else {
-          results.push({ success: false, selector, eventType: Object.keys(events)[0] });
+          results.push({
+            success: false,
+            selector,
+            eventType: Object.keys(events)[0],
+          });
         }
       }
       return results;
     }),
     waitForElement: vi.fn((selector, timeout = 5000) => {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const element = global.document.querySelector(selector);
         if (element) {
           resolve(element);
@@ -666,7 +693,7 @@ global.UIComponents = {
         }
       });
     }),
-    elementExists: vi.fn((selector) => {
+    elementExists: vi.fn(selector => {
       return global.document.querySelector(selector) !== null;
     }),
     addEventListener: vi.fn((selector, eventType, handler) => {
@@ -685,11 +712,11 @@ global.UIComponents = {
       }
       return false;
     }),
-    getValue: vi.fn((id) => {
+    getValue: vi.fn(id => {
       const element = global.document.getElementById(id);
       return element ? element.value : null;
-    })
-  }
+    }),
+  },
 };
 
 // Make UIComponents available globally
@@ -700,7 +727,6 @@ const originalSetTimeout = global.setTimeout;
 const originalSetInterval = global.setInterval;
 
 global.setTimeout = vi.fn((callback, delay) => {
-  const id = Math.random();
   if (delay === 0) {
     callback();
   } else {
@@ -708,11 +734,10 @@ global.setTimeout = vi.fn((callback, delay) => {
     const timer = originalSetTimeout(callback, delay);
     return timer;
   }
-  return id;
+  return Math.random();
 });
 
 global.setInterval = vi.fn((callback, delay) => {
-  const id = Math.random();
   // Use the original setInterval to avoid infinite recursion
   const timer = originalSetInterval(callback, delay);
   return timer;
@@ -727,32 +752,32 @@ global.ErrorHandler = {
     shouldShowToUser: true,
     userMessage: error.message || 'An error occurred',
     technicalMessage: error.message,
-    context: context
+    context: context,
   })),
   createError: vi.fn((message, type, context) => ({
     message,
     type,
     context,
-    name: 'Error'
+    name: 'Error',
   })),
   ERROR_TYPES: {
     NETWORK: 'network',
     AUTH: 'auth',
     VALIDATION: 'validation',
     STORAGE: 'storage',
-    UNKNOWN: 'unknown'
-  }
+    UNKNOWN: 'unknown',
+  },
 };
 
 // Setup test environment
 beforeEach(() => {
   // Clear all mocks before each test
   vi.clearAllMocks();
-  
+
   // Reset DOM
   global.document.body = global.document.createElement('body');
   global.document.head = global.document.createElement('head');
-  
+
   // Reset Chrome API mocks
   Object.keys(global.chrome).forEach(key => {
     if (typeof global.chrome[key] === 'object' && global.chrome[key] !== null) {
@@ -769,4 +794,4 @@ beforeEach(() => {
 afterEach(() => {
   // Clean up any remaining timeouts
   vi.clearAllTimers();
-}); 
+});

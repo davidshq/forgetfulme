@@ -2,14 +2,17 @@
  * @fileoverview Enhanced Test Utilities Example
  * @module example-usage-test
  * @description Demonstrates proper usage of test factories and utilities
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createTestData, createAssertionHelpers } from '../helpers/test-factories.js';
+import {
+  createTestData,
+  createAssertionHelpers,
+} from '../helpers/test-factories.js';
 
 /**
  * Enhanced Test Utilities Example
@@ -20,7 +23,7 @@ describe('Enhanced Test Utilities Example', () => {
   describe('Test Data Factory Examples', () => {
     it('should create bookmark data with defaults', () => {
       const bookmark = createTestData.bookmark();
-      
+
       expect(bookmark).toEqual({
         id: 'test-bookmark-id',
         url: 'https://example.com',
@@ -38,7 +41,7 @@ describe('Enhanced Test Utilities Example', () => {
         title: 'Custom Bookmark',
         tags: ['custom'],
       });
-      
+
       expect(bookmark.url).toBe('https://custom.com');
       expect(bookmark.title).toBe('Custom Bookmark');
       expect(bookmark.tags).toEqual(['custom']);
@@ -47,7 +50,7 @@ describe('Enhanced Test Utilities Example', () => {
 
     it('should create user data', () => {
       const user = createTestData.user();
-      
+
       expect(user).toEqual({
         id: 'test-user-id',
         email: 'test@example.com',
@@ -57,7 +60,7 @@ describe('Enhanced Test Utilities Example', () => {
 
     it('should create tab data', () => {
       const tab = createTestData.tab();
-      
+
       expect(tab).toEqual({
         id: 1,
         url: 'https://example.com',
@@ -68,7 +71,7 @@ describe('Enhanced Test Utilities Example', () => {
 
     it('should create error data', () => {
       const error = createTestData.error();
-      
+
       expect(error).toEqual({
         message: 'Test error message',
         type: 'UNKNOWN',
@@ -106,13 +109,13 @@ describe('Enhanced Test Utilities Example', () => {
 
     it('should assert success message', () => {
       mocks.uiMessages.success('Test success', document.createElement('div'));
-      
+
       assertions.assertSuccessMessage('Test success');
     });
 
     it('should assert loading message', () => {
       mocks.uiMessages.loading('Loading...', document.createElement('div'));
-      
+
       assertions.assertLoadingMessage('Loading...');
     });
 
@@ -121,18 +124,18 @@ describe('Enhanced Test Utilities Example', () => {
         url: 'https://example.com',
         title: 'Test Bookmark',
       });
-      
+
       mocks.supabaseService.saveBookmark(bookmarkData);
-      
+
       assertions.assertBookmarkSaved(bookmarkData);
     });
 
     it('should assert bookmark updated', () => {
       const bookmarkId = 'test-id';
       const updateData = { title: 'Updated Title' };
-      
+
       mocks.supabaseService.updateBookmark(bookmarkId, updateData);
-      
+
       assertions.assertBookmarkUpdated(bookmarkId, updateData);
     });
 
@@ -142,10 +145,13 @@ describe('Enhanced Test Utilities Example', () => {
         userMessage: 'User friendly error',
         shouldShowToUser: true,
       });
-      
+
       mocks.errorHandler.handle(error, 'test-context');
-      mocks.uiMessages.error('User friendly error', document.createElement('div'));
-      
+      mocks.uiMessages.error(
+        'User friendly error',
+        document.createElement('div')
+      );
+
       assertions.assertErrorHandling('test-context');
     });
   });
@@ -172,9 +178,11 @@ describe('Enhanced Test Utilities Example', () => {
       const result = await customMocks.supabaseService.saveBookmark();
       expect(result.id).toBe('custom-id');
       expect(result.url).toBe('https://custom.com');
-      
+
       customMocks.uiMessages.success('Test message');
-      expect(customMocks.uiMessages.success).toHaveBeenCalledWith('Test message');
+      expect(customMocks.uiMessages.success).toHaveBeenCalledWith(
+        'Test message'
+      );
     });
   });
-}); 
+});

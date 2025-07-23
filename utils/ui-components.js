@@ -2,7 +2,7 @@
  * @fileoverview UI Components for ForgetfulMe Extension
  * @module ui-components
  * @description Centralized component factory for consistent UI patterns and DOM utilities
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,11 +12,11 @@
  * UI Components factory for ForgetfulMe Extension
  * @class UIComponents
  * @description Provides centralized component creation and DOM utilities for consistent UI patterns
- * 
+ *
  * @example
  * // Create a button
  * const button = UIComponents.createButton('Click me', () => console.log('clicked'));
- * 
+ *
  * // Use DOM utilities
  * const element = UIComponents.DOM.getElement('my-element');
  */
@@ -351,7 +351,7 @@ class UIComponents {
   static createButton(text, onClick, className = '', options = {}) {
     const button = document.createElement('button');
     button.textContent = text;
-    
+
     // Map custom classes to Pico CSS classes
     let picoClass = '';
     if (className.includes('primary')) picoClass = 'primary';
@@ -359,7 +359,7 @@ class UIComponents {
     else if (className.includes('danger')) picoClass = 'contrast';
     else if (className.includes('outline')) picoClass = 'outline';
     else picoClass = className;
-    
+
     button.className = picoClass;
 
     if (onClick) {
@@ -463,12 +463,9 @@ class UIComponents {
 
     // Add submit button if specified
     if (options.submitText) {
-      const submitBtn = this.createButton(
-        options.submitText,
-        null,
-        'primary',
-        { type: 'submit' }
-      );
+      const submitBtn = this.createButton(options.submitText, null, 'primary', {
+        type: 'submit',
+      });
       form.appendChild(submitBtn);
     }
 
@@ -733,7 +730,7 @@ class UIComponents {
    * @param {Object} options - Tab options
    * @returns {HTMLElement}
    */
-  static createTabs(tabs, options = {}) {
+  static createTabs(tabs, _options = {}) {
     const tabContainer = document.createElement('div');
     tabContainer.className = 'tab-container';
 
@@ -788,7 +785,7 @@ class UIComponents {
    * @param {Object} options - Modal options
    * @returns {HTMLElement}
    */
-  static createModal(title, content, options = {}) {
+  static createModal(title, content, _options = {}) {
     const modal = document.createElement('div');
 
     const modalContent = document.createElement('div');

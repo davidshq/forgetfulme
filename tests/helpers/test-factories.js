@@ -2,7 +2,7 @@
  * @fileoverview Test factories for creating specialized test instances
  * @module test-factories
  * @description Provides factory functions for creating specialized test instances with proper mocking
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -10,13 +10,9 @@
 
 import { vi } from 'vitest';
 import {
-  createTestEnvironment,
   setupTestWithMocks,
   setupModuleMocks,
   createMockElement,
-  setupPopupDOM,
-  setupChromeTabs,
-  setupBookmarkData,
 } from './test-utils.js';
 
 /**
@@ -26,27 +22,30 @@ import {
  * 2. Use Playwright for integration testing (popup functionality)
  * 3. Focus on testing business logic in utility modules
  * 4. Accept ES module mocking limitations in Vitest
- * 
+ *
  * Provides consistent setup patterns for different module types
  */
 
 /**
  * Creates a complete utility module test instance
- * 
+ *
  * This is the recommended approach for testing utility modules that have
  * dependencies. Instead of trying to mock ES modules in complex scenarios,
  * we test each utility module in isolation with proper mocking.
- * 
+ *
  * @param {string} modulePath - Path to the utility module
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete utility module test setup
  */
-export const createUtilityTestInstance = async (modulePath, customMocks = {}) => {
+export const createUtilityTestInstance = async (
+  modulePath,
+  customMocks = {}
+) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks(mocks);
-  
+
   // Import the module under test AFTER mocking
   const UtilityModule = (await import(modulePath)).default;
 
@@ -59,16 +58,16 @@ export const createUtilityTestInstance = async (modulePath, customMocks = {}) =>
 
 /**
  * Creates a complete auth UI test instance
- * 
+ *
  * Tests the AuthUI module which handles authentication forms and user interactions.
  * This module is tested in isolation with mocked dependencies.
- * 
+ *
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Promise<Object>} Complete auth UI test setup
  */
 export const createAuthUITestInstance = async (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Create mock container
   const mockContainer = createMockElement('div', { id: 'test-container' });
 
@@ -92,19 +91,19 @@ export const createAuthUITestInstance = async (customMocks = {}) => {
 
 /**
  * Creates a complete background service test instance
- * 
+ *
  * Tests the background service which handles extension-wide functionality.
  * This module is tested in isolation with proper Chrome API mocking.
- * 
+ *
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Promise<Object>} Complete background service test setup
  */
 export const createBackgroundTestInstance = async (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks(mocks);
-  
+
   // Setup additional Chrome APIs for background service
   mocks.chrome.runtime.onMessage.addListener = vi.fn();
   mocks.chrome.storage.onChanged.addListener = vi.fn();
@@ -126,19 +125,19 @@ export const createBackgroundTestInstance = async (customMocks = {}) => {
 
 /**
  * Creates a complete options page test instance
- * 
+ *
  * Tests the options page which handles extension configuration.
  * This module is tested in isolation with proper DOM mocking.
- * 
+ *
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Promise<Object>} Complete options page test setup
  */
 export const createOptionsTestInstance = async (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks(mocks);
-  
+
   // Setup DOM elements for options page
   const mockForm = createMockElement('form', { id: 'config-form' });
   const mockUrlInput = createMockElement('input', { id: 'supabase-url' });
@@ -147,7 +146,7 @@ export const createOptionsTestInstance = async (customMocks = {}) => {
   const mockTestBtn = createMockElement('button', { id: 'test-connection' });
 
   // Setup DOM element mapping for options
-  mocks.uiComponents.DOM.getElement.mockImplementation((id) => {
+  mocks.uiComponents.DOM.getElement.mockImplementation(id => {
     const elementMap = {
       'config-form': mockForm,
       'supabase-url': mockUrlInput,
@@ -180,19 +179,19 @@ export const createOptionsTestInstance = async (customMocks = {}) => {
 
 /**
  * Creates a complete config UI test instance
- * 
+ *
  * Tests the config UI which handles configuration interface.
  * This module is tested in isolation with proper DOM mocking.
- * 
+ *
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete config UI test setup
  */
 export const createConfigUITestInstance = async (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks(mocks);
-  
+
   // Create mock container
   const mockContainer = createMockElement('div', { id: 'config-container' });
 
@@ -212,19 +211,19 @@ export const createConfigUITestInstance = async (customMocks = {}) => {
 
 /**
  * Creates a complete supabase service test instance
- * 
+ *
  * Tests the Supabase service which handles database operations.
  * This module is tested in isolation with proper Supabase client mocking.
- * 
+ *
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete supabase service test setup
  */
 export const createSupabaseServiceTestInstance = async (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
-  
+
   // Setup module mocks
   setupModuleMocks(mocks);
-  
+
   // Setup Supabase client mock
   const mockSupabaseClient = {
     from: vi.fn().mockReturnThis(),
@@ -325,7 +324,7 @@ export const createTestData = {
 /**
  * Creates assertion helpers for common test patterns
  */
-export const createAssertionHelpers = (mocks) => ({
+export const createAssertionHelpers = mocks => ({
   /**
    * Asserts that error handling was called correctly
    * @param {string} expectedContext - Expected error context
@@ -335,7 +334,7 @@ export const createAssertionHelpers = (mocks) => ({
       expect.any(Error),
       expectedContext
     );
-    
+
     const errorResult = mocks.errorHandler.handle.mock.results[0].value;
     expect(mocks.uiMessages.error).toHaveBeenCalledWith(
       errorResult.userMessage,
@@ -347,7 +346,7 @@ export const createAssertionHelpers = (mocks) => ({
    * Asserts that a success message was shown
    * @param {string} expectedMessage - Expected success message
    */
-  assertSuccessMessage: (expectedMessage) => {
+  assertSuccessMessage: expectedMessage => {
     expect(mocks.uiMessages.success).toHaveBeenCalledWith(
       expectedMessage,
       expect.anything()
@@ -358,7 +357,7 @@ export const createAssertionHelpers = (mocks) => ({
    * Asserts that a loading message was shown
    * @param {string} expectedMessage - Expected loading message
    */
-  assertLoadingMessage: (expectedMessage) => {
+  assertLoadingMessage: expectedMessage => {
     expect(mocks.uiMessages.loading).toHaveBeenCalledWith(
       expectedMessage,
       expect.anything()
@@ -369,7 +368,7 @@ export const createAssertionHelpers = (mocks) => ({
    * Asserts that a bookmark was saved correctly
    * @param {Object} expectedBookmark - Expected bookmark data
    */
-  assertBookmarkSaved: (expectedBookmark) => {
+  assertBookmarkSaved: expectedBookmark => {
     expect(mocks.supabaseService.saveBookmark).toHaveBeenCalledWith(
       expect.objectContaining(expectedBookmark)
     );
@@ -386,4 +385,4 @@ export const createAssertionHelpers = (mocks) => ({
       expect.objectContaining(expectedUpdates)
     );
   },
-}); 
+});

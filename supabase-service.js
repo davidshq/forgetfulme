@@ -2,7 +2,7 @@
  * @fileoverview Supabase service for ForgetfulMe extension
  * @module supabase-service
  * @description Handles all Supabase database operations and real-time subscriptions
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -16,12 +16,12 @@ import BookmarkTransformer from './utils/bookmark-transformer.js';
  * @class SupabaseService
  * @description Manages all Supabase database operations including bookmarks, user preferences,
  * and real-time subscriptions
- * 
+ *
  * @example
  * const supabaseConfig = new SupabaseConfig();
  * const supabaseService = new SupabaseService(supabaseConfig);
  * await supabaseService.initialize();
- * 
+ *
  * // Save a bookmark
  * const bookmark = await supabaseService.saveBookmark({
  *   url: 'https://example.com',
@@ -51,7 +51,7 @@ class SupabaseService {
    * @method initialize
    * @description Initializes the Supabase configuration and sets up the client and real-time manager
    * @throws {Error} When initialization fails
-   * 
+   *
    * @example
    * const service = new SupabaseService(config);
    * await service.initialize();
@@ -77,7 +77,7 @@ class SupabaseService {
    * @param {string[]} [bookmark.tags] - Optional array of tags
    * @returns {Promise<Object>} The saved bookmark object
    * @throws {Error} When user is not authenticated or validation fails
-   * 
+   *
    * @example
    * const bookmark = await supabaseService.saveBookmark({
    *   url: 'https://example.com',
@@ -109,12 +109,12 @@ class SupabaseService {
 
     // Check if bookmark already exists
     const existingBookmark = await this.getBookmarkByUrl(bookmark.url);
-    
+
     if (existingBookmark) {
       // Return existing bookmark with a flag indicating it's a duplicate
       return {
         ...existingBookmark,
-        isDuplicate: true
+        isDuplicate: true,
       };
     }
 

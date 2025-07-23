@@ -5,45 +5,45 @@ const mockChrome = {
   storage: {
     sync: {
       get: vi.fn(),
-      set: vi.fn()
+      set: vi.fn(),
     },
     onChanged: {
-      addListener: vi.fn()
-    }
+      addListener: vi.fn(),
+    },
   },
   runtime: {
     onMessage: {
-      addListener: vi.fn()
+      addListener: vi.fn(),
     },
     onInstalled: {
-      addListener: vi.fn()
-    }
+      addListener: vi.fn(),
+    },
   },
   commands: {
     onCommand: {
-      addListener: vi.fn()
-    }
+      addListener: vi.fn(),
+    },
   },
   tabs: {
     query: vi.fn(),
     get: vi.fn(),
     onUpdated: {
-      addListener: vi.fn()
+      addListener: vi.fn(),
     },
     onActivated: {
-      addListener: vi.fn()
-    }
+      addListener: vi.fn(),
+    },
   },
   notifications: {
-    create: vi.fn()
+    create: vi.fn(),
   },
   action: {
     setBadgeText: vi.fn(),
     setBadgeBackgroundColor: vi.fn(),
     onClicked: {
-      addListener: vi.fn()
-    }
-  }
+      addListener: vi.fn(),
+    },
+  },
 };
 
 // Mock global chrome object
@@ -54,7 +54,7 @@ global.console = {
   log: vi.fn(),
   error: vi.fn(),
   warn: vi.fn(),
-  debug: vi.fn()
+  debug: vi.fn(),
 };
 
 describe('ForgetfulMe Background Service', () => {
@@ -70,8 +70,8 @@ describe('ForgetfulMe Background Service', () => {
         callback({
           auth_session: {
             user: { id: 'test-user', email: 'test@example.com' },
-            access_token: 'test-token'
-          }
+            access_token: 'test-token',
+          },
         });
       });
 
@@ -85,7 +85,7 @@ describe('ForgetfulMe Background Service', () => {
                 type: 'basic',
                 iconUrl: 'icons/icon48.png',
                 title: 'ForgetfulMe',
-                message: 'Page marked as read!'
+                message: 'Page marked as read!',
               });
               sendResponse({ success: true });
               break;
@@ -101,7 +101,10 @@ describe('ForgetfulMe Background Service', () => {
 
       // Test MARK_AS_READ message
       await handleMessage(
-        { type: 'MARK_AS_READ', data: { url: 'https://example.com', title: 'Test' } },
+        {
+          type: 'MARK_AS_READ',
+          data: { url: 'https://example.com', title: 'Test' },
+        },
         {},
         sendResponse
       );
@@ -111,7 +114,7 @@ describe('ForgetfulMe Background Service', () => {
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
-        message: 'Page marked as read!'
+        message: 'Page marked as read!',
       });
 
       // Check that response was sent
@@ -121,7 +124,7 @@ describe('ForgetfulMe Background Service', () => {
     test('should handle GET_AUTH_STATE messages', async () => {
       const mockAuthState = {
         user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token'
+        access_token: 'test-token',
       };
 
       // Mock chrome.storage.sync.get to return auth state
@@ -133,14 +136,15 @@ describe('ForgetfulMe Background Service', () => {
       const handleMessage = async (message, sender, sendResponse) => {
         try {
           switch (message.type) {
-            case 'GET_AUTH_STATE':
-              const authState = await new Promise((resolve) => {
-                chrome.storage.sync.get(['auth_session'], (result) => {
-                  resolve(result.auth_session || null);
+            case 'GET_AUTH_STATE': {
+              const authState = await new Promise(resolve => {
+                chrome.storage.sync.get(['auth_session'], _result => {
+                  resolve(_result.auth_session || null);
                 });
               });
               sendResponse({ success: true, authState });
               break;
+            }
             default:
               sendResponse({ success: false, error: 'Unknown message type' });
           }
@@ -152,16 +156,12 @@ describe('ForgetfulMe Background Service', () => {
       const sendResponse = vi.fn();
 
       // Test GET_AUTH_STATE message
-      await handleMessage(
-        { type: 'GET_AUTH_STATE' },
-        {},
-        sendResponse
-      );
+      await handleMessage({ type: 'GET_AUTH_STATE' }, {}, sendResponse);
 
       // Check that response was sent with auth state
       expect(sendResponse).toHaveBeenCalledWith({
         success: true,
-        authState: mockAuthState
+        authState: mockAuthState,
       });
     });
 
@@ -170,10 +170,11 @@ describe('ForgetfulMe Background Service', () => {
       const handleMessage = async (message, sender, sendResponse) => {
         try {
           switch (message.type) {
-            case 'UNKNOWN_MESSAGE_TYPE':
+            case 'UNKNOWN_MESSAGE_TYPE': {
               console.warn('Background: Unknown message type:', message.type);
               sendResponse({ success: false, error: 'Unknown message type' });
               break;
+            }
             default:
               sendResponse({ success: false, error: 'Unknown message type' });
           }
@@ -185,11 +186,7 @@ describe('ForgetfulMe Background Service', () => {
       const sendResponse = vi.fn();
 
       // Test unknown message type
-      await handleMessage(
-        { type: 'UNKNOWN_MESSAGE_TYPE' },
-        {},
-        sendResponse
-      );
+      await handleMessage({ type: 'UNKNOWN_MESSAGE_TYPE' }, {}, sendResponse);
 
       // Check that warning was logged
       expect(console.warn).toHaveBeenCalledWith(
@@ -200,7 +197,7 @@ describe('ForgetfulMe Background Service', () => {
       // Check that error response was sent
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: 'Unknown message type'
+        error: 'Unknown message type',
       });
     });
   });
@@ -208,7 +205,7 @@ describe('ForgetfulMe Background Service', () => {
   describe('Authentication State Management', () => {
     test('should handle storage auth state changes', () => {
       // Create a mock storage change handler
-      const handleStorageAuthChange = (newAuthState) => {
+      const handleStorageAuthChange = newAuthState => {
         console.log(
           'Background: Auth state changed:',
           newAuthState ? 'authenticated' : 'not authenticated'
@@ -232,14 +229,14 @@ describe('ForgetfulMe Background Service', () => {
             type: 'basic',
             iconUrl: 'icons/icon48.png',
             title: 'ForgetfulMe',
-            message: 'Successfully signed in!'
+            message: 'Successfully signed in!',
           });
         }
       };
 
       const mockAuthState = {
         user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token'
+        access_token: 'test-token',
       };
 
       // Test auth state change
@@ -256,17 +253,21 @@ describe('ForgetfulMe Background Service', () => {
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
-        message: 'Successfully signed in!'
+        message: 'Successfully signed in!',
       });
 
       // Check that badge was updated
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
-      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#4CAF50' });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
+        text: '✓',
+      });
+      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#4CAF50',
+      });
     });
 
     test('should handle auth state clearing', () => {
       // Create a mock storage change handler
-      const handleStorageAuthChange = (newAuthState) => {
+      const handleStorageAuthChange = newAuthState => {
         console.log(
           'Background: Auth state changed:',
           newAuthState ? 'authenticated' : 'not authenticated'
@@ -306,26 +307,28 @@ describe('ForgetfulMe Background Service', () => {
         callback({
           auth_session: {
             user: { id: 'test-user', email: 'test@example.com' },
-            access_token: 'test-token'
-          }
+            access_token: 'test-token',
+          },
         });
       });
 
       // Mock chrome.tabs.query to return a valid tab
       mockChrome.tabs.query.mockImplementation((queryInfo, callback) => {
-        callback([{
-          id: 1,
-          url: 'https://example.com/article',
-          title: 'Test Article',
-          active: true
-        }]);
+        callback([
+          {
+            id: 1,
+            url: 'https://example.com/article',
+            title: 'Test Article',
+            active: true,
+          },
+        ]);
       });
 
       // Create a mock keyboard shortcut handler
       const handleKeyboardShortcut = async () => {
         try {
-          const isAuthenticated = await new Promise((resolve) => {
-            chrome.storage.sync.get(['auth_session'], (result) => {
+          const isAuthenticated = await new Promise(resolve => {
+            chrome.storage.sync.get(['auth_session'], result => {
               resolve(result.auth_session !== null);
             });
           });
@@ -340,11 +343,14 @@ describe('ForgetfulMe Background Service', () => {
             return;
           }
 
-          const [tab] = await new Promise((resolve) => {
-            chrome.tabs.query({
-              active: true,
-              currentWindow: true,
-            }, resolve);
+          const [tab] = await new Promise(resolve => {
+            chrome.tabs.query(
+              {
+                active: true,
+                currentWindow: true,
+              },
+              resolve
+            );
           });
 
           if (
@@ -380,7 +386,7 @@ describe('ForgetfulMe Background Service', () => {
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
-        message: 'Click the extension icon to mark this page as read'
+        message: 'Click the extension icon to mark this page as read',
       });
     });
 
@@ -393,9 +399,9 @@ describe('ForgetfulMe Background Service', () => {
       // Create a mock keyboard shortcut handler
       const handleKeyboardShortcut = async () => {
         try {
-          const isAuthenticated = await new Promise((resolve) => {
-            chrome.storage.sync.get(['auth_session'], (result) => {
-              resolve(result.auth_session !== null);
+          const isAuthenticated = await new Promise(resolve => {
+            chrome.storage.sync.get(['auth_session'], _result => {
+              resolve(_result.auth_session !== null);
             });
           });
 
@@ -421,7 +427,7 @@ describe('ForgetfulMe Background Service', () => {
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
-        message: 'Please sign in to use keyboard shortcuts'
+        message: 'Please sign in to use keyboard shortcuts',
       });
     });
 
@@ -431,27 +437,29 @@ describe('ForgetfulMe Background Service', () => {
         callback({
           auth_session: {
             user: { id: 'test-user', email: 'test@example.com' },
-            access_token: 'test-token'
-          }
+            access_token: 'test-token',
+          },
         });
       });
 
       // Mock chrome.tabs.query to return a browser page
-      mockChrome.tabs.query.mockImplementation((queryInfo, callback) => {
-        callback([{
-          id: 1,
-          url: 'chrome://extensions/',
-          title: 'Extensions',
-          active: true
-        }]);
+      mockChrome.tabs.query.mockImplementation((_queryInfo, callback) => {
+        callback([
+          {
+            id: 1,
+            url: 'chrome://extensions/',
+            title: 'Extensions',
+            active: true,
+          },
+        ]);
       });
 
       // Create a mock keyboard shortcut handler
       const handleKeyboardShortcut = async () => {
         try {
-          const isAuthenticated = await new Promise((resolve) => {
-            chrome.storage.sync.get(['auth_session'], (result) => {
-              resolve(result.auth_session !== null);
+          const isAuthenticated = await new Promise(resolve => {
+            chrome.storage.sync.get(['auth_session'], _result => {
+              resolve(_result.auth_session !== null);
             });
           });
 
@@ -465,11 +473,14 @@ describe('ForgetfulMe Background Service', () => {
             return;
           }
 
-          const [tab] = await new Promise((resolve) => {
-            chrome.tabs.query({
-              active: true,
-              currentWindow: true,
-            }, resolve);
+          const [tab] = await new Promise(resolve => {
+            chrome.tabs.query(
+              {
+                active: true,
+                currentWindow: true,
+              },
+              resolve
+            );
           });
 
           if (
@@ -514,9 +525,9 @@ describe('ForgetfulMe Background Service', () => {
       // Create a mock initialization function
       const initializeDefaultSettings = async () => {
         try {
-          return new Promise((resolve) => {
-            chrome.storage.sync.get(['customStatusTypes'], (result) => {
-              if (!result.customStatusTypes) {
+          return new Promise(resolve => {
+            chrome.storage.sync.get(['customStatusTypes'], _result => {
+              if (!_result.customStatusTypes) {
                 const defaultStatusTypes = [
                   'read',
                   'good-reference',
@@ -524,12 +535,15 @@ describe('ForgetfulMe Background Service', () => {
                   'revisit-later',
                 ];
 
-                chrome.storage.sync.set({
-                  customStatusTypes: defaultStatusTypes,
-                }, () => {
-                  console.log('Default settings initialized');
-                  resolve();
-                });
+                chrome.storage.sync.set(
+                  {
+                    customStatusTypes: defaultStatusTypes,
+                  },
+                  () => {
+                    console.log('Default settings initialized');
+                    resolve();
+                  }
+                );
               } else {
                 resolve();
               }
@@ -550,8 +564,8 @@ describe('ForgetfulMe Background Service', () => {
             'read',
             'good-reference',
             'low-value',
-            'revisit-later'
-          ]
+            'revisit-later',
+          ],
         },
         expect.any(Function)
       );
@@ -569,9 +583,9 @@ describe('ForgetfulMe Background Service', () => {
       // Create a mock initialization function
       const initializeDefaultSettings = async () => {
         try {
-          return new Promise((resolve) => {
-            chrome.storage.sync.get(['customStatusTypes'], (result) => {
-              if (!result.customStatusTypes) {
+          return new Promise(resolve => {
+            chrome.storage.sync.get(['customStatusTypes'], _result => {
+              if (!_result.customStatusTypes) {
                 const defaultStatusTypes = [
                   'read',
                   'good-reference',
@@ -579,12 +593,15 @@ describe('ForgetfulMe Background Service', () => {
                   'revisit-later',
                 ];
 
-                chrome.storage.sync.set({
-                  customStatusTypes: defaultStatusTypes,
-                }, () => {
-                  console.log('Default settings initialized');
-                  resolve();
-                });
+                chrome.storage.sync.set(
+                  {
+                    customStatusTypes: defaultStatusTypes,
+                  },
+                  () => {
+                    console.log('Default settings initialized');
+                    resolve();
+                  }
+                );
               } else {
                 resolve();
               }
@@ -611,7 +628,7 @@ describe('ForgetfulMe Background Service', () => {
       });
 
       // Create a mock badge update function
-      const updateExtensionBadge = (session) => {
+      const updateExtensionBadge = session => {
         try {
           if (session) {
             chrome.action.setBadgeText({ text: '✓' });
@@ -626,7 +643,7 @@ describe('ForgetfulMe Background Service', () => {
 
       const mockAuthState = {
         user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token'
+        access_token: 'test-token',
       };
 
       // Test badge update with error
@@ -643,29 +660,35 @@ describe('ForgetfulMe Background Service', () => {
   describe('URL Status Checking', () => {
     test('should handle BOOKMARK_SAVED message and clear cache', async () => {
       // Mock chrome.tabs.query to return a test tab
-      mockChrome.tabs.query.mockImplementation((queryInfo) => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      mockChrome.tabs.query.mockImplementation(_queryInfo => {
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler
       const handleMessage = async (message, sender, sendResponse) => {
         try {
           switch (message.type) {
-            case 'BOOKMARK_SAVED':
+            case 'BOOKMARK_SAVED': {
               // Simulate cache clearing and URL status check
               const url = message.data?.url;
               if (url) {
                 // Clear cache (simulated)
                 console.log('Cache cleared for URL:', url);
-                
+
                 // Re-check current tab URL status
-                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                const [tab] = await chrome.tabs.query({
+                  active: true,
+                  currentWindow: true,
+                });
                 if (tab && tab.url) {
                   console.log('Re-checking URL status for:', tab.url);
                 }
               }
               sendResponse({ success: true });
               break;
+            }
             default:
               sendResponse({ success: false, error: 'Unknown message type' });
           }
@@ -684,9 +707,10 @@ describe('ForgetfulMe Background Service', () => {
       );
 
       // Check that tabs.query was called
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
-        { active: true, currentWindow: true }
-      );
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
+        active: true,
+        currentWindow: true,
+      });
 
       // Check that response was sent
       expect(sendResponse).toHaveBeenCalledWith({ success: true });
@@ -694,29 +718,35 @@ describe('ForgetfulMe Background Service', () => {
 
     test('should handle BOOKMARK_UPDATED message and clear cache', async () => {
       // Mock chrome.tabs.query to return a test tab
-      mockChrome.tabs.query.mockImplementation((queryInfo) => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      mockChrome.tabs.query.mockImplementation(_queryInfo => {
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler
       const handleMessage = async (message, sender, sendResponse) => {
         try {
           switch (message.type) {
-            case 'BOOKMARK_UPDATED':
+            case 'BOOKMARK_UPDATED': {
               // Simulate cache clearing and URL status check
               const url = message.data?.url;
               if (url) {
                 // Clear cache (simulated)
                 console.log('Cache cleared for URL:', url);
-                
+
                 // Re-check current tab URL status
-                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                const [tab] = await chrome.tabs.query({
+                  active: true,
+                  currentWindow: true,
+                });
                 if (tab && tab.url) {
                   console.log('Re-checking URL status for:', tab.url);
                 }
               }
               sendResponse({ success: true });
               break;
+            }
             default:
               sendResponse({ success: false, error: 'Unknown message type' });
           }
@@ -735,9 +765,10 @@ describe('ForgetfulMe Background Service', () => {
       );
 
       // Check that tabs.query was called
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
-        { active: true, currentWindow: true }
-      );
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
+        active: true,
+        currentWindow: true,
+      });
 
       // Check that response was sent
       expect(sendResponse).toHaveBeenCalledWith({ success: true });
@@ -745,22 +776,28 @@ describe('ForgetfulMe Background Service', () => {
 
     test('should handle CHECK_URL_STATUS message', async () => {
       // Mock chrome.tabs.query to return a test tab
-      mockChrome.tabs.query.mockImplementation((queryInfo) => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+      mockChrome.tabs.query.mockImplementation(_queryInfo => {
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler
       const handleMessage = async (message, sender, sendResponse) => {
         try {
           switch (message.type) {
-            case 'CHECK_URL_STATUS':
+            case 'CHECK_URL_STATUS': {
               // Handle request to check current tab URL status
-              const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+              const [currentTab] = await chrome.tabs.query({
+                active: true,
+                currentWindow: true,
+              });
               if (currentTab && currentTab.url) {
                 console.log('Checking URL status for:', currentTab.url);
               }
               sendResponse({ success: true });
               break;
+            }
             default:
               sendResponse({ success: false, error: 'Unknown message type' });
           }
@@ -772,16 +809,13 @@ describe('ForgetfulMe Background Service', () => {
       const sendResponse = vi.fn();
 
       // Test CHECK_URL_STATUS message
-      await handleMessage(
-        { type: 'CHECK_URL_STATUS' },
-        {},
-        sendResponse
-      );
+      await handleMessage({ type: 'CHECK_URL_STATUS' }, {}, sendResponse);
 
       // Check that tabs.query was called
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith(
-        { active: true, currentWindow: true }
-      );
+      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
+        active: true,
+        currentWindow: true,
+      });
 
       // Check that response was sent
       expect(sendResponse).toHaveBeenCalledWith({ success: true });
@@ -815,8 +849,12 @@ describe('ForgetfulMe Background Service', () => {
       updateIconForUrl('https://example.com', true);
 
       // Check that checkmark was set
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
-      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#4CAF50' });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
+        text: '✓',
+      });
+      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#4CAF50',
+      });
 
       // Reset mocks
       vi.clearAllMocks();
@@ -825,8 +863,12 @@ describe('ForgetfulMe Background Service', () => {
       updateIconForUrl('https://example.com', false);
 
       // Check that plus sign was set
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '+' });
-      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#2196F3' });
+      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
+        text: '+',
+      });
+      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#2196F3',
+      });
 
       // Reset mocks
       vi.clearAllMocks();
@@ -838,4 +880,4 @@ describe('ForgetfulMe Background Service', () => {
       expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '' });
     });
   });
-}); 
+});

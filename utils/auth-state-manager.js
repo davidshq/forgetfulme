@@ -2,7 +2,7 @@
  * @fileoverview Authentication State Manager for ForgetfulMe extension
  * @module auth-state-manager
  * @description Handles authentication state synchronization across all extension contexts
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -13,7 +13,7 @@
  * @class AuthStateManager
  * @description Manages authentication state synchronization across all extension contexts
  * including popup, background, and options pages
- * 
+ *
  * @example
  * const authManager = new AuthStateManager();
  * await authManager.initialize();
@@ -42,7 +42,7 @@ class AuthStateManager {
    * @method initialize
    * @description Loads current auth state from storage and sets up change listeners
    * @throws {Error} When initialization fails
-   * 
+   *
    * @example
    * const authManager = new AuthStateManager();
    * await authManager.initialize();
@@ -79,7 +79,7 @@ class AuthStateManager {
    * @method getAuthState
    * @description Returns the current authentication session object
    * @returns {Promise<Object|null>} Current authentication session or null if not authenticated
-   * 
+   *
    * @example
    * const session = await authManager.getAuthState();
    * if (session) {
@@ -97,11 +97,11 @@ class AuthStateManager {
    * @method setAuthState
    * @param {Object|null} session - The authentication session object or null to clear
    * @description Updates the auth state, saves to storage, and notifies all extension contexts
-   * 
+   *
    * @example
    * // Set authenticated state
    * await authManager.setAuthState(session);
-   * 
+   *
    * // Clear authentication
    * await authManager.setAuthState(null);
    */

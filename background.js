@@ -2,7 +2,7 @@
  * @fileoverview Background service worker for ForgetfulMe extension
  * @module background
  * @description Handles background tasks, keyboard shortcuts, and message routing
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -12,7 +12,7 @@
  * Background service worker for the ForgetfulMe Chrome extension
  * @class ForgetfulMeBackground
  * @description Manages background tasks, keyboard shortcuts, and communication between extension contexts
- * 
+ *
  * @example
  * // Automatically instantiated when the service worker loads
  * // No manual instantiation required
@@ -30,7 +30,7 @@ class ForgetfulMeBackground {
     this.urlStatusCache = new Map();
     /** @type {number} Cache timeout in milliseconds (5 minutes) */
     this.cacheTimeout = 5 * 60 * 1000;
-    
+
     this.initializeEventListeners();
     this.initializeAuthState();
   }
@@ -41,7 +41,7 @@ class ForgetfulMeBackground {
    * @method initializeAuthState
    * @description Loads the current authentication state from Chrome sync storage
    * @throws {Error} When storage access fails
-   * 
+   *
    * @example
    * // Called during background initialization
    * await background.initializeAuthState();
@@ -61,13 +61,11 @@ class ForgetfulMeBackground {
     }
   }
 
-
-
   /**
    * Set up all Chrome extension event listeners
    * @method initializeEventListeners
    * @description Configures listeners for keyboard shortcuts, installation events, runtime messages, and storage changes
-   * 
+   *
    * @example
    * // Called during background initialization
    * background.initializeEventListeners();
@@ -108,7 +106,7 @@ class ForgetfulMeBackground {
     });
 
     // Handle tab activation to check URL status
-    chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    chrome.tabs.onActivated.addListener(async activeInfo => {
       try {
         const tab = await chrome.tabs.get(activeInfo.tabId);
         if (tab.url) {
@@ -120,7 +118,7 @@ class ForgetfulMeBackground {
     });
 
     // Handle action button click to check URL status
-    chrome.action.onClicked.addListener(async (tab) => {
+    chrome.action.onClicked.addListener(async tab => {
       if (tab.url) {
         await this.checkUrlStatus(tab);
       }
@@ -155,37 +153,47 @@ class ForgetfulMeBackground {
           sendResponse({ success: true });
           break;
 
-        case 'GET_AUTH_STATE':
+        case 'GET_AUTH_STATE': {
           const authState = await this.getAuthState();
           sendResponse({ success: true, authState });
           break;
+        }
 
         case 'AUTH_STATE_CHANGED':
           // This is handled by storage.onChanged, but we can log it
           console.log('Background: Received auth state change message');
           break;
 
-        case 'GET_CONFIG_SUMMARY':
+        case 'GET_CONFIG_SUMMARY': {
           const summary = this.getAuthSummary();
           sendResponse({ success: true, summary });
           break;
+        }
 
-        case 'CHECK_URL_STATUS':
+        case 'CHECK_URL_STATUS': {
           // Handle request to check current tab URL status
-          const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          const [currentTab] = await chrome.tabs.query({
+            active: true,
+            currentWindow: true,
+          });
           if (currentTab && currentTab.url) {
             await this.checkUrlStatus(currentTab);
           }
           sendResponse({ success: true });
           break;
+        }
 
         case 'URL_STATUS_RESULT':
           // Handle URL status result from popup
-          if (message.data && message.data.url && typeof message.data.isSaved === 'boolean') {
+          if (
+            message.data &&
+            message.data.url &&
+            typeof message.data.isSaved === 'boolean'
+          ) {
             // Cache the result
             this.urlStatusCache.set(message.data.url, {
               isSaved: message.data.isSaved,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             });
             // Update icon
             this.updateIconForUrl(message.data.url, message.data.isSaved);
@@ -266,11 +274,13 @@ class ForgetfulMeBackground {
   async checkUrlStatus(tab) {
     try {
       // Skip browser pages and extension pages
-      if (!tab.url || 
-          tab.url.startsWith('chrome://') || 
-          tab.url.startsWith('chrome-extension://') ||
-          tab.url.startsWith('about:') ||
-          tab.url.startsWith('moz-extension://')) {
+      if (
+        !tab.url ||
+        tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('chrome-extension://') ||
+        tab.url.startsWith('about:') ||
+        tab.url.startsWith('moz-extension://')
+      ) {
         this.updateIconForUrl(null, false);
         return;
       }
@@ -292,7 +302,6 @@ class ForgetfulMeBackground {
       // For now, show default state since we can't access database from background
       // The popup will handle the actual URL checking when opened
       this.updateIconForUrl(tab.url, false);
-
     } catch (error) {
       console.debug('Background: Error checking URL status:', error.message);
       // On error, show default icon
@@ -391,7 +400,7 @@ class ForgetfulMeBackground {
     }
   }
 
-  async handleMarkAsRead(bookmarkData) {
+  async handleMarkAsRead(_bookmarkData) {
     try {
       // This will be handled by the popup, background just shows notification
       chrome.notifications.create({

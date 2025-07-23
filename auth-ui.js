@@ -2,7 +2,7 @@
  * @fileoverview Authentication UI component for ForgetfulMe extension
  * @module auth-ui
  * @description Handles authentication user interface including login, signup, and user profile
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -16,7 +16,7 @@ import UIMessages from './utils/ui-messages.js';
  * Authentication UI component for ForgetfulMe extension
  * @class AuthUI
  * @description Handles authentication user interface including login, signup, and user profile
- * 
+ *
  * @example
  * const authUI = new AuthUI(supabaseConfig, onAuthSuccess, authStateManager);
  * authUI.showLoginForm(container);
@@ -53,7 +53,7 @@ class AuthUI {
     // Create login form
     const loginForm = UIComponents.createForm(
       'loginForm',
-      (e, form) => this.handleLogin(document),
+      (_e, _form) => this.handleLogin(document),
       [
         {
           type: 'email',
@@ -111,7 +111,7 @@ class AuthUI {
     // Create signup form
     const signupForm = UIComponents.createForm(
       'signupForm',
-      (e, form) => this.handleSignup(document),
+      (_e, _form) => this.handleSignup(document),
       [
         {
           type: 'email',
@@ -266,7 +266,7 @@ class AuthUI {
               this.onAuthSuccess();
             }, 1000);
           }
-        } catch (signInError) {
+        } catch {
           // If auto-signin fails, show the email verification message
           UIMessages.success(
             'Account created! Please check your email to verify your account, then sign in.',

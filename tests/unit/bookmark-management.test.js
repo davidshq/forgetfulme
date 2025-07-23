@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * @fileoverview Unit tests for BookmarkManagementPage using Kent Dodds testing methodology
  * @module bookmark-management.test
  * @description Tests for the bookmark management page using Kent Dodds' testing principles
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
@@ -26,7 +26,7 @@ vi.mock('../../utils/ui-components.js', () => ({
     createContainer: vi.fn(),
     createListItem: vi.fn(),
     createList: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../utils/auth-state-manager.js', () => ({
@@ -34,7 +34,7 @@ vi.mock('../../utils/auth-state-manager.js', () => ({
     initialize: vi.fn().mockResolvedValue(),
     isAuthenticated: vi.fn().mockResolvedValue(true),
     addListener: vi.fn(),
-  }))
+  })),
 }));
 
 vi.mock('../../utils/error-handler.js', () => ({
@@ -54,8 +54,8 @@ vi.mock('../../utils/error-handler.js', () => ({
       MEDIUM: 'MEDIUM',
       HIGH: 'HIGH',
       CRITICAL: 'CRITICAL',
-    }
-  }
+    },
+  },
 }));
 
 vi.mock('../../utils/ui-messages.js', () => ({
@@ -64,21 +64,21 @@ vi.mock('../../utils/ui-messages.js', () => ({
     error: vi.fn(),
     show: vi.fn(),
     confirm: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../utils/config-manager.js', () => ({
   default: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(),
     getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-  }))
+  })),
 }));
 
 vi.mock('../../utils/bookmark-transformer.js', () => ({
   default: {
     toUIFormat: vi.fn(),
     fromCurrentTab: vi.fn(),
-  }
+  },
 }));
 
 vi.mock('../../supabase-config.js', () => ({
@@ -86,7 +86,7 @@ vi.mock('../../supabase-config.js', () => ({
     isConfigured: vi.fn().mockResolvedValue(true),
     initialize: vi.fn().mockResolvedValue(),
     getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
-  }))
+  })),
 }));
 
 vi.mock('../../supabase-service.js', () => ({
@@ -97,7 +97,7 @@ vi.mock('../../supabase-service.js', () => ({
     updateBookmark: vi.fn(),
     deleteBookmark: vi.fn(),
     getBookmarkById: vi.fn(),
-  }))
+  })),
 }));
 
 // Mock chrome API
@@ -136,7 +136,7 @@ describe('BookmarkManagementPage', () => {
     mockUIComponents = UIComponents;
     mockUIMessages = UIMessages;
     mockErrorHandler = ErrorHandler;
-    
+
     // Directly replace the ErrorHandler.handle method to ensure it returns the correct structure
     ErrorHandler.handle = vi.fn().mockReturnValue({
       errorInfo: {
@@ -144,7 +144,7 @@ describe('BookmarkManagementPage', () => {
         severity: 'MEDIUM',
         message: 'Test error message',
         context: 'test',
-        originalError: new Error('Test error message')
+        originalError: new Error('Test error message'),
       },
       userMessage: 'Test error message',
       shouldRetry: false,
@@ -152,7 +152,7 @@ describe('BookmarkManagementPage', () => {
     });
 
     // Mock BookmarkTransformer.toUIFormat
-    BookmarkTransformer.toUIFormat = vi.fn().mockImplementation((bookmark) => ({
+    BookmarkTransformer.toUIFormat = vi.fn().mockImplementation(bookmark => ({
       id: bookmark.id,
       url: bookmark.url,
       title: bookmark.title,
@@ -160,7 +160,7 @@ describe('BookmarkManagementPage', () => {
       tags: bookmark.tags,
       created_at: bookmark.created_at,
     }));
-    
+
     // Create a new instance of SupabaseService and ensure methods are vi.fn() instances
     mockSupabaseService = new SupabaseService();
     mockSupabaseService.saveBookmark = vi.fn();
@@ -171,14 +171,14 @@ describe('BookmarkManagementPage', () => {
 
     // Mock DOM elements
     const mockAppContainer = document.createElement('div');
-    mockUIComponents.DOM.getElement.mockImplementation((id) => {
+    mockUIComponents.DOM.getElement.mockImplementation(id => {
       if (id === 'app') return mockAppContainer;
       return null;
     });
 
     // Create page instance
     page = new BookmarkManagementPage();
-    
+
     // Replace the page's service instances with our mocked ones
     page.supabaseService = mockSupabaseService;
     page.supabaseConfig = {
@@ -224,11 +224,19 @@ describe('BookmarkManagementPage', () => {
       mockSupabaseService.getBookmarks.mockResolvedValue(mockBookmarks);
 
       // Mock UI components
-      mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
-      mockUIComponents.createSection.mockReturnValue(document.createElement('div'));
-      mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
+      mockUIComponents.createButton.mockReturnValue(
+        document.createElement('button')
+      );
+      mockUIComponents.createSection.mockReturnValue(
+        document.createElement('div')
+      );
+      mockUIComponents.createForm.mockReturnValue(
+        document.createElement('form')
+      );
       mockUIComponents.createList.mockReturnValue(document.createElement('ul'));
-      mockUIComponents.createListItem.mockReturnValue(document.createElement('li'));
+      mockUIComponents.createListItem.mockReturnValue(
+        document.createElement('li')
+      );
 
       // Mock document.getElementById for bookmarks list
       const mockBookmarksList = document.createElement('ul');
@@ -236,7 +244,9 @@ describe('BookmarkManagementPage', () => {
 
       await page.loadAllBookmarks();
 
-      expect(mockSupabaseService.getBookmarks).toHaveBeenCalledWith({ limit: 100 });
+      expect(mockSupabaseService.getBookmarks).toHaveBeenCalledWith({
+        limit: 100,
+      });
       expect(BookmarkTransformer.toUIFormat).toHaveBeenCalledTimes(2);
     });
 
@@ -283,8 +293,13 @@ describe('BookmarkManagementPage', () => {
 
       await page.deleteBookmark('bookmark-1', 'Test Bookmark');
 
-      expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith('bookmark-1');
-      expect(mockUIMessages.success).toHaveBeenCalledWith('Bookmark deleted successfully!', expect.any(Object));
+      expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith(
+        'bookmark-1'
+      );
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        'Bookmark deleted successfully!',
+        expect.any(Object)
+      );
       expect(page.loadAllBookmarks).toHaveBeenCalled();
     });
 
@@ -299,8 +314,14 @@ describe('BookmarkManagementPage', () => {
 
       await page.deleteBookmark('bookmark-1', 'Test Bookmark');
 
-      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'bookmark-management.deleteBookmark');
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'bookmark-management.deleteBookmark'
+      );
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object)
+      );
     });
 
     it('should open bookmark in new tab', () => {
@@ -309,7 +330,9 @@ describe('BookmarkManagementPage', () => {
 
       page.openBookmark('https://example.com');
 
-      expect(mockTabsCreate).toHaveBeenCalledWith({ url: 'https://example.com' });
+      expect(mockTabsCreate).toHaveBeenCalledWith({
+        url: 'https://example.com',
+      });
     });
 
     it('should delete selected bookmarks successfully', async () => {
@@ -321,9 +344,9 @@ describe('BookmarkManagementPage', () => {
 
       // Mock successful delete operations
       mockSupabaseService.deleteBookmark.mockResolvedValue(true);
-      
+
       // Mock DOM query to return selected checkboxes
-      document.querySelectorAll = vi.fn().mockImplementation((selector) => {
+      document.querySelectorAll = vi.fn().mockImplementation(selector => {
         if (selector === '.bookmark-checkbox:checked') {
           return mockCheckboxes;
         }
@@ -338,9 +361,11 @@ describe('BookmarkManagementPage', () => {
 
       // Mock confirmation dialog to capture the callback
       let confirmCallback;
-      mockUIMessages.confirm.mockImplementation((message, callback, cancelCallback, container) => {
-        confirmCallback = callback;
-      });
+      mockUIMessages.confirm.mockImplementation(
+        (message, callback, _cancelCallback, _container) => {
+          confirmCallback = callback;
+        }
+      );
 
       // Act: Call the method
       page.deleteSelectedBookmarks();
@@ -358,23 +383,24 @@ describe('BookmarkManagementPage', () => {
         expect.any(Function),
         expect.any(Object)
       );
-      
+
       // Verify delete operations were called for each selected bookmark
       expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledTimes(2);
       expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith('1');
       expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith('2');
-      
+
       // Verify success message was shown
-      expect(mockUIMessages.success).toHaveBeenCalledWith('2 bookmark(s) deleted successfully!', expect.any(Object));
-      
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        '2 bookmark(s) deleted successfully!',
+        expect.any(Object)
+      );
+
       // Verify bookmarks were reloaded
       expect(page.loadAllBookmarks).toHaveBeenCalled();
     });
 
     it('should export selected bookmarks', async () => {
-      const mockCheckboxes = [
-        { checked: true, dataset: { bookmarkId: '1' } },
-      ];
+      const mockCheckboxes = [{ checked: true, dataset: { bookmarkId: '1' } }];
 
       const mockBookmark = {
         id: '1',
@@ -408,7 +434,10 @@ describe('BookmarkManagementPage', () => {
       await page.exportSelectedBookmarks();
 
       expect(mockSupabaseService.getBookmarkById).toHaveBeenCalledWith('1');
-      expect(mockUIMessages.success).toHaveBeenCalledWith('1 bookmark(s) exported successfully!', expect.any(Object));
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        '1 bookmark(s) exported successfully!',
+        expect.any(Object)
+      );
     });
   });
 
@@ -422,12 +451,12 @@ describe('BookmarkManagementPage', () => {
     it('should format time correctly', () => {
       const now = Date.now();
       expect(page.formatTime(now)).toBe('Just now');
-      
+
       const oneMinuteAgo = now - 60000;
       expect(page.formatTime(oneMinuteAgo)).toBe('1m ago');
-      
+
       const oneHourAgo = now - 3600000;
       expect(page.formatTime(oneHourAgo)).toBe('1h ago');
     });
   });
-}); 
+});

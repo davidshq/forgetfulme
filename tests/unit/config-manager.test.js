@@ -27,11 +27,11 @@ describe('ConfigManager', () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
-    
+
     // Setup global mocks
     global.chrome = mockChrome;
     global.console = mockConsole;
-    
+
     // Create new instance for each test
     configManager = new ConfigManager();
   });
@@ -94,7 +94,9 @@ describe('ConfigManager', () => {
 
       expect(configManager.initialized).toBe(true);
       expect(configManager.config.supabase).toEqual(mockSupabaseConfig);
-      expect(configManager.config.preferences.customStatusTypes).toEqual(mockStatusTypes);
+      expect(configManager.config.preferences.customStatusTypes).toEqual(
+        mockStatusTypes
+      );
       expect(configManager.config.auth).toEqual(mockAuthSession);
     });
 
@@ -292,13 +294,19 @@ describe('ConfigManager', () => {
 
     test('should reject setting Supabase config with invalid URL', async () => {
       await expect(
-        configManager.setSupabaseConfig('http://example.supabase.co', 'valid-key')
+        configManager.setSupabaseConfig(
+          'http://example.supabase.co',
+          'valid-key'
+        )
       ).rejects.toThrow('URL must start with https://');
     });
 
     test('should reject setting Supabase config with invalid anon key', async () => {
       await expect(
-        configManager.setSupabaseConfig('https://example.supabase.co', 'invalid-key')
+        configManager.setSupabaseConfig(
+          'https://example.supabase.co',
+          'invalid-key'
+        )
       ).rejects.toThrow('Invalid anon key format');
     });
 
@@ -370,7 +378,9 @@ describe('ConfigManager', () => {
 
       await configManager.setCustomStatusTypes(statusTypes);
 
-      expect(configManager.config.preferences.customStatusTypes).toEqual(statusTypes);
+      expect(configManager.config.preferences.customStatusTypes).toEqual(
+        statusTypes
+      );
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: statusTypes,
       });
@@ -385,7 +395,9 @@ describe('ConfigManager', () => {
     test('should add custom status type', async () => {
       await configManager.addCustomStatusType('new-status');
 
-      expect(configManager.config.preferences.customStatusTypes).toContain('new-status');
+      expect(configManager.config.preferences.customStatusTypes).toContain(
+        'new-status'
+      );
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: [
           'read',
@@ -411,19 +423,21 @@ describe('ConfigManager', () => {
     });
 
     test('should reject adding invalid status type', async () => {
-      await expect(
-        configManager.addCustomStatusType('')
-      ).rejects.toThrow('Status type must be a non-empty string');
+      await expect(configManager.addCustomStatusType('')).rejects.toThrow(
+        'Status type must be a non-empty string'
+      );
 
-      await expect(
-        configManager.addCustomStatusType(null)
-      ).rejects.toThrow('Status type must be a non-empty string');
+      await expect(configManager.addCustomStatusType(null)).rejects.toThrow(
+        'Status type must be a non-empty string'
+      );
     });
 
     test('should remove custom status type', async () => {
       await configManager.removeCustomStatusType('read');
 
-      expect(configManager.config.preferences.customStatusTypes).not.toContain('read');
+      expect(configManager.config.preferences.customStatusTypes).not.toContain(
+        'read'
+      );
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: ['good-reference', 'low-value', 'revisit-later'],
       });
@@ -466,7 +480,9 @@ describe('ConfigManager', () => {
       await configManager.clearAuthSession();
 
       expect(configManager.config.auth).toBeNull();
-      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith(['auth_session']);
+      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith([
+        'auth_session',
+      ]);
     });
 
     test('should check if authenticated', async () => {
@@ -481,7 +497,7 @@ describe('ConfigManager', () => {
   describe('Listener Management', () => {
     test('should add and remove listeners', () => {
       const mockCallback = vi.fn();
-      
+
       configManager.addListener('configChanged', mockCallback);
       expect(configManager.listeners.size).toBe(1);
 
@@ -536,10 +552,10 @@ describe('ConfigManager', () => {
       });
 
       await configManager.initialize();
-      
+
       // Clear the mock to count only new calls
       mockChrome.storage.sync.get.mockClear();
-      
+
       await configManager.ensureInitialized();
 
       // ensureInitialized should not call storage.get again since already initialized
@@ -624,7 +640,9 @@ describe('ConfigManager', () => {
 
       await configManager.initialize();
 
-      expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({ configVersion: 1 });
+      expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
+        configVersion: 1,
+      });
     });
 
     test('should not migrate if already at current version', async () => {
@@ -649,7 +667,9 @@ describe('ConfigManager', () => {
         auth_session: null,
         configVersion: 0,
       });
-      mockChrome.storage.sync.set.mockRejectedValue(new Error('Migration error'));
+      mockChrome.storage.sync.set.mockRejectedValue(
+        new Error('Migration error')
+      );
 
       // Should not throw error
       await configManager.initialize();
@@ -737,4 +757,4 @@ describe('ConfigManager', () => {
       ).rejects.toThrow('URL must start with https://');
     });
   });
-}); 
+});
