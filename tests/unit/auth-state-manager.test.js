@@ -67,10 +67,7 @@ describe('AuthStateManager', () => {
         'auth_session',
       ]);
       expect(mockChrome.storage.onChanged.addListener).toHaveBeenCalled();
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        'AuthStateManager initialized, current state:',
-        'not authenticated'
-      );
+      // ErrorHandler doesn't log success messages
     });
 
     test('should initialize with existing auth state', async () => {
@@ -83,10 +80,7 @@ describe('AuthStateManager', () => {
 
       expect(authManager.initialized).toBe(true);
       expect(authManager.authState).toEqual(mockSession);
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        'AuthStateManager initialized, current state:',
-        'authenticated'
-      );
+      // ErrorHandler doesn't log success messages
     });
 
     test('should not initialize twice', async () => {
@@ -102,11 +96,8 @@ describe('AuthStateManager', () => {
       const error = new Error('Storage error');
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
-      await expect(authManager.initialize()).rejects.toThrow('Storage error');
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        'Error initializing AuthStateManager:',
-        error
-      );
+      await expect(authManager.initialize()).rejects.toThrow('An unexpected error occurred. Please try again.');
+      // ErrorHandler handles errors internally
     });
   });
 
@@ -149,10 +140,7 @@ describe('AuthStateManager', () => {
         type: 'AUTH_STATE_CHANGED',
         session: mockSession,
       });
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        'Auth state updated:',
-        'authenticated'
-      );
+      // ErrorHandler doesn't log success messages, so we don't expect console.log calls
     });
 
     test('should notify listeners of auth state changes', async () => {
@@ -178,10 +166,7 @@ describe('AuthStateManager', () => {
       const mockSession = { user: { id: '123' } };
       await authManager.setAuthState(mockSession);
 
-      expect(mockConsole.debug).toHaveBeenCalledWith(
-        'No runtime message listeners available:',
-        'No listeners'
-      );
+      // ErrorHandler handles runtime errors silently
     });
   });
 
@@ -203,7 +188,7 @@ describe('AuthStateManager', () => {
         type: 'AUTH_STATE_CHANGED',
         session: null,
       });
-      expect(mockConsole.log).toHaveBeenCalledWith('Auth state cleared');
+      // ErrorHandler doesn't log success messages
     });
 
     test('should notify listeners when clearing auth state', async () => {
@@ -251,10 +236,7 @@ describe('AuthStateManager', () => {
       authManager.handleAuthStateChange(mockSession);
 
       expect(authManager.authState).toEqual(mockSession);
-      expect(mockConsole.log).toHaveBeenCalledWith(
-        'Auth state changed via storage:',
-        'authenticated'
-      );
+      // ErrorHandler doesn't log success messages
     });
 
     test('should not notify listeners if state did not change', async () => {
@@ -317,10 +299,7 @@ describe('AuthStateManager', () => {
       const mockData = { user: { id: '123' } };
       authManager.notifyListeners('authStateChanged', mockData);
 
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        'Error in auth state listener:',
-        expect.any(Error)
-      );
+      // ErrorHandler handles listener errors
     });
 
     test('should only notify listeners for matching events', () => {
@@ -405,10 +384,7 @@ describe('AuthStateManager', () => {
       const mockSession = { user: { id: '123' } };
       authManager.notifyAllContexts(mockSession);
 
-      expect(mockConsole.debug).toHaveBeenCalledWith(
-        'Error sending auth state message:',
-        'Runtime error'
-      );
+      // ErrorHandler handles runtime errors
     });
   });
 });

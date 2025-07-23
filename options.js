@@ -66,7 +66,7 @@ class ForgetfulMeOptions {
       this.initializeAuthState();
     } catch (error) {
       ErrorHandler.handle(error, 'options.initializeAsync');
-      console.error('Failed to initialize options:', error);
+      // Failed to initialize options
     }
   }
 
@@ -88,17 +88,14 @@ class ForgetfulMeOptions {
         }
       );
 
-      console.log('Options: Auth state initialized');
+      // Auth state initialized successfully
     } catch (error) {
-      console.error('Options: Error initializing auth state:', error);
+      ErrorHandler.handle(error, 'options.initializeAuthState');
     }
   }
 
   handleAuthStateChange(session) {
-    console.log(
-      'Options: Auth state changed:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // Auth state changed - update UI accordingly
 
     // Update UI based on auth state
     if (session) {
@@ -184,10 +181,7 @@ class ForgetfulMeOptions {
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(
-            `Supabase initialization attempt ${retryCount} failed:`,
-            error
-          );
+          // Supabase initialization attempt failed, retrying...
 
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries

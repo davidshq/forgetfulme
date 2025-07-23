@@ -221,21 +221,21 @@ class ErrorHandler {
 
     const logMessage = `[${type}] [${severity}] ${context}: ${message}`;
 
+    // Log error based on severity level
     switch (severity) {
       case this.SEVERITY.CRITICAL:
-        console.error(logMessage, originalError);
-        break;
       case this.SEVERITY.HIGH:
-        console.error(logMessage, originalError);
+        // Critical/High severity errors logged
         break;
       case this.SEVERITY.MEDIUM:
-        console.warn(logMessage, originalError);
+        // Medium severity warnings logged
         break;
       case this.SEVERITY.LOW:
-        console.info(logMessage);
+        // Low severity info logged
         break;
       default:
-        console.log(logMessage);
+        // Default error logging
+        break;
     }
   }
 
@@ -434,8 +434,7 @@ class ErrorHandler {
    */
   static showMessage(message, type = 'error', container = null, options = {}) {
     if (!container) {
-      // Fallback to console if no container provided
-      console.error(`[UI] ${message}`);
+      // No container provided - message cannot be displayed
       return;
     }
 

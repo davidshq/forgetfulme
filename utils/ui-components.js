@@ -1,12 +1,14 @@
 /**
- * @fileoverview UI Components for ForgetfulMe Extension
+ * @fileoverview UI Components for ForgetfulMe extension
  * @module ui-components
- * @description Centralized component factory for consistent UI patterns and DOM utilities
+ * @description Provides reusable UI components and DOM utilities
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
+
+import ErrorHandler from './error-handler.js';
 
 /**
  * UI Components factory for ForgetfulMe Extension
@@ -149,10 +151,7 @@ class UIComponents {
       try {
         return container.getElementById(id);
       } catch (error) {
-        console.warn(
-          `UIComponents.DOM.getElement: Error accessing element with id '${id}':`,
-          error
-        );
+        ErrorHandler.handle(error, 'ui-components.DOM.getElement');
         return null;
       }
     },
@@ -167,10 +166,7 @@ class UIComponents {
       try {
         return container.querySelector(selector);
       } catch (error) {
-        console.warn(
-          `UIComponents.DOM.querySelector: Error accessing element with selector '${selector}':`,
-          error
-        );
+        ErrorHandler.handle(error, 'ui-components.DOM.querySelector');
         return null;
       }
     },
@@ -185,10 +181,7 @@ class UIComponents {
       try {
         return container.querySelectorAll(selector);
       } catch (error) {
-        console.warn(
-          `UIComponents.DOM.querySelectorAll: Error accessing elements with selector '${selector}':`,
-          error
-        );
+        ErrorHandler.handle(error, 'ui-components.DOM.querySelectorAll');
         return document.querySelectorAll(''); // Return empty NodeList
       }
     },
@@ -254,9 +247,7 @@ class UIComponents {
         element.addEventListener(event, handler);
         return true;
       }
-      console.warn(
-        `UIComponents.DOM.addEventListener: Element with id '${id}' not found`
-      );
+      // Element with id not found
       return false;
     },
 
@@ -273,9 +264,7 @@ class UIComponents {
         element.value = value;
         return true;
       }
-      console.warn(
-        `UIComponents.DOM.setValue: Element with id '${id}' not found`
-      );
+      // Element with id not found
       return false;
     },
 
@@ -329,10 +318,7 @@ class UIComponents {
           element.addEventListener(event, handler);
           boundEvents.push({ element, event, handler });
         } else {
-          console.warn(
-            `UIComponents.DOM.bindEvents: Element not found for binding:`,
-            binding
-          );
+          // Element not found for binding
         }
       }
 

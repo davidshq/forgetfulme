@@ -1,12 +1,14 @@
 /**
- * @fileoverview Unified Configuration Manager for ForgetfulMe Extension
+ * @fileoverview Configuration manager for ForgetfulMe extension
  * @module config-manager
- * @description Consolidates all configuration logic and storage operations
+ * @description Manages extension configuration, preferences, and storage operations
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
+
+import ErrorHandler from './error-handler.js';
 
 /**
  * Unified Configuration Manager for ForgetfulMe Extension
@@ -64,8 +66,8 @@ class ConfigManager {
       this.initialized = true;
       this.notifyListeners('initialized');
     } catch (error) {
-      console.error('Error initializing ConfigManager:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'config-manager.initialize');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initialize');
     }
   }
 
@@ -89,8 +91,8 @@ class ConfigManager {
       };
       this.config.auth = result.auth_session || null;
     } catch (error) {
-      console.error('Error loading configuration:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'config-manager.loadAllConfig');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.loadAllConfig');
     }
   }
 
@@ -99,17 +101,27 @@ class ConfigManager {
     // Validate Supabase configuration if present
     if (this.config.supabase) {
       if (!this.config.supabase.url || !this.config.supabase.anonKey) {
-        throw new Error(
-          'Invalid Supabase configuration: missing URL or anon key'
+        throw ErrorHandler.createError(
+          'Invalid Supabase configuration: missing URL or anon key',
+          ErrorHandler.ERROR_TYPES.VALIDATION,
+          'config-manager.validateConfig'
         );
       }
 
       if (!this.config.supabase.url.startsWith('https://')) {
-        throw new Error('Invalid Supabase URL: must start with https://');
+        throw ErrorHandler.createError(
+          'Invalid Supabase URL: must start with https://',
+          ErrorHandler.ERROR_TYPES.VALIDATION,
+          'config-manager.validateConfig'
+        );
       }
 
       if (!this.config.supabase.anonKey.startsWith('eyJ')) {
-        throw new Error('Invalid anon key format');
+        throw ErrorHandler.createError(
+          'Invalid anon key format',
+          ErrorHandler.ERROR_TYPES.VALIDATION,
+          'config-manager.validateConfig'
+        );
       }
     }
 
@@ -136,7 +148,7 @@ class ConfigManager {
         await this.setMigrationVersion(1);
       }
     } catch (error) {
-      console.error('Error during configuration migration:', error);
+      ErrorHandler.handle(error, 'config-manager.migrateConfig');
       // Don't throw - migration errors shouldn't break the app
     }
   }
@@ -144,7 +156,7 @@ class ConfigManager {
   async migrateToVersion1() {
     // Migration logic for version 1
     // This is where we'd handle any breaking changes in configuration format
-    console.log('Migrating configuration to version 1');
+    // Migrating configuration to version 1
   }
 
   async getMigrationVersion() {
@@ -160,7 +172,7 @@ class ConfigManager {
     try {
       await chrome.storage.sync.set({ configVersion: version });
     } catch (error) {
-      console.error('Error setting migration version:', error);
+      // Error setting migration version
     }
   }
 
@@ -175,15 +187,27 @@ class ConfigManager {
 
     // Validate input
     if (!url || !anonKey) {
-      throw new Error('Both URL and anon key are required');
+      throw ErrorHandler.createError(
+        'Both URL and anon key are required',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.setSupabaseConfig'
+      );
     }
 
     if (!url.startsWith('https://')) {
-      throw new Error('URL must start with https://');
+      throw ErrorHandler.createError(
+        'URL must start with https://',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.setSupabaseConfig'
+      );
     }
 
     if (!anonKey.startsWith('eyJ')) {
-      throw new Error('Invalid anon key format');
+      throw ErrorHandler.createError(
+        'Invalid anon key format',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.setSupabaseConfig'
+      );
     }
 
     // Update configuration
@@ -236,7 +260,11 @@ class ConfigManager {
     await this.ensureInitialized();
 
     if (!Array.isArray(statusTypes)) {
-      throw new Error('Status types must be an array');
+      throw ErrorHandler.createError(
+        'Status types must be an array',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.setCustomStatusTypes'
+      );
     }
 
     this.config.preferences.customStatusTypes = statusTypes;
@@ -253,7 +281,11 @@ class ConfigManager {
     await this.ensureInitialized();
 
     if (!statusType || typeof statusType !== 'string') {
-      throw new Error('Status type must be a non-empty string');
+      throw ErrorHandler.createError(
+        'Status type must be a non-empty string',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.addCustomStatusType'
+      );
     }
 
     const currentTypes = this.config.preferences.customStatusTypes;
@@ -297,14 +329,10 @@ class ConfigManager {
           session: session,
         })
         .catch(error => {
-          // Ignore errors when no listeners are available
-          console.debug(
-            'No runtime message listeners available:',
-            error.message
-          );
+          ErrorHandler.handle(error, 'config-manager.setAuthSession.runtime');
         });
     } catch (error) {
-      console.debug('Error sending auth state message:', error.message);
+      ErrorHandler.handle(error, 'config-manager.setAuthSession');
     }
   }
 
@@ -326,14 +354,10 @@ class ConfigManager {
           session: null,
         })
         .catch(error => {
-          // Ignore errors when no listeners are available
-          console.debug(
-            'No runtime message listeners available:',
-            error.message
-          );
+          ErrorHandler.handle(error, 'config-manager.clearAuthSession.runtime');
         });
     } catch (error) {
-      console.debug('Error sending auth state message:', error.message);
+      ErrorHandler.handle(error, 'config-manager.clearAuthSession');
     }
   }
 
@@ -359,10 +383,10 @@ class ConfigManager {
       // Update local config
       this.config.preferences = defaultSettings;
 
-      console.log('Default settings initialized');
+      // Default settings initialized successfully
     } catch (error) {
-      console.error('Error initializing default settings:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'config-manager.initializeDefaultSettings');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initializeDefaultSettings');
     }
   }
 
@@ -383,7 +407,11 @@ class ConfigManager {
     await this.ensureInitialized();
 
     if (!configData || typeof configData !== 'object') {
-      throw new Error('Invalid configuration data');
+      throw ErrorHandler.createError(
+        'Invalid configuration data',
+        ErrorHandler.ERROR_TYPES.VALIDATION,
+        'config-manager.importConfig'
+      );
     }
 
     // Validate imported data
@@ -425,7 +453,7 @@ class ConfigManager {
         try {
           listener.callback(data);
         } catch (error) {
-          console.error('Error in config listener:', error);
+          // Error in config listener
         }
       }
     }
@@ -449,7 +477,7 @@ class ConfigManager {
       this.initialized = false;
       this.notifyListeners('configReset');
     } catch (error) {
-      console.error('Error resetting configuration:', error);
+      // Error resetting configuration
       throw error;
     }
   }

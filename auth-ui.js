@@ -305,7 +305,7 @@ class AuthUI {
         await this.authStateManager.clearAuthState();
       }
 
-      console.log('Successfully signed out');
+      // Successfully signed out
 
       // Refresh the page or show login form
       location.reload();
@@ -313,7 +313,7 @@ class AuthUI {
       const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
         silent: true,
       });
-      console.error('Error during sign out:', errorResult);
+      // Error during sign out
       // Don't show user for sign out errors as they're not critical
     }
   }

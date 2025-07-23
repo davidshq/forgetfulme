@@ -79,7 +79,7 @@ class ForgetfulMePopup {
       this.initializeAuthState();
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.initializeAsync');
-      console.error('Failed to initialize popup:', errorResult);
+      // Failed to initialize popup
     }
   }
 
@@ -112,9 +112,9 @@ class ForgetfulMePopup {
         }
       );
 
-      console.log('Popup: Auth state initialized');
+      // Auth state initialized successfully
     } catch (error) {
-      console.error('Popup: Error initializing auth state:', error);
+      ErrorHandler.handle(error, 'popup.initializeAuthState');
     }
   }
 
@@ -129,10 +129,7 @@ class ForgetfulMePopup {
    * popup.handleAuthStateChange(session);
    */
   handleAuthStateChange(session) {
-    console.log(
-      'Popup: Auth state changed:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // Auth state changed - update UI accordingly
 
     // Update UI based on auth state
     if (session) {
@@ -207,10 +204,7 @@ class ForgetfulMePopup {
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(
-            `Supabase initialization attempt ${retryCount} failed:`,
-            error
-          );
+          // Supabase initialization attempt failed, retrying...
 
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries
@@ -458,10 +452,7 @@ class ForgetfulMePopup {
             data: { url: bookmark.url },
           });
         } catch (error) {
-          console.debug(
-            'Popup: Error notifying background about saved bookmark:',
-            error.message
-          );
+          // Error notifying background about saved bookmark
         }
 
         // Close popup after a short delay
@@ -681,15 +672,14 @@ class ForgetfulMePopup {
           data: { url: tab.url, isSaved },
         });
       } catch (error) {
-        console.debug('Popup: Error checking URL in database:', error.message);
-        // Send default state on error
+        // Error checking URL in database - send default state
         await chrome.runtime.sendMessage({
           type: 'URL_STATUS_RESULT',
           data: { url: tab.url, isSaved: false },
         });
       }
     } catch (error) {
-      console.debug('Popup: Error checking URL status:', error.message);
+      // Error checking URL status
     }
   }
 
@@ -810,10 +800,7 @@ class ForgetfulMePopup {
           data: { url: updates.url || this.currentBookmarkUrl },
         });
       } catch (error) {
-        console.debug(
-          'Popup: Error notifying background about updated bookmark:',
-          error.message
-        );
+        // Error notifying background about updated bookmark
       }
 
       // Return to main interface after a short delay

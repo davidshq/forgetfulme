@@ -1,12 +1,14 @@
 /**
- * @fileoverview UI Message Handler for ForgetfulMe Extension
+ * @fileoverview UI Messages for ForgetfulMe extension
  * @module ui-messages
- * @description Provides centralized message display functionality for user feedback
+ * @description Provides user-friendly message display and confirmation dialogs
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
+
+import ErrorHandler from './error-handler.js';
 
 /**
  * UI Message Handler for ForgetfulMe Extension
@@ -49,10 +51,7 @@ class UIMessages {
    */
   static show(message, type = 'info', container = null, options = {}) {
     if (!container) {
-      console.warn(
-        'UIMessages.show: No container provided, falling back to console'
-      );
-      console.log(`[${type.toUpperCase()}] ${message}`);
+      // No container provided - message cannot be displayed
       return;
     }
 
@@ -73,10 +72,7 @@ class UIMessages {
     try {
       container.appendChild(messageEl);
     } catch {
-      console.warn(
-        'UIMessages.show: Error adding message to container, falling back to console'
-      );
-      console.log(`[${type.toUpperCase()}] ${message}`);
+      // Error adding message to container
       return;
     }
 
@@ -155,10 +151,7 @@ class UIMessages {
    */
   static loading(message, container, _options = {}) {
     if (!container) {
-      console.warn(
-        'UIMessages.loading: No container provided, falling back to console'
-      );
-      console.log(`[LOADING] ${message}`);
+      // No container provided - loading message cannot be displayed
       return;
     }
 
@@ -184,11 +177,8 @@ class UIMessages {
     // Add to container
     try {
       container.appendChild(messageEl);
-    } catch {
-      console.warn(
-        'UIMessages.loading: Error adding message to container, falling back to console'
-      );
-      console.log(`[LOADING] ${message}`);
+    } catch (error) {
+      ErrorHandler.handle(error, 'ui-messages.loading');
       return;
     }
 

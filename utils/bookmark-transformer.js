@@ -1,13 +1,14 @@
 /**
- * @fileoverview BookmarkTransformer - Unified bookmark data transformation utility
+ * @fileoverview Bookmark transformer for ForgetfulMe extension
  * @module bookmark-transformer
- * @description Consolidates all bookmark data transformation logic to eliminate duplication
- * and ensure consistent data handling across the application.
+ * @description Transforms bookmark data between different formats
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
+
+import ErrorHandler from './error-handler.js';
 
 /**
  * BookmarkTransformer - Unified bookmark data transformation utility

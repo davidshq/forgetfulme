@@ -589,6 +589,7 @@ export const createMockElement = (tagName = 'div', options = {}) => {
  * Sets up common DOM elements for popup tests
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @returns {Object} DOM setup with common elements
+ * @deprecated Use test-factories.js instead
  */
 export const setupPopupDOM = mocks => {
   const mockAppContainer = createMockElement('div', { id: 'app' });
@@ -630,6 +631,7 @@ export const setupPopupDOM = mocks => {
  * Sets up common Chrome tabs for popup tests
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @param {Object} tabData - Tab data to return
+ * @deprecated Use test-factories.js instead
  */
 export const setupChromeTabs = (
   mocks,
@@ -645,6 +647,7 @@ export const setupChromeTabs = (
  * Sets up common bookmark data for tests
  * @param {Object} mocks - Mocks from createTestEnvironment
  * @param {Object} bookmarkData - Bookmark data to return
+ * @deprecated Use test-factories.js instead
  */
 export const setupBookmarkData = (
   mocks,
@@ -662,6 +665,7 @@ export const setupBookmarkData = (
  * Creates a complete popup test instance
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete popup test setup
+ * @deprecated Use test-factories.js instead
  */
 export const createPopupTestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
@@ -689,6 +693,7 @@ export const createPopupTestInstance = (customMocks = {}) => {
  * Creates a complete auth UI test instance
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete auth UI test setup
+ * @deprecated Use test-factories.js instead
  */
 export const createAuthUITestInstance = (customMocks = {}) => {
   const { mocks, cleanup } = setupTestWithMocks(customMocks);
@@ -708,6 +713,7 @@ export const createAuthUITestInstance = (customMocks = {}) => {
 
 /**
  * Legacy functions for backward compatibility
+ * @deprecated Use setupTestWithMocks() and cleanup() instead
  */
 export const setupGlobalMocks = () => {
   const mocks = createTestEnvironment();

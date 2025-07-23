@@ -30,6 +30,14 @@ A cross-browser extension that helps you mark websites as "read" for research pu
 - **Data statistics** and usage insights
 - **Secure user accounts** with email/password
 
+### Error Handling & Reliability
+- **Centralized error handling** system for consistent user experience
+- **User-friendly error messages** instead of technical jargon
+- **Service worker compatibility** for background script reliability
+- **Comprehensive error categorization** (network, auth, validation, etc.)
+- **Smart retry logic** for transient failures
+- **Graceful degradation** when services are unavailable
+
 ## Installation
 
 ### Prerequisites
@@ -290,6 +298,9 @@ The project maintains high code quality through:
 - ✅ Comprehensive testing suite
 - ✅ Code quality tools
 - ✅ Enhanced documentation
+- ✅ **Centralized error handling system**
+- ✅ **User-friendly error messages**
+- ✅ **Service worker compatibility**
 
 ### Phase 2 (Planned)
 - 🔄 Advanced search and filtering

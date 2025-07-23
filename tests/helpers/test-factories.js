@@ -27,36 +27,6 @@ import {
  */
 
 /**
- * Creates a complete utility module test instance
- *
- * This is the recommended approach for testing utility modules that have
- * dependencies. Instead of trying to mock ES modules in complex scenarios,
- * we test each utility module in isolation with proper mocking.
- *
- * @param {string} modulePath - Path to the utility module
- * @param {Object} customMocks - Custom mocks to override defaults
- * @returns {Object} Complete utility module test setup
- */
-export const createUtilityTestInstance = async (
-  modulePath,
-  customMocks = {}
-) => {
-  const { mocks, cleanup } = setupTestWithMocks(customMocks);
-
-  // Setup module mocks
-  setupModuleMocks(mocks);
-
-  // Import the module under test AFTER mocking
-  const UtilityModule = (await import(modulePath)).default;
-
-  return {
-    utilityModule: UtilityModule,
-    mocks,
-    cleanup,
-  };
-};
-
-/**
  * Creates a complete auth UI test instance
  *
  * Tests the AuthUI module which handles authentication forms and user interactions.
@@ -90,180 +60,8 @@ export const createAuthUITestInstance = async (customMocks = {}) => {
 };
 
 /**
- * Creates a complete background service test instance
- *
- * Tests the background service which handles extension-wide functionality.
- * This module is tested in isolation with proper Chrome API mocking.
- *
- * @param {Object} customMocks - Custom mocks to override defaults
- * @returns {Promise<Object>} Complete background service test setup
- */
-export const createBackgroundTestInstance = async (customMocks = {}) => {
-  const { mocks, cleanup } = setupTestWithMocks(customMocks);
-
-  // Setup module mocks
-  setupModuleMocks(mocks);
-
-  // Setup additional Chrome APIs for background service
-  mocks.chrome.runtime.onMessage.addListener = vi.fn();
-  mocks.chrome.storage.onChanged.addListener = vi.fn();
-  mocks.chrome.action.setBadgeText = vi.fn();
-  mocks.chrome.action.setBadgeBackgroundColor = vi.fn();
-
-  // Import the module under test AFTER mocking
-  const BackgroundService = (await import('../../background.js')).default;
-
-  // Create background service instance
-  const backgroundService = new BackgroundService();
-
-  return {
-    backgroundService,
-    mocks,
-    cleanup,
-  };
-};
-
-/**
- * Creates a complete options page test instance
- *
- * Tests the options page which handles extension configuration.
- * This module is tested in isolation with proper DOM mocking.
- *
- * @param {Object} customMocks - Custom mocks to override defaults
- * @returns {Promise<Object>} Complete options page test setup
- */
-export const createOptionsTestInstance = async (customMocks = {}) => {
-  const { mocks, cleanup } = setupTestWithMocks(customMocks);
-
-  // Setup module mocks
-  setupModuleMocks(mocks);
-
-  // Setup DOM elements for options page
-  const mockForm = createMockElement('form', { id: 'config-form' });
-  const mockUrlInput = createMockElement('input', { id: 'supabase-url' });
-  const mockKeyInput = createMockElement('input', { id: 'supabase-key' });
-  const mockSaveBtn = createMockElement('button', { id: 'save-config' });
-  const mockTestBtn = createMockElement('button', { id: 'test-connection' });
-
-  // Setup DOM element mapping for options
-  mocks.uiComponents.DOM.getElement.mockImplementation(id => {
-    const elementMap = {
-      'config-form': mockForm,
-      'supabase-url': mockUrlInput,
-      'supabase-key': mockKeyInput,
-      'save-config': mockSaveBtn,
-      'test-connection': mockTestBtn,
-    };
-    return elementMap[id] || null;
-  });
-
-  // Import the module under test AFTER mocking
-  const OptionsPage = (await import('../../options.js')).default;
-
-  // Create options page instance
-  const optionsPage = new OptionsPage();
-
-  return {
-    optionsPage,
-    mocks,
-    domElements: {
-      form: mockForm,
-      urlInput: mockUrlInput,
-      keyInput: mockKeyInput,
-      saveBtn: mockSaveBtn,
-      testBtn: mockTestBtn,
-    },
-    cleanup,
-  };
-};
-
-/**
- * Creates a complete config UI test instance
- *
- * Tests the config UI which handles configuration interface.
- * This module is tested in isolation with proper DOM mocking.
- *
- * @param {Object} customMocks - Custom mocks to override defaults
- * @returns {Object} Complete config UI test setup
- */
-export const createConfigUITestInstance = async (customMocks = {}) => {
-  const { mocks, cleanup } = setupTestWithMocks(customMocks);
-
-  // Setup module mocks
-  setupModuleMocks(mocks);
-
-  // Create mock container
-  const mockContainer = createMockElement('div', { id: 'config-container' });
-
-  // Import the module under test AFTER mocking
-  const ConfigUI = (await import('../../config-ui.js')).default;
-
-  // Create config UI instance
-  const configUI = new ConfigUI(mockContainer);
-
-  return {
-    configUI,
-    mocks,
-    container: mockContainer,
-    cleanup,
-  };
-};
-
-/**
- * Creates a complete supabase service test instance
- *
- * Tests the Supabase service which handles database operations.
- * This module is tested in isolation with proper Supabase client mocking.
- *
- * @param {Object} customMocks - Custom mocks to override defaults
- * @returns {Object} Complete supabase service test setup
- */
-export const createSupabaseServiceTestInstance = async (customMocks = {}) => {
-  const { mocks, cleanup } = setupTestWithMocks(customMocks);
-
-  // Setup module mocks
-  setupModuleMocks(mocks);
-
-  // Setup Supabase client mock
-  const mockSupabaseClient = {
-    from: vi.fn().mockReturnThis(),
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn().mockReturnThis(),
-    auth: {
-      getSession: vi.fn(),
-      signInWithPassword: vi.fn(),
-      signUp: vi.fn(),
-      signOut: vi.fn(),
-    },
-  };
-
-  // Mock the Supabase client creation
-  vi.mock('@supabase/supabase-js', () => ({
-    createClient: vi.fn().mockReturnValue(mockSupabaseClient),
-  }));
-
-  // Import the module under test AFTER mocking
-  const SupabaseService = (await import('../../supabase-service.js')).default;
-
-  // Create supabase service instance with config
-  const supabaseService = new SupabaseService(mocks.supabaseConfig);
-
-  return {
-    supabaseService,
-    mocks: {
-      ...mocks,
-      supabaseClient: mockSupabaseClient,
-    },
-    cleanup,
-  };
-};
-
-/**
  * Creates test data for common scenarios
+ * @description Simple factory functions that create test objects - these are good to keep centralized
  */
 export const createTestData = {
   /**
@@ -323,6 +121,7 @@ export const createTestData = {
 
 /**
  * Creates assertion helpers for common test patterns
+ * @description Simple assertion patterns that are good to keep centralized
  */
 export const createAssertionHelpers = mocks => ({
   /**

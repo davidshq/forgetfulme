@@ -9,6 +9,83 @@
  */
 
 /**
+ * Simple error handler for background script (service worker)
+ * Since service workers can't use ES6 imports, this is a simplified version
+ */
+const BackgroundErrorHandler = {
+  /**
+   * Handle errors in background script
+   * @param {Error} error - The error object
+   * @param {string} context - Where the error occurred
+   */
+  handle(error, context) {
+    // Log error for debugging
+    console.error(`[${context}] Error:`, error.message);
+    
+    // Show user-friendly notification if needed
+    this.showErrorNotification(error, context);
+  },
+
+  /**
+   * Show error notification to user
+   * @param {Error} error - The error object
+   * @param {string} context - Where the error occurred
+   */
+  showErrorNotification(error, context) {
+    // Only show notifications for certain types of errors
+    if (context.includes('auth') || context.includes('config')) {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'ForgetfulMe',
+        message: this.getUserMessage(error, context),
+      });
+    }
+  },
+
+  /**
+   * Get user-friendly error message
+   * @param {Error} error - The error object
+   * @param {string} context - Where the error occurred
+   * @returns {string} User-friendly error message
+   */
+  getUserMessage(error, context) {
+    const message = error.message || error.toString();
+
+    // Network errors
+    if (message.includes('fetch') || message.includes('network') || message.includes('HTTP')) {
+      return 'Connection error. Please check your internet connection and try again.';
+    }
+
+    // Authentication errors
+    if (message.includes('auth') || message.includes('login') || message.includes('sign')) {
+      return 'Authentication error. Please try signing in again.';
+    }
+
+    // Configuration errors
+    if (message.includes('config') || message.includes('supabase')) {
+      return 'Configuration error. Please check your settings and try again.';
+    }
+
+    // Default error message
+    return 'An unexpected error occurred. Please try again.';
+  },
+
+  /**
+   * Create a standardized error object
+   * @param {string} message - Error message
+   * @param {string} context - Error context
+   * @returns {Error} Standardized error object
+   */
+  createError(message, context) {
+    const error = new Error(message);
+    error.context = context;
+    error.timestamp = new Date().toISOString();
+    return error;
+  }
+};
+
+/**
  * Background service worker for the ForgetfulMe Chrome extension
  * @class ForgetfulMeBackground
  * @description Manages background tasks, keyboard shortcuts, and communication between extension contexts
@@ -52,12 +129,9 @@ class ForgetfulMeBackground {
       const result = await chrome.storage.sync.get(['auth_session']);
       this.authState = result.auth_session || null;
 
-      console.log(
-        'Background: Auth state initialized:',
-        this.authState ? 'authenticated' : 'not authenticated'
-      );
+      // Auth state initialized successfully
     } catch (error) {
-      console.error('Background: Error initializing auth state:', error);
+      BackgroundErrorHandler.handle(error, 'background.initializeAuthState');
     }
   }
 
@@ -113,7 +187,7 @@ class ForgetfulMeBackground {
           this.checkUrlStatus(tab);
         }
       } catch (error) {
-        console.debug('Background: Error getting active tab:', error.message);
+        BackgroundErrorHandler.handle(error, 'background.tabActivation');
       }
     });
 
@@ -160,8 +234,7 @@ class ForgetfulMeBackground {
         }
 
         case 'AUTH_STATE_CHANGED':
-          // This is handled by storage.onChanged, but we can log it
-          console.log('Background: Received auth state change message');
+          // Auth state change message received
           break;
 
         case 'GET_CONFIG_SUMMARY': {
@@ -202,11 +275,11 @@ class ForgetfulMeBackground {
           break;
 
         default:
-          console.warn('Background: Unknown message type:', message.type);
+          // Unknown message type - ignore silently
           sendResponse({ success: false, error: 'Unknown message type' });
       }
     } catch (error) {
-      console.error('Background: Error handling message:', error);
+      // Error handling message
       sendResponse({ success: false, error: error.message });
     }
   }
@@ -222,10 +295,7 @@ class ForgetfulMeBackground {
   }
 
   handleAuthStateChange(session) {
-    console.log(
-      'Background: Auth state changed:',
-      session ? 'authenticated' : 'not authenticated'
-    );
+    // Auth state changed - update UI accordingly
 
     // Update extension badge or icon based on auth state
     this.updateExtensionBadge(session);
@@ -260,7 +330,7 @@ class ForgetfulMeBackground {
         chrome.action.setBadgeText({ text: '' });
       }
     } catch (error) {
-      console.debug('Background: Error updating badge:', error.message);
+      // Ignore badge update errors
     }
   }
 
@@ -303,7 +373,7 @@ class ForgetfulMeBackground {
       // The popup will handle the actual URL checking when opened
       this.updateIconForUrl(tab.url, false);
     } catch (error) {
-      console.debug('Background: Error checking URL status:', error.message);
+      // Error checking URL status - show default icon
       // On error, show default icon
       this.updateIconForUrl(null, false);
     }
@@ -334,7 +404,7 @@ class ForgetfulMeBackground {
         chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
       }
     } catch (error) {
-      console.debug('Background: Error updating icon:', error.message);
+      // Ignore icon update errors
     }
   }
 
@@ -387,16 +457,7 @@ class ForgetfulMeBackground {
         message: 'Click the extension icon to mark this page as read',
       });
     } catch (error) {
-      // Log error for debugging
-      console.error('Error handling keyboard shortcut:', error);
-
-      // Show error notification
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: 'ForgetfulMe',
-        message: 'Error handling shortcut. Please try again.',
-      });
+      BackgroundErrorHandler.handle(error, 'background.handleKeyboardShortcut');
     }
   }
 
@@ -410,15 +471,7 @@ class ForgetfulMeBackground {
         message: 'Page marked as read!',
       });
     } catch (error) {
-      // Log error for debugging
-      console.error('Error marking as read:', error);
-
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: 'ForgetfulMe',
-        message: 'Error saving bookmark. Please try again.',
-      });
+      BackgroundErrorHandler.handle(error, 'background.handleMarkAsRead');
     }
   }
 
@@ -440,10 +493,10 @@ class ForgetfulMeBackground {
           customStatusTypes: defaultStatusTypes,
         });
 
-        console.log('Default settings initialized');
+        // Default settings initialized successfully
       }
     } catch (error) {
-      console.error('Error initializing default settings:', error);
+      BackgroundErrorHandler.handle(error, 'background.initializeDefaultSettings');
     }
   }
 

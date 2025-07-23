@@ -66,10 +66,7 @@ class BookmarkManagementPage {
         error,
         'bookmark-management.initializeAsync'
       );
-      console.error(
-        'Failed to initialize bookmark management page:',
-        errorResult
-      );
+      // Failed to initialize bookmark management page
     }
   }
 
@@ -93,7 +90,7 @@ class BookmarkManagementPage {
         error,
         'bookmark-management.initializeAuthState'
       );
-      console.error('Failed to initialize auth state:', errorResult);
+      // Failed to initialize auth state
     }
   }
 
@@ -121,7 +118,11 @@ class BookmarkManagementPage {
   initializeElements() {
     this.appContainer = UIComponents.DOM.getElement('app');
     if (!this.appContainer) {
-      throw new Error('App container not found');
+      throw ErrorHandler.createError(
+        'App container not found',
+        ErrorHandler.ERROR_TYPES.UI,
+        'bookmark-management.initializeElements'
+      );
     }
   }
 
@@ -150,10 +151,7 @@ class BookmarkManagementPage {
           break; // Success, exit the retry loop
         } catch (error) {
           retryCount++;
-          console.log(
-            `Supabase initialization attempt ${retryCount} failed:`,
-            error
-          );
+          // Supabase initialization attempt failed, retrying...
 
           if (retryCount >= maxRetries) {
             throw error; // Re-throw if we've exhausted retries

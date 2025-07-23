@@ -9,6 +9,7 @@
  */
 
 import ConfigManager from './utils/config-manager.js';
+import ErrorHandler from './utils/error-handler.js';
 
 /**
  * Supabase configuration manager for ForgetfulMe extension
@@ -92,27 +93,13 @@ class SupabaseConfig {
       // If no configuration found, don't show error - just mark as not configured
       this.configLoaded = true;
     } catch (error) {
-      console.error('Error loading Supabase configuration:', error);
+      ErrorHandler.handle(error, 'supabase-config.loadConfiguration');
       this.configLoaded = true;
     }
   }
 
   showSetupInstructions() {
-    console.log(`
-      ⚠️  Supabase configuration not found!
-      
-      Please configure your Supabase credentials:
-      
-      1. Create a Supabase project at https://supabase.com
-      2. Get your Project URL and anon public key
-      3. Open the extension options page
-      4. Go to Settings > Supabase Configuration
-      5. Enter your Project URL and anon public key
-      
-      Or set environment variables:
-      - SUPABASE_URL
-      - SUPABASE_ANON_KEY
-    `);
+    // Supabase configuration not found - setup instructions would be shown here
   }
 
   async setConfiguration(url, anonKey) {
@@ -127,8 +114,8 @@ class SupabaseConfig {
 
       return result;
     } catch (error) {
-      console.error('Error setting configuration:', error);
-      return { success: false, message: error.message };
+      const errorResult = ErrorHandler.handle(error, 'supabase-config.setConfiguration');
+      return { success: false, message: errorResult.userMessage };
     }
   }
 
@@ -151,23 +138,19 @@ class SupabaseConfig {
       const maxAttempts = 10;
 
       while (typeof supabase === 'undefined' && attempts < maxAttempts) {
-        console.log(
-          `Waiting for Supabase library to load... (attempt ${attempts + 1}/${maxAttempts})`
-        );
+        // Waiting for Supabase library to load...
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }
 
       // Check if Supabase client is available
       if (typeof supabase === 'undefined') {
-        console.warn(
-          'Supabase client not loaded after waiting. This might be a timing issue.'
-        );
+        // Supabase client not loaded after waiting
         return false;
       }
 
       // Use the globally available Supabase client
-      console.log('Creating Supabase client with URL:', this.supabaseUrl);
+      // Creating Supabase client
       this.supabase = supabase.createClient(
         this.supabaseUrl,
         this.supabaseAnonKey
@@ -176,7 +159,7 @@ class SupabaseConfig {
 
       // Verify the client was created properly
       if (!this.supabase || typeof this.supabase.from !== 'function') {
-        console.error('Supabase client not properly initialized');
+        // Supabase client not properly initialized
         return false;
       }
 
@@ -192,7 +175,7 @@ class SupabaseConfig {
 
       return false;
     } catch (error) {
-      console.error('Error initializing Supabase:', error);
+      ErrorHandler.handle(error, 'supabase-config.initialize');
       return false;
     }
   }
@@ -200,7 +183,11 @@ class SupabaseConfig {
   async signIn(email, password) {
     try {
       if (!this.auth) {
-        throw new Error('Supabase not initialized');
+        throw ErrorHandler.createError(
+          'Supabase not initialized',
+          ErrorHandler.ERROR_TYPES.CONFIG,
+          'supabase-config.signIn'
+        );
       }
 
       const { data, error } = await this.auth.signInWithPassword({
@@ -214,15 +201,19 @@ class SupabaseConfig {
       this.user = data.user;
       return data;
     } catch (error) {
-      console.error('Sign in error:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'supabase-config.signIn');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signIn');
     }
   }
 
   async signUp(email, password) {
     try {
       if (!this.auth) {
-        throw new Error('Supabase not initialized');
+        throw ErrorHandler.createError(
+          'Supabase not initialized',
+          ErrorHandler.ERROR_TYPES.CONFIG,
+          'supabase-config.signUp'
+        );
       }
 
       const { data, error } = await this.auth.signUp({
@@ -234,8 +225,8 @@ class SupabaseConfig {
 
       return data;
     } catch (error) {
-      console.error('Sign up error:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'supabase-config.signUp');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signUp');
     }
   }
 
@@ -249,8 +240,8 @@ class SupabaseConfig {
       this.session = null;
       this.user = null;
     } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
+      const errorResult = ErrorHandler.handle(error, 'supabase-config.signOut');
+      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signOut');
     }
   }
 

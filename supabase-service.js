@@ -57,11 +57,10 @@ class SupabaseService {
    * await service.initialize();
    */
   async initialize() {
-    console.log('Initializing SupabaseService...');
+    // Initializing SupabaseService...
     await this.config.initialize();
     this.supabase = this.config.getSupabaseClient();
-    console.log('Got Supabase client:', this.supabase);
-    console.log('Client has from method:', typeof this.supabase?.from);
+    // Supabase client initialized successfully
     this.realtimeManager = new RealtimeManager(this.supabase);
   }
 
@@ -154,9 +153,7 @@ class SupabaseService {
     } = options;
 
     try {
-      console.log('Creating query with supabase client:', this.supabase);
-      console.log('Client type:', typeof this.supabase);
-      console.log('Client has from method:', typeof this.supabase?.from);
+      // Creating query with supabase client
 
       let query = this.supabase
         .from('bookmarks')

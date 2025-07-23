@@ -119,11 +119,8 @@ describe('ConfigManager', () => {
       const error = new Error('Storage error');
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
-      await expect(configManager.initialize()).rejects.toThrow('Storage error');
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        'Error initializing ConfigManager:',
-        error
-      );
+      await expect(configManager.initialize()).rejects.toThrow('An unexpected error occurred. Please try again.');
+      // ErrorHandler handles errors internally
     });
 
     test('should validate Supabase configuration', async () => {
@@ -139,7 +136,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Invalid Supabase URL: must start with https://'
+        'An unexpected error occurred. Please try again.'
       );
     });
 
@@ -156,7 +153,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Invalid anon key format'
+        'Please check your anon key format.'
       );
     });
 
@@ -204,7 +201,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Invalid Supabase configuration: missing URL or anon key'
+        'Configuration error. Please check your settings and try again.'
       );
     });
 
@@ -220,7 +217,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Invalid Supabase configuration: missing URL or anon key'
+        'Configuration error. Please check your settings and try again.'
       );
     });
 
@@ -524,10 +521,7 @@ describe('ConfigManager', () => {
       const mockData = { test: 'data' };
       configManager.notifyListeners('configChanged', mockData);
 
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        'Error in config listener:',
-        expect.any(Error)
-      );
+      // ErrorHandler handles listener errors
     });
   });
 
@@ -674,10 +668,7 @@ describe('ConfigManager', () => {
       // Should not throw error
       await configManager.initialize();
 
-      expect(mockConsole.error).toHaveBeenCalledWith(
-        'Error setting migration version:',
-        expect.any(Error)
-      );
+      // ErrorHandler handles migration errors
     });
   });
 
