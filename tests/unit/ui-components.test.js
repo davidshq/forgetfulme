@@ -1242,24 +1242,24 @@ describe('UIComponents', () => {
       });
     });
 
-    describe('createLoadingSpinner (legacy)', () => {
-      test('should create loading spinner using new implementation', () => {
-        const spinner = UIComponents.createLoadingSpinner('Loading...');
+    describe('createLoadingState', () => {
+      test('should create loading state using Pico progress', () => {
+        const loadingState = UIComponents.createLoadingState('Loading...');
 
-        expect(spinner.tagName).toBe('DIV');
-        expect(spinner.className).toContain('loading-state');
-        expect(spinner.querySelector('progress')).toBeTruthy();
-        expect(spinner.querySelector('.loading-text')).toBeTruthy();
-        expect(spinner.querySelector('.loading-text').textContent).toBe('Loading...');
+        expect(loadingState.tagName).toBe('DIV');
+        expect(loadingState.className).toContain('loading-state');
+        expect(loadingState.querySelector('progress')).toBeTruthy();
+        expect(loadingState.querySelector('.loading-text')).toBeTruthy();
+        expect(loadingState.querySelector('.loading-text').textContent).toBe('Loading...');
       });
 
-      test('should create loading spinner with custom class', () => {
-        const spinner = UIComponents.createLoadingSpinner(
+      test('should create loading state with custom class', () => {
+        const loadingState = UIComponents.createLoadingState(
           'Loading...',
-          'custom-spinner'
+          'custom-loading'
         );
 
-        expect(spinner.className).toContain('custom-spinner');
+        expect(loadingState.className).toContain('custom-loading');
       });
     });
 

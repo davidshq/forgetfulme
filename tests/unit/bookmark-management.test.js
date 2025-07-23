@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { formatStatus, formatTime } from '../../utils/formatters.js';
 
 /**
  * @fileoverview Unit tests for BookmarkManagementPage using Kent Dodds testing methodology
@@ -441,22 +442,22 @@ describe('BookmarkManagementPage', () => {
     });
   });
 
-  describe('Utility Methods', () => {
+  describe('Shared Formatters', () => {
     it('should format status correctly', () => {
-      expect(page.formatStatus('good-reference')).toBe('Good Reference');
-      expect(page.formatStatus('low-value')).toBe('Low Value');
-      expect(page.formatStatus('revisit-later')).toBe('Revisit Later');
+      expect(formatStatus('good-reference')).toBe('Good Reference');
+      expect(formatStatus('low-value')).toBe('Low Value');
+      expect(formatStatus('revisit-later')).toBe('Revisit Later');
     });
 
     it('should format time correctly', () => {
       const now = Date.now();
-      expect(page.formatTime(now)).toBe('Just now');
+      expect(formatTime(now)).toBe('Just now');
 
       const oneMinuteAgo = now - 60000;
-      expect(page.formatTime(oneMinuteAgo)).toBe('1m ago');
+      expect(formatTime(oneMinuteAgo)).toBe('1m ago');
 
       const oneHourAgo = now - 3600000;
-      expect(page.formatTime(oneHourAgo)).toBe('1h ago');
+      expect(formatTime(oneHourAgo)).toBe('1h ago');
     });
   });
 });

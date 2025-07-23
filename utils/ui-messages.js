@@ -151,9 +151,9 @@ class UIMessages {
    * Show loading message with Pico progress indicator
    * @param {string} message - Loading message
    * @param {HTMLElement} container - Container element
-   * @param {Object} options - Additional options
+   * @param {Object} _options - Additional options (unused)
    */
-  static loading(message, container, options = {}) {
+  static loading(message, container, _options = {}) {
     if (!container) {
       console.warn(
         'UIMessages.loading: No container provided, falling back to console'
@@ -236,10 +236,10 @@ class UIMessages {
    * @param {string} message - Error message
    * @param {Function} retryFunction - Function to retry
    * @param {HTMLElement} container - Container element
-   * @param {Object} options - Additional options
+   * @param {Object} _options - Additional options (unused)
    */
-  static showWithRetry(message, retryFunction, container, options = {}) {
-    const messageEl = this.error(message, container, options);
+  static showWithRetry(message, retryFunction, container, _options = {}) {
+    const messageEl = this.error(message, container, _options);
 
     if (retryFunction) {
       // Use UIComponents if available, otherwise fall back to manual creation

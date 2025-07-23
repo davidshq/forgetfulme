@@ -17,6 +17,7 @@ import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
 import AuthStateManager from './utils/auth-state-manager.js';
 import ConfigUI from './config-ui.js';
+import { formatStatus, formatTime } from './utils/formatters.js';
 
 /**
  * Options page class for ForgetfulMe extension
@@ -429,7 +430,7 @@ class ForgetfulMeOptions {
     statusTypes.forEach(status => {
       const listItem = UIComponents.createListItem(
         {
-          title: this.formatStatus(status),
+          title: formatStatus(status),
           actions: [
             {
               text: 'Remove',
@@ -521,7 +522,7 @@ class ForgetfulMeOptions {
 
     if (mostUsedStatusEl) {
       if (mostUsed) {
-        mostUsedStatusEl.textContent = this.formatStatus(mostUsed[0]);
+        mostUsedStatusEl.textContent = formatStatus(mostUsed[0]);
       } else {
         mostUsedStatusEl.textContent = 'None';
       }
@@ -615,27 +616,6 @@ class ForgetfulMeOptions {
     });
   }
 
-  formatStatus(status) {
-    return status
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
-
-  formatTime(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-
-    return new Date(timestamp).toLocaleDateString();
-  }
 
   showMessage(message, type) {
     // Use the centralized UIMessages system

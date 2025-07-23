@@ -16,6 +16,7 @@ import ConfigManager from './utils/config-manager.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
 import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
+import { formatStatus, formatTime } from './utils/formatters.js';
 
 /**
  * Bookmark management page class
@@ -523,22 +524,22 @@ class BookmarkManagementPage {
     // Add status badge
     const statusSpan = document.createElement('span');
     statusSpan.className = `bookmark-status status-${bookmark.status}`;
-    statusSpan.textContent = this.formatStatus(bookmark.status);
+          statusSpan.textContent = formatStatus(bookmark.status);
     statusSpan.setAttribute(
       'aria-label',
-      `Status: ${this.formatStatus(bookmark.status)}`
+              `Status: ${formatStatus(bookmark.status)}`
     );
     metaDiv.appendChild(statusSpan);
 
     // Add time
     const timeSpan = document.createElement('span');
     timeSpan.className = 'bookmark-time';
-    timeSpan.textContent = this.formatTime(
+          timeSpan.textContent = formatTime(
       new Date(bookmark.created_at).getTime()
     );
     timeSpan.setAttribute(
       'aria-label',
-      `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`
+              `Created ${formatTime(new Date(bookmark.created_at).getTime())}`
     );
     metaDiv.appendChild(timeSpan);
 
@@ -679,9 +680,9 @@ class BookmarkManagementPage {
       <div class="bookmark-info">
         <p><strong>Title:</strong> ${existingBookmark.title}</p>
         <p><strong>URL:</strong> <a href="${existingBookmark.url}" target="_blank">${existingBookmark.url}</a></p>
-        <p><strong>Current Status:</strong> ${this.formatStatus(existingBookmark.read_status)}</p>
+        <p><strong>Current Status:</strong> ${formatStatus(existingBookmark.read_status)}</p>
         <p><strong>Current Tags:</strong> ${existingBookmark.tags ? existingBookmark.tags.join(', ') : 'None'}</p>
-        <p><strong>Created:</strong> ${this.formatTime(new Date(existingBookmark.created_at).getTime())}</p>
+        <p><strong>Created:</strong> ${formatTime(new Date(existingBookmark.created_at).getTime())}</p>
       </div>
     `;
 
@@ -992,34 +993,7 @@ class BookmarkManagementPage {
     }
   }
 
-  /**
-   * Format status for display
-   * @method formatStatus
-   * @param {string} status - The status to format
-   * @returns {string} The formatted status
-   */
-  formatStatus(status) {
-    return status
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
 
-  /**
-   * Format time for display
-   * @method formatTime
-   * @param {number} timestamp - The timestamp to format
-   * @returns {string} The formatted time
-   */
-  formatTime(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-
-    if (diff < 60000) return 'Just now';
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return `${Math.floor(diff / 86400000)}d ago`;
-  }
 
   /**
    * Open settings page

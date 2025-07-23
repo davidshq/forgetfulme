@@ -631,10 +631,10 @@ class UIComponents {
    * @param {string|HTMLElement} content - Card content
    * @param {string|HTMLElement} footer - Card footer content (optional)
    * @param {string} className - Additional CSS classes
-   * @param {Object} options - Card options
+   * @param {Object} _options - Card options (unused)
    * @returns {HTMLElement}
    */
-  static createCard(title, content, footer = '', className = '', options = {}) {
+  static createCard(title, content, footer = '', className = '', _options = {}) {
     const article = document.createElement('article');
     article.className = `card ${className}`.trim();
     
@@ -970,18 +970,6 @@ class UIComponents {
     } else {
       element.removeAttribute('aria-busy');
     }
-  }
-
-  /**
-   * Create a loading spinner (legacy method - now uses Pico progress)
-   * @param {string} text - Loading text
-   * @param {string} className - Additional CSS classes
-   * @returns {HTMLElement}
-   * @deprecated Use createLoadingState() instead for Pico integration
-   */
-  static createLoadingSpinner(text = 'Loading...', className = '') {
-    // Use the new Pico-based loading state
-    return this.createLoadingState(text, className);
   }
 
   /**

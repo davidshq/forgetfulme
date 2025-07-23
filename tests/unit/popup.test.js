@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { formatStatus, formatTime } from '../../utils/formatters.js';
 
 /**
  * @fileoverview Unit tests for ForgetfulMePopup using Kent Dodds testing methodology
@@ -362,24 +363,22 @@ describe('ForgetfulMePopup', () => {
     });
   });
 
-  describe('formatStatus', () => {
+  describe('Shared Formatters', () => {
     it('should format status correctly', () => {
-      expect(popup.formatStatus('good-reference')).toBe('Good Reference');
-      expect(popup.formatStatus('low-value')).toBe('Low Value');
-      expect(popup.formatStatus('revisit-later')).toBe('Revisit Later');
+      expect(formatStatus('good-reference')).toBe('Good Reference');
+      expect(formatStatus('low-value')).toBe('Low Value');
+      expect(formatStatus('revisit-later')).toBe('Revisit Later');
     });
-  });
 
-  describe('formatTime', () => {
     it('should format time correctly', () => {
       const now = Date.now();
-      expect(popup.formatTime(now)).toBe('Just now');
+      expect(formatTime(now)).toBe('Just now');
 
       const oneMinuteAgo = now - 60000;
-      expect(popup.formatTime(oneMinuteAgo)).toBe('1m ago');
+      expect(formatTime(oneMinuteAgo)).toBe('1m ago');
 
       const oneHourAgo = now - 3600000;
-      expect(popup.formatTime(oneHourAgo)).toBe('1h ago');
+      expect(formatTime(oneHourAgo)).toBe('1h ago');
     });
   });
 

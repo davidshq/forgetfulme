@@ -18,6 +18,7 @@ import BookmarkTransformer from './utils/bookmark-transformer.js';
 import SupabaseConfig from './supabase-config.js';
 import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
+import { formatStatus, formatTime } from './utils/formatters.js';
 
 /**
  * Main popup class for the ForgetfulMe Chrome extension
@@ -561,21 +562,21 @@ class ForgetfulMePopup {
 
     // Add status badge
     const statusSpan = document.createElement('small');
-    statusSpan.textContent = this.formatStatus(bookmark.status);
+    statusSpan.textContent = formatStatus(bookmark.status);
     statusSpan.setAttribute(
       'aria-label',
-      `Status: ${this.formatStatus(bookmark.status)}`
+      `Status: ${formatStatus(bookmark.status)}`
     );
     metaDiv.appendChild(statusSpan);
 
     // Add time
     const timeSpan = document.createElement('small');
-    timeSpan.textContent = this.formatTime(
+    timeSpan.textContent = formatTime(
       new Date(bookmark.created_at).getTime()
     );
     timeSpan.setAttribute(
       'aria-label',
-      `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`
+      `Created ${formatTime(new Date(bookmark.created_at).getTime())}`
     );
     metaDiv.appendChild(timeSpan);
 
@@ -606,7 +607,7 @@ class ForgetfulMePopup {
           customStatusTypes.forEach(status => {
             const option = document.createElement('option');
             option.value = status;
-            option.textContent = this.formatStatus(status);
+            option.textContent = formatStatus(status);
             readStatusSelectEl.appendChild(option);
           });
         }
@@ -619,27 +620,7 @@ class ForgetfulMePopup {
     }
   }
 
-  formatStatus(status) {
-    return status
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  }
 
-  formatTime(timestamp) {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-
-    return new Date(timestamp).toLocaleDateString();
-  }
 
   showMessage(message, type) {
     // Use the centralized UIMessages system
@@ -741,9 +722,9 @@ class ForgetfulMePopup {
       <div class="bookmark-info">
         <p><strong>Title:</strong> ${existingBookmark.title}</p>
         <p><strong>URL:</strong> <a href="${existingBookmark.url}" target="_blank">${existingBookmark.url}</a></p>
-        <p><strong>Current Status:</strong> ${this.formatStatus(existingBookmark.read_status)}</p>
+        <p><strong>Current Status:</strong> ${formatStatus(existingBookmark.read_status)}</p>
         <p><strong>Current Tags:</strong> ${existingBookmark.tags ? existingBookmark.tags.join(', ') : 'None'}</p>
-        <p><strong>Created:</strong> ${this.formatTime(new Date(existingBookmark.created_at).getTime())}</p>
+        <p><strong>Created:</strong> ${formatTime(new Date(existingBookmark.created_at).getTime())}</p>
       </div>
     `;
 
