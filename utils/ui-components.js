@@ -351,7 +351,16 @@ class UIComponents {
   static createButton(text, onClick, className = '', options = {}) {
     const button = document.createElement('button');
     button.textContent = text;
-    button.className = `ui-btn ${className}`.trim();
+    
+    // Map custom classes to Pico CSS classes
+    let picoClass = '';
+    if (className.includes('primary')) picoClass = 'primary';
+    else if (className.includes('secondary')) picoClass = 'secondary';
+    else if (className.includes('danger')) picoClass = 'contrast';
+    else if (className.includes('outline')) picoClass = 'outline';
+    else picoClass = className;
+    
+    button.className = picoClass;
 
     if (onClick) {
       button.addEventListener('click', onClick);
@@ -376,7 +385,6 @@ class UIComponents {
    */
   static createFormField(type, id, label, options = {}) {
     const formGroup = document.createElement('div');
-    formGroup.className = 'ui-form-group';
 
     // Create label
     const labelEl = document.createElement('label');
@@ -404,7 +412,6 @@ class UIComponents {
 
     // Apply common attributes
     field.id = id;
-    field.className = 'ui-form-control';
 
     if (options.placeholder) field.placeholder = options.placeholder;
     if (options.required) field.required = options.required;
@@ -434,7 +441,7 @@ class UIComponents {
   static createForm(id, onSubmit, fields = [], options = {}) {
     const form = document.createElement('form');
     form.id = id;
-    form.className = `ui-form ${options.className || ''}`.trim();
+    form.className = options.className || '';
 
     if (onSubmit) {
       form.addEventListener('submit', e => {
@@ -627,26 +634,23 @@ class UIComponents {
    */
   static createConfirmDialog(message, onConfirm, onCancel, options = {}) {
     const dialog = document.createElement('div');
-    dialog.className = 'confirm-dialog';
 
     const messageEl = document.createElement('div');
-    messageEl.className = 'confirm-message';
     messageEl.textContent = message;
     dialog.appendChild(messageEl);
 
     const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'confirm-buttons';
 
     const confirmBtn = this.createButton(
       options.confirmText || 'Confirm',
       onConfirm,
-      'ui-btn-primary'
+      'primary'
     );
 
     const cancelBtn = this.createButton(
       options.cancelText || 'Cancel',
       onCancel,
-      'ui-btn-secondary'
+      'secondary'
     );
 
     buttonContainer.appendChild(confirmBtn);
@@ -786,13 +790,10 @@ class UIComponents {
    */
   static createModal(title, content, options = {}) {
     const modal = document.createElement('div');
-    modal.className = 'modal';
 
     const modalContent = document.createElement('div');
-    modalContent.className = 'modal-content';
 
     const header = document.createElement('div');
-    header.className = 'modal-header';
 
     const titleEl = document.createElement('h3');
     titleEl.textContent = title;
@@ -801,12 +802,11 @@ class UIComponents {
     const closeBtn = this.createButton(
       '×',
       () => this.closeModal(modal),
-      'modal-close'
+      'outline'
     );
     header.appendChild(closeBtn);
 
     const body = document.createElement('div');
-    body.className = 'modal-body';
     body.appendChild(content);
 
     modalContent.appendChild(header);

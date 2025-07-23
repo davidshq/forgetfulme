@@ -668,17 +668,16 @@ describe('UIComponents', () => {
         );
 
         expect(dialog.tagName).toBe('DIV');
-        expect(dialog.className).toContain('confirm-dialog');
-        expect(dialog.querySelector('.confirm-message')).toBeTruthy();
-        expect(dialog.querySelector('.confirm-message').textContent).toBe('Are you sure?');
+        expect(dialog.querySelector('div')).toBeTruthy();
+        expect(dialog.querySelector('div').textContent).toBe('Are you sure?');
 
         // Test confirm button
-        const confirmBtn = dialog.querySelector('.ui-btn-primary');
+        const confirmBtn = dialog.querySelector('.primary');
         confirmBtn.click();
         expect(mockConfirm).toHaveBeenCalled();
 
         // Test cancel button
-        const cancelBtn = dialog.querySelector('.ui-btn-secondary');
+        const cancelBtn = dialog.querySelector('.secondary');
         cancelBtn.click();
         expect(mockCancel).toHaveBeenCalled();
       });
@@ -693,8 +692,8 @@ describe('UIComponents', () => {
           { confirmText: 'Yes', cancelText: 'No' }
         );
 
-        const confirmBtn = dialog.querySelector('.ui-btn-primary');
-        const cancelBtn = dialog.querySelector('.ui-btn-secondary');
+        const confirmBtn = dialog.querySelector('.primary');
+        const cancelBtn = dialog.querySelector('.secondary');
 
         expect(confirmBtn.textContent).toBe('Yes');
         expect(cancelBtn.textContent).toBe('No');
@@ -802,13 +801,11 @@ describe('UIComponents', () => {
         const modal = UIComponents.createModal('Test Modal', content);
 
         expect(modal.tagName).toBe('DIV');
-        expect(modal.className).toBe('modal');
-        expect(modal.querySelector('.modal-content')).toBeTruthy();
-        expect(modal.querySelector('.modal-header')).toBeTruthy();
+        expect(modal.querySelector('div')).toBeTruthy();
+        expect(modal.querySelector('div')).toBeTruthy();
         
         // Check for h3 element in header
-        const header = modal.querySelector('.modal-header');
-        const titleEl = header.querySelector('h3');
+        const titleEl = modal.querySelector('h3');
         expect(titleEl).toBeTruthy();
         expect(titleEl.textContent).toBe('Test Modal');
         
@@ -822,8 +819,8 @@ describe('UIComponents', () => {
         const modal = UIComponents.createModal('Test Modal', content);
 
         // Find close button in header
-        const header = modal.querySelector('.modal-header');
-        const closeBtn = header.querySelector('.ui-btn');
+        const header = modal.querySelector('div');
+        const closeBtn = header.querySelector('.outline');
         expect(closeBtn).toBeTruthy();
 
         // Test close functionality

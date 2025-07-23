@@ -310,42 +310,38 @@ class ForgetfulMePopup {
     header.appendChild(title);
 
     const headerActions = document.createElement('div');
-    headerActions.className = 'header-actions';
+    headerActions.className = 'grid';
     headerActions.setAttribute('role', 'toolbar');
     headerActions.setAttribute('aria-label', 'Extension actions');
 
     const settingsBtn = document.createElement('button');
-    settingsBtn.className = 'settings-btn';
+    settingsBtn.className = 'outline';
     settingsBtn.setAttribute('aria-label', 'Open settings');
     settingsBtn.setAttribute('title', 'Settings');
     settingsBtn.addEventListener('click', () => this.openSettings());
     
     const settingsIcon = document.createElement('span');
-    settingsIcon.className = 'icon';
     settingsIcon.textContent = '⚙️';
     settingsBtn.appendChild(settingsIcon);
     
     const settingsText = document.createElement('span');
-    settingsText.className = 'text';
-    settingsText.textContent = 'Settings';
+    settingsText.textContent = ' Settings';
     settingsBtn.appendChild(settingsText);
     
     headerActions.appendChild(settingsBtn);
 
     const manageBtn = document.createElement('button');
-    manageBtn.className = 'manage-btn';
+    manageBtn.className = 'outline';
     manageBtn.setAttribute('aria-label', 'Manage bookmarks');
     manageBtn.setAttribute('title', 'Manage Bookmarks');
     manageBtn.addEventListener('click', () => this.showBookmarkManagement());
     
     const manageIcon = document.createElement('span');
-    manageIcon.className = 'icon';
     manageIcon.textContent = '📚';
     manageBtn.appendChild(manageIcon);
     
     const manageText = document.createElement('span');
-    manageText.className = 'text';
-    manageText.textContent = 'Manage URLs';
+    manageText.textContent = ' Manage URLs';
     manageBtn.appendChild(manageText);
     
     headerActions.appendChild(manageBtn);
@@ -354,18 +350,15 @@ class ForgetfulMePopup {
 
     // Create main content container
     const mainContent = document.createElement('div');
-    mainContent.className = 'main-content';
     mainContent.setAttribute('role', 'main');
 
     // Create form with better accessibility
     const form = document.createElement('form');
-    form.className = 'bookmark-form';
     form.setAttribute('role', 'form');
     form.setAttribute('aria-label', 'Mark current page as read');
 
     // Status selection group
     const statusGroup = document.createElement('div');
-    statusGroup.className = 'form-group';
 
     const statusLabel = document.createElement('label');
     statusLabel.setAttribute('for', 'read-status');
@@ -396,13 +389,10 @@ class ForgetfulMePopup {
     const statusHelp = document.createElement('small');
     statusHelp.id = 'status-help';
     statusHelp.textContent = 'Choose how you want to categorize this page';
-    statusHelp.style.color = '#6c757d';
-    statusHelp.style.fontSize = '12px';
     statusGroup.appendChild(statusHelp);
 
     // Tags input group
     const tagsGroup = document.createElement('div');
-    tagsGroup.className = 'form-group';
 
     const tagsLabel = document.createElement('label');
     tagsLabel.setAttribute('for', 'tags');
@@ -420,14 +410,12 @@ class ForgetfulMePopup {
     const tagsHelp = document.createElement('small');
     tagsHelp.id = 'tags-help';
     tagsHelp.textContent = 'Add tags to help organize your bookmarks';
-    tagsHelp.style.color = '#6c757d';
-    tagsHelp.style.fontSize = '12px';
     tagsGroup.appendChild(tagsHelp);
 
     // Submit button
     const submitBtn = document.createElement('button');
     submitBtn.type = 'submit';
-    submitBtn.className = 'primary-btn';
+    submitBtn.className = 'primary';
     submitBtn.textContent = 'Mark as Read';
     submitBtn.setAttribute('aria-label', 'Mark current page as read with selected status and tags');
 
@@ -446,7 +434,6 @@ class ForgetfulMePopup {
 
     // Create recent section with better accessibility
     const recentSection = document.createElement('section');
-    recentSection.className = 'recent-section';
     recentSection.setAttribute('role', 'region');
     recentSection.setAttribute('aria-label', 'Recent entries');
 
@@ -551,21 +538,15 @@ class ForgetfulMePopup {
         emptyItem.setAttribute('aria-label', 'No recent entries');
         
         const emptyIcon = document.createElement('div');
-        emptyIcon.style.fontSize = '24px';
-        emptyIcon.style.marginBottom = '8px';
         emptyIcon.textContent = '📚';
         emptyItem.appendChild(emptyIcon);
         
         const emptyTitle = document.createElement('div');
-        emptyTitle.className = 'title';
         emptyTitle.textContent = 'No entries yet';
-        emptyTitle.style.fontWeight = '600';
-        emptyTitle.style.color = '#495057';
         emptyItem.appendChild(emptyTitle);
         
         const emptyMeta = document.createElement('div');
-        emptyMeta.className = 'meta';
-        emptyMeta.innerHTML = '<span class="status status-info">No entries</span>';
+        emptyMeta.innerHTML = '<small>No entries</small>';
         emptyItem.appendChild(emptyMeta);
         
         recentListEl.appendChild(emptyItem);
@@ -582,19 +563,15 @@ class ForgetfulMePopup {
       const recentListEl = document.getElementById('recent-list');
       if (recentListEl) {
         const errorItem = document.createElement('div');
-        errorItem.className = 'recent-item error';
         errorItem.setAttribute('role', 'listitem');
         errorItem.setAttribute('aria-label', 'Error loading entries');
         
         const errorTitle = document.createElement('div');
-        errorTitle.className = 'title';
         errorTitle.textContent = 'Error loading entries';
-        errorTitle.style.color = '#dc3545';
         errorItem.appendChild(errorTitle);
         
         const errorMeta = document.createElement('div');
-        errorMeta.className = 'meta';
-        errorMeta.innerHTML = '<span class="status status-error">Error</span>';
+        errorMeta.innerHTML = '<small>Error</small>';
         errorItem.appendChild(errorMeta);
         
         recentListEl.appendChild(errorItem);
@@ -615,37 +592,33 @@ class ForgetfulMePopup {
    */
   createRecentListItem(bookmark, index) {
     const listItem = document.createElement('div');
-    listItem.className = 'recent-item';
     listItem.setAttribute('role', 'listitem');
     listItem.setAttribute('aria-label', `Recent bookmark ${index + 1}: ${bookmark.title}`);
 
     // Add title
     const titleDiv = document.createElement('div');
-    titleDiv.className = 'title';
     titleDiv.textContent = bookmark.title;
     titleDiv.setAttribute('title', bookmark.title);
     listItem.appendChild(titleDiv);
 
     // Add meta information
     const metaDiv = document.createElement('div');
-    metaDiv.className = 'meta';
 
     // Add status badge
-    const statusSpan = document.createElement('span');
-    statusSpan.className = `status status-${bookmark.status}`;
+    const statusSpan = document.createElement('small');
     statusSpan.textContent = this.formatStatus(bookmark.status);
     statusSpan.setAttribute('aria-label', `Status: ${this.formatStatus(bookmark.status)}`);
     metaDiv.appendChild(statusSpan);
 
     // Add time
-    const timeSpan = document.createElement('span');
+    const timeSpan = document.createElement('small');
     timeSpan.textContent = this.formatTime(new Date(bookmark.created_at).getTime());
     timeSpan.setAttribute('aria-label', `Created ${this.formatTime(new Date(bookmark.created_at).getTime())}`);
     metaDiv.appendChild(timeSpan);
 
     // Add tags if they exist
     if (bookmark.tags && bookmark.tags.length > 0) {
-      const tagsSpan = document.createElement('span');
+      const tagsSpan = document.createElement('small');
       tagsSpan.textContent = `Tags: ${bookmark.tags.join(', ')}`;
       tagsSpan.setAttribute('aria-label', `Tags: ${bookmark.tags.join(', ')}`);
       metaDiv.appendChild(tagsSpan);
