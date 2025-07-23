@@ -466,7 +466,7 @@ class UIComponents {
       const submitBtn = this.createButton(
         options.submitText,
         null,
-        'ui-btn-primary',
+        'primary',
         { type: 'submit' }
       );
       form.appendChild(submitBtn);
@@ -574,7 +574,7 @@ class UIComponents {
         const actionBtn = this.createButton(
           action.text,
           action.onClick,
-          action.className || 'ui-btn-small'
+          action.className || ''
         );
         actions.appendChild(actionBtn);
       });

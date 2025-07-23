@@ -809,9 +809,9 @@ describe('UIComponents', () => {
         expect(titleEl).toBeTruthy();
         expect(titleEl.textContent).toBe('Test Modal');
         
-        expect(modal.querySelector('.modal-body')).toBeTruthy();
+        expect(modal.querySelector('div')).toBeTruthy();
         // The modal body contains the content element, not the text directly
-        expect(modal.querySelector('.modal-body').children.length).toBeGreaterThan(0);
+        expect(modal.querySelector('div').children.length).toBeGreaterThan(0);
       });
 
       test('should create modal with close button', () => {

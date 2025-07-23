@@ -291,7 +291,7 @@ class ForgetfulMeOptions {
     const addStatusBtn = UIComponents.createButton(
       'Add',
       () => this.addStatusType(),
-      'ui-btn-primary',
+      'primary',
       {
         id: 'add-status-btn',
       }
@@ -316,7 +316,7 @@ class ForgetfulMeOptions {
     const exportBtn = UIComponents.createButton(
       'Export Data',
       () => this.exportData(),
-      'ui-btn-secondary',
+      'secondary',
       {
         id: 'export-data-btn',
       }
@@ -329,7 +329,7 @@ class ForgetfulMeOptions {
           importFileEl.click();
         }
       },
-      'ui-btn-secondary',
+      'secondary',
       {
         id: 'import-data-btn',
       }
@@ -337,7 +337,7 @@ class ForgetfulMeOptions {
     const clearBtn = UIComponents.createButton(
       'Clear All Data',
       () => this.clearData(),
-      'ui-btn-danger',
+      'contrast',
       {
         id: 'clear-data-btn',
       }
@@ -366,7 +366,7 @@ class ForgetfulMeOptions {
     const manageBookmarksBtn = UIComponents.createButton(
       '📚 Manage Bookmarks',
       () => this.openBookmarkManagement(),
-      'ui-btn-secondary',
+      'secondary',
       {
         id: 'manage-bookmarks-btn',
         title: 'Open bookmark management interface',

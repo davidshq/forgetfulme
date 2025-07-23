@@ -262,7 +262,7 @@ class ForgetfulMePopup {
     const settingsBtn = UIComponents.createButton(
       'Open Settings',
       () => this.openSettings(),
-      'ui-btn-primary'
+      'primary'
     );
     setupSection.appendChild(settingsBtn);
     container.appendChild(setupSection);
@@ -755,7 +755,7 @@ class ForgetfulMePopup {
     const backBtn = UIComponents.createButton(
       '← Back',
       () => this.showMainInterface(),
-      'ui-btn-secondary',
+      'secondary',
       { title: 'Back to main interface' }
     );
     header.appendChild(backBtn);
