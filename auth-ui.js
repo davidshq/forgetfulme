@@ -29,7 +29,6 @@ class AuthUI {
    * @param {Object} supabaseConfig - Supabase configuration instance
    * @param {Function} onAuthSuccess - Callback function called on successful authentication
    * @param {AuthStateManager} [authStateManager=null] - Authentication state manager
-   * @description Sets up the authentication UI with configuration and callbacks
    */
   constructor(supabaseConfig, onAuthSuccess, authStateManager = null) {
     /** @type {Object} Supabase configuration instance */
@@ -42,6 +41,10 @@ class AuthUI {
     this.currentView = 'login'; // 'login' or 'signup'
   }
 
+  /**
+   * Display login form in the specified container
+   * @param {HTMLElement} container - Container element to render the form
+   */
   showLoginForm(container) {
     // Create container with header
     const containerEl = UIComponents.createContainer(
@@ -100,6 +103,10 @@ class AuthUI {
     this.bindAuthEvents(container);
   }
 
+  /**
+   * Display signup form in the specified container
+   * @param {HTMLElement} container - Container element to render the form
+   */
   showSignupForm(container) {
     // Create container with header
     const containerEl = UIComponents.createContainer(
@@ -168,6 +175,10 @@ class AuthUI {
     this.bindAuthEvents(container);
   }
 
+  /**
+   * Bind authentication event listeners
+   * @param {HTMLElement} container - Container element with auth forms
+   */
   bindAuthEvents(container) {
     const showSignupLink = UIComponents.DOM.querySelector(
       '#showSignup',
@@ -193,6 +204,10 @@ class AuthUI {
     }
   }
 
+  /**
+   * Handle user login attempt
+   * @param {HTMLElement} container - Container element for displaying messages
+   */
   async handleLogin(container) {
     const email = UIComponents.DOM.getValue('loginEmail', container);
     const password = UIComponents.DOM.getValue('loginPassword', container);
@@ -221,6 +236,10 @@ class AuthUI {
     }
   }
 
+  /**
+   * Handle user signup attempt
+   * @param {HTMLElement} container - Container element for displaying messages
+   */
   async handleSignup(container) {
     const email = UIComponents.DOM.getValue('signupEmail', container);
     const password = UIComponents.DOM.getValue('signupPassword', container);
@@ -295,6 +314,9 @@ class AuthUI {
     }
   }
 
+  /**
+   * Handle user sign out
+   */
   async handleSignOut() {
     try {
       // Sign out from Supabase
@@ -318,11 +340,22 @@ class AuthUI {
     }
   }
 
+  /**
+   * Display authentication message to user
+   * @param {HTMLElement} container - Container element for displaying messages
+   * @param {string} message - Message to display
+   * @param {string} type - Message type (success, error, loading)
+   */
   showAuthMessage(container, message, type) {
     // Use the centralized UIMessages system
     UIMessages.show(message, type, container);
   }
 
+  /**
+   * Convert error object to user-friendly message
+   * @param {Error} error - Error object
+   * @returns {string} User-friendly error message
+   */
   getErrorMessage(error) {
     if (error.message.includes('Invalid login credentials')) {
       return 'Invalid email or password';
@@ -341,6 +374,11 @@ class AuthUI {
     }
   }
 
+  /**
+   * Display user profile information
+   * @param {HTMLElement} container - Container element to render the profile
+   * @param {Object} user - User object with profile information
+   */
   showUserProfile(container, user) {
     const profileHTML = `
       <div class="user-profile">

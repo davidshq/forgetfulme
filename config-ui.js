@@ -34,6 +34,11 @@ class ConfigUI {
     this.config = supabaseConfig;
   }
 
+  /**
+   * Display the configuration form
+   * @param {HTMLElement} container - Container element to render the form
+   * @description Creates and displays the Supabase configuration form with help section
+   */
   showConfigForm(container) {
     // Create container with header
     const containerEl = UIComponents.createContainer(
@@ -108,10 +113,20 @@ class ConfigUI {
     this.loadCurrentConfig(container);
   }
 
+  /**
+   * Bind configuration form events
+   * @param {HTMLElement} container - Container element
+   * @description Sets up event listeners for configuration form interactions
+   */
   bindConfigEvents(_container) {
     // Form event is handled by createForm, no additional binding needed
   }
 
+  /**
+   * Load and display current configuration
+   * @param {HTMLElement} container - Container element
+   * @description Populates form fields with existing configuration values
+   */
   async loadCurrentConfig(container) {
     try {
       const currentConfig = await this.config.getConfiguration();
@@ -139,6 +154,11 @@ class ConfigUI {
     }
   }
 
+  /**
+   * Handle configuration form submission
+   * @param {HTMLElement} container - Container element
+   * @description Validates and saves configuration, then tests the connection
+   */
   async handleConfigSubmit(container) {
     const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
     const keyInput = UIComponents.DOM.querySelector(
@@ -190,11 +210,23 @@ class ConfigUI {
     }
   }
 
+  /**
+   * Display configuration message
+   * @param {HTMLElement} container - Container element
+   * @param {string} message - Message to display
+   * @param {string} type - Message type (success, error, info, loading)
+   * @description Shows user feedback messages using centralized UIMessages system
+   */
   showConfigMessage(container, message, type) {
     // Use the centralized UIMessages system
     UIMessages.show(message, type, container);
   }
 
+  /**
+   * Display configuration status
+   * @param {HTMLElement} container - Container element
+   * @description Shows current configuration status with test and edit buttons
+   */
   showConfigStatus(container) {
     const statusHTML = `
       <div class="config-status">
@@ -222,6 +254,11 @@ class ConfigUI {
     this.bindStatusEvents(container);
   }
 
+  /**
+   * Load and display configuration status
+   * @param {HTMLElement} container - Container element
+   * @description Updates status display with current configuration values
+   */
   async loadConfigStatus(container) {
     try {
       const config = await this.config.getConfiguration();
@@ -258,6 +295,11 @@ class ConfigUI {
     }
   }
 
+  /**
+   * Test Supabase connection
+   * @param {HTMLElement} container - Container element
+   * @description Attempts to connect to Supabase and updates connection status
+   */
   async testConnection(container) {
     const connectionEl = UIComponents.DOM.querySelector(
       '#statusConnection',
@@ -278,6 +320,11 @@ class ConfigUI {
     }
   }
 
+  /**
+   * Bind status page events
+   * @param {HTMLElement} container - Container element
+   * @description Sets up event listeners for test connection and edit configuration buttons
+   */
   bindStatusEvents(container) {
     const testBtn = UIComponents.DOM.querySelector(
       '#testConnectionBtn',

@@ -199,6 +199,19 @@ class ForgetfulMeBackground {
     });
   }
 
+  /**
+   * Handle messages from other extension contexts (popup, options, etc.)
+   * @async
+   * @method handleMessage
+   * @param {Object} message - The message object containing type and data
+   * @param {string} message.type - The type of message to handle
+   * @param {Object} [message.data] - Optional data associated with the message
+   * @param {Object} sender - Information about the message sender
+   * @param {Function} sendResponse - Function to send response back to sender
+   * @description Routes messages to appropriate handlers based on message type
+   * @throws {Error} When message handling fails
+   *
+   */
   async handleMessage(message, sender, sendResponse) {
     try {
       switch (message.type) {
@@ -284,16 +297,33 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Get the current authentication state from storage
+   * @async
+   * @method getAuthState
+   * @returns {Promise<Object|null>} The current authentication session or null if not authenticated
+   */
   async getAuthState() {
     const result = await chrome.storage.sync.get(['auth_session']);
     return result.auth_session || null;
   }
 
+  /**
+   * Check if the user is currently authenticated
+   * @async
+   * @method isAuthenticated
+   * @returns {Promise<boolean>} True if user is authenticated, false otherwise
+   */
   async isAuthenticated() {
     const authState = await this.getAuthState();
     return authState !== null;
   }
 
+  /**
+   * Handle authentication state changes and update UI accordingly
+   * @method handleAuthStateChange
+   * @param {Object|null} session - The authentication session object or null if signed out
+   */
   handleAuthStateChange(session) {
     // Auth state changed - update UI accordingly
 
@@ -311,6 +341,11 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Handle authentication state changes from storage events
+   * @method handleStorageAuthChange
+   * @param {Object|null} newAuthState - The new authentication state from storage
+   */
   handleStorageAuthChange(newAuthState) {
     // Update local auth state
     this.authState = newAuthState;
@@ -319,6 +354,11 @@ class ForgetfulMeBackground {
     this.handleAuthStateChange(newAuthState);
   }
 
+  /**
+   * Update the extension badge based on authentication state
+   * @method updateExtensionBadge
+   * @param {Object|null} session - The authentication session object or null if signed out
+   */
   updateExtensionBadge(session) {
     try {
       if (session) {
@@ -420,6 +460,11 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Handle keyboard shortcut activation (Ctrl+Shift+R / Cmd+Shift+R)
+   * @async
+   * @method handleKeyboardShortcut
+   */
   async handleKeyboardShortcut() {
     try {
       // Check if user is authenticated before allowing keyboard shortcut
@@ -461,6 +506,12 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Handle bookmark marking as read (placeholder for future implementation)
+   * @async
+   * @method handleMarkAsRead
+   * @param {Object} _bookmarkData - Bookmark data (currently unused)
+   */
   async handleMarkAsRead(_bookmarkData) {
     try {
       // This will be handled by the popup, background just shows notification
@@ -475,6 +526,11 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Initialize default extension settings if they don't exist
+   * @async
+   * @method initializeDefaultSettings
+   */
   async initializeDefaultSettings() {
     try {
       // Check if default settings already exist
@@ -500,6 +556,11 @@ class ForgetfulMeBackground {
     }
   }
 
+  /**
+   * Get a summary of the current authentication state
+   * @method getAuthSummary
+   * @returns {Object} Authentication summary object
+   */
   getAuthSummary() {
     return {
       isAuthenticated: this.authState !== null,

@@ -47,7 +47,10 @@ class ConfigManager {
     this.listeners = new Set();
   }
 
-  // Initialize configuration manager
+  /**
+   * Initialize configuration manager
+   * @description Loads configuration from storage and validates settings
+   */
   async initialize() {
     if (this.initialized) {
       return;
@@ -71,7 +74,10 @@ class ConfigManager {
     }
   }
 
-  // Load all configuration from storage
+  /**
+   * Load all configuration from storage
+   * @description Retrieves all configuration data from Chrome sync storage
+   */
   async loadAllConfig() {
     try {
       const result = await chrome.storage.sync.get([
@@ -96,7 +102,10 @@ class ConfigManager {
     }
   }
 
-  // Validate configuration
+  /**
+   * Validate configuration
+   * @description Validates loaded configuration data
+   */
   async validateConfig() {
     // Validate Supabase configuration if present
     if (this.config.supabase) {
@@ -136,7 +145,10 @@ class ConfigManager {
     }
   }
 
-  // Migrate configuration from old format to new format
+  /**
+   * Migrate configuration to latest version
+   * @description Handles configuration migration between versions
+   */
   async migrateConfig() {
     try {
       // Check if migration is needed
@@ -153,12 +165,20 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Migrate to version 1 configuration
+   * @description Performs migration to version 1 format
+   */
   async migrateToVersion1() {
     // Migration logic for version 1
     // This is where we'd handle any breaking changes in configuration format
     // Migrating configuration to version 1
   }
 
+  /**
+   * Get current migration version
+   * @returns {Promise<number>} Current migration version
+   */
   async getMigrationVersion() {
     try {
       const result = await chrome.storage.sync.get(['configVersion']);
@@ -168,6 +188,10 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Set migration version
+   * @param {number} version - Version number to set
+   */
   async setMigrationVersion(version) {
     try {
       await chrome.storage.sync.set({ configVersion: version });
@@ -176,12 +200,21 @@ class ConfigManager {
     }
   }
 
-  // Supabase Configuration Methods
+  /**
+   * Get Supabase configuration
+   * @returns {Promise<Object|null>} Supabase configuration object
+   */
   async getSupabaseConfig() {
     await this.ensureInitialized();
     return this.config.supabase;
   }
 
+  /**
+   * Set Supabase configuration
+   * @param {string} url - Supabase project URL
+   * @param {string} anonKey - Supabase anon key
+   * @description Saves Supabase configuration to storage
+   */
   async setSupabaseConfig(url, anonKey) {
     await this.ensureInitialized();
 
@@ -223,17 +256,29 @@ class ConfigManager {
     return { success: true, message: 'Configuration saved successfully' };
   }
 
+  /**
+   * Check if Supabase is configured
+   * @returns {Promise<boolean>} True if Supabase is configured
+   */
   async isSupabaseConfigured() {
     await this.ensureInitialized();
     return this.config.supabase !== null;
   }
 
-  // Preferences Methods
+  /**
+   * Get user preferences
+   * @returns {Promise<Object>} User preferences object
+   */
   async getPreferences() {
     await this.ensureInitialized();
     return this.config.preferences;
   }
 
+  /**
+   * Set user preferences
+   * @param {Object} preferences - Preferences object to save
+   * @description Saves user preferences to storage
+   */
   async setPreferences(preferences) {
     await this.ensureInitialized();
 
@@ -251,11 +296,20 @@ class ConfigManager {
     this.notifyListeners('preferencesChanged', this.config.preferences);
   }
 
+  /**
+   * Get custom status types
+   * @returns {Promise<Array>} Array of custom status types
+   */
   async getCustomStatusTypes() {
     await this.ensureInitialized();
     return this.config.preferences.customStatusTypes;
   }
 
+  /**
+   * Set custom status types
+   * @param {Array} statusTypes - Array of status type strings
+   * @description Saves custom status types to preferences
+   */
   async setCustomStatusTypes(statusTypes) {
     await this.ensureInitialized();
 
@@ -277,6 +331,11 @@ class ConfigManager {
     this.notifyListeners('statusTypesChanged', statusTypes);
   }
 
+  /**
+   * Add custom status type
+   * @param {string} statusType - Status type to add
+   * @description Adds a new status type to the list
+   */
   async addCustomStatusType(statusType) {
     await this.ensureInitialized();
 
@@ -295,6 +354,11 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Remove custom status type
+   * @param {string} statusType - Status type to remove
+   * @description Removes a status type from the list
+   */
   async removeCustomStatusType(statusType) {
     await this.ensureInitialized();
 
@@ -303,12 +367,20 @@ class ConfigManager {
     await this.setCustomStatusTypes(updatedTypes);
   }
 
-  // Authentication Methods
+  /**
+   * Get authentication session
+   * @returns {Promise<Object|null>} Authentication session object
+   */
   async getAuthSession() {
     await this.ensureInitialized();
     return this.config.auth;
   }
 
+  /**
+   * Set authentication session
+   * @param {Object|null} session - Authentication session object
+   * @description Saves authentication session to storage
+   */
   async setAuthSession(session) {
     await this.ensureInitialized();
 
@@ -336,6 +408,10 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Clear authentication session
+   * @description Removes authentication session from storage
+   */
   async clearAuthSession() {
     await this.ensureInitialized();
 
@@ -361,12 +437,19 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Check if user is authenticated
+   * @returns {Promise<boolean>} True if user is authenticated
+   */
   async isAuthenticated() {
     await this.ensureInitialized();
     return this.config.auth !== null;
   }
 
-  // Default Settings Methods
+  /**
+   * Initialize default settings
+   * @description Sets up default configuration values
+   */
   async initializeDefaultSettings() {
     try {
       const defaultSettings = {
@@ -390,7 +473,11 @@ class ConfigManager {
     }
   }
 
-  // Export/Import Methods
+  /**
+   * Export configuration
+   * @returns {Promise<Object>} Configuration export object
+   * @description Exports all configuration data for backup
+   */
   async exportConfig() {
     await this.ensureInitialized();
 
@@ -403,6 +490,11 @@ class ConfigManager {
     };
   }
 
+  /**
+   * Import configuration
+   * @param {Object} configData - Configuration data to import
+   * @description Imports configuration data from backup
+   */
   async importConfig(configData) {
     await this.ensureInitialized();
 
@@ -433,11 +525,22 @@ class ConfigManager {
     return { success: true, message: 'Configuration imported successfully' };
   }
 
-  // Event Listener Methods
+  /**
+   * Add event listener
+   * @param {string} event - Event name to listen for
+   * @param {Function} callback - Callback function to execute
+   * @description Registers a callback for configuration events
+   */
   addListener(event, callback) {
     this.listeners.add({ event, callback });
   }
 
+  /**
+   * Remove event listener
+   * @param {string} event - Event name to remove listener from
+   * @param {Function} callback - Callback function to remove
+   * @description Removes a specific event listener
+   */
   removeListener(event, callback) {
     for (const listener of this.listeners) {
       if (listener.event === event && listener.callback === callback) {
@@ -447,6 +550,12 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Notify all listeners of an event
+   * @param {string} event - Event name to notify
+   * @param {*} data - Data to pass to listeners
+   * @description Executes all registered callbacks for an event
+   */
   notifyListeners(event, data) {
     for (const listener of this.listeners) {
       if (listener.event === event) {
@@ -459,13 +568,20 @@ class ConfigManager {
     }
   }
 
-  // Utility Methods
+  /**
+   * Ensure manager is initialized
+   * @description Initializes manager if not already done
+   */
   async ensureInitialized() {
     if (!this.initialized) {
       await this.initialize();
     }
   }
 
+  /**
+   * Reset configuration to defaults
+   * @description Clears all configuration and resets to defaults
+   */
   async reset() {
     try {
       await chrome.storage.sync.clear();
@@ -482,7 +598,11 @@ class ConfigManager {
     }
   }
 
-  // Get configuration summary for debugging
+  /**
+   * Get configuration summary
+   * @returns {Object} Summary object with configuration status
+   * @description Returns a summary of current configuration state
+   */
   getConfigSummary() {
     return {
       initialized: this.initialized,

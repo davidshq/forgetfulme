@@ -47,14 +47,8 @@ class SupabaseService {
 
   /**
    * Initialize the Supabase service
-   * @async
-   * @method initialize
    * @description Initializes the Supabase configuration and sets up the client and real-time manager
    * @throws {Error} When initialization fails
-   *
-   * @example
-   * const service = new SupabaseService(config);
-   * await service.initialize();
    */
   async initialize() {
     // Initializing SupabaseService...
@@ -66,8 +60,6 @@ class SupabaseService {
 
   /**
    * Save a bookmark to the database
-   * @async
-   * @method saveBookmark
    * @param {Object} bookmark - The bookmark object to save
    * @param {string} bookmark.url - The URL of the bookmark
    * @param {string} bookmark.title - The title of the bookmark
@@ -76,14 +68,6 @@ class SupabaseService {
    * @param {string[]} [bookmark.tags] - Optional array of tags
    * @returns {Promise<Object>} The saved bookmark object
    * @throws {Error} When user is not authenticated or validation fails
-   *
-   * @example
-   * const bookmark = await supabaseService.saveBookmark({
-   *   url: 'https://example.com',
-   *   title: 'Example Page',
-   *   readStatus: 'read',
-   *   tags: ['research', 'important']
-   * });
    */
   async saveBookmark(bookmark) {
     if (!this.config.isAuthenticated()) {
@@ -133,6 +117,17 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Get bookmarks with filtering and pagination
+   * @param {Object} options - Query options
+   * @param {number} [options.page=1] - Page number for pagination
+   * @param {number} [options.limit=50] - Number of bookmarks per page
+   * @param {string} [options.status] - Filter by read status
+   * @param {string} [options.search] - Search in title and description
+   * @param {string[]} [options.tags] - Filter by tags
+   * @returns {Promise<Array>} Array of bookmark objects
+   * @throws {Error} When user is not authenticated
+   */
   async getBookmarks(options = {}) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -186,6 +181,12 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Get bookmark by URL
+   * @param {string} url - The URL to search for
+   * @returns {Promise<Object|null>} Bookmark object or null if not found
+   * @throws {Error} When user is not authenticated
+   */
   async getBookmarkByUrl(url) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -220,6 +221,13 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Update bookmark data
+   * @param {string} bookmarkId - The bookmark ID to update
+   * @param {Object} updates - Object containing fields to update
+   * @returns {Promise<Object>} Updated bookmark object
+   * @throws {Error} When user is not authenticated
+   */
   async updateBookmark(bookmarkId, updates) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -248,6 +256,12 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Delete bookmark by ID
+   * @param {string} bookmarkId - The bookmark ID to delete
+   * @returns {Promise<boolean>} True if deletion was successful
+   * @throws {Error} When user is not authenticated
+   */
   async deleteBookmark(bookmarkId) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -272,6 +286,12 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Get bookmark by ID
+   * @param {string} bookmarkId - The bookmark ID to retrieve
+   * @returns {Promise<Object|null>} Bookmark object or null if not found
+   * @throws {Error} When user is not authenticated
+   */
   async getBookmarkById(bookmarkId) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -304,6 +324,11 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Get bookmark statistics
+   * @returns {Promise<Object>} Object with status counts
+   * @throws {Error} When user is not authenticated
+   */
   async getBookmarkStats() {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -333,7 +358,12 @@ class SupabaseService {
     }
   }
 
-  // User preferences operations
+  /**
+   * Save user preferences
+   * @param {Object} preferences - User preferences object
+   * @returns {Promise<Object>} Saved preferences object
+   * @throws {Error} When user is not authenticated
+   */
   async saveUserPreferences(preferences) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -363,6 +393,11 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Get user preferences
+   * @returns {Promise<Object>} User preferences object
+   * @throws {Error} When user is not authenticated
+   */
   async getUserPreferences() {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -389,7 +424,12 @@ class SupabaseService {
     }
   }
 
-  // Real-time subscriptions
+  /**
+   * Subscribe to bookmark changes
+   * @param {Function} callback - Callback function for bookmark changes
+   * @returns {Object} Subscription object
+   * @throws {Error} When user is not authenticated
+   */
   subscribeToBookmarks(callback) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -403,11 +443,20 @@ class SupabaseService {
     return this.realtimeManager.subscribeToBookmarks(userId, callback);
   }
 
+  /**
+   * Unsubscribe from real-time channel
+   * @param {string} channelName - Name of the channel to unsubscribe from
+   * @description Removes subscription and cleans up resources
+   */
   unsubscribe(channelName) {
     this.realtimeManager.unsubscribe(channelName);
   }
 
-  // Data export/import
+  /**
+   * Export all user data
+   * @returns {Promise<Object>} Object containing bookmarks, preferences, and metadata
+   * @throws {Error} When user is not authenticated
+   */
   async exportData() {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -433,6 +482,12 @@ class SupabaseService {
     }
   }
 
+  /**
+   * Import user data
+   * @param {Object} importData - Data object containing bookmarks and preferences
+   * @returns {Promise<boolean>} True if import was successful
+   * @throws {Error} When user is not authenticated or import fails
+   */
   async importData(importData) {
     if (!this.config.isAuthenticated()) {
       throw ErrorHandler.createError(
@@ -472,13 +527,30 @@ class SupabaseService {
   }
 }
 
-// Real-time manager for handling subscriptions
+/**
+ * Real-time manager for handling subscriptions
+ * @class RealtimeManager
+ * @description Manages Supabase real-time subscriptions and channel cleanup
+ */
 class RealtimeManager {
+  /**
+   * Initialize the real-time manager
+   * @constructor
+   * @param {Object} supabase - Supabase client instance
+   * @description Sets up subscription tracking
+   */
   constructor(supabase) {
     this.supabase = supabase;
     this.subscriptions = new Map();
   }
 
+  /**
+   * Subscribe to bookmark changes for a user
+   * @param {string} userId - User ID to subscribe for
+   * @param {Function} callback - Callback function for changes
+   * @returns {Object} Subscription object
+   * @description Creates real-time subscription for bookmark changes
+   */
   subscribeToBookmarks(userId, callback) {
     const subscription = this.supabase
       .channel('bookmarks')
@@ -500,6 +572,11 @@ class RealtimeManager {
     return subscription;
   }
 
+  /**
+   * Unsubscribe from a channel
+   * @param {string} channelName - Name of the channel to unsubscribe from
+   * @description Removes subscription and cleans up resources
+   */
   unsubscribe(channelName) {
     const subscription = this.subscriptions.get(channelName);
     if (subscription) {

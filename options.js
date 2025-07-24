@@ -56,6 +56,10 @@ class ForgetfulMeOptions {
     this.initializeAsync();
   }
 
+  /**
+   * Initialize the options page asynchronously
+   * @description Sets up DOM elements, app initialization, and auth state
+   */
   async initializeAsync() {
     try {
       // Wait for DOM to be ready
@@ -70,6 +74,10 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Initialize authentication state and listeners
+   * @description Sets up auth state manager and message listeners
+   */
   async initializeAuthState() {
     try {
       await this.authStateManager.initialize();
@@ -94,6 +102,11 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Handle authentication state changes
+   * @param {Object|null} session - Current session object or null
+   * @description Updates UI based on authentication state
+   */
   handleAuthStateChange(session) {
     // Auth state changed - update UI accordingly
 
@@ -108,6 +121,10 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Initialize DOM elements
+   * @description Sets up references to DOM elements for event binding
+   */
   initializeElements() {
     // Initialize elements that exist in the initial HTML
     this.appContainer = UIComponents.DOM.getElement('app');
@@ -127,6 +144,10 @@ class ForgetfulMeOptions {
     this.mostUsedStatus = UIComponents.DOM.getElement('most-used-status');
   }
 
+  /**
+   * Bind event listeners to DOM elements
+   * @description Sets up click and keyboard event handlers
+   */
   bindEvents() {
     // Only bind events if elements exist using safe DOM utilities
     if (this.addStatusBtn) {
@@ -163,6 +184,10 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Initialize the application
+   * @description Checks configuration, initializes Supabase, and shows appropriate interface
+   */
   async initializeApp() {
     try {
       // Check if Supabase is configured
@@ -210,14 +235,26 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Show configuration interface
+   * @description Displays Supabase configuration form
+   */
   showConfigInterface() {
     this.configUI.showConfigForm(this.appContainer);
   }
 
+  /**
+   * Show authentication interface
+   * @description Displays login form for user authentication
+   */
   showAuthInterface() {
     this.authUI.showLoginForm(this.appContainer);
   }
 
+  /**
+   * Handle successful authentication
+   * @description Updates auth state and shows main interface
+   */
   onAuthSuccess() {
     // Update auth state in the manager
     this.authStateManager.setAuthState(this.supabaseConfig.session);
@@ -226,6 +263,10 @@ class ForgetfulMeOptions {
     this.loadData();
   }
 
+  /**
+   * Show main application interface
+   * @description Creates and displays the main options interface with all cards
+   */
   showMainInterface() {
     // Create main container
     const mainContainer = UIComponents.createContainer(
@@ -384,6 +425,10 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Load and display application data
+   * @description Fetches bookmarks and status types, updates UI
+   */
   async loadData() {
     try {
       await this.configManager.initialize();
@@ -400,6 +445,11 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Load status types into the UI
+   * @param {Array} statusTypes - Array of custom status types
+   * @description Populates the status types list with current data
+   */
   loadStatusTypes(statusTypes) {
     const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
     if (!statusTypesListEl) return;
@@ -440,6 +490,10 @@ class ForgetfulMeOptions {
     });
   }
 
+  /**
+   * Add a new status type
+   * @description Validates input and adds new custom status type
+   */
   async addStatusType() {
     // Safely get the status input value
     const statusValue = UIComponents.DOM.getValue('new-status');
@@ -471,6 +525,11 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Remove a status type
+   * @param {string} status - Status type to remove
+   * @description Removes specified status type from configuration
+   */
   async removeStatusType(status) {
     try {
       await this.configManager.initialize();
@@ -488,6 +547,12 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Load statistics into the UI
+   * @param {Array} bookmarks - Array of bookmark objects
+   * @param {Array} statusTypes - Array of status type objects
+   * @description Updates statistics display with current data
+   */
   loadStatistics(bookmarks, statusTypes) {
     // Safely update statistics using DOM utilities
     const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
@@ -523,6 +588,10 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Export application data
+   * @description Exports all data to JSON file for backup
+   */
   async exportData() {
     try {
       const exportData = await this.supabaseService.exportData();
@@ -547,6 +616,11 @@ class ForgetfulMeOptions {
     }
   }
 
+  /**
+   * Import application data
+   * @param {Event} event - File input change event
+   * @description Imports data from JSON file
+   */
   async importData(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -568,6 +642,10 @@ class ForgetfulMeOptions {
     event.target.value = '';
   }
 
+  /**
+   * Clear all application data
+   * @description Removes all bookmarks after user confirmation
+   */
   async clearData() {
     UIMessages.confirm(
       'Are you sure you want to clear all data? This action cannot be undone.',
@@ -600,7 +678,6 @@ class ForgetfulMeOptions {
 
   /**
    * Open bookmark management interface in a new tab
-   * @method openBookmarkManagement
    * @description Opens the bookmark management interface in a new tab for better usability
    */
   openBookmarkManagement() {
@@ -610,7 +687,12 @@ class ForgetfulMeOptions {
     });
   }
 
-
+  /**
+   * Show message to user
+   * @param {string} message - Message to display
+   * @param {string} type - Message type (success, error, info, loading)
+   * @description Shows user feedback messages using centralized UIMessages system
+   */
   showMessage(message, type) {
     // Use the centralized UIMessages system
     UIMessages.show(message, type, this.appContainer);

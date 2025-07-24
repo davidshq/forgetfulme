@@ -125,30 +125,22 @@ This implementation adds a dedicated bookmark management interface that allows u
 
 ### CSS Styling Updates
 
-#### Removed Styles (`options.css`)
-- `.recent-entries-container`: Removed recent entries container styling
-- `.recent-entry-item`: Removed recent entry item styling
-- `.recent-entry-item .entry-title`: Removed entry title styling
-- `.recent-entry-item .entry-meta`: Removed entry meta styling
-- `.recent-entry-item .entry-status`: Removed entry status styling
+The bookmark management interface uses the shared Pico CSS framework (`libs/pico.min.css`) and button styles defined in `utils/ui-components.js`. No separate CSS files are needed as the styling is handled through:
 
-#### New Styles (`popup.css`)
+**Pico CSS Framework**
+- Consistent typography and layout
+- Responsive design components
+- Built-in form styling
 
-**Bookmark Management Interface**
-- `.manage-btn`: Styling for the management button
-- `.search-form`: Search form styling
-- `.bookmark-item`: Individual bookmark item styling
-- `.bookmark-checkbox`: Checkbox positioning and styling
-- `.bookmark-actions`: Action button container styling
-
-**Bulk Actions**
-- `.bulk-actions`: Container for bulk action buttons
+**UI Components Button Styles**
 - `.ui-btn-danger`: Red delete button styling
 - `.ui-btn-small`: Small button styling for action buttons
+- `.ui-btn-primary`: Primary action buttons
+- `.ui-btn-secondary`: Secondary action buttons
 
-**Search and Filter**
-- `.search-section`: Search section styling
-- Status-specific styling for different read statuses
+**Custom Styling**
+- Bookmark management interface styling handled through Pico CSS classes
+- Button styles managed through the shared UI components system
 
 ## User Experience
 
@@ -185,8 +177,8 @@ This implementation adds a dedicated bookmark management interface that allows u
 - `popup.js`: Added bookmark management interface and all related methods
 - `options.js`: Removed recent entries section, added bookmark management button
 - `supabase-service.js`: Added `getBookmarkById` method
-- `popup.css`: Added comprehensive styling for management interface
-- `options.css`: Removed recent entries related styles
+- `libs/pico.min.css`: Shared CSS framework for consistent styling
+- `utils/ui-components.js`: Button styles and UI components
 - `tests/unit/popup.test.js`: Added tests for bookmark management functionality
 - `tests/unit/options.test.js`: Added tests for options page bookmark management
 - `TODO.md`: Updated to mark feature as completed

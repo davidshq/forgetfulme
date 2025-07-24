@@ -40,14 +40,8 @@ class AuthStateManager {
 
   /**
    * Initialize the authentication state manager
-   * @async
-   * @method initialize
    * @description Loads current auth state from storage and sets up change listeners
    * @throws {Error} When initialization fails
-   *
-   * @example
-   * const authManager = new AuthStateManager();
-   * await authManager.initialize();
    */
   async initialize() {
     if (this.initialized) return;
@@ -74,16 +68,7 @@ class AuthStateManager {
 
   /**
    * Get the current authentication state
-   * @async
-   * @method getAuthState
-   * @description Returns the current authentication session object
    * @returns {Promise<Object|null>} Current authentication session or null if not authenticated
-   *
-   * @example
-   * const session = await authManager.getAuthState();
-   * if (session) {
-   *   console.log('User is authenticated:', session.user.email);
-   * }
    */
   async getAuthState() {
     await this.ensureInitialized();
@@ -92,17 +77,8 @@ class AuthStateManager {
 
   /**
    * Set the authentication state and notify all contexts
-   * @async
-   * @method setAuthState
    * @param {Object|null} session - The authentication session object or null to clear
    * @description Updates the auth state, saves to storage, and notifies all extension contexts
-   *
-   * @example
-   * // Set authenticated state
-   * await authManager.setAuthState(session);
-   *
-   * // Clear authentication
-   * await authManager.setAuthState(null);
    */
   async setAuthState(session) {
     await this.ensureInitialized();
@@ -121,6 +97,10 @@ class AuthStateManager {
     // Auth state updated successfully
   }
 
+  /**
+   * Clear authentication state
+   * @description Removes auth state from storage and notifies all contexts
+   */
   async clearAuthState() {
     await this.ensureInitialized();
 
@@ -138,11 +118,20 @@ class AuthStateManager {
     // Auth state cleared successfully
   }
 
+  /**
+   * Check if user is authenticated
+   * @returns {Promise<boolean>} True if user is authenticated
+   */
   async isAuthenticated() {
     await this.ensureInitialized();
     return this.authState !== null;
   }
 
+  /**
+   * Handle authentication state change from storage
+   * @param {Object|null} newAuthState - New authentication state
+   * @description Updates local state and notifies listeners of changes
+   */
   handleAuthStateChange(newAuthState) {
     const oldAuthState = this.authState;
     this.authState = newAuthState;
@@ -154,6 +143,11 @@ class AuthStateManager {
     }
   }
 
+  /**
+   * Notify all extension contexts of auth state change
+   * @param {Object|null} session - Current session object or null
+   * @description Sends runtime message to all extension contexts
+   */
   notifyAllContexts(session) {
     try {
       chrome.runtime
@@ -169,11 +163,22 @@ class AuthStateManager {
     }
   }
 
-  // Event listener management
+  /**
+   * Add event listener
+   * @param {string} event - Event name to listen for
+   * @param {Function} callback - Callback function to execute
+   * @description Registers a callback for auth state events
+   */
   addListener(event, callback) {
     this.listeners.add({ event, callback });
   }
 
+  /**
+   * Remove event listener
+   * @param {string} event - Event name to remove listener from
+   * @param {Function} callback - Callback function to remove
+   * @description Removes a specific event listener
+   */
   removeListener(event, callback) {
     for (const listener of this.listeners) {
       if (listener.event === event && listener.callback === callback) {
@@ -183,6 +188,12 @@ class AuthStateManager {
     }
   }
 
+  /**
+   * Notify all listeners of an event
+   * @param {string} event - Event name to notify
+   * @param {*} data - Data to pass to listeners
+   * @description Executes all registered callbacks for an event
+   */
   notifyListeners(event, data) {
     for (const listener of this.listeners) {
       if (listener.event === event) {
@@ -195,13 +206,21 @@ class AuthStateManager {
     }
   }
 
+  /**
+   * Ensure manager is initialized
+   * @description Initializes manager if not already done
+   */
   async ensureInitialized() {
     if (!this.initialized) {
       await this.initialize();
     }
   }
 
-  // Get current auth state summary
+  /**
+   * Get current auth state summary
+   * @returns {Object} Summary object with auth state information
+   * @description Returns a summary of current authentication state
+   */
   getAuthSummary() {
     return {
       isAuthenticated: this.authState !== null,

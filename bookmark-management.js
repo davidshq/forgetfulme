@@ -27,7 +27,6 @@ class BookmarkManagementPage {
   /**
    * Initialize the bookmark management page
    * @constructor
-   * @description Sets up the page with authentication, configuration, and service dependencies
    */
   constructor() {
     /** @type {ConfigManager} Configuration manager for user preferences */
@@ -49,8 +48,6 @@ class BookmarkManagementPage {
   /**
    * Initialize the page asynchronously after DOM is ready
    * @async
-   * @method initializeAsync
-   * @description Performs all initialization tasks including DOM setup and auth state setup
    * @throws {Error} When initialization fails
    */
   async initializeAsync() {
@@ -73,8 +70,6 @@ class BookmarkManagementPage {
   /**
    * Initialize authentication state and set up listeners
    * @async
-   * @method initializeAuthState
-   * @description Sets up authentication state management and listeners for auth state changes
    * @throws {Error} When auth state initialization fails
    */
   async initializeAuthState() {
@@ -96,7 +91,6 @@ class BookmarkManagementPage {
 
   /**
    * Handle authentication state changes
-   * @method handleAuthStateChange
    * @param {Object|null} session - The current session object or null if not authenticated
    * @description Updates the interface based on authentication state
    */
@@ -129,8 +123,6 @@ class BookmarkManagementPage {
   /**
    * Initialize the application
    * @async
-   * @method initializeApp
-   * @description Performs application initialization including Supabase setup and auth checks
    * @throws {Error} When initialization fails
    */
   async initializeApp() {
@@ -184,8 +176,6 @@ class BookmarkManagementPage {
 
   /**
    * Show setup interface when Supabase is not configured
-   * @method showSetupInterface
-   * @description Displays setup instructions when Supabase is not configured
    */
   showSetupInterface() {
     // Create main container

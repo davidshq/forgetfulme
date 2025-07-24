@@ -127,11 +127,9 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 forgetfulme/
 ├── manifest.json          # Extension configuration
 ├── popup.html            # Main popup interface
-├── popup.css             # Popup styling
 ├── popup.js              # Popup functionality
 ├── background.js          # Background service worker
 ├── options.html          # Settings page
-├── options.css           # Settings styling
 ├── options.js            # Settings functionality
 ├── supabase-client.js    # Local Supabase client (CSP compliant)
 ├── supabase-config.js    # Supabase configuration (secure)
