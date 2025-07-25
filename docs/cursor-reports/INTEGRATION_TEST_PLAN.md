@@ -29,25 +29,80 @@ tests/
 
 ## Integration Test Categories
 
-### 1. Popup Interface Tests ✅ (Implemented)
+### 1. Popup Interface Tests ⚠️ (In Progress)
 
-**Status**: 4/4 tests implemented and passing
+**Status**: 6/11 tests implemented (55% complete)
 
 **Current Tests**:
 - ✅ `popup.test.js` - Setup interface display
 - ✅ `popup.test.js` - Settings button functionality  
 - ✅ `popup.test.js` - How it works section
 - ✅ `popup.test.js` - Styling and layout
+- ✅ `popup-authenticated.test.js` - Main interface when authenticated
+- ✅ `popup-authenticated.test.js` - Mark as read functionality
 
 **Missing Integration Tests**:
-- ❌ Main interface (when authenticated and configured)
-- ❌ Mark as read functionality
 - ❌ Status selection dropdown
 - ❌ Tags input functionality
 - ❌ Recent entries display
 - ❌ Form submission and validation
 - ❌ Success/error message handling
 - ❌ Keyboard shortcuts (Ctrl+Shift+R)
+
+**Key Implementation Notes**:
+
+1. **Chrome API Mocking Requirements**:
+   ```javascript
+   // CORRECT: Use Promise-based mocking for Chrome Storage API
+   chrome.storage = {
+     sync: {
+       get: (keys) => {
+         return new Promise((resolve) => {
+           // Return mock data
+           resolve(result);
+         });
+       }
+     }
+   };
+
+   // INCORRECT: Don't use callback-based mocking
+   chrome.storage = {
+     sync: {
+       get: (keys, callback) => {
+         callback(result);  // This won't work!
+       }
+     }
+   };
+   ```
+
+2. **Required Mock Data Structure**:
+   ```javascript
+   const mockData = {
+     auth_session: {
+       user: { id: '...', email: '...' },
+       access_token: '...',
+       refresh_token: '...'
+     },
+     supabaseConfig: {
+       url: 'https://...',
+       anonKey: 'eyJ...'  // Must start with 'eyJ'
+     },
+     customStatusTypes: ['read', ...],
+     configVersion: 1  // Required for migrations
+   };
+   ```
+
+3. **Test Organization**:
+   - Use `popup.test.js` for unauthenticated/unconfigured states
+   - Use `popup-authenticated.test.js` for authenticated state tests
+   - Mock Chrome APIs at context level using `context.addInitScript()`
+   - Ensure proper Promise-based API mocking
+
+4. **Common Gotchas**:
+   - Chrome Storage API expects Promises, not callbacks
+   - Supabase anon key must start with 'eyJ'
+   - Configuration version must be present for migrations
+   - Storage mocking must handle all possible key requests
 
 ### 2. Options/Settings Page Tests ✅ (Implemented)
 
@@ -226,11 +281,12 @@ tests/
 ## Updated Integration Test Priorities
 
 ### Phase 1: Core Functionality (High Priority)
-1. **Authentication Integration Tests** - Complete auth flow testing
-2. **Popup Main Interface Tests** - Test authenticated popup functionality
-3. **Background Service Tests** - Test keyboard shortcuts and messaging
-4. **Bookmark Management Main Interface Tests** - Test authenticated bookmark management
-5. **Cross-Context Communication** - Test message passing between contexts
+1. ✅ **Authentication Integration Tests** - Complete auth flow testing
+2. ✅ **Popup Main Interface Tests** - Test authenticated popup functionality
+3. ⚠️ **Popup Form Tests** - Test form functionality (in progress)
+4. ❌ **Background Service Tests** - Test keyboard shortcuts and messaging
+5. ❌ **Bookmark Management Main Interface Tests** - Test authenticated bookmark management
+6. ❌ **Cross-Context Communication** - Test message passing between contexts
 
 ### Phase 2: Advanced Features (Medium Priority)
 1. **Options Page Advanced Tests** - Test authenticated settings interface
@@ -316,16 +372,17 @@ test.describe('Main Bookmark Management Integration Tests', () => {
 
 ## Summary
 
-**Current Status**: 18/50 integration tests implemented (36% complete)
+**Current Status**: 20/50 integration tests implemented (40% complete)
 - ✅ Popup Setup Interface: 4/4 tests (100% complete)
 - ✅ Options Configuration: 6/6 tests (100% complete)  
 - ✅ Bookmark Management Setup: 7/7 tests (100% complete)
+- ⚠️ Popup Interface: 6/11 tests (55% complete)
 - ⚠️ Authentication: 1/7 tests (14% complete)
 - ❌ Background Service: 0/7 tests (0% complete)
 - ❌ Main Bookmark Management: 0/7 tests (0% complete)
 - ❌ All other categories: 0% complete
 
-**Priority**: Focus on completing Phase 1 integration tests to ensure core functionality is thoroughly tested before moving to advanced features.
+**Priority**: Continue implementing Phase 1 popup form tests, focusing on proper Chrome API mocking patterns.
 
 **Relevance**: The existing tests are still relevant but incomplete. The codebase has more functionality than what's currently tested, requiring additional integration tests to achieve comprehensive coverage.
 
