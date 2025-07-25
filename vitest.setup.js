@@ -24,31 +24,297 @@ global.console = {
 };
 
 /**
- * Mock Chrome API for testing
+ * Enhanced Chrome storage state manager for global mocking
+ * @class GlobalChromeStorageManager
+ * @description Manages Chrome storage state with proper event handling and state persistence
+ */
+class GlobalChromeStorageManager {
+  constructor() {
+    this.data = {
+      // Default storage structure matching the application expectations
+      supabaseConfig: null,
+      auth_session: null,
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
+      config: {
+        supabase: null,
+        preferences: {
+          customStatusTypes: [
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ]
+        },
+        auth: null
+      }
+    };
+    this.listeners = [];
+    this.errorListeners = [];
+  }
+
+  /**
+   * Get storage data with proper key handling
+   * @param {string|Array|Object} keys - Keys to retrieve
+   * @param {Function} callback - Callback function
+   */
+  get(keys, callback) {
+    try {
+      const result = {};
+      
+      if (Array.isArray(keys)) {
+        keys.forEach(key => {
+          result[key] = this.data[key] !== undefined ? this.data[key] : null;
+        });
+      } else if (typeof keys === 'string') {
+        result[keys] = this.data[keys] !== undefined ? this.data[keys] : null;
+      } else if (keys === null || keys === undefined) {
+        // Return all data when no keys specified
+        Object.assign(result, this.data);
+      } else {
+        // Handle object keys
+        Object.keys(keys).forEach(key => {
+          result[key] = this.data[key] !== undefined ? this.data[key] : null;
+        });
+      }
+      
+      callback(result);
+    } catch (error) {
+      this.notifyErrorListeners('get', error);
+      callback({});
+    }
+  }
+
+  /**
+   * Set storage data with change notifications
+   * @param {Object} data - Data to store
+   * @param {Function} callback - Callback function
+   */
+  set(data, callback) {
+    try {
+      const changes = {};
+      Object.keys(data).forEach(key => {
+        const oldValue = this.data[key];
+        this.data[key] = data[key];
+        changes[key] = { oldValue, newValue: data[key] };
+      });
+
+      // Notify listeners of changes
+      this.notifyListeners(changes);
+      
+      if (callback) callback();
+    } catch (error) {
+      this.notifyErrorListeners('set', error);
+      if (callback) callback();
+    }
+  }
+
+  /**
+   * Remove storage data
+   * @param {string|Array} keys - Keys to remove
+   * @param {Function} callback - Callback function
+   */
+  remove(keys, callback) {
+    try {
+      const keyArray = Array.isArray(keys) ? keys : [keys];
+      const changes = {};
+      
+      keyArray.forEach(key => {
+        if (this.data[key] !== undefined) {
+          const oldValue = this.data[key];
+          delete this.data[key];
+          changes[key] = { oldValue, newValue: undefined };
+        }
+      });
+
+      if (Object.keys(changes).length > 0) {
+        this.notifyListeners(changes);
+      }
+      
+      if (callback) callback();
+    } catch (error) {
+      this.notifyErrorListeners('remove', error);
+      if (callback) callback();
+    }
+  }
+
+  /**
+   * Clear all storage data
+   * @param {Function} callback - Callback function
+   */
+  clear(callback) {
+    try {
+      const changes = {};
+      Object.keys(this.data).forEach(key => {
+        changes[key] = { oldValue: this.data[key], newValue: undefined };
+      });
+      
+      this.data = {};
+      this.notifyListeners(changes);
+      
+      if (callback) callback();
+    } catch (error) {
+      this.notifyErrorListeners('clear', error);
+      if (callback) callback();
+    }
+  }
+
+  /**
+   * Add change listener
+   * @param {Function} listener - Listener function
+   */
+  addListener(listener) {
+    this.listeners.push(listener);
+  }
+
+  /**
+   * Remove change listener
+   * @param {Function} listener - Listener function
+   */
+  removeListener(listener) {
+    const index = this.listeners.indexOf(listener);
+    if (index > -1) {
+      this.listeners.splice(index, 1);
+    }
+  }
+
+  /**
+   * Add error listener
+   * @param {Function} listener - Error listener function
+   */
+  addErrorListener(listener) {
+    this.errorListeners.push(listener);
+  }
+
+  /**
+   * Notify change listeners
+   * @param {Object} changes - Storage changes
+   */
+  notifyListeners(changes) {
+    this.listeners.forEach(listener => {
+      try {
+        listener(changes, 'sync');
+      } catch (error) {
+        console.warn('Storage listener error:', error);
+      }
+    });
+  }
+
+  /**
+   * Notify error listeners
+   * @param {string} operation - Operation that failed
+   * @param {Error} error - Error object
+   */
+  notifyErrorListeners(operation, error) {
+    this.errorListeners.forEach(listener => {
+      try {
+        listener(operation, error);
+      } catch (listenerError) {
+        console.warn('Error listener error:', listenerError);
+      }
+    });
+  }
+
+  /**
+   * Reset storage to initial state
+   * @param {Object} newData - New initial data
+   */
+  reset(newData = {}) {
+    this.data = {
+      supabaseConfig: null,
+      auth_session: null,
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
+      config: {
+        supabase: null,
+        preferences: {
+          customStatusTypes: [
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ]
+        },
+        auth: null
+      },
+      ...newData
+    };
+    this.listeners = [];
+    this.errorListeners = [];
+  }
+}
+
+// Create global storage manager instance
+const globalStorageManager = new GlobalChromeStorageManager();
+
+/**
+ * Enhanced Chrome API mock for testing
  * @type {Object}
  * @description Provides comprehensive mocking of Chrome extension APIs for unit testing
  */
 global.chrome = {
   storage: {
     sync: {
-      get: vi.fn(),
-      set: vi.fn(),
-      remove: vi.fn(),
-      clear: vi.fn(),
+      get: vi.fn((keys, callback) => globalStorageManager.get(keys, callback)),
+      set: vi.fn((data, callback) => globalStorageManager.set(data, callback)),
+      remove: vi.fn((keys, callback) => globalStorageManager.remove(keys, callback)),
+      clear: vi.fn((callback) => globalStorageManager.clear(callback)),
       onChanged: {
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
+        addListener: vi.fn((listener) => globalStorageManager.addListener(listener)),
+        removeListener: vi.fn((listener) => globalStorageManager.removeListener(listener)),
       },
     },
     local: {
-      get: vi.fn(),
-      set: vi.fn(),
-      remove: vi.fn(),
-      clear: vi.fn(),
+      get: vi.fn((keys, callback) => {
+        // Local storage typically empty for this extension
+        callback({});
+      }),
+      set: vi.fn((data, callback) => {
+        if (callback) callback();
+      }),
+      remove: vi.fn((keys, callback) => {
+        if (callback) callback();
+      }),
+      clear: vi.fn((callback) => {
+        if (callback) callback();
+      }),
     },
   },
   runtime: {
-    sendMessage: vi.fn(),
+    sendMessage: vi.fn((message, callback) => {
+      // Enhanced message handling with proper responses
+      const responses = {
+        'BOOKMARK_SAVED': { success: true, bookmarkId: 'test-id' },
+        'GET_AUTH_STATE': { 
+          authenticated: !!globalStorageManager.data.auth_session,
+          user: globalStorageManager.data.auth_session?.user || null
+        },
+        'TEST_CONNECTION': { success: true, message: 'Connection successful' },
+        'SAVE_CONFIG': { success: true, message: 'Configuration saved' },
+        'GET_CONFIG': { 
+          success: true, 
+          config: globalStorageManager.data.config 
+        }
+      };
+      
+      const response = responses[message.type] || { 
+        success: false, 
+        error: 'Unknown message type' 
+      };
+      
+      if (callback) {
+        // Simulate async response
+        setTimeout(() => callback(response), 100);
+      }
+    }),
     onMessage: {
       addListener: vi.fn(),
       removeListener: vi.fn(),
@@ -57,20 +323,49 @@ global.chrome = {
     getURL: vi.fn(path => `chrome-extension://test-id/${path}`),
   },
   tabs: {
-    query: vi.fn(),
-    get: vi.fn(),
+    query: vi.fn((queryInfo, callback) => {
+      const mockTabs = [
+        {
+          id: 1,
+          url: 'https://example.com',
+          title: 'Test Page',
+          active: true
+        }
+      ];
+      callback(mockTabs);
+    }),
+    get: vi.fn((tabId, callback) => {
+      callback({
+        id: tabId,
+        url: 'https://example.com',
+        title: 'Test Page'
+      });
+    }),
     update: vi.fn(),
     create: vi.fn(),
   },
   action: {
     setBadgeText: vi.fn(),
     setBadgeBackgroundColor: vi.fn(),
+    onClicked: {
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    },
   },
   notifications: {
     create: vi.fn(),
     clear: vi.fn(),
   },
+  commands: {
+    onCommand: {
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    },
+  },
 };
+
+// Expose storage manager for test control
+global.chrome._storageManager = globalStorageManager;
 
 /**
  * Enhanced DOM element mock factory

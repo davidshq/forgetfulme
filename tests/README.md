@@ -1,254 +1,151 @@
-# ForgetfulMe Extension Tests
+# Test Structure Documentation
 
-This directory contains comprehensive tests for the ForgetfulMe Chrome extension, following a strategic approach that addresses ES module mocking limitations in Vitest.
+This directory contains the test suite for the ForgetfulMe Chrome extension, organized with separate utilities for unit tests (Vitest) and integration tests (Playwright).
 
-## Testing Strategy
-
-### Core Principles
-
-Based on the findings in `docs/ES_MODULE_MOCKING_ISSUE.md`, our testing strategy follows these principles:
-
-1. **Test Individual Utility Modules Separately** - Each utility module is tested in isolation with proper mocking
-2. **Use Playwright for Integration Testing** - Complex UI interactions and popup functionality are tested with Playwright
-3. **Focus on Business Logic** - Unit tests focus on the core business logic in utility modules
-4. **Accept ES Module Limitations** - We work within Vitest's ES module mocking constraints
-
-### Test Structure
+## Directory Structure
 
 ```
 tests/
-├── unit/                    # Individual module unit tests
-│   ├── error-handler.test.js
-│   ├── ui-components.test.js
-│   ├── auth-state-manager.test.js
-│   ├── config-manager.test.js
-│   ├── bookmark-transformer.test.js
-│   ├── ui-messages.test.js
-│   ├── auth-ui.test.js
-│   ├── supabase-service.test.js
-│   ├── background.test.js
-│   ├── supabase-config.test.js
-│   ├── config-ui.test.js
-│   ├── popup.test.js
-│   ├── options.test.js
-│   ├── formatters.test.js
-│   ├── bookmark-management.test.js
-│   └── example-usage.test.js
-├── integration/             # End-to-end integration tests (Playwright)
-│   ├── popup.test.js        # Popup interface and user interactions
-│   └── options.test.js      # Options page configuration
-├── helpers/                 # Test utilities and factories
-│   ├── test-utils.js       # Core test utilities
-│   ├── test-factories.js   # Specialized test factories
-│   └── extension-helper.js # Playwright extension helper
-├── README.md               # This file
+├── shared/                    # Shared constants and types
+│   └── constants.js          # Common test data constants
+├── unit/                     # Vitest unit tests
+│   ├── factories/           # Unit test factories
+│   │   ├── auth-factory.js
+│   │   ├── bookmark-factory.js
+│   │   ├── config-factory.js
+│   │   └── index.js
+│   ├── utils/               # Unit test utilities
+│   │   └── test-utils.js
+│   └── *.test.js           # Unit test files
+├── integration/             # Playwright E2E tests
+│   ├── factories/           # E2E test factories
+│   │   ├── auth-factory.js
+│   │   ├── bookmark-factory.js
+│   │   └── index.js
+│   ├── helpers/             # E2E test helpers
+│   │   └── extension-helper.js
+│   └── *.test.js           # Integration test files
+└── helpers/                 # Shared test helpers
+    └── extension-helper.js
 ```
 
-## Test Categories
+## Usage Examples
 
-### Unit Tests (`tests/unit/`)
+### Unit Tests (Vitest)
 
-These tests focus on individual utility modules and their business logic:
+```javascript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createMockAuthSession, createMockBookmark } from './unit/factories';
+import { mockChromeAPI, createMockElement } from './unit/utils/test-utils';
 
-- **ErrorHandler** - Error categorization and user-friendly messages
-- **UIComponents** - DOM manipulation and UI element creation
-- **AuthStateManager** - Authentication state management
-- **ConfigManager** - Configuration storage and validation
-- **BookmarkTransformer** - Data format conversion
-- **UIMessages** - User message display
-- **AuthUI** - Authentication forms and user interactions
-- **SupabaseService** - Database operations
-- **BackgroundService** - Extension background functionality
+describe('AuthStateManager', () => {
+  beforeEach(() => {
+    // Mock Chrome API
+    const mockChrome = mockChromeAPI({
+      auth_session: createMockAuthSession()
+    });
+    global.chrome = mockChrome;
+  });
 
-### Integration Tests (`tests/integration/`)
+  it('should handle authentication', () => {
+    // Test implementation using factories
+    const session = createMockAuthSession({ user: { id: 'test-user' } });
+    expect(session.user.id).toBe('test-user');
+  });
+});
+```
 
-These tests use Playwright for end-to-end functionality:
+### Integration Tests (Playwright)
 
-- **popup.test.js** - Popup interface and user interactions
-- **options.test.js** - Options page configuration
+```javascript
+import { test, expect } from '@playwright/test';
+import ExtensionHelper from './helpers/extension-helper.js';
+import { createAuthenticatedState, createBookmarkFormData } from './integration/factories';
 
-## Test Utilities
+test.describe('Bookmark Management', () => {
+  let extensionHelper;
 
-### Core Utilities (`test-utils.js`)
+  test.beforeEach(async ({ page, context }) => {
+    extensionHelper = new ExtensionHelper(page, context);
+    await extensionHelper.mockChromeAPI(createAuthenticatedState());
+  });
 
-Provides centralized mock creation and test environment setup:
+  test('should create bookmark', async ({ page }) => {
+    const bookmarkData = createBookmarkFormData({
+      title: 'Test Bookmark',
+      url: 'https://example.com'
+    });
 
-- `createTestEnvironment()` - Complete test environment with all mocks
-- `setupTestWithMocks()` - Test setup with mocks and cleanup
-- `createMockChrome()` - Chrome extension API mocks
-- `createMockErrorHandler()` - Error handler mocks
-- `createMockUIComponents()` - UI component mocks
-- And more...
+    await page.goto('http://localhost:3000/bookmark-management.html');
+    // Test implementation
+  });
+});
+```
 
-### Test Factories (`test-factories.js`)
+## Factory Functions
 
-Provides specialized test instance creation:
+### Unit Test Factories
 
-- `createUtilityTestInstance()` - For testing utility modules
-- `createAuthUITestInstance()` - For testing authentication UI
-- `createBackgroundTestInstance()` - For testing background service
-- `createOptionsTestInstance()` - For testing options page
-- `createSupabaseServiceTestInstance()` - For testing database operations
+- **`createMockAuthSession(overrides)`** - Creates mock authentication session
+- **`createMockBookmark(overrides)`** - Creates mock bookmark object
+- **`createMockConfig(overrides)`** - Creates mock configuration object
+- **`createMockChromeStorage(overrides)`** - Creates mock Chrome storage data
+
+### Integration Test Factories
+
+- **`createAuthenticatedState(overrides)`** - Creates authenticated Chrome storage state
+- **`createUnconfiguredState(overrides)`** - Creates unconfigured Chrome storage state
+- **`createConfiguredState(overrides)`** - Creates configured but unauthenticated state
+- **`createBookmarkFormData(overrides)`** - Creates bookmark form data for E2E tests
+
+## Utility Functions
+
+### Unit Test Utilities
+
+- **`mockChromeAPI(storageData)`** - Mocks Chrome API for unit tests
+- **`createMockElement(tagName, attributes, innerHTML)`** - Creates mock DOM elements
+- **`createMockForm(formData)`** - Creates mock form elements
+- **`mockConsole()`** - Mocks console methods
+- **`resetMocks()`** - Resets all Vitest mocks
+
+### Integration Test Utilities
+
+- **`ExtensionHelper`** - Main helper class for Playwright tests
+- **`setupAuthenticatedState(userData)`** - Sets up authenticated state
+- **`setupUnconfiguredState()`** - Sets up unconfigured state
+- **`waitForNetworkIdle(timeout)`** - Waits for network to be idle
+
+## Best Practices
+
+1. **Use Factories**: Always use factory functions to create test data instead of hardcoding values
+2. **Override Pattern**: Use the `overrides` parameter to customize test data for specific scenarios
+3. **Shared Constants**: Import from `./shared/constants.js` for consistent test data
+4. **Framework Separation**: Keep unit test utilities separate from integration test utilities
+5. **Documentation**: Add JSDoc comments to all factory and utility functions
 
 ## Running Tests
 
-### All Tests
 ```bash
+# Run unit tests
+npm run test:unit
+
+# Run integration tests
+npm run test:playwright
+
+# Run all tests
 npm test
 ```
 
-### Unit Tests Only
-```bash
-npm run test:unit
-```
+## Adding New Factories
 
-### Integration Tests Only
-```bash
-npm run test:playwright
-```
+1. Create a new factory file in the appropriate directory (`unit/factories/` or `integration/factories/`)
+2. Export factory functions with proper JSDoc documentation
+3. Add the export to the corresponding `index.js` file
+4. Update this README with usage examples
 
-### Specific Test File
-```bash
-npm test tests/unit/error-handler.test.js
-npm run test:playwright tests/integration/popup.test.js
-```
+## Adding New Utilities
 
-## Test Best Practices
-
-### 1. Mock Dependencies Properly
-
-```javascript
-// Mock Chrome APIs
-const mockChrome = {
-  storage: { sync: { get: vi.fn() } },
-  tabs: { query: vi.fn() }
-};
-global.chrome = mockChrome;
-```
-
-### 2. Use Test Factories for Complex Setup
-
-```javascript
-import { createAuthUITestInstance } from './helpers/test-factories.js';
-
-describe('AuthUI', () => {
-  let authUI, mocks, cleanup;
-
-  beforeEach(async () => {
-    ({ authUI, mocks, cleanup } = await createAuthUITestInstance());
-  });
-
-  afterEach(() => {
-    cleanup();
-  });
-});
-```
-
-### 3. Test Business Logic, Not Implementation Details
-
-```javascript
-// Good: Test the business logic
-test('should categorize network errors correctly', () => {
-  const error = new Error('Network timeout');
-  const result = ErrorHandler.handle(error, 'test-context');
-  expect(result.errorInfo.type).toBe(ErrorHandler.ERROR_TYPES.NETWORK);
-});
-
-// Avoid: Testing implementation details
-test('should call console.warn', () => {
-  // Implementation details may change
-});
-```
-
-### 4. Use Descriptive Test Names
-
-```javascript
-// Good: Descriptive test names
-test('should save bookmark when no duplicate exists', async () => {
-  // Test implementation
-});
-
-// Avoid: Vague test names
-test('should work', async () => {
-  // Test implementation
-});
-```
-
-## ES Module Mocking Strategy
-
-### Why This Approach?
-
-The ES module mocking limitations in Vitest make it difficult to test modules with complex dependencies. Our solution:
-
-1. **Test Individual Modules** - Each utility module is tested in isolation
-2. **Mock Dependencies** - Use `vi.mock()` for simple dependencies
-3. **Integration Tests** - Use Playwright for complex UI testing
-4. **Focus on Business Logic** - Test what the module does, not how it does it
-
-### Example: Testing a Utility Module
-
-```javascript
-// tests/unit/example-utility.test.js
-import { describe, test, expect, beforeEach, vi } from 'vitest';
-import ExampleUtility from '../../utils/example-utility.js';
-
-describe('ExampleUtility', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Setup mocks for dependencies
-  });
-
-  test('should perform business logic correctly', () => {
-    const result = ExampleUtility.doSomething('input');
-    expect(result).toBe('expected output');
-  });
-});
-```
-
-## Coverage Goals
-
-- **Unit Tests**: 90%+ coverage for utility modules
-- **Integration Tests**: Cover all major user workflows
-- **Error Handling**: Test all error scenarios
-- **Edge Cases**: Test boundary conditions and invalid inputs
-
-## Continuous Integration
-
-Tests run automatically on:
-- Pull requests
-- Main branch commits
-- Release tags
-
-## Troubleshooting
-
-### Common Issues
-
-1. **JSDOM Navigation Errors**: Mock `window.location.reload()` for tests that trigger page reloads
-2. **Chrome API Errors**: Ensure Chrome APIs are properly mocked
-3. **Async Test Failures**: Use proper async/await patterns and timeouts
-
-### Debugging Tests
-
-```bash
-# Run tests with verbose output
-npm test -- --reporter=verbose
-
-# Run specific test with debugging
-npm test -- --reporter=verbose tests/unit/example.test.js
-```
-
-## Contributing
-
-When adding new tests:
-
-1. Follow the existing patterns in similar test files
-2. Use the test factories for complex setup
-3. Focus on business logic, not implementation details
-4. Add comprehensive error handling tests
-5. Update this README if adding new test categories
-
-## References
-
-- [ES Module Mocking Issue Documentation](../docs/ES_MODULE_MOCKING_ISSUE.md)
-- [Vitest Documentation](https://vitest.dev/)
-- [Playwright Documentation](https://playwright.dev/) 
+1. Create utility functions in the appropriate utils directory
+2. Follow the existing patterns for mocking and helper functions
+3. Add comprehensive JSDoc documentation
+4. Include usage examples in this README 

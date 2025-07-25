@@ -22,19 +22,29 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  
+  // Test filtering - only run integration tests
+  testMatch: '**/integration/**/*.test.js',
+  
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    // Increase timeout for integration tests
+    actionTimeout: 10000,
+    navigationTimeout: 15000,
   },
+  
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  
   webServer: {
     command: 'python3 -m http.server 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: 30000,
   },
 });
