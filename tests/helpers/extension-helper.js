@@ -205,18 +205,6 @@ class ExtensionHelper {
               'low-value',
               'revisit-later',
             ],
-            config: {
-              supabase: null,
-              preferences: {
-                customStatusTypes: [
-                  'read',
-                  'good-reference',
-                  'low-value',
-                  'revisit-later',
-                ]
-              },
-              auth: null
-            },
             ...initialData
           };
           this.listeners = [];
@@ -399,18 +387,6 @@ class ExtensionHelper {
               'low-value',
               'revisit-later',
             ],
-            config: {
-              supabase: null,
-              preferences: {
-                customStatusTypes: [
-                  'read',
-                  'good-reference',
-                  'low-value',
-                  'revisit-later',
-                ]
-              },
-              auth: null
-            },
             ...newData
           };
           this.listeners = [];

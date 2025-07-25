@@ -29,24 +29,6 @@ export const createAuthenticatedState = (overrides = {}) => ({
     ...overrides.auth_session
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  // Add the config structure that ConfigManager expects
-  config: {
-    supabase: {
-      url: TEST_SUPABASE_CONFIG.url,
-      anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
-    },
-    preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
-    },
-    auth: {
-      user: { ...TEST_USER, ...overrides.user },
-      access_token: 'test-access-token',
-      refresh_token: 'test-refresh-token',
-      expires_at: Date.now() + 3600000,
-      ...overrides.auth_session
-    }
-  },
   ...overrides
 });
 
@@ -59,14 +41,6 @@ export const createUnconfiguredState = (overrides = {}) => ({
   supabaseConfig: null,
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  // Add the config structure that ConfigManager expects
-  config: {
-    supabase: null,
-    preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
-    },
-    auth: null
-  },
   ...overrides
 });
 
@@ -83,18 +57,6 @@ export const createConfiguredState = (overrides = {}) => ({
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  // Add the config structure that ConfigManager expects
-  config: {
-    supabase: {
-      url: TEST_SUPABASE_CONFIG.url,
-      anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
-    },
-    preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
-    },
-    auth: null
-  },
   ...overrides
 });
 
@@ -111,18 +73,6 @@ export const createInvalidConfigState = (overrides = {}) => ({
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  // Add the config structure that ConfigManager expects
-  config: {
-    supabase: {
-      url: 'https://invalid.supabase.co',
-      anonKey: 'invalid-key',
-      ...overrides.supabaseConfig
-    },
-    preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
-    },
-    auth: null
-  },
   ...overrides
 });
 
@@ -145,23 +95,5 @@ export const createExpiredSessionState = (overrides = {}) => ({
     ...overrides.auth_session
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  // Add the config structure that ConfigManager expects
-  config: {
-    supabase: {
-      url: TEST_SUPABASE_CONFIG.url,
-      anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
-    },
-    preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
-    },
-    auth: {
-      user: { ...TEST_USER, ...overrides.user },
-      access_token: 'expired-access-token',
-      refresh_token: 'expired-refresh-token',
-      expires_at: Date.now() - 3600000, // Expired 1 hour ago
-      ...overrides.auth_session
-    }
-  },
   ...overrides
 }); 

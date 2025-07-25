@@ -1,151 +1,159 @@
-# Test Structure Documentation
+# ForgetfulMe Extension Test Suite
 
-This directory contains the test suite for the ForgetfulMe Chrome extension, organized with separate utilities for unit tests (Vitest) and integration tests (Playwright).
+This directory contains comprehensive tests for the ForgetfulMe Chrome extension, organized into unit tests (Vitest) and integration/E2E tests (Playwright).
 
-## Directory Structure
+## Test Structure
 
-```
-tests/
-├── shared/                    # Shared constants and types
-│   └── constants.js          # Common test data constants
-├── unit/                     # Vitest unit tests
-│   ├── factories/           # Unit test factories
-│   │   ├── auth-factory.js
-│   │   ├── bookmark-factory.js
-│   │   ├── config-factory.js
-│   │   └── index.js
-│   ├── utils/               # Unit test utilities
-│   │   └── test-utils.js
-│   └── *.test.js           # Unit test files
-├── integration/             # Playwright E2E tests
-│   ├── factories/           # E2E test factories
-│   │   ├── auth-factory.js
-│   │   ├── bookmark-factory.js
-│   │   └── index.js
-│   ├── helpers/             # E2E test helpers
-│   │   └── extension-helper.js
-│   └── *.test.js           # Integration test files
-└── helpers/                 # Shared test helpers
-    └── extension-helper.js
-```
+### Unit Tests (`tests/unit/`)
+- **Framework**: Vitest
+- **Location**: `tests/unit/`
+- **Utilities**: `tests/unit/utils/vitest-utils.js`
+- **Factories**: `tests/unit/factories/`
+
+### Integration/E2E Tests (`tests/integration/`)
+- **Framework**: Playwright
+- **Location**: `tests/integration/`
+- **Utilities**: `tests/integration/utils/playwright-utils.js`
+- **Factories**: `tests/integration/factories/`
+
+### Shared Resources (`tests/shared/`)
+- **Constants**: `tests/shared/constants.js`
+- **Common test data used by both unit and integration tests**
+
+## Test Utilities Separation
+
+### Vitest Utilities (`tests/unit/utils/vitest-utils.js`)
+- Mock creation for Chrome APIs
+- DOM element mocking
+- Test environment setup
+- Module mocking utilities
+- Vitest-specific test helpers
+
+### Playwright Utilities (`tests/integration/utils/playwright-utils.js`)
+- Extension helper class
+- Browser context management
+- Chrome API mocking for browser environment
+- Page interaction utilities
+- Integration test setup helpers
+
+## Test Factories Separation
+
+### Vitest Factories (`tests/unit/factories/vitest-factories.js`)
+- Mock object creation for unit tests
+- Vitest-specific test data
+- Mock function creation
+- Unit test state management
+
+### Playwright Factories (`tests/integration/factories/playwright-factories.js`)
+- Integration test state creation
+- Browser environment test data
+- E2E test scenarios
+- Real-world data simulation
 
 ## Usage Examples
 
 ### Unit Tests (Vitest)
-
 ```javascript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createMockAuthSession, createMockBookmark } from './unit/factories';
-import { mockChromeAPI, createMockElement } from './unit/utils/test-utils';
+import { createTestEnvironment, setupTestWithMocks } from './utils/vitest-utils.js';
+import { createMockAuthSession, createMockUser } from './factories/vitest-factories.js';
 
-describe('AuthStateManager', () => {
+describe('Auth Tests', () => {
+  let mocks;
+
   beforeEach(() => {
-    // Mock Chrome API
-    const mockChrome = mockChromeAPI({
-      auth_session: createMockAuthSession()
-    });
-    global.chrome = mockChrome;
+    mocks = setupTestWithMocks();
   });
 
-  it('should handle authentication', () => {
-    // Test implementation using factories
-    const session = createMockAuthSession({ user: { id: 'test-user' } });
-    expect(session.user.id).toBe('test-user');
-  });
-});
-```
-
-### Integration Tests (Playwright)
-
-```javascript
-import { test, expect } from '@playwright/test';
-import ExtensionHelper from './helpers/extension-helper.js';
-import { createAuthenticatedState, createBookmarkFormData } from './integration/factories';
-
-test.describe('Bookmark Management', () => {
-  let extensionHelper;
-
-  test.beforeEach(async ({ page, context }) => {
-    extensionHelper = new ExtensionHelper(page, context);
-    await extensionHelper.mockChromeAPI(createAuthenticatedState());
-  });
-
-  test('should create bookmark', async ({ page }) => {
-    const bookmarkData = createBookmarkFormData({
-      title: 'Test Bookmark',
-      url: 'https://example.com'
-    });
-
-    await page.goto('http://localhost:3000/bookmark-management.html');
+  test('should authenticate user', () => {
+    const authSession = createMockAuthSession();
     // Test implementation
   });
 });
 ```
 
-## Factory Functions
+### Integration Tests (Playwright)
+```javascript
+import { test, expect } from '@playwright/test';
+import { createAuthenticatedPlaywrightTest, createUnconfiguredPlaywrightTest } from './utils/playwright-utils.js';
+import { createAuthenticatedState } from './factories/playwright-factories.js';
 
-### Unit Test Factories
+test('authentication flow', async ({ page, context }) => {
+  const helper = await createUnconfiguredPlaywrightTest(page, context);
+  await helper.openOptions();
+  // Test implementation
+});
+```
 
-- **`createMockAuthSession(overrides)`** - Creates mock authentication session
-- **`createMockBookmark(overrides)`** - Creates mock bookmark object
-- **`createMockConfig(overrides)`** - Creates mock configuration object
-- **`createMockChromeStorage(overrides)`** - Creates mock Chrome storage data
+## Key Benefits of Separation
 
-### Integration Test Factories
+1. **Environment-Specific Utilities**: Each test framework has utilities tailored to its environment
+2. **Reduced Dependencies**: No cross-contamination between unit and integration test utilities
+3. **Better Performance**: Unit tests don't load Playwright-specific code
+4. **Clearer Intent**: Test code clearly indicates its purpose and framework
+5. **Easier Maintenance**: Changes to one framework don't affect the other
 
-- **`createAuthenticatedState(overrides)`** - Creates authenticated Chrome storage state
-- **`createUnconfiguredState(overrides)`** - Creates unconfigured Chrome storage state
-- **`createConfiguredState(overrides)`** - Creates configured but unauthenticated state
-- **`createBookmarkFormData(overrides)`** - Creates bookmark form data for E2E tests
+## Migration Guide
 
-## Utility Functions
+### From Shared Utilities to Framework-Specific
+- **Unit Tests**: Import from `tests/unit/utils/vitest-utils.js`
+- **Integration Tests**: Import from `tests/integration/utils/playwright-utils.js`
 
-### Unit Test Utilities
-
-- **`mockChromeAPI(storageData)`** - Mocks Chrome API for unit tests
-- **`createMockElement(tagName, attributes, innerHTML)`** - Creates mock DOM elements
-- **`createMockForm(formData)`** - Creates mock form elements
-- **`mockConsole()`** - Mocks console methods
-- **`resetMocks()`** - Resets all Vitest mocks
-
-### Integration Test Utilities
-
-- **`ExtensionHelper`** - Main helper class for Playwright tests
-- **`setupAuthenticatedState(userData)`** - Sets up authenticated state
-- **`setupUnconfiguredState()`** - Sets up unconfigured state
-- **`waitForNetworkIdle(timeout)`** - Waits for network to be idle
+### From Shared Factories to Framework-Specific
+- **Unit Tests**: Import from `tests/unit/factories/vitest-factories.js`
+- **Integration Tests**: Import from `tests/integration/factories/playwright-factories.js`
 
 ## Best Practices
 
-1. **Use Factories**: Always use factory functions to create test data instead of hardcoding values
-2. **Override Pattern**: Use the `overrides` parameter to customize test data for specific scenarios
-3. **Shared Constants**: Import from `./shared/constants.js` for consistent test data
-4. **Framework Separation**: Keep unit test utilities separate from integration test utilities
-5. **Documentation**: Add JSDoc comments to all factory and utility functions
+1. **Use Framework-Specific Utilities**: Always use the utilities designed for your test framework
+2. **Import from Index Files**: Use the index files for clean imports
+3. **Share Constants**: Use `tests/shared/constants.js` for common test data
+4. **Document Changes**: Update this README when adding new utilities or factories
+5. **Test Isolation**: Ensure unit and integration tests remain independent
 
 ## Running Tests
 
+### Unit Tests
 ```bash
-# Run unit tests
 npm run test:unit
+```
 
-# Run integration tests
-npm run test:playwright
+### Integration Tests
+```bash
+npm run test:integration
+```
 
-# Run all tests
+### All Tests
+```bash
 npm test
 ```
 
-## Adding New Factories
+## File Organization
 
-1. Create a new factory file in the appropriate directory (`unit/factories/` or `integration/factories/`)
-2. Export factory functions with proper JSDoc documentation
-3. Add the export to the corresponding `index.js` file
-4. Update this README with usage examples
+```
+tests/
+├── unit/                    # Vitest unit tests
+│   ├── utils/
+│   │   └── vitest-utils.js # Vitest-specific utilities
+│   └── factories/
+│       ├── vitest-factories.js # Vitest-specific factories
+│       └── index.js
+├── integration/             # Playwright integration tests
+│   ├── utils/
+│   │   └── playwright-utils.js # Playwright-specific utilities
+│   └── factories/
+│       ├── playwright-factories.js # Playwright-specific factories
+│       └── index.js
+├── shared/
+│   └── constants.js        # Shared test constants
+└── README.md              # This file
+```
 
-## Adding New Utilities
+## Contributing
 
-1. Create utility functions in the appropriate utils directory
-2. Follow the existing patterns for mocking and helper functions
-3. Add comprehensive JSDoc documentation
-4. Include usage examples in this README 
+When adding new tests:
+
+1. **Choose the Right Framework**: Use Vitest for unit tests, Playwright for integration/E2E tests
+2. **Use Framework-Specific Utilities**: Import from the appropriate utilities file
+3. **Create Framework-Specific Factories**: Add new factories to the appropriate factories file
+4. **Update Documentation**: Keep this README and related documentation up to date
+5. **Follow Naming Conventions**: Use clear, descriptive names for utilities and factories 
