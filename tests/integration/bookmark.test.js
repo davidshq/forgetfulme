@@ -73,7 +73,7 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
               },
             ]);
           },
-          create: (options) => {
+          create: options => {
             window.tabCreated = options;
           },
         };
@@ -87,25 +87,33 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     await extensionHelper.waitForExtensionReady();
   });
 
-  test('should display setup interface when not configured', async ({ page }) => {
+  test('should display setup interface when not configured', async ({
+    page,
+  }) => {
     // Wait for the interface to load
     await page.waitForTimeout(2000);
 
     // Check for setup interface elements
-    const setupContainer = await extensionHelper.isElementVisible('.setup-container');
+    const setupContainer =
+      await extensionHelper.isElementVisible('.setup-container');
     expect(setupContainer).toBeTruthy();
 
-    const welcomeText = await extensionHelper.getElementText('.ui-container-header h2');
+    const welcomeText = await extensionHelper.getElementText(
+      '.ui-container-header h2'
+    );
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
-    const setupSection = await extensionHelper.isElementVisible('.setup-section');
+    const setupSection =
+      await extensionHelper.isElementVisible('.setup-section');
     expect(setupSection).toBeTruthy();
 
     const settingsBtn = await extensionHelper.isElementVisible('button');
     expect(settingsBtn).toBeTruthy();
   });
 
-  test('should have settings button that calls openOptionsPage', async ({ page }) => {
+  test('should have settings button that calls openOptionsPage', async ({
+    page,
+  }) => {
     // Wait for the interface to load
     await page.waitForTimeout(2000);
 
@@ -176,7 +184,9 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     expect(buttonCount).toBeGreaterThan(0);
   });
 
-  test('should display authentication interface when not authenticated', async ({ page }) => {
+  test('should display authentication interface when not authenticated', async ({
+    page,
+  }) => {
     // Mock configured but not authenticated state BEFORE page load
     await page.addInitScript(() => {
       if (typeof chrome === 'undefined') {
@@ -192,25 +202,39 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
                 supabase_anon_key: 'test-key',
               });
             },
-            set: (data, callback) => { if (callback) callback(); },
+            set: (data, callback) => {
+              if (callback) callback();
+            },
           },
           local: {
-            get: (keys, callback) => { callback({}); },
-            set: (data, callback) => { if (callback) callback(); },
+            get: (keys, callback) => {
+              callback({});
+            },
+            set: (data, callback) => {
+              if (callback) callback();
+            },
           },
         };
       }
       if (!chrome.runtime) {
         chrome.runtime = {
           onMessage: { addListener: () => {} },
-          sendMessage: (message, callback) => { if (callback) callback({ success: true }); },
-          openOptionsPage: () => { window.optionsPageOpened = true; },
+          sendMessage: (message, callback) => {
+            if (callback) callback({ success: true });
+          },
+          openOptionsPage: () => {
+            window.optionsPageOpened = true;
+          },
         };
       }
       if (!chrome.tabs) {
         chrome.tabs = {
-          query: (queryInfo, callback) => { callback([{ url: 'https://example.com', title: 'Test Page' }]); },
-          create: (options) => { window.tabCreated = options; },
+          query: (queryInfo, callback) => {
+            callback([{ url: 'https://example.com', title: 'Test Page' }]);
+          },
+          create: options => {
+            window.tabCreated = options;
+          },
         };
       }
     });
@@ -218,9 +242,11 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     await extensionHelper.waitForExtensionReady();
     await page.waitForTimeout(2000);
     // Check for auth interface
-    const authContainer = await extensionHelper.isElementVisible('.auth-container');
+    const authContainer =
+      await extensionHelper.isElementVisible('.auth-container');
     expect(authContainer).toBeTruthy();
-    const authTitle = await extensionHelper.getElementText('.auth-container h2');
+    const authTitle =
+      await extensionHelper.getElementText('.auth-container h2');
     expect(authTitle).toContain('Authentication Required');
   });
 
@@ -272,4 +298,4 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     const setupInstructions = await page.locator('.setup-section ol');
     expect(await setupInstructions.isVisible()).toBeTruthy();
   });
-}); 
+});

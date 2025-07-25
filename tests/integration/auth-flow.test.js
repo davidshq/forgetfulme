@@ -7,12 +7,14 @@ test.describe('ForgetfulMe Basic Page Loading Tests', () => {
   test.beforeEach(async ({ page, context }) => {
     // Initialize extension helper with proper Chrome extension context
     extensionHelper = new ExtensionHelper(page, context);
-    
+
     // Set up Chrome API mocking
     await extensionHelper.mockChromeAPI();
   });
 
-  test('should load bookmark management page successfully', async ({ page }) => {
+  test('should load bookmark management page successfully', async ({
+    page,
+  }) => {
     // Navigate to bookmark management page
     await page.goto('http://localhost:3000/bookmark-management.html');
     await extensionHelper.waitForExtensionReady();
@@ -81,11 +83,15 @@ test.describe('ForgetfulMe Basic Page Loading Tests', () => {
     await extensionHelper.waitForExtensionReady();
 
     // Check that the main script is loaded
-    const scriptElements = await page.locator('script[src*="bookmark-management.js"]');
+    const scriptElements = await page.locator(
+      'script[src*="bookmark-management.js"]'
+    );
     await expect(scriptElements).toHaveCount(1);
 
     // Check that Supabase library is loaded
-    const supabaseScript = await page.locator('script[src*="supabase-js.min.js"]');
+    const supabaseScript = await page.locator(
+      'script[src*="supabase-js.min.js"]'
+    );
     await expect(supabaseScript).toHaveCount(1);
   });
 
@@ -121,7 +127,7 @@ test.describe('ForgetfulMe Basic Page Loading Tests', () => {
 
   test('should not have JavaScript errors on page load', async ({ page }) => {
     const consoleErrors = [];
-    
+
     // Listen for console errors
     page.on('console', msg => {
       if (msg.type() === 'error') {
@@ -152,4 +158,4 @@ test.describe('ForgetfulMe Basic Page Loading Tests', () => {
     const viewportMeta = await page.locator('meta[name="viewport"]');
     await expect(viewportMeta).toHaveCount(1);
   });
-}); 
+});

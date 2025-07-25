@@ -69,8 +69,15 @@ class ConfigManager {
       this.initialized = true;
       this.notifyListeners('initialized');
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initialize');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initialize');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initialize'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.initialize'
+      );
     }
   }
 
@@ -81,9 +88,15 @@ class ConfigManager {
   async loadAllConfig() {
     try {
       console.log('ConfigManager: Loading all config from Chrome storage...');
-      console.log('ConfigManager: chrome object exists?', typeof chrome !== 'undefined');
-      console.log('ConfigManager: chrome.storage exists?', typeof chrome !== 'undefined' && chrome.storage);
-      
+      console.log(
+        'ConfigManager: chrome object exists?',
+        typeof chrome !== 'undefined'
+      );
+      console.log(
+        'ConfigManager: chrome.storage exists?',
+        typeof chrome !== 'undefined' && chrome.storage
+      );
+
       if (typeof chrome === 'undefined' || !chrome.storage) {
         console.log('ConfigManager: Chrome APIs not available, using defaults');
         this.config.supabase = null;
@@ -98,7 +111,7 @@ class ConfigManager {
         this.config.auth = null;
         return;
       }
-      
+
       const result = await chrome.storage.sync.get([
         'supabaseConfig',
         'customStatusTypes',
@@ -116,12 +129,19 @@ class ConfigManager {
         ],
       };
       this.config.auth = result.auth_session || null;
-      
+
       console.log('ConfigManager: Final config:', this.config);
     } catch (error) {
       console.error('ConfigManager: Error loading config:', error);
-      const errorResult = ErrorHandler.handle(error, 'config-manager.loadAllConfig');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.loadAllConfig');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.loadAllConfig'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.loadAllConfig'
+      );
     }
   }
 
@@ -285,7 +305,10 @@ class ConfigManager {
    */
   async isSupabaseConfigured() {
     await this.ensureInitialized();
-    console.log('ConfigManager: isSupabaseConfigured called, supabase config:', this.config.supabase);
+    console.log(
+      'ConfigManager: isSupabaseConfigured called, supabase config:',
+      this.config.supabase
+    );
     return this.config.supabase !== null;
   }
 
@@ -492,8 +515,15 @@ class ConfigManager {
 
       // Default settings initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initializeDefaultSettings');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initializeDefaultSettings');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initializeDefaultSettings'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.initializeDefaultSettings'
+      );
     }
   }
 

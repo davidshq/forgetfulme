@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { createMockUIComponents, createMockUIMessages, createMockErrorHandler, createMockSupabaseConfig } from '../helpers/test-utils.js';
+import {
+  createMockUIComponents,
+  createMockUIMessages,
+  createMockErrorHandler,
+  createMockSupabaseConfig,
+} from '../helpers/test-utils.js';
 
 // Mock dependencies before importing ConfigUI
 vi.mock('../../utils/ui-components.js', () => ({
@@ -81,9 +86,11 @@ describe('ConfigUI', () => {
       const mockContainer = document.createElement('div');
       const mockForm = document.createElement('form');
       const mockSection = document.createElement('section');
-      
+
       // Mock DOM methods with proper return values
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
       UIComponents.createContainer = vi.fn().mockReturnValue(mockContainer);
       UIComponents.createForm = vi.fn().mockReturnValue(mockForm);
       UIComponents.createSection = vi.fn().mockReturnValue(mockSection);
@@ -106,17 +113,17 @@ describe('ConfigUI', () => {
           expect.objectContaining({
             type: 'url',
             id: 'supabaseUrl',
-            label: 'Project URL'
+            label: 'Project URL',
           }),
           expect.objectContaining({
             type: 'text',
             id: 'supabaseAnonKey',
-            label: 'Anon Public Key'
-          })
+            label: 'Anon Public Key',
+          }),
         ]),
         expect.objectContaining({
           submitText: 'Save Configuration',
-          className: 'config-form'
+          className: 'config-form',
         })
       );
 
@@ -141,9 +148,11 @@ describe('ConfigUI', () => {
       const mockContainer = document.createElement('div');
       const mockForm = document.createElement('form');
       const mockSection = document.createElement('section');
-      
+
       // Mock DOM methods with proper return values
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
       UIComponents.createContainer = vi.fn().mockReturnValue(mockContainer);
       UIComponents.createForm = vi.fn().mockReturnValue(mockForm);
       UIComponents.createSection = vi.fn().mockReturnValue(mockSection);
@@ -173,21 +182,28 @@ describe('ConfigUI', () => {
       // Mock the config.getConfiguration method
       const mockConfig = {
         url: 'https://test.supabase.co',
-        anonKey: 'test-key-123'
+        anonKey: 'test-key-123',
       };
-      mockSupabaseConfig.getConfiguration = vi.fn().mockResolvedValue(mockConfig);
+      mockSupabaseConfig.getConfiguration = vi
+        .fn()
+        .mockResolvedValue(mockConfig);
 
       // Mock DOM querySelector to return input elements
       const mockUrlInput = document.createElement('input');
       const mockKeyInput = document.createElement('input');
-      
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlInput) // First call for #supabaseUrl
         .mockReturnValueOnce(mockKeyInput); // Second call for #supabaseAnonKey
 
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.info = vi.fn();
 
       // Call the method
@@ -197,23 +213,36 @@ describe('ConfigUI', () => {
       expect(mockSupabaseConfig.getConfiguration).toHaveBeenCalled();
 
       // Verify DOM elements were queried
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#supabaseUrl', container);
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#supabaseAnonKey', container);
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#supabaseUrl',
+        container
+      );
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#supabaseAnonKey',
+        container
+      );
 
       // Verify values were set
       expect(mockUrlInput.value).toBe('https://test.supabase.co');
       expect(mockKeyInput.value).toBe('test-key-123');
 
       // Verify success message was shown
-      expect(UIMessages.info).toHaveBeenCalledWith('Current configuration loaded', container);
+      expect(UIMessages.info).toHaveBeenCalledWith(
+        'Current configuration loaded',
+        container
+      );
     });
 
     it('should handle error when loading configuration', async () => {
       // Mock the config.getConfiguration to throw an error
-      mockSupabaseConfig.getConfiguration = vi.fn().mockRejectedValue(new Error('Test error'));
+      mockSupabaseConfig.getConfiguration = vi
+        .fn()
+        .mockRejectedValue(new Error('Test error'));
 
       // Mock ErrorHandler
-      const { default: ErrorHandler } = await import('../../utils/error-handler.js');
+      const { default: ErrorHandler } = await import(
+        '../../utils/error-handler.js'
+      );
       ErrorHandler.handle = vi.fn();
 
       // Call the method
@@ -237,22 +266,27 @@ describe('ConfigUI', () => {
       mockKeyInput.value = 'test-key-123';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlInput) // First call for #supabaseUrl
         .mockReturnValueOnce(mockKeyInput); // Second call for #supabaseAnonKey
 
       // Mock config.setConfiguration
       mockSupabaseConfig.setConfiguration = vi.fn().mockResolvedValue({
         success: true,
-        message: 'Configuration saved'
+        message: 'Configuration saved',
       });
 
       // Mock config.initialize
       mockSupabaseConfig.initialize = vi.fn().mockResolvedValue();
 
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.loading = vi.fn();
       UIMessages.success = vi.fn();
       UIMessages.error = vi.fn();
@@ -261,7 +295,10 @@ describe('ConfigUI', () => {
       await configUI.handleConfigSubmit(container);
 
       // Verify loading message was shown
-      expect(UIMessages.loading).toHaveBeenCalledWith('Saving configuration...', container);
+      expect(UIMessages.loading).toHaveBeenCalledWith(
+        'Saving configuration...',
+        container
+      );
 
       // Verify configuration was saved
       expect(mockSupabaseConfig.setConfiguration).toHaveBeenCalledWith(
@@ -270,7 +307,10 @@ describe('ConfigUI', () => {
       );
 
       // Verify success message was shown
-      expect(UIMessages.success).toHaveBeenCalledWith('Configuration saved successfully!', container);
+      expect(UIMessages.success).toHaveBeenCalledWith(
+        'Configuration saved successfully!',
+        container
+      );
 
       // Wait for the setTimeout to complete
       await new Promise(resolve => setTimeout(resolve, 1100));
@@ -293,13 +333,18 @@ describe('ConfigUI', () => {
       mockKeyInput.value = '';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlInput)
         .mockReturnValueOnce(mockKeyInput);
 
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.error = vi.fn();
 
       // Mock setConfiguration (even though it shouldn't be called)
@@ -309,7 +354,10 @@ describe('ConfigUI', () => {
       await configUI.handleConfigSubmit(container);
 
       // Verify error message was shown
-      expect(UIMessages.error).toHaveBeenCalledWith('Please fill in all fields', container);
+      expect(UIMessages.error).toHaveBeenCalledWith(
+        'Please fill in all fields',
+        container
+      );
 
       // Verify configuration was not saved
       expect(mockSupabaseConfig.setConfiguration).not.toHaveBeenCalled();
@@ -323,19 +371,24 @@ describe('ConfigUI', () => {
       mockKeyInput.value = 'test-key-123';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlInput)
         .mockReturnValueOnce(mockKeyInput);
 
       // Mock config.setConfiguration to fail
       mockSupabaseConfig.setConfiguration = vi.fn().mockResolvedValue({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid credentials',
       });
 
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.loading = vi.fn();
       UIMessages.error = vi.fn();
 
@@ -343,10 +396,16 @@ describe('ConfigUI', () => {
       await configUI.handleConfigSubmit(container);
 
       // Verify loading message was shown
-      expect(UIMessages.loading).toHaveBeenCalledWith('Saving configuration...', container);
+      expect(UIMessages.loading).toHaveBeenCalledWith(
+        'Saving configuration...',
+        container
+      );
 
       // Verify error message was shown
-      expect(UIMessages.error).toHaveBeenCalledWith('Error: Invalid credentials', container);
+      expect(UIMessages.error).toHaveBeenCalledWith(
+        'Error: Invalid credentials',
+        container
+      );
     });
 
     it('should handle configuration test failure', async () => {
@@ -357,28 +416,37 @@ describe('ConfigUI', () => {
       mockKeyInput.value = 'test-key-123';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlInput)
         .mockReturnValueOnce(mockKeyInput);
 
       // Mock config.setConfiguration to succeed
       mockSupabaseConfig.setConfiguration = vi.fn().mockResolvedValue({
         success: true,
-        message: 'Configuration saved'
+        message: 'Configuration saved',
       });
 
       // Mock config.initialize to fail
-      mockSupabaseConfig.initialize = vi.fn().mockRejectedValue(new Error('Connection failed'));
+      mockSupabaseConfig.initialize = vi
+        .fn()
+        .mockRejectedValue(new Error('Connection failed'));
 
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.loading = vi.fn();
       UIMessages.success = vi.fn();
       UIMessages.error = vi.fn();
 
       // Mock ErrorHandler
-      const { default: ErrorHandler } = await import('../../utils/error-handler.js');
+      const { default: ErrorHandler } = await import(
+        '../../utils/error-handler.js'
+      );
       ErrorHandler.handle = vi.fn();
 
       // Call the method
@@ -404,19 +472,27 @@ describe('ConfigUI', () => {
   describe('showConfigMessage', () => {
     it('should display configuration message using UIMessages', async () => {
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.show = vi.fn();
 
       // Call the method
       configUI.showConfigMessage(container, 'Test message', 'success');
 
       // Verify UIMessages.show was called with correct parameters
-      expect(UIMessages.show).toHaveBeenCalledWith('Test message', 'success', container);
+      expect(UIMessages.show).toHaveBeenCalledWith(
+        'Test message',
+        'success',
+        container
+      );
     });
 
     it('should handle different message types', async () => {
       // Mock UIMessages
-      const { default: UIMessages } = await import('../../utils/ui-messages.js');
+      const { default: UIMessages } = await import(
+        '../../utils/ui-messages.js'
+      );
       UIMessages.show = vi.fn();
 
       // Test different message types
@@ -424,7 +500,11 @@ describe('ConfigUI', () => {
 
       for (const type of messageTypes) {
         configUI.showConfigMessage(container, `Test ${type} message`, type);
-        expect(UIMessages.show).toHaveBeenCalledWith(`Test ${type} message`, type, container);
+        expect(UIMessages.show).toHaveBeenCalledWith(
+          `Test ${type} message`,
+          type,
+          container
+        );
       }
 
       // Verify it was called for each type
@@ -469,9 +549,11 @@ describe('ConfigUI', () => {
       // Mock configuration
       const mockConfig = {
         url: 'https://test.supabase.co',
-        anonKey: 'test-key-12345678901234567890'
+        anonKey: 'test-key-12345678901234567890',
       };
-      mockSupabaseConfig.getConfiguration = vi.fn().mockResolvedValue(mockConfig);
+      mockSupabaseConfig.getConfiguration = vi
+        .fn()
+        .mockResolvedValue(mockConfig);
 
       // Mock DOM elements
       const mockUrlEl = document.createElement('span');
@@ -479,8 +561,11 @@ describe('ConfigUI', () => {
       const mockConnectionEl = document.createElement('span');
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlEl) // #statusUrl
         .mockReturnValueOnce(mockKeyEl) // #statusKey
         .mockReturnValueOnce(mockConnectionEl); // #statusConnection
@@ -495,8 +580,14 @@ describe('ConfigUI', () => {
       expect(mockSupabaseConfig.getConfiguration).toHaveBeenCalled();
 
       // Verify DOM elements were queried
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#statusUrl', container);
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#statusKey', container);
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#statusUrl',
+        container
+      );
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#statusKey',
+        container
+      );
 
       // Verify values were set
       expect(mockUrlEl.textContent).toBe('https://test.supabase.co');
@@ -516,8 +607,11 @@ describe('ConfigUI', () => {
       const mockConnectionEl = document.createElement('span');
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockUrlEl) // #statusUrl
         .mockReturnValueOnce(mockKeyEl) // #statusKey
         .mockReturnValueOnce(mockConnectionEl); // #statusConnection
@@ -536,10 +630,14 @@ describe('ConfigUI', () => {
 
     it('should handle error when loading configuration', async () => {
       // Mock configuration to throw error
-      mockSupabaseConfig.getConfiguration = vi.fn().mockRejectedValue(new Error('Test error'));
+      mockSupabaseConfig.getConfiguration = vi
+        .fn()
+        .mockRejectedValue(new Error('Test error'));
 
       // Mock ErrorHandler
-      const { default: ErrorHandler } = await import('../../utils/error-handler.js');
+      const { default: ErrorHandler } = await import(
+        '../../utils/error-handler.js'
+      );
       ErrorHandler.handle = vi.fn();
 
       // Call the method
@@ -560,8 +658,12 @@ describe('ConfigUI', () => {
       const mockConnectionEl = document.createElement('span');
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn().mockReturnValue(mockConnectionEl);
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
+        .mockReturnValue(mockConnectionEl);
 
       // Mock config.initialize to succeed
       mockSupabaseConfig.initialize = vi.fn().mockResolvedValue();
@@ -582,11 +684,17 @@ describe('ConfigUI', () => {
       const mockConnectionEl = document.createElement('span');
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn().mockReturnValue(mockConnectionEl);
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
+        .mockReturnValue(mockConnectionEl);
 
       // Mock config.initialize to fail
-      mockSupabaseConfig.initialize = vi.fn().mockRejectedValue(new Error('Connection failed'));
+      mockSupabaseConfig.initialize = vi
+        .fn()
+        .mockRejectedValue(new Error('Connection failed'));
 
       // Call the method
       await configUI.testConnection(container);
@@ -601,7 +709,9 @@ describe('ConfigUI', () => {
 
     it('should handle missing connection element', async () => {
       // Mock DOM querySelector to return null
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
       UIComponents.DOM.querySelector = vi.fn().mockReturnValue(null);
 
       // Mock config.initialize to succeed
@@ -622,8 +732,11 @@ describe('ConfigUI', () => {
       mockTestBtn.id = 'testConnectionBtn';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(mockTestBtn) // #testConnectionBtn
         .mockReturnValueOnce(null); // #editConfigBtn
 
@@ -634,7 +747,10 @@ describe('ConfigUI', () => {
       configUI.bindStatusEvents(container);
 
       // Verify DOM query was made
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#testConnectionBtn', container);
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#testConnectionBtn',
+        container
+      );
 
       // Simulate button click
       mockTestBtn.click();
@@ -649,19 +765,27 @@ describe('ConfigUI', () => {
       mockEditBtn.id = 'editConfigBtn';
 
       // Mock DOM querySelector
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(null) // #testConnectionBtn
         .mockReturnValueOnce(mockEditBtn); // #editConfigBtn
 
       // Mock showConfigForm method to avoid the actual implementation
-      const showConfigFormSpy = vi.spyOn(configUI, 'showConfigForm').mockImplementation(() => {});
+      const showConfigFormSpy = vi
+        .spyOn(configUI, 'showConfigForm')
+        .mockImplementation(() => {});
 
       // Call the method
       configUI.bindStatusEvents(container);
 
       // Verify DOM query was made
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#editConfigBtn', container);
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#editConfigBtn',
+        container
+      );
 
       // Simulate button click
       mockEditBtn.click();
@@ -672,8 +796,11 @@ describe('ConfigUI', () => {
 
     it('should handle missing buttons gracefully', async () => {
       // Mock DOM querySelector to return null for both buttons
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
-      UIComponents.DOM.querySelector = vi.fn()
+      const { default: UIComponents } = await import(
+        '../../utils/ui-components.js'
+      );
+      UIComponents.DOM.querySelector = vi
+        .fn()
         .mockReturnValueOnce(null) // #testConnectionBtn
         .mockReturnValueOnce(null); // #editConfigBtn
 
@@ -681,8 +808,14 @@ describe('ConfigUI', () => {
       expect(() => configUI.bindStatusEvents(container)).not.toThrow();
 
       // Verify DOM queries were still made
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#testConnectionBtn', container);
-      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith('#editConfigBtn', container);
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#testConnectionBtn',
+        container
+      );
+      expect(UIComponents.DOM.querySelector).toHaveBeenCalledWith(
+        '#editConfigBtn',
+        container
+      );
     });
   });
-}); 
+});

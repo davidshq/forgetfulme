@@ -35,11 +35,11 @@ class ChromeStorageManager {
             'good-reference',
             'low-value',
             'revisit-later',
-          ]
+          ],
         },
-        auth: null
+        auth: null,
       },
-      ...initialData
+      ...initialData,
     };
     this.listeners = [];
     this.errorListeners = [];
@@ -53,7 +53,7 @@ class ChromeStorageManager {
   get(keys, callback) {
     try {
       const result = {};
-      
+
       if (Array.isArray(keys)) {
         keys.forEach(key => {
           result[key] = this.data[key] !== undefined ? this.data[key] : null;
@@ -69,7 +69,7 @@ class ChromeStorageManager {
           result[key] = this.data[key] !== undefined ? this.data[key] : null;
         });
       }
-      
+
       callback(result);
     } catch (error) {
       this.notifyErrorListeners('get', error);
@@ -93,7 +93,7 @@ class ChromeStorageManager {
 
       // Notify listeners of changes
       this.notifyListeners(changes);
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('set', error);
@@ -110,7 +110,7 @@ class ChromeStorageManager {
     try {
       const keyArray = Array.isArray(keys) ? keys : [keys];
       const changes = {};
-      
+
       keyArray.forEach(key => {
         if (this.data[key] !== undefined) {
           const oldValue = this.data[key];
@@ -122,7 +122,7 @@ class ChromeStorageManager {
       if (Object.keys(changes).length > 0) {
         this.notifyListeners(changes);
       }
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('remove', error);
@@ -140,10 +140,10 @@ class ChromeStorageManager {
       Object.keys(this.data).forEach(key => {
         changes[key] = { oldValue: this.data[key], newValue: undefined };
       });
-      
+
       this.data = {};
       this.notifyListeners(changes);
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('clear', error);
@@ -229,11 +229,11 @@ class ChromeStorageManager {
             'good-reference',
             'low-value',
             'revisit-later',
-          ]
+          ],
         },
-        auth: null
+        auth: null,
       },
-      ...newData
+      ...newData,
     };
     this.listeners = [];
     this.errorListeners = [];
@@ -248,7 +248,7 @@ class ChromeStorageManager {
  */
 export const mockChromeAPI = (storageData = {}, options = {}) => {
   const storageManager = new ChromeStorageManager(storageData);
-  
+
   const mockStorage = {
     sync: {
       get: vi.fn((keys, callback) => {
@@ -263,14 +263,16 @@ export const mockChromeAPI = (storageData = {}, options = {}) => {
         // Ensure callback is called asynchronously
         setTimeout(() => storageManager.remove(keys, callback), 0);
       }),
-      clear: vi.fn((callback) => {
+      clear: vi.fn(callback => {
         // Ensure callback is called asynchronously
         setTimeout(() => storageManager.clear(callback), 0);
       }),
       onChanged: {
-        addListener: vi.fn((listener) => storageManager.addListener(listener)),
-        removeListener: vi.fn((listener) => storageManager.removeListener(listener))
-      }
+        addListener: vi.fn(listener => storageManager.addListener(listener)),
+        removeListener: vi.fn(listener =>
+          storageManager.removeListener(listener)
+        ),
+      },
     },
     local: {
       get: vi.fn((keys, callback) => {
@@ -283,45 +285,45 @@ export const mockChromeAPI = (storageData = {}, options = {}) => {
       remove: vi.fn((keys, callback) => {
         if (callback) setTimeout(() => callback(), 0);
       }),
-      clear: vi.fn((callback) => {
+      clear: vi.fn(callback => {
         if (callback) setTimeout(() => callback(), 0);
-      })
-    }
+      }),
+    },
   };
 
   const mockRuntime = {
     onMessage: {
       addListener: vi.fn(),
-      removeListener: vi.fn()
+      removeListener: vi.fn(),
     },
     sendMessage: vi.fn((message, callback) => {
       // Enhanced message handling with proper responses
       const responses = {
-        'BOOKMARK_SAVED': { success: true, bookmarkId: 'test-id' },
-        'GET_AUTH_STATE': { 
+        BOOKMARK_SAVED: { success: true, bookmarkId: 'test-id' },
+        GET_AUTH_STATE: {
           authenticated: !!storageManager.data.auth_session,
-          user: storageManager.data.auth_session?.user || null
+          user: storageManager.data.auth_session?.user || null,
         },
-        'TEST_CONNECTION': { success: true, message: 'Connection successful' },
-        'SAVE_CONFIG': { success: true, message: 'Configuration saved' },
-        'GET_CONFIG': { 
-          success: true, 
-          config: storageManager.data.config 
-        }
+        TEST_CONNECTION: { success: true, message: 'Connection successful' },
+        SAVE_CONFIG: { success: true, message: 'Configuration saved' },
+        GET_CONFIG: {
+          success: true,
+          config: storageManager.data.config,
+        },
       };
-      
-      const response = responses[message.type] || { 
-        success: false, 
-        error: 'Unknown message type' 
+
+      const response = responses[message.type] || {
+        success: false,
+        error: 'Unknown message type',
       };
-      
+
       if (callback) {
         // Simulate async response
         setTimeout(() => callback(response), options.responseDelay || 100);
       }
     }),
     openOptionsPage: vi.fn(),
-    getURL: vi.fn(path => `chrome-extension://test-id/${path}`)
+    getURL: vi.fn(path => `chrome-extension://test-id/${path}`),
   };
 
   const mockTabs = {
@@ -331,27 +333,35 @@ export const mockChromeAPI = (storageData = {}, options = {}) => {
           id: 1,
           url: 'https://example.com',
           title: 'Test Page',
-          active: true
-        }
+          active: true,
+        },
       ];
       setTimeout(() => callback(mockTabs), 0);
     }),
-    getCurrent: vi.fn((callback) => {
-      setTimeout(() => callback({
-        id: 1,
-        url: 'https://example.com',
-        title: 'Test Page'
-      }), 0);
+    getCurrent: vi.fn(callback => {
+      setTimeout(
+        () =>
+          callback({
+            id: 1,
+            url: 'https://example.com',
+            title: 'Test Page',
+          }),
+        0
+      );
     }),
     get: vi.fn((tabId, callback) => {
-      setTimeout(() => callback({
-        id: tabId,
-        url: 'https://example.com',
-        title: 'Test Page'
-      }), 0);
+      setTimeout(
+        () =>
+          callback({
+            id: tabId,
+            url: 'https://example.com',
+            title: 'Test Page',
+          }),
+        0
+      );
     }),
     update: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
   };
 
   const mockAction = {
@@ -359,20 +369,20 @@ export const mockChromeAPI = (storageData = {}, options = {}) => {
     setBadgeBackgroundColor: vi.fn(),
     onClicked: {
       addListener: vi.fn(),
-      removeListener: vi.fn()
-    }
+      removeListener: vi.fn(),
+    },
   };
 
   const mockNotifications = {
     create: vi.fn(),
-    clear: vi.fn()
+    clear: vi.fn(),
   };
 
   const mockCommands = {
     onCommand: {
       addListener: vi.fn(),
-      removeListener: vi.fn()
-    }
+      removeListener: vi.fn(),
+    },
   };
 
   return {
@@ -383,7 +393,7 @@ export const mockChromeAPI = (storageData = {}, options = {}) => {
     notifications: mockNotifications,
     commands: mockCommands,
     // Expose storage manager for test control
-    _storageManager: storageManager
+    _storageManager: storageManager,
   };
 };
 
@@ -398,27 +408,22 @@ export const createAuthenticatedState = (userData = {}, configData = {}) => ({
     user: {
       id: 'test-user-id',
       email: 'test@example.com',
-      ...userData
+      ...userData,
     },
     access_token: 'test-access-token',
-    refresh_token: 'test-refresh-token'
+    refresh_token: 'test-refresh-token',
   },
   supabaseConfig: {
     url: 'https://test.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-key',
-    ...configData
+    ...configData,
   },
-  customStatusTypes: [
-    'read',
-    'good-reference',
-    'low-value',
-    'revisit-later',
-  ],
+  customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   config: {
     supabase: {
       url: 'https://test.supabase.co',
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-key',
-      ...configData
+      ...configData,
     },
     preferences: {
       customStatusTypes: [
@@ -426,16 +431,16 @@ export const createAuthenticatedState = (userData = {}, configData = {}) => ({
         'good-reference',
         'low-value',
         'revisit-later',
-      ]
+      ],
     },
     auth: {
       user: {
         id: 'test-user-id',
         email: 'test@example.com',
-        ...userData
-      }
-    }
-  }
+        ...userData,
+      },
+    },
+  },
 });
 
 /**
@@ -445,12 +450,7 @@ export const createAuthenticatedState = (userData = {}, configData = {}) => ({
 export const createUnconfiguredState = () => ({
   supabaseConfig: null,
   auth_session: null,
-  customStatusTypes: [
-    'read',
-    'good-reference',
-    'low-value',
-    'revisit-later',
-  ],
+  customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   config: {
     supabase: null,
     preferences: {
@@ -459,10 +459,10 @@ export const createUnconfiguredState = () => ({
         'good-reference',
         'low-value',
         'revisit-later',
-      ]
+      ],
     },
-    auth: null
-  }
+    auth: null,
+  },
 });
 
 /**
@@ -474,20 +474,15 @@ export const createConfiguredUnauthenticatedState = (configData = {}) => ({
   supabaseConfig: {
     url: 'https://test.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-key',
-    ...configData
+    ...configData,
   },
   auth_session: null,
-  customStatusTypes: [
-    'read',
-    'good-reference',
-    'low-value',
-    'revisit-later',
-  ],
+  customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   config: {
     supabase: {
       url: 'https://test.supabase.co',
       anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-key',
-      ...configData
+      ...configData,
     },
     preferences: {
       customStatusTypes: [
@@ -495,10 +490,10 @@ export const createConfiguredUnauthenticatedState = (configData = {}) => ({
         'good-reference',
         'low-value',
         'revisit-later',
-      ]
+      ],
     },
-    auth: null
-  }
+    auth: null,
+  },
 });
 
 /**
@@ -508,7 +503,11 @@ export const createConfiguredUnauthenticatedState = (configData = {}) => ({
  * @param {string} innerHTML - Inner HTML content
  * @returns {HTMLElement} Mock DOM element
  */
-export const createMockElement = (tagName = 'div', attributes = {}, innerHTML = '') => {
+export const createMockElement = (
+  tagName = 'div',
+  attributes = {},
+  innerHTML = ''
+) => {
   const element = document.createElement(tagName);
   Object.entries(attributes).forEach(([key, value]) => {
     element.setAttribute(key, value);
@@ -544,16 +543,16 @@ export const mockConsole = () => {
     error: vi.fn(),
     warn: vi.fn(),
     info: vi.fn(),
-    debug: vi.fn()
+    debug: vi.fn(),
   };
-  
+
   Object.assign(console, mockConsole);
-  
+
   return {
     mockConsole,
     restore: () => {
       Object.assign(console, originalConsole);
-    }
+    },
   };
 };
 
@@ -564,7 +563,11 @@ export const mockConsole = () => {
  * @param {number} code - Error code
  * @returns {Error} Mock error object
  */
-export const createMockError = (message = 'Test error', name = 'TestError', code = 500) => {
+export const createMockError = (
+  message = 'Test error',
+  name = 'TestError',
+  code = 500
+) => {
   const error = new Error(message);
   error.name = name;
   error.code = code;
@@ -576,7 +579,8 @@ export const createMockError = (message = 'Test error', name = 'TestError', code
  * @param {number} ms - Milliseconds to wait
  * @returns {Promise} Promise that resolves after the specified time
  */
-export const waitFor = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
+export const waitFor = (ms = 0) =>
+  new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Create a mock event for unit tests
@@ -585,7 +589,11 @@ export const waitFor = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms
  * @returns {Event} Mock event object
  */
 export const createMockEvent = (type = 'click', options = {}) => {
-  const event = new Event(type, { bubbles: true, cancelable: true, ...options });
+  const event = new Event(type, {
+    bubbles: true,
+    cancelable: true,
+    ...options,
+  });
   return event;
 };
 
@@ -595,4 +603,4 @@ export const createMockEvent = (type = 'click', options = {}) => {
 export const resetMocks = () => {
   vi.clearAllMocks();
   vi.resetAllMocks();
-}; 
+};

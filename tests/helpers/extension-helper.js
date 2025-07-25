@@ -10,7 +10,11 @@
 
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createAuthenticatedState, createUnconfiguredState, createConfiguredState } from '../integration/factories/auth-factory.js';
+import {
+  createAuthenticatedState,
+  createUnconfiguredState,
+  createConfiguredState,
+} from '../integration/factories/auth-factory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -191,7 +195,7 @@ class ExtensionHelper {
    * @description Mocks Chrome APIs with proper state management and error handling
    */
   async mockChromeAPI(initialState = {}) {
-    await this.page.addInitScript((initialState) => {
+    await this.page.addInitScript(initialState => {
       // Enhanced Chrome storage state manager for integration tests
       class IntegrationChromeStorageManager {
         constructor(initialData = {}) {
@@ -205,7 +209,7 @@ class ExtensionHelper {
               'low-value',
               'revisit-later',
             ],
-            ...initialData
+            ...initialData,
           };
           this.listeners = [];
           this.errorListeners = [];
@@ -219,23 +223,26 @@ class ExtensionHelper {
         get(keys, callback) {
           try {
             const result = {};
-            
+
             if (Array.isArray(keys)) {
               keys.forEach(key => {
-                result[key] = this.data[key] !== undefined ? this.data[key] : null;
+                result[key] =
+                  this.data[key] !== undefined ? this.data[key] : null;
               });
             } else if (typeof keys === 'string') {
-              result[keys] = this.data[keys] !== undefined ? this.data[keys] : null;
+              result[keys] =
+                this.data[keys] !== undefined ? this.data[keys] : null;
             } else if (keys === null || keys === undefined) {
               // Return all data when no keys specified
               Object.assign(result, this.data);
             } else {
               // Handle object keys
               Object.keys(keys).forEach(key => {
-                result[key] = this.data[key] !== undefined ? this.data[key] : null;
+                result[key] =
+                  this.data[key] !== undefined ? this.data[key] : null;
               });
             }
-            
+
             callback(result);
           } catch (error) {
             this.notifyErrorListeners('get', error);
@@ -259,7 +266,7 @@ class ExtensionHelper {
 
             // Notify listeners of changes
             this.notifyListeners(changes);
-            
+
             if (callback) callback();
           } catch (error) {
             this.notifyErrorListeners('set', error);
@@ -276,7 +283,7 @@ class ExtensionHelper {
           try {
             const keyArray = Array.isArray(keys) ? keys : [keys];
             const changes = {};
-            
+
             keyArray.forEach(key => {
               if (this.data[key] !== undefined) {
                 const oldValue = this.data[key];
@@ -288,7 +295,7 @@ class ExtensionHelper {
             if (Object.keys(changes).length > 0) {
               this.notifyListeners(changes);
             }
-            
+
             if (callback) callback();
           } catch (error) {
             this.notifyErrorListeners('remove', error);
@@ -306,10 +313,10 @@ class ExtensionHelper {
             Object.keys(this.data).forEach(key => {
               changes[key] = { oldValue: this.data[key], newValue: undefined };
             });
-            
+
             this.data = {};
             this.notifyListeners(changes);
-            
+
             if (callback) callback();
           } catch (error) {
             this.notifyErrorListeners('clear', error);
@@ -387,7 +394,7 @@ class ExtensionHelper {
               'low-value',
               'revisit-later',
             ],
-            ...newData
+            ...newData,
           };
           this.listeners = [];
           this.errorListeners = [];
@@ -403,11 +410,11 @@ class ExtensionHelper {
           get: (keys, callback) => storageManager.get(keys, callback),
           set: (data, callback) => storageManager.set(data, callback),
           remove: (keys, callback) => storageManager.remove(keys, callback),
-          clear: (callback) => storageManager.clear(callback),
+          clear: callback => storageManager.clear(callback),
           onChanged: {
-            addListener: (callback) => storageManager.addListener(callback),
-            removeListener: (callback) => storageManager.removeListener(callback)
-          }
+            addListener: callback => storageManager.addListener(callback),
+            removeListener: callback => storageManager.removeListener(callback),
+          },
         },
         local: {
           get: (keys, callback) => {
@@ -420,64 +427,67 @@ class ExtensionHelper {
           remove: (keys, callback) => {
             if (callback) callback();
           },
-          clear: (callback) => {
+          clear: callback => {
             if (callback) callback();
-          }
-        }
+          },
+        },
       };
 
       // Mock chrome.runtime API with better message handling
       const mockRuntime = {
         onMessage: {
-          addListener: (callback) => {
+          addListener: callback => {
             // Store callback for later use
             if (!window.mockRuntimeListeners) {
               window.mockRuntimeListeners = [];
             }
             window.mockRuntimeListeners.push(callback);
           },
-          removeListener: (callback) => {
+          removeListener: callback => {
             if (window.mockRuntimeListeners) {
               const index = window.mockRuntimeListeners.indexOf(callback);
               if (index > -1) {
                 window.mockRuntimeListeners.splice(index, 1);
               }
             }
-          }
+          },
         },
-        
+
         sendMessage: (message, callback) => {
           // Enhanced message handling with proper responses
           const responses = {
-            'BOOKMARK_SAVED': { success: true, bookmarkId: 'test-id' },
-            'GET_AUTH_STATE': { 
+            BOOKMARK_SAVED: { success: true, bookmarkId: 'test-id' },
+            GET_AUTH_STATE: {
               authenticated: !!storageManager.data.auth_session,
-              user: storageManager.data.auth_session?.user || null
+              user: storageManager.data.auth_session?.user || null,
             },
-            'TEST_CONNECTION': { success: true, message: 'Connection successful' },
-            'SAVE_CONFIG': { success: true, message: 'Configuration saved' },
-            'GET_CONFIG': { 
-              success: true, 
-              config: storageManager.data.config 
-            }
+            TEST_CONNECTION: {
+              success: true,
+              message: 'Connection successful',
+            },
+            SAVE_CONFIG: { success: true, message: 'Configuration saved' },
+            GET_CONFIG: {
+              success: true,
+              config: storageManager.data.config,
+            },
           };
-          
-          const response = responses[message.type] || { 
-            success: false, 
-            error: 'Unknown message type' 
+
+          const response = responses[message.type] || {
+            success: false,
+            error: 'Unknown message type',
           };
-          
+
           if (callback) {
             // Simulate async response
             setTimeout(() => callback(response), 100);
           }
         },
-        
+
         openOptionsPage: () => {
           window.optionsPageOpened = true;
         },
 
-        getURL: (path) => `chrome-extension://test-id/${path}`
+        getURL: path => `chrome-extension://test-id/${path}`,
       };
 
       // Mock chrome.tabs API
@@ -488,17 +498,17 @@ class ExtensionHelper {
               id: 1,
               url: 'https://example.com',
               title: 'Test Page',
-              active: true
-            }
+              active: true,
+            },
           ];
           callback(mockTabs);
         },
-        
-        getCurrent: (callback) => {
+
+        getCurrent: callback => {
           callback({
             id: 1,
             url: 'https://example.com',
-            title: 'Test Page'
+            title: 'Test Page',
           });
         },
 
@@ -506,12 +516,12 @@ class ExtensionHelper {
           callback({
             id: tabId,
             url: 'https://example.com',
-            title: 'Test Page'
+            title: 'Test Page',
           });
         },
 
         update: () => {},
-        create: () => {}
+        create: () => {},
       };
 
       // Mock chrome.action API
@@ -520,22 +530,22 @@ class ExtensionHelper {
         setBadgeBackgroundColor: () => {},
         onClicked: {
           addListener: () => {},
-          removeListener: () => {}
-        }
+          removeListener: () => {},
+        },
       };
 
       // Mock chrome.notifications API
       const mockNotifications = {
         create: () => {},
-        clear: () => {}
+        clear: () => {},
       };
 
       // Mock chrome.commands API
       const mockCommands = {
         onCommand: {
           addListener: () => {},
-          removeListener: () => {}
-        }
+          removeListener: () => {},
+        },
       };
 
       // Initialize Chrome API if not exists
@@ -553,15 +563,15 @@ class ExtensionHelper {
 
       // Add utility functions for testing
       window.mockChromeAPI = {
-        setStorageData: (data) => {
+        setStorageData: data => {
           Object.assign(storageManager.data, data);
         },
-        
+
         getStorageData: () => {
           return { ...storageManager.data };
         },
-        
-        simulateMessage: (message) => {
+
+        simulateMessage: message => {
           if (window.mockRuntimeListeners) {
             window.mockRuntimeListeners.forEach(listener => {
               try {
@@ -572,7 +582,7 @@ class ExtensionHelper {
             });
           }
         },
-        
+
         reset: () => {
           storageManager.reset();
           if (window.mockRuntimeListeners) {
@@ -581,7 +591,7 @@ class ExtensionHelper {
         },
 
         // Expose storage manager for test control
-        _storageManager: storageManager
+        _storageManager: storageManager,
       };
 
       console.log('Chrome API mocked successfully');
@@ -595,11 +605,13 @@ class ExtensionHelper {
    * @param {Object} userData - User data for authentication
    * @description Sets up Chrome storage with authenticated user data
    */
-  async setupAuthenticatedState(userData = { id: 'test-user-id', email: 'test@example.com' }) {
+  async setupAuthenticatedState(
+    userData = { id: 'test-user-id', email: 'test@example.com' }
+  ) {
     const authState = createAuthenticatedState({
-      user: userData
+      user: userData,
     });
-    
+
     // Mock Chrome API before page loads
     await this.mockChromeAPI(authState);
   }
@@ -612,7 +624,7 @@ class ExtensionHelper {
    */
   async setupUnconfiguredState() {
     const unconfiguredState = createUnconfiguredState();
-    
+
     // Mock Chrome API before page loads
     await this.mockChromeAPI(unconfiguredState);
   }
@@ -625,7 +637,7 @@ class ExtensionHelper {
    */
   async setupConfiguredState() {
     const configuredState = createConfiguredState();
-    
+
     // Mock Chrome API before page loads
     await this.mockChromeAPI(configuredState);
   }

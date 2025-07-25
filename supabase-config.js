@@ -114,7 +114,10 @@ class SupabaseConfig {
 
       return result;
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'supabase-config.setConfiguration');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'supabase-config.setConfiguration'
+      );
       return { success: false, message: errorResult.userMessage };
     }
   }
@@ -202,7 +205,11 @@ class SupabaseConfig {
       return data;
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'supabase-config.signIn');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signIn');
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'supabase-config.signIn'
+      );
     }
   }
 
@@ -226,7 +233,11 @@ class SupabaseConfig {
       return data;
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'supabase-config.signUp');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signUp');
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'supabase-config.signUp'
+      );
     }
   }
 
@@ -241,7 +252,11 @@ class SupabaseConfig {
       this.user = null;
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'supabase-config.signOut');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'supabase-config.signOut');
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'supabase-config.signOut'
+      );
     }
   }
 

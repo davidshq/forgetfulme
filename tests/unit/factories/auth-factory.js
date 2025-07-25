@@ -8,7 +8,11 @@
  * @since 2024-01-01
  */
 
-import { TEST_USER, TEST_AUTH_SESSION, TEST_SUPABASE_CONFIG } from '../../shared/constants.js';
+import {
+  TEST_USER,
+  TEST_AUTH_SESSION,
+  TEST_SUPABASE_CONFIG,
+} from '../../shared/constants.js';
 
 /**
  * Create a mock authentication session for unit tests
@@ -20,7 +24,7 @@ export const createMockAuthSession = (overrides = {}) => ({
   access_token: 'test-access-token',
   refresh_token: 'test-refresh-token',
   expires_at: Date.now() + 3600000,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -31,7 +35,7 @@ export const createMockAuthSession = (overrides = {}) => ({
 export const createMockSupabaseConfig = (overrides = {}) => ({
   url: TEST_SUPABASE_CONFIG.url,
   anonKey: TEST_SUPABASE_CONFIG.anonKey,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -43,7 +47,7 @@ export const createMockUser = (overrides = {}) => ({
   id: TEST_USER.id,
   email: TEST_USER.email,
   name: TEST_USER.name,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -55,7 +59,7 @@ export const createMockChromeStorage = (overrides = {}) => ({
   supabaseConfig: createMockSupabaseConfig(),
   auth_session: createMockAuthSession(),
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -64,11 +68,14 @@ export const createMockChromeStorage = (overrides = {}) => ({
  * @param {string} code - Error code
  * @returns {Object} Mock authentication error
  */
-export const createMockAuthError = (message = 'Authentication failed', code = 'AUTH_ERROR') => ({
+export const createMockAuthError = (
+  message = 'Authentication failed',
+  code = 'AUTH_ERROR'
+) => ({
   message,
   code,
   status: 401,
-  name: 'AuthError'
+  name: 'AuthError',
 });
 
 /**
@@ -82,8 +89,8 @@ export const createMockSupabaseClient = (overrides = {}) => ({
     signUp: vi.fn(),
     signOut: vi.fn(),
     getSession: vi.fn(),
-    onAuthStateChange: vi.fn()
+    onAuthStateChange: vi.fn(),
   },
   from: vi.fn(),
-  ...overrides
-}); 
+  ...overrides,
+});

@@ -8,7 +8,11 @@
  * @since 2024-01-01
  */
 
-import { TEST_USER, TEST_AUTH_SESSION, TEST_SUPABASE_CONFIG } from '../../shared/constants.js';
+import {
+  TEST_USER,
+  TEST_AUTH_SESSION,
+  TEST_SUPABASE_CONFIG,
+} from '../../shared/constants.js';
 
 /**
  * Create a mock authentication session for Vitest unit tests
@@ -22,7 +26,7 @@ export const createMockAuthSession = (overrides = {}) => ({
   access_token: 'test-access-token',
   refresh_token: 'test-refresh-token',
   expires_at: Date.now() + 3600000,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -35,7 +39,7 @@ export const createMockAuthSession = (overrides = {}) => ({
 export const createMockSupabaseConfig = (overrides = {}) => ({
   url: TEST_SUPABASE_CONFIG.url,
   anonKey: TEST_SUPABASE_CONFIG.anonKey,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -49,7 +53,7 @@ export const createMockUser = (overrides = {}) => ({
   id: TEST_USER.id,
   email: TEST_USER.email,
   name: TEST_USER.name,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -63,7 +67,7 @@ export const createMockChromeStorage = (overrides = {}) => ({
   supabaseConfig: createMockSupabaseConfig(),
   auth_session: createMockAuthSession(),
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -74,11 +78,14 @@ export const createMockChromeStorage = (overrides = {}) => ({
  * @returns {Object} Mock authentication error
  * @description Creates a mock authentication error for Vitest unit testing
  */
-export const createMockAuthError = (message = 'Authentication failed', code = 'AUTH_ERROR') => ({
+export const createMockAuthError = (
+  message = 'Authentication failed',
+  code = 'AUTH_ERROR'
+) => ({
   message,
   code,
   status: 401,
-  name: 'AuthError'
+  name: 'AuthError',
 });
 
 /**
@@ -94,10 +101,10 @@ export const createMockSupabaseClient = (overrides = {}) => ({
     signUp: vi.fn(),
     signOut: vi.fn(),
     getSession: vi.fn(),
-    onAuthStateChange: vi.fn()
+    onAuthStateChange: vi.fn(),
   },
   from: vi.fn(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -115,7 +122,7 @@ export const createMockBookmark = (overrides = {}) => ({
   tags: ['test'],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -127,12 +134,12 @@ export const createMockBookmark = (overrides = {}) => ({
  * @description Creates a list of mock bookmark objects for Vitest unit testing
  */
 export const createMockBookmarkList = (count = 3, overrides = {}) => {
-  return Array.from({ length: count }, (_, index) => 
+  return Array.from({ length: count }, (_, index) =>
     createMockBookmark({
       id: `test-bookmark-${index}`,
       url: `https://example${index}.com`,
       title: `Test Bookmark ${index}`,
-      ...overrides
+      ...overrides,
     })
   );
 };
@@ -147,10 +154,10 @@ export const createMockBookmarkList = (count = 3, overrides = {}) => {
 export const createMockConfig = (overrides = {}) => ({
   supabase: createMockSupabaseConfig(),
   preferences: {
-    customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+    customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   },
   auth: createMockAuthSession(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -162,7 +169,11 @@ export const createMockConfig = (overrides = {}) => ({
  * @returns {Error} Mock error object
  * @description Creates a mock error object for Vitest unit testing
  */
-export const createMockError = (message = 'Test error', name = 'TestError', code = 500) => {
+export const createMockError = (
+  message = 'Test error',
+  name = 'TestError',
+  code = 500
+) => {
   const error = new Error(message);
   error.name = name;
   error.code = code;
@@ -190,7 +201,7 @@ export const createMockEvent = (type = 'click', options = {}) => ({
   eventPhase: 0,
   isTrusted: true,
   timeStamp: Date.now(),
-  ...options
+  ...options,
 });
 
 /**
@@ -205,18 +216,18 @@ export const createMockFormData = (data = {}) => {
   Object.entries(data).forEach(([key, value]) => {
     formData.set(key, value);
   });
-  
+
   return {
-    get: vi.fn((key) => formData.get(key)),
-    getAll: vi.fn((key) => [formData.get(key)]),
-    has: vi.fn((key) => formData.has(key)),
+    get: vi.fn(key => formData.get(key)),
+    getAll: vi.fn(key => [formData.get(key)]),
+    has: vi.fn(key => formData.has(key)),
     set: vi.fn((key, value) => formData.set(key, value)),
-    delete: vi.fn((key) => formData.delete(key)),
+    delete: vi.fn(key => formData.delete(key)),
     append: vi.fn((key, value) => formData.set(key, value)),
     entries: vi.fn(() => formData.entries()),
     keys: vi.fn(() => formData.keys()),
     values: vi.fn(() => formData.values()),
-    forEach: vi.fn((callback) => formData.forEach(callback)),
+    forEach: vi.fn(callback => formData.forEach(callback)),
   };
 };
 
@@ -229,7 +240,11 @@ export const createMockFormData = (data = {}) => {
  * @returns {Object} Mock fetch response
  * @description Creates a mock fetch response for Vitest unit testing
  */
-export const createMockFetchResponse = (data = {}, status = 200, headers = {}) => ({
+export const createMockFetchResponse = (
+  data = {},
+  status = 200,
+  headers = {}
+) => ({
   ok: status >= 200 && status < 300,
   status,
   statusText: status === 200 ? 'OK' : 'Error',
@@ -252,8 +267,9 @@ export const createMockFetchResponse = (data = {}, status = 200, headers = {}) =
 export const createMockFetch = (responses = {}) => {
   return vi.fn().mockImplementation((url, options = {}) => {
     // Find matching response
-    const response = responses[url] || responses['*'] || createMockFetchResponse();
-    
+    const response =
+      responses[url] || responses['*'] || createMockFetchResponse();
+
     // Return a promise that resolves to the response
     return Promise.resolve(response);
   });
@@ -285,13 +301,13 @@ export const createMockTimer = () => ({
  */
 export const createMockStorage = (initialData = {}) => {
   const storage = new Map(Object.entries(initialData));
-  
+
   return {
-    getItem: vi.fn((key) => storage.get(key) || null),
+    getItem: vi.fn(key => storage.get(key) || null),
     setItem: vi.fn((key, value) => storage.set(key, value)),
-    removeItem: vi.fn((key) => storage.delete(key)),
+    removeItem: vi.fn(key => storage.delete(key)),
     clear: vi.fn(() => storage.clear()),
-    key: vi.fn((index) => Array.from(storage.keys())[index] || null),
+    key: vi.fn(index => Array.from(storage.keys())[index] || null),
     length: storage.size,
   };
 };
@@ -316,7 +332,7 @@ export const createMockLocation = (overrides = {}) => ({
   assign: vi.fn(),
   replace: vi.fn(),
   reload: vi.fn(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -354,7 +370,7 @@ export const createMockNavigator = (overrides = {}) => ({
   maxTouchPoints: 0,
   hardwareConcurrency: 4,
   deviceMemory: 8,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -420,5 +436,5 @@ export const createMockWindow = (overrides = {}) => ({
   getSelection: vi.fn(),
   find: vi.fn(),
   getMatchedCSSRules: vi.fn(),
-  ...overrides
-}); 
+  ...overrides,
+});

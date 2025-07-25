@@ -160,7 +160,8 @@ export class ExtensionHelper {
    * @param {string} messageType - Type of message to wait for ('success', 'error', 'any')
    */
   async waitForMessage(messageType = 'any') {
-    const selector = messageType === 'any' ? '.ui-message' : `.ui-message.${messageType}`;
+    const selector =
+      messageType === 'any' ? '.ui-message' : `.ui-message.${messageType}`;
     await this.page.waitForSelector(selector, { timeout: 10000 });
   }
 
@@ -170,7 +171,7 @@ export class ExtensionHelper {
    */
   async mockChromeAPI(initialState = {}) {
     // Set up Chrome API mocking in the browser context
-    await this.page.addInitScript((initialData) => {
+    await this.page.addInitScript(initialData => {
       // Chrome Storage Manager for Integration Tests
       class IntegrationChromeStorageManager {
         constructor(initialData = {}) {
@@ -196,7 +197,8 @@ export class ExtensionHelper {
             } else if (typeof keys === 'object') {
               // Object with default values
               Object.keys(keys).forEach(key => {
-                result[key] = this.data[key] !== undefined ? this.data[key] : keys[key];
+                result[key] =
+                  this.data[key] !== undefined ? this.data[key] : keys[key];
               });
             }
 
@@ -241,7 +243,7 @@ export class ExtensionHelper {
           try {
             const changes = {};
             const keyArray = Array.isArray(keys) ? keys : [keys];
-            
+
             keyArray.forEach(key => {
               if (this.data[key] !== undefined) {
                 const oldValue = this.data[key];
@@ -271,7 +273,7 @@ export class ExtensionHelper {
             Object.keys(this.data).forEach(key => {
               changes[key] = { oldValue: this.data[key], newValue: undefined };
             });
-            
+
             this.data = {};
             this.notifyListeners(changes);
 
@@ -333,7 +335,9 @@ export class ExtensionHelper {
       }
 
       // Create global storage manager
-      window.testStorageManager = new IntegrationChromeStorageManager(initialData);
+      window.testStorageManager = new IntegrationChromeStorageManager(
+        initialData
+      );
 
       // Mock Chrome storage API
       if (typeof chrome !== 'undefined') {
@@ -341,9 +345,11 @@ export class ExtensionHelper {
           local: window.testStorageManager,
           sync: window.testStorageManager,
           onChanged: {
-            addListener: (listener) => window.testStorageManager.addListener(listener),
-            removeListener: (listener) => window.testStorageManager.removeListener(listener)
-          }
+            addListener: listener =>
+              window.testStorageManager.addListener(listener),
+            removeListener: listener =>
+              window.testStorageManager.removeListener(listener),
+          },
         };
 
         // Mock other Chrome APIs
@@ -357,53 +363,57 @@ export class ExtensionHelper {
           },
           onMessage: {
             addListener: () => {},
-            removeListener: () => {}
-          }
+            removeListener: () => {},
+          },
         };
 
         chrome.action = {
           setBadgeText: () => {},
           setBadgeBackgroundColor: () => {},
-          setTitle: () => {}
+          setTitle: () => {},
         };
 
         chrome.notifications = {
           create: () => {},
           clear: () => {},
-          getAll: () => Promise.resolve({})
+          getAll: () => Promise.resolve({}),
         };
 
         chrome.commands = {
-          getAll: () => Promise.resolve([])
+          getAll: () => Promise.resolve([]),
         };
       }
     }, initialState);
 
     // Store reference to storage manager for test control
-    this.storageManager = await this.page.evaluate(() => window.testStorageManager);
+    this.storageManager = await this.page.evaluate(
+      () => window.testStorageManager
+    );
   }
 
   /**
    * Set up authenticated state for testing
    * @param {Object} userData - User data for authentication
    */
-  async setupAuthenticatedState(userData = { id: 'test-user-id', email: 'test@example.com' }) {
+  async setupAuthenticatedState(
+    userData = { id: 'test-user-id', email: 'test@example.com' }
+  ) {
     const authState = {
       supabaseConfig: {
         url: TEST_SUPABASE_CONFIG.url,
         key: TEST_SUPABASE_CONFIG.key,
-        isConfigured: true
+        isConfigured: true,
       },
       user: {
         id: userData.id,
         email: userData.email,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       },
       session: {
         access_token: 'test-access-token',
         refresh_token: 'test-refresh-token',
-        expires_at: Date.now() + 3600000
-      }
+        expires_at: Date.now() + 3600000,
+      },
     };
 
     await this.mockChromeAPI(authState);
@@ -417,8 +427,8 @@ export class ExtensionHelper {
       supabaseConfig: {
         url: '',
         key: '',
-        isConfigured: false
-      }
+        isConfigured: false,
+      },
     };
 
     await this.mockChromeAPI(unconfiguredState);
@@ -432,8 +442,8 @@ export class ExtensionHelper {
       supabaseConfig: {
         url: TEST_SUPABASE_CONFIG.url,
         key: TEST_SUPABASE_CONFIG.key,
-        isConfigured: true
-      }
+        isConfigured: true,
+      },
     };
 
     await this.mockChromeAPI(configuredState);
@@ -469,4 +479,4 @@ export const setupPlaywrightTest = async (page, context, initialState = {}) => {
   const helper = new ExtensionHelper(page, context);
   await helper.mockChromeAPI(initialState);
   return helper;
-}; 
+};

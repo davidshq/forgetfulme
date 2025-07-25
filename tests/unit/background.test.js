@@ -911,11 +911,19 @@ describe('BackgroundErrorHandler', () => {
       getUserMessage(error, context) {
         const message = error.message || error.toString();
 
-        if (message.includes('fetch') || message.includes('network') || message.includes('HTTP')) {
+        if (
+          message.includes('fetch') ||
+          message.includes('network') ||
+          message.includes('HTTP')
+        ) {
           return 'Connection error. Please check your internet connection and try again.';
         }
 
-        if (message.includes('auth') || message.includes('login') || message.includes('sign')) {
+        if (
+          message.includes('auth') ||
+          message.includes('login') ||
+          message.includes('sign')
+        ) {
           return 'Authentication error. Please try signing in again.';
         }
 
@@ -931,7 +939,7 @@ describe('BackgroundErrorHandler', () => {
         error.context = context;
         error.timestamp = new Date().toISOString();
         return error;
-      }
+      },
     };
   });
 
@@ -939,14 +947,20 @@ describe('BackgroundErrorHandler', () => {
     it('logs error and shows notification for auth context', () => {
       const error = new Error('auth failed');
       BackgroundErrorHandler.handle(error, 'auth');
-      expect(console.error).toHaveBeenCalledWith('[auth] Error:', 'auth failed');
+      expect(console.error).toHaveBeenCalledWith(
+        '[auth] Error:',
+        'auth failed'
+      );
       expect(chrome.notifications.create).toHaveBeenCalled();
     });
 
     it('logs error and does not show notification for non-auth context', () => {
       const error = new Error('other error');
       BackgroundErrorHandler.handle(error, 'other');
-      expect(console.error).toHaveBeenCalledWith('[other] Error:', 'other error');
+      expect(console.error).toHaveBeenCalledWith(
+        '[other] Error:',
+        'other error'
+      );
       expect(chrome.notifications.create).not.toHaveBeenCalled();
     });
   });
@@ -955,12 +969,14 @@ describe('BackgroundErrorHandler', () => {
     it('shows notification for config context', () => {
       const error = new Error('config missing');
       BackgroundErrorHandler.showErrorNotification(error, 'config');
-      expect(chrome.notifications.create).toHaveBeenCalledWith(expect.objectContaining({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: 'ForgetfulMe',
-        message: expect.any(String),
-      }));
+      expect(chrome.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'basic',
+          iconUrl: 'icons/icon48.png',
+          title: 'ForgetfulMe',
+          message: expect.any(String),
+        })
+      );
     });
 
     it('does not show notification for unrelated context', () => {
@@ -973,19 +989,27 @@ describe('BackgroundErrorHandler', () => {
   describe('getUserMessage', () => {
     it('returns network error message', () => {
       const error = new Error('fetch failed');
-      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(/Connection error/);
+      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(
+        /Connection error/
+      );
     });
     it('returns auth error message', () => {
       const error = new Error('auth required');
-      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(/Authentication error/);
+      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(
+        /Authentication error/
+      );
     });
     it('returns config error message', () => {
       const error = new Error('config missing');
-      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(/Configuration error/);
+      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(
+        /Configuration error/
+      );
     });
     it('returns default error message', () => {
       const error = new Error('something else');
-      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(/unexpected error/i);
+      expect(BackgroundErrorHandler.getUserMessage(error, 'any')).toMatch(
+        /unexpected error/i
+      );
     });
   });
 

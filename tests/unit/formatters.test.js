@@ -42,11 +42,11 @@ describe('Formatters', () => {
   describe('formatTime', () => {
     it('should format recent times correctly', () => {
       const now = Date.now();
-      
+
       // Just now (less than 1 minute)
       expect(formatTime(now)).toBe('Just now');
       expect(formatTime(now - 30000)).toBe('Just now'); // 30 seconds ago
-      
+
       // Minutes ago
       expect(formatTime(now - 60000)).toBe('1m ago'); // 1 minute ago
       expect(formatTime(now - 120000)).toBe('2m ago'); // 2 minutes ago
@@ -55,7 +55,7 @@ describe('Formatters', () => {
 
     it('should format hours correctly', () => {
       const now = Date.now();
-      
+
       // Hours ago
       expect(formatTime(now - 3600000)).toBe('1h ago'); // 1 hour ago
       expect(formatTime(now - 7200000)).toBe('2h ago'); // 2 hours ago
@@ -64,12 +64,12 @@ describe('Formatters', () => {
 
     it('should format days correctly', () => {
       const now = Date.now();
-      
+
       // Days ago (less than 7 days)
       expect(formatTime(now - 86400000)).toBe('1d ago'); // 1 day ago
       expect(formatTime(now - 172800000)).toBe('2d ago'); // 2 days ago
       expect(formatTime(now - 518400000)).toBe('6d ago'); // 6 days ago
-      
+
       // 7 days or older should return date string
       const sevenDaysAgo = now - 604800000; // 7 days ago
       const result = formatTime(sevenDaysAgo);
@@ -81,7 +81,7 @@ describe('Formatters', () => {
     it('should format older dates with locale date string', () => {
       const oldDate = new Date('2024-01-01').getTime();
       const result = formatTime(oldDate);
-      
+
       // Should return a localized date string
       expect(typeof result).toBe('string');
       expect(result).not.toBe('Just now');
@@ -92,7 +92,7 @@ describe('Formatters', () => {
       // Future timestamps
       const future = Date.now() + 60000;
       expect(formatTime(future)).toBe('Just now');
-      
+
       // Very old timestamps
       const veryOld = new Date('2020-01-01').getTime();
       const result = formatTime(veryOld);
@@ -128,8 +128,10 @@ describe('Formatters', () => {
         const formattedTime = formatTime(time);
 
         expect(formattedStatus).toMatch(/^[A-Z][a-z]+(\s[A-Z][a-z]+)*$/);
-        expect(formattedTime).toMatch(/^(Just now|\d+[mhd] ago|\d+\/\d+\/\d+)$/);
+        expect(formattedTime).toMatch(
+          /^(Just now|\d+[mhd] ago|\d+\/\d+\/\d+)$/
+        );
       });
     });
   });
-}); 
+});

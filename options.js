@@ -419,7 +419,9 @@ class ForgetfulMeOptions {
     this.bindEvents();
 
     // Show configuration status
-    const configStatusContainer = document.getElementById('config-status-container');
+    const configStatusContainer = document.getElementById(
+      'config-status-container'
+    );
     if (configStatusContainer) {
       this.configUI.showConfigStatus(configStatusContainer);
     }

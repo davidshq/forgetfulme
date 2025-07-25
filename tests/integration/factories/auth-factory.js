@@ -8,7 +8,11 @@
  * @since 2024-01-01
  */
 
-import { TEST_USER, TEST_AUTH_SESSION, TEST_SUPABASE_CONFIG } from '../../shared/constants.js';
+import {
+  TEST_USER,
+  TEST_AUTH_SESSION,
+  TEST_SUPABASE_CONFIG,
+} from '../../shared/constants.js';
 
 /**
  * Create authenticated state for integration tests
@@ -19,17 +23,17 @@ export const createAuthenticatedState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: {
     user: { ...TEST_USER, ...overrides.user },
     access_token: 'test-access-token',
     refresh_token: 'test-refresh-token',
     expires_at: Date.now() + 3600000,
-    ...overrides.auth_session
+    ...overrides.auth_session,
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -41,7 +45,7 @@ export const createUnconfiguredState = (overrides = {}) => ({
   supabaseConfig: null,
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -53,11 +57,11 @@ export const createConfiguredState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -69,11 +73,11 @@ export const createInvalidConfigState = (overrides = {}) => ({
   supabaseConfig: {
     url: 'https://invalid.supabase.co',
     anonKey: 'invalid-key',
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -85,15 +89,15 @@ export const createExpiredSessionState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: {
     user: { ...TEST_USER, ...overrides.user },
     access_token: 'expired-access-token',
     refresh_token: 'expired-refresh-token',
     expires_at: Date.now() - 3600000, // Expired 1 hour ago
-    ...overrides.auth_session
+    ...overrides.auth_session,
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
-  ...overrides
-}); 
+  ...overrides,
+});

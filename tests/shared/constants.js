@@ -15,7 +15,7 @@
 export const TEST_USER = {
   id: 'test-user-id',
   email: 'test@example.com',
-  name: 'Test User'
+  name: 'Test User',
 };
 
 /**
@@ -24,7 +24,7 @@ export const TEST_USER = {
  */
 export const TEST_SUPABASE_CONFIG = {
   url: 'https://test.supabase.co',
-  anonKey: 'test-anon-key'
+  anonKey: 'test-anon-key',
 };
 
 /**
@@ -39,7 +39,7 @@ export const TEST_BOOKMARK = {
   tags: 'test, integration',
   notes: 'Test bookmark for integration testing',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z'
+  updatedAt: '2024-01-01T00:00:00Z',
 };
 
 /**
@@ -50,7 +50,7 @@ export const TEST_AUTH_SESSION = {
   user: TEST_USER,
   access_token: 'test-access-token',
   refresh_token: 'test-refresh-token',
-  expires_at: Date.now() + 3600000 // 1 hour from now
+  expires_at: Date.now() + 3600000, // 1 hour from now
 };
 
 /**
@@ -61,7 +61,7 @@ export const DEFAULT_STATUS_TYPES = [
   'read',
   'good-reference',
   'low-value',
-  'revisit-later'
+  'revisit-later',
 ];
 
 /**
@@ -72,7 +72,7 @@ export const TEST_ERROR_MESSAGES = {
   CONFIG_REQUIRED: 'Supabase configuration is required',
   AUTH_REQUIRED: 'Authentication is required',
   NETWORK_ERROR: 'Network connection failed',
-  VALIDATION_ERROR: 'Invalid input provided'
+  VALIDATION_ERROR: 'Invalid input provided',
 };
 
 /**
@@ -82,5 +82,5 @@ export const TEST_ERROR_MESSAGES = {
 export const STORAGE_KEYS = {
   SUPABASE_CONFIG: 'supabaseConfig',
   AUTH_SESSION: 'auth_session',
-  CUSTOM_STATUS_TYPES: 'customStatusTypes'
-}; 
+  CUSTOM_STATUS_TYPES: 'customStatusTypes',
+};

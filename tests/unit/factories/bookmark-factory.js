@@ -24,7 +24,7 @@ export const createMockBookmark = (overrides = {}) => ({
   notes: TEST_BOOKMARK.notes,
   createdAt: TEST_BOOKMARK.createdAt,
   updatedAt: TEST_BOOKMARK.updatedAt,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -36,13 +36,15 @@ export const createMockBookmark = (overrides = {}) => ({
 export const createMockBookmarkList = (count = 3, baseOverrides = {}) => {
   const bookmarks = [];
   for (let i = 0; i < count; i++) {
-    bookmarks.push(createMockBookmark({
-      id: `bookmark-${i + 1}`,
-      title: `Test Bookmark ${i + 1}`,
-      url: `https://example.com/test-${i + 1}`,
-      status: DEFAULT_STATUS_TYPES[i % DEFAULT_STATUS_TYPES.length],
-      ...baseOverrides
-    }));
+    bookmarks.push(
+      createMockBookmark({
+        id: `bookmark-${i + 1}`,
+        title: `Test Bookmark ${i + 1}`,
+        url: `https://example.com/test-${i + 1}`,
+        status: DEFAULT_STATUS_TYPES[i % DEFAULT_STATUS_TYPES.length],
+        ...baseOverrides,
+      })
+    );
   }
   return bookmarks;
 };
@@ -58,7 +60,7 @@ export const createMockBookmarkFormData = (overrides = {}) => ({
   status: TEST_BOOKMARK.status,
   tags: TEST_BOOKMARK.tags,
   notes: TEST_BOOKMARK.notes,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -70,7 +72,7 @@ export const createMockBookmarkSearchResult = (overrides = {}) => ({
   data: createMockBookmarkList(2),
   count: 2,
   error: null,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -79,11 +81,14 @@ export const createMockBookmarkSearchResult = (overrides = {}) => ({
  * @param {string} code - Error code
  * @returns {Object} Mock bookmark error
  */
-export const createMockBookmarkError = (message = 'Bookmark operation failed', code = 'BOOKMARK_ERROR') => ({
+export const createMockBookmarkError = (
+  message = 'Bookmark operation failed',
+  code = 'BOOKMARK_ERROR'
+) => ({
   message,
   code,
   status: 400,
-  name: 'BookmarkError'
+  name: 'BookmarkError',
 });
 
 /**
@@ -95,5 +100,5 @@ export const createMockBookmarkTransformerResult = (overrides = {}) => ({
   transformed: true,
   bookmark: createMockBookmark(),
   errors: [],
-  ...overrides
-}); 
+  ...overrides,
+});

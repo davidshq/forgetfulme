@@ -8,7 +8,10 @@
  * @since 2024-01-01
  */
 
-import { TEST_SUPABASE_CONFIG, DEFAULT_STATUS_TYPES } from '../../shared/constants.js';
+import {
+  TEST_SUPABASE_CONFIG,
+  DEFAULT_STATUS_TYPES,
+} from '../../shared/constants.js';
 
 /**
  * Create a mock configuration object for unit tests
@@ -18,10 +21,10 @@ import { TEST_SUPABASE_CONFIG, DEFAULT_STATUS_TYPES } from '../../shared/constan
 export const createMockConfig = (overrides = {}) => ({
   supabase: TEST_SUPABASE_CONFIG,
   preferences: {
-    customStatusTypes: DEFAULT_STATUS_TYPES
+    customStatusTypes: DEFAULT_STATUS_TYPES,
   },
   auth: null,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -32,7 +35,7 @@ export const createMockConfig = (overrides = {}) => ({
 export const createMockSupabaseConfig = (overrides = {}) => ({
   url: TEST_SUPABASE_CONFIG.url,
   anonKey: TEST_SUPABASE_CONFIG.anonKey,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -44,7 +47,7 @@ export const createMockPreferences = (overrides = {}) => ({
   customStatusTypes: DEFAULT_STATUS_TYPES,
   theme: 'light',
   language: 'en',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -56,7 +59,7 @@ export const createMockChromeStorage = (overrides = {}) => ({
   supabaseConfig: createMockSupabaseConfig(),
   customStatusTypes: DEFAULT_STATUS_TYPES,
   auth_session: null,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -65,11 +68,14 @@ export const createMockChromeStorage = (overrides = {}) => ({
  * @param {string} code - Error code
  * @returns {Object} Mock configuration error
  */
-export const createMockConfigError = (message = 'Configuration error', code = 'CONFIG_ERROR') => ({
+export const createMockConfigError = (
+  message = 'Configuration error',
+  code = 'CONFIG_ERROR'
+) => ({
   message,
   code,
   status: 500,
-  name: 'ConfigError'
+  name: 'ConfigError',
 });
 
 /**
@@ -81,7 +87,7 @@ export const createMockConfigValidationResult = (overrides = {}) => ({
   isValid: true,
   errors: [],
   warnings: [],
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -94,5 +100,5 @@ export const createMockConfigMigrationResult = (overrides = {}) => ({
   fromVersion: '1.0.0',
   toVersion: '2.0.0',
   changes: [],
-  ...overrides
-}); 
+  ...overrides,
+});

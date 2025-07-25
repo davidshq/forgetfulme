@@ -23,10 +23,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  
+
   // Test filtering - only run integration tests
   testMatch: '**/integration/**/*.test.js',
-  
+
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -34,11 +34,11 @@ export default defineConfig({
     actionTimeout: 15000,
     navigationTimeout: 20000,
   },
-  
+
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Load the Chrome extension properly
         launchOptions: {
@@ -52,16 +52,11 @@ export default defineConfig({
           ],
         },
         // Set up proper Playwright permissions
-        permissions: [
-          'geolocation',
-          'notifications',
-          'camera',
-          'microphone',
-        ],
+        permissions: ['geolocation', 'notifications', 'camera', 'microphone'],
       },
     },
   ],
-  
+
   webServer: {
     command: 'python3 -m http.server 3000',
     url: 'http://localhost:3000',

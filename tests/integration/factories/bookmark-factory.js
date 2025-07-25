@@ -21,7 +21,7 @@ export const createBookmarkFormData = (overrides = {}) => ({
   status: TEST_BOOKMARK.status,
   tags: TEST_BOOKMARK.tags,
   notes: TEST_BOOKMARK.notes,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -35,7 +35,7 @@ export const createBookmarkSearchData = (overrides = {}) => ({
   tags: 'integration',
   sortBy: 'createdAt',
   sortOrder: 'desc',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -48,9 +48,9 @@ export const createBookmarkFilterData = (overrides = {}) => ({
   tags: ['test', 'integration'],
   dateRange: {
     start: '2024-01-01',
-    end: '2024-12-31'
+    end: '2024-12-31',
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -63,7 +63,7 @@ export const createBookmarkEditData = (overrides = {}) => ({
   status: 'good-reference',
   tags: 'updated, test, integration',
   notes: 'Updated notes for testing',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -75,7 +75,7 @@ export const createBookmarkBulkData = (overrides = {}) => ({
   bookmarkIds: ['bookmark-1', 'bookmark-2', 'bookmark-3'],
   action: 'delete', // or 'export', 'update-status'
   newStatus: 'read',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -88,7 +88,7 @@ export const createBookmarkExportData = (overrides = {}) => ({
   includeMetadata: true,
   dateRange: {
     start: '2024-01-01',
-    end: '2024-12-31'
+    end: '2024-12-31',
   },
-  ...overrides
-}); 
+  ...overrides,
+});

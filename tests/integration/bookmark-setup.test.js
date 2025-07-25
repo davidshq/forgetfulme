@@ -63,7 +63,7 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
               },
             ]);
           },
-          create: (options) => {
+          create: options => {
             window.tabCreated = options;
           },
         };
@@ -77,25 +77,33 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
     await extensionHelper.waitForExtensionReady();
   });
 
-  test('should display setup interface when not configured', async ({ page }) => {
+  test('should display setup interface when not configured', async ({
+    page,
+  }) => {
     // Wait for the interface to load
     await page.waitForTimeout(2000);
 
     // Check for setup interface elements
-    const setupContainer = await extensionHelper.isElementVisible('.setup-container');
+    const setupContainer =
+      await extensionHelper.isElementVisible('.setup-container');
     expect(setupContainer).toBeTruthy();
 
-    const welcomeText = await extensionHelper.getElementText('.ui-container-header h2');
+    const welcomeText = await extensionHelper.getElementText(
+      '.ui-container-header h2'
+    );
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
-    const setupSection = await extensionHelper.isElementVisible('.setup-section');
+    const setupSection =
+      await extensionHelper.isElementVisible('.setup-section');
     expect(setupSection).toBeTruthy();
 
     const settingsBtn = await extensionHelper.isElementVisible('button');
     expect(settingsBtn).toBeTruthy();
   });
 
-  test('should have settings button that calls openOptionsPage', async ({ page }) => {
+  test('should have settings button that calls openOptionsPage', async ({
+    page,
+  }) => {
     // Wait for the interface to load
     await page.waitForTimeout(2000);
 
@@ -165,4 +173,4 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
     const buttonCount = await buttons.count();
     expect(buttonCount).toBeGreaterThan(0);
   });
-}); 
+});

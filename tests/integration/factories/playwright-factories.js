@@ -8,7 +8,11 @@
  * @since 2024-01-01
  */
 
-import { TEST_USER, TEST_AUTH_SESSION, TEST_SUPABASE_CONFIG } from '../../shared/constants.js';
+import {
+  TEST_USER,
+  TEST_AUTH_SESSION,
+  TEST_SUPABASE_CONFIG,
+} from '../../shared/constants.js';
 
 /**
  * Create authenticated state for Playwright integration tests
@@ -21,14 +25,14 @@ export const createAuthenticatedState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: {
     user: { ...TEST_USER, ...overrides.user },
     access_token: 'test-access-token',
     refresh_token: 'test-refresh-token',
     expires_at: Date.now() + 3600000,
-    ...overrides.auth_session
+    ...overrides.auth_session,
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   // Add the config structure that ConfigManager expects
@@ -36,20 +40,25 @@ export const createAuthenticatedState = (overrides = {}) => ({
     supabase: {
       url: TEST_SUPABASE_CONFIG.url,
       anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
+      ...overrides.supabaseConfig,
     },
     preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     },
     auth: {
       user: { ...TEST_USER, ...overrides.user },
       access_token: 'test-access-token',
       refresh_token: 'test-refresh-token',
       expires_at: Date.now() + 3600000,
-      ...overrides.auth_session
-    }
+      ...overrides.auth_session,
+    },
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -67,11 +76,16 @@ export const createUnconfiguredState = (overrides = {}) => ({
   config: {
     supabase: null,
     preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     },
-    auth: null
+    auth: null,
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -85,7 +99,7 @@ export const createConfiguredState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
@@ -94,14 +108,19 @@ export const createConfiguredState = (overrides = {}) => ({
     supabase: {
       url: TEST_SUPABASE_CONFIG.url,
       anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
+      ...overrides.supabaseConfig,
     },
     preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     },
-    auth: null
+    auth: null,
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -115,7 +134,7 @@ export const createInvalidConfigState = (overrides = {}) => ({
   supabaseConfig: {
     url: 'https://invalid.supabase.co',
     anonKey: 'invalid-key',
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: null,
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
@@ -123,14 +142,19 @@ export const createInvalidConfigState = (overrides = {}) => ({
     supabase: {
       url: 'https://invalid.supabase.co',
       anonKey: 'invalid-key',
-      ...overrides.supabaseConfig
+      ...overrides.supabaseConfig,
     },
     preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     },
-    auth: null
+    auth: null,
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -144,34 +168,39 @@ export const createExpiredSessionState = (overrides = {}) => ({
   supabaseConfig: {
     url: TEST_SUPABASE_CONFIG.url,
     anonKey: TEST_SUPABASE_CONFIG.anonKey,
-    ...overrides.supabaseConfig
+    ...overrides.supabaseConfig,
   },
   auth_session: {
     user: { ...TEST_USER, ...overrides.user },
     access_token: 'expired-access-token',
     refresh_token: 'expired-refresh-token',
     expires_at: Date.now() - 3600000, // Expired 1 hour ago
-    ...overrides.auth_session
+    ...overrides.auth_session,
   },
   customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
   config: {
     supabase: {
       url: TEST_SUPABASE_CONFIG.url,
       anonKey: TEST_SUPABASE_CONFIG.anonKey,
-      ...overrides.supabaseConfig
+      ...overrides.supabaseConfig,
     },
     preferences: {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     },
     auth: {
       user: { ...TEST_USER, ...overrides.user },
       access_token: 'expired-access-token',
       refresh_token: 'expired-refresh-token',
       expires_at: Date.now() - 3600000,
-      ...overrides.auth_session
-    }
+      ...overrides.auth_session,
+    },
   },
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -189,7 +218,7 @@ export const createBookmarkData = (overrides = {}) => ({
   tags: ['test'],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -201,12 +230,12 @@ export const createBookmarkData = (overrides = {}) => ({
  * @description Creates a list of bookmark data for Playwright integration/E2E testing
  */
 export const createBookmarkList = (count = 3, overrides = {}) => {
-  return Array.from({ length: count }, (_, index) => 
+  return Array.from({ length: count }, (_, index) =>
     createBookmarkData({
       id: `test-bookmark-${index}`,
       url: `https://example${index}.com`,
       title: `Test Bookmark ${index}`,
-      ...overrides
+      ...overrides,
     })
   );
 };
@@ -222,7 +251,7 @@ export const createUserData = (overrides = {}) => ({
   id: TEST_USER.id,
   email: TEST_USER.email,
   name: TEST_USER.name,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -237,7 +266,7 @@ export const createAuthSession = (overrides = {}) => ({
   access_token: 'test-access-token',
   refresh_token: 'test-refresh-token',
   expires_at: Date.now() + 3600000,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -250,7 +279,7 @@ export const createAuthSession = (overrides = {}) => ({
 export const createSupabaseConfig = (overrides = {}) => ({
   url: TEST_SUPABASE_CONFIG.url,
   anonKey: TEST_SUPABASE_CONFIG.anonKey,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -264,7 +293,7 @@ export const createTestPageData = (overrides = {}) => ({
   url: 'https://example.com',
   title: 'Test Page',
   favicon: 'https://example.com/favicon.ico',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -279,7 +308,7 @@ export const createFormData = (data = {}) => ({
   password: 'testpassword',
   supabaseUrl: 'https://test.supabase.co',
   supabaseKey: 'test-anon-key',
-  ...data
+  ...data,
 });
 
 /**
@@ -291,13 +320,17 @@ export const createFormData = (data = {}) => ({
  * @returns {Object} Error response for integration tests
  * @description Creates error response for Playwright integration/E2E testing
  */
-export const createErrorResponse = (message = 'Test error', status = 500, code = 'TEST_ERROR') => ({
+export const createErrorResponse = (
+  message = 'Test error',
+  status = 500,
+  code = 'TEST_ERROR'
+) => ({
   error: {
     message,
     code,
     status,
-    details: 'Test error details'
-  }
+    details: 'Test error details',
+  },
 });
 
 /**
@@ -310,7 +343,7 @@ export const createErrorResponse = (message = 'Test error', status = 500, code =
 export const createSuccessResponse = (data = {}) => ({
   success: true,
   data,
-  message: 'Operation completed successfully'
+  message: 'Operation completed successfully',
 });
 
 /**
@@ -325,7 +358,7 @@ export const createTestEnvironmentConfig = (overrides = {}) => ({
   extensionId: 'test-extension-id',
   timeout: 10000,
   retries: 2,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -338,7 +371,7 @@ export const createTestEnvironmentConfig = (overrides = {}) => ({
 export const createTestCredentials = (overrides = {}) => ({
   email: 'test@example.com',
   password: 'testpassword123',
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -353,7 +386,7 @@ export const createBookmarkStatus = (status = 'read', overrides = {}) => ({
   status,
   timestamp: new Date().toISOString(),
   user_id: TEST_USER.id,
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -368,7 +401,7 @@ export const createTagData = (name = 'test-tag', overrides = {}) => ({
   name,
   color: '#007bff',
   created_at: new Date().toISOString(),
-  ...overrides
+  ...overrides,
 });
 
 /**
@@ -380,10 +413,14 @@ export const createTagData = (name = 'test-tag', overrides = {}) => ({
  * @returns {Object} Notification data
  * @description Creates notification data for Playwright integration/E2E testing
  */
-export const createNotificationData = (type = 'info', message = 'Test notification', overrides = {}) => ({
+export const createNotificationData = (
+  type = 'info',
+  message = 'Test notification',
+  overrides = {}
+) => ({
   type,
   message,
   title: 'Test Notification',
   timestamp: new Date().toISOString(),
-  ...overrides
-}); 
+  ...overrides,
+});

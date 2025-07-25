@@ -486,11 +486,11 @@ export const createTestEnvironment = (customMocks = {}) => {
  */
 export const setupTestWithMocks = (customMocks = {}) => {
   const mocks = createTestEnvironment(customMocks);
-  
+
   // Setup global mocks
   global.chrome = mocks.chrome;
   global.console = mocks.console;
-  
+
   return mocks;
 };
 
@@ -503,35 +503,35 @@ export const setupModuleMocks = () => {
   vi.mock('./utils/error-handler.js', () => ({
     default: createMockErrorHandler(),
   }));
-  
+
   vi.mock('./utils/ui-components.js', () => ({
     default: createMockUIComponents(),
   }));
-  
+
   vi.mock('./utils/ui-messages.js', () => ({
     default: createMockUIMessages(),
   }));
-  
+
   vi.mock('./supabase-service.js', () => ({
     default: createMockSupabaseService(),
   }));
-  
+
   vi.mock('./utils/config-manager.js', () => ({
     default: createMockConfigManager(),
   }));
-  
+
   vi.mock('./utils/auth-state-manager.js', () => ({
     default: createMockAuthStateManager(),
   }));
-  
+
   vi.mock('./supabase-config.js', () => ({
     default: createMockSupabaseConfig(),
   }));
-  
+
   vi.mock('./utils/auth-ui.js', () => ({
     default: createMockAuthUI(),
   }));
-  
+
   vi.mock('./utils/bookmark-transformer.js', () => ({
     default: createMockBookmarkTransformer(),
   }));
@@ -687,13 +687,15 @@ export const setupChromeTabs = (
   }
 ) => {
   mocks.chrome.tabs.query.mockImplementation((queryInfo, callback) => {
-    callback([{
-      id: 1,
-      url: tabData.url,
-      title: tabData.title,
-      active: true,
-      ...tabData,
-    }]);
+    callback([
+      {
+        id: 1,
+        url: tabData.url,
+        title: tabData.title,
+        active: true,
+        ...tabData,
+      },
+    ]);
   });
 
   mocks.chrome.tabs.get.mockImplementation((tabId, callback) => {
@@ -756,13 +758,15 @@ export const setupBookmarkData = (
 export const createPopupTestInstance = (customMocks = {}) => {
   const mocks = setupTestWithMocks(customMocks);
   const popupElement = createMockElement('div', { id: 'app' });
-  
+
   // Setup document mock
   global.document = {
     getElementById: vi.fn().mockReturnValue(popupElement),
     querySelector: vi.fn().mockReturnValue(popupElement),
     querySelectorAll: vi.fn().mockReturnValue([popupElement]),
-    createElement: vi.fn().mockImplementation((tagName) => createMockElement(tagName)),
+    createElement: vi
+      .fn()
+      .mockImplementation(tagName => createMockElement(tagName)),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -784,13 +788,15 @@ export const createPopupTestInstance = (customMocks = {}) => {
 export const createAuthUITestInstance = (customMocks = {}) => {
   const mocks = setupTestWithMocks(customMocks);
   const authContainer = createMockElement('div', { id: 'auth-container' });
-  
+
   // Setup document mock
   global.document = {
     getElementById: vi.fn().mockReturnValue(authContainer),
     querySelector: vi.fn().mockReturnValue(authContainer),
     querySelectorAll: vi.fn().mockReturnValue([authContainer]),
-    createElement: vi.fn().mockImplementation((tagName) => createMockElement(tagName)),
+    createElement: vi
+      .fn()
+      .mockImplementation(tagName => createMockElement(tagName)),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -814,7 +820,9 @@ export const setupGlobalMocks = () => {
     getElementById: vi.fn(),
     querySelector: vi.fn(),
     querySelectorAll: vi.fn(),
-    createElement: vi.fn().mockImplementation((tagName) => createMockElement(tagName)),
+    createElement: vi
+      .fn()
+      .mockImplementation(tagName => createMockElement(tagName)),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -854,4 +862,4 @@ export const setupTest = () => {
  */
 export const cleanupTest = () => {
   cleanupMocks();
-}; 
+};

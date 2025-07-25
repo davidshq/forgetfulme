@@ -14,4 +14,4 @@ export * from './bookmark-factory.js';
 export * from './config-factory.js';
 
 // Export Vitest-specific factories
-export * from './vitest-factories.js'; 
+export * from './vitest-factories.js';

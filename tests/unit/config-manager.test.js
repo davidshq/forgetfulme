@@ -119,7 +119,9 @@ describe('ConfigManager', () => {
       const error = new Error('Storage error');
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
-      await expect(configManager.initialize()).rejects.toThrow('An unexpected error occurred. Please try again.');
+      await expect(configManager.initialize()).rejects.toThrow(
+        'An unexpected error occurred. Please try again.'
+      );
       // ErrorHandler handles errors internally
     });
 

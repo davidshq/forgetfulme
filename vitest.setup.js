@@ -48,10 +48,10 @@ class GlobalChromeStorageManager {
             'good-reference',
             'low-value',
             'revisit-later',
-          ]
+          ],
         },
-        auth: null
-      }
+        auth: null,
+      },
     };
     this.listeners = [];
     this.errorListeners = [];
@@ -65,7 +65,7 @@ class GlobalChromeStorageManager {
   get(keys, callback) {
     try {
       const result = {};
-      
+
       if (Array.isArray(keys)) {
         keys.forEach(key => {
           result[key] = this.data[key] !== undefined ? this.data[key] : null;
@@ -81,7 +81,7 @@ class GlobalChromeStorageManager {
           result[key] = this.data[key] !== undefined ? this.data[key] : null;
         });
       }
-      
+
       callback(result);
     } catch (error) {
       this.notifyErrorListeners('get', error);
@@ -105,7 +105,7 @@ class GlobalChromeStorageManager {
 
       // Notify listeners of changes
       this.notifyListeners(changes);
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('set', error);
@@ -122,7 +122,7 @@ class GlobalChromeStorageManager {
     try {
       const keyArray = Array.isArray(keys) ? keys : [keys];
       const changes = {};
-      
+
       keyArray.forEach(key => {
         if (this.data[key] !== undefined) {
           const oldValue = this.data[key];
@@ -134,7 +134,7 @@ class GlobalChromeStorageManager {
       if (Object.keys(changes).length > 0) {
         this.notifyListeners(changes);
       }
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('remove', error);
@@ -152,10 +152,10 @@ class GlobalChromeStorageManager {
       Object.keys(this.data).forEach(key => {
         changes[key] = { oldValue: this.data[key], newValue: undefined };
       });
-      
+
       this.data = {};
       this.notifyListeners(changes);
-      
+
       if (callback) callback();
     } catch (error) {
       this.notifyErrorListeners('clear', error);
@@ -241,11 +241,11 @@ class GlobalChromeStorageManager {
             'good-reference',
             'low-value',
             'revisit-later',
-          ]
+          ],
         },
-        auth: null
+        auth: null,
       },
-      ...newData
+      ...newData,
     };
     this.listeners = [];
     this.errorListeners = [];
@@ -265,11 +265,17 @@ global.chrome = {
     sync: {
       get: vi.fn((keys, callback) => globalStorageManager.get(keys, callback)),
       set: vi.fn((data, callback) => globalStorageManager.set(data, callback)),
-      remove: vi.fn((keys, callback) => globalStorageManager.remove(keys, callback)),
-      clear: vi.fn((callback) => globalStorageManager.clear(callback)),
+      remove: vi.fn((keys, callback) =>
+        globalStorageManager.remove(keys, callback)
+      ),
+      clear: vi.fn(callback => globalStorageManager.clear(callback)),
       onChanged: {
-        addListener: vi.fn((listener) => globalStorageManager.addListener(listener)),
-        removeListener: vi.fn((listener) => globalStorageManager.removeListener(listener)),
+        addListener: vi.fn(listener =>
+          globalStorageManager.addListener(listener)
+        ),
+        removeListener: vi.fn(listener =>
+          globalStorageManager.removeListener(listener)
+        ),
       },
     },
     local: {
@@ -283,7 +289,7 @@ global.chrome = {
       remove: vi.fn((keys, callback) => {
         if (callback) callback();
       }),
-      clear: vi.fn((callback) => {
+      clear: vi.fn(callback => {
         if (callback) callback();
       }),
     },
@@ -292,24 +298,24 @@ global.chrome = {
     sendMessage: vi.fn((message, callback) => {
       // Enhanced message handling with proper responses
       const responses = {
-        'BOOKMARK_SAVED': { success: true, bookmarkId: 'test-id' },
-        'GET_AUTH_STATE': { 
+        BOOKMARK_SAVED: { success: true, bookmarkId: 'test-id' },
+        GET_AUTH_STATE: {
           authenticated: !!globalStorageManager.data.auth_session,
-          user: globalStorageManager.data.auth_session?.user || null
+          user: globalStorageManager.data.auth_session?.user || null,
         },
-        'TEST_CONNECTION': { success: true, message: 'Connection successful' },
-        'SAVE_CONFIG': { success: true, message: 'Configuration saved' },
-        'GET_CONFIG': { 
-          success: true, 
-          config: globalStorageManager.data.config 
-        }
+        TEST_CONNECTION: { success: true, message: 'Connection successful' },
+        SAVE_CONFIG: { success: true, message: 'Configuration saved' },
+        GET_CONFIG: {
+          success: true,
+          config: globalStorageManager.data.config,
+        },
       };
-      
-      const response = responses[message.type] || { 
-        success: false, 
-        error: 'Unknown message type' 
+
+      const response = responses[message.type] || {
+        success: false,
+        error: 'Unknown message type',
       };
-      
+
       if (callback) {
         // Simulate async response
         setTimeout(() => callback(response), 100);
@@ -329,8 +335,8 @@ global.chrome = {
           id: 1,
           url: 'https://example.com',
           title: 'Test Page',
-          active: true
-        }
+          active: true,
+        },
       ];
       callback(mockTabs);
     }),
@@ -338,7 +344,7 @@ global.chrome = {
       callback({
         id: tabId,
         url: 'https://example.com',
-        title: 'Test Page'
+        title: 'Test Page',
       });
     }),
     update: vi.fn(),
@@ -572,10 +578,10 @@ const createMockElement = tagName => {
     select: vi.fn(),
 
     // Attributes
-    getAttribute: vi.fn(function(name) {
+    getAttribute: vi.fn(function (name) {
       return this._attributes?.[name] || null;
     }),
-    setAttribute: vi.fn(function(name, value) {
+    setAttribute: vi.fn(function (name, value) {
       if (!this._attributes) {
         this._attributes = {};
       }
@@ -585,12 +591,12 @@ const createMockElement = tagName => {
         global.document.registerElement(value, this);
       }
     }),
-    removeAttribute: vi.fn(function(name) {
+    removeAttribute: vi.fn(function (name) {
       if (this._attributes) {
         delete this._attributes[name];
       }
     }),
-    hasAttribute: vi.fn(function(name) {
+    hasAttribute: vi.fn(function (name) {
       return this._attributes?.[name] !== undefined;
     }),
 
@@ -647,8 +653,6 @@ const createMockElement = tagName => {
   element.addEventListener = vi.fn(function (type, handler) {
     this._eventListeners.push({ type, handler });
   });
-
-
 
   // Override id property to register elements
   Object.defineProperty(element, 'id', {
@@ -848,7 +852,9 @@ global.UIComponents = {
     return item;
   }),
   createSection: vi.fn((title, className, options) => {
-    const element = options?.useCard ? global.document.createElement('article') : global.document.createElement('section');
+    const element = options?.useCard
+      ? global.document.createElement('article')
+      : global.document.createElement('section');
     element.className = `section ${className || ''}`.trim();
     if (title) {
       if (options?.useCard) {
@@ -911,21 +917,23 @@ global.UIComponents = {
     }
     return card;
   }),
-  createFormCard: vi.fn((title, formFields, onSubmit, submitText, className) => {
-    const card = global.document.createElement('article');
-    card.className = `card form-card ${className || ''}`.trim();
-    if (title) {
-      const header = global.document.createElement('header');
-      const titleElement = global.document.createElement('h3');
-      titleElement.textContent = title;
-      header.appendChild(titleElement);
-      card.appendChild(header);
+  createFormCard: vi.fn(
+    (title, formFields, onSubmit, submitText, className) => {
+      const card = global.document.createElement('article');
+      card.className = `card form-card ${className || ''}`.trim();
+      if (title) {
+        const header = global.document.createElement('header');
+        const titleElement = global.document.createElement('h3');
+        titleElement.textContent = title;
+        header.appendChild(titleElement);
+        card.appendChild(header);
+      }
+      const form = global.document.createElement('form');
+      form.className = 'card-form';
+      card.appendChild(form);
+      return card;
     }
-    const form = global.document.createElement('form');
-    form.className = 'card-form';
-    card.appendChild(form);
-    return card;
-  }),
+  ),
   createListCard: vi.fn((title, items, options, className) => {
     const card = global.document.createElement('article');
     card.className = `card list-card ${className || ''}`.trim();
@@ -956,7 +964,7 @@ global.UIComponents = {
     const nav = global.document.createElement('nav');
     nav.setAttribute('aria-label', ariaLabel || 'Main navigation');
     nav.className = className || '';
-    
+
     const ul = global.document.createElement('ul');
     items.forEach(item => {
       const li = global.document.createElement('li');
@@ -983,7 +991,7 @@ global.UIComponents = {
     const nav = global.document.createElement('nav');
     nav.setAttribute('aria-label', 'Breadcrumb');
     nav.className = `breadcrumb ${className || ''}`.trim();
-    
+
     const ol = global.document.createElement('ol');
     items.forEach((item, index) => {
       const li = global.document.createElement('li');
@@ -1007,7 +1015,7 @@ global.UIComponents = {
     const nav = global.document.createElement('nav');
     nav.setAttribute('aria-label', ariaLabel || 'Navigation menu');
     nav.className = `nav-menu ${className || ''}`.trim();
-    
+
     const ul = global.document.createElement('ul');
     items.forEach(item => {
       const li = global.document.createElement('li');
@@ -1038,29 +1046,32 @@ global.UIComponents = {
     const header = global.document.createElement('header');
     header.setAttribute('role', 'banner');
     header.className = options?.className || '';
-    
+
     if (title) {
       const titleEl = global.document.createElement('h1');
       titleEl.textContent = title;
       titleEl.setAttribute('id', options?.titleId || 'page-title');
       header.appendChild(titleEl);
     }
-    
+
     if (navItems && navItems.length > 0) {
       const nav = global.document.createElement('nav');
-      nav.setAttribute('aria-label', options?.navAriaLabel || 'Main navigation');
+      nav.setAttribute(
+        'aria-label',
+        options?.navAriaLabel || 'Main navigation'
+      );
       nav.className = options?.navClassName || '';
       header.appendChild(nav);
     }
-    
+
     return header;
   }),
   createModal: vi.fn((title, content, actions, options) => {
     const dialog = global.document.createElement('dialog');
     dialog.className = options?.className || '';
-    
+
     const article = global.document.createElement('article');
-    
+
     if (title) {
       const header = global.document.createElement('header');
       const titleEl = global.document.createElement('h3');
@@ -1068,7 +1079,7 @@ global.UIComponents = {
       header.appendChild(titleEl);
       article.appendChild(header);
     }
-    
+
     const mainContent = global.document.createElement('div');
     if (typeof content === 'string') {
       mainContent.innerHTML = content;
@@ -1076,7 +1087,7 @@ global.UIComponents = {
       mainContent.appendChild(content);
     }
     article.appendChild(mainContent);
-    
+
     if (actions && actions.length > 0) {
       const footer = global.document.createElement('footer');
       actions.forEach(action => {
@@ -1087,7 +1098,7 @@ global.UIComponents = {
       });
       article.appendChild(footer);
     }
-    
+
     if (options?.showClose !== false) {
       const closeBtn = global.document.createElement('button');
       closeBtn.textContent = '×';
@@ -1095,40 +1106,40 @@ global.UIComponents = {
       closeBtn.setAttribute('aria-label', 'Close modal');
       article.appendChild(closeBtn);
     }
-    
+
     dialog.appendChild(article);
     return dialog;
   }),
   createConfirmDialog: vi.fn((message, onConfirm, onCancel, options) => {
     const dialog = global.document.createElement('dialog');
     dialog.className = 'confirm-dialog';
-    
+
     const article = global.document.createElement('article');
-    
+
     const header = global.document.createElement('header');
     const titleEl = global.document.createElement('h3');
     titleEl.textContent = options?.title || 'Confirm';
     header.appendChild(titleEl);
     article.appendChild(header);
-    
+
     const mainContent = global.document.createElement('div');
     mainContent.textContent = message;
     article.appendChild(mainContent);
-    
+
     const footer = global.document.createElement('footer');
     const confirmBtn = global.document.createElement('button');
     confirmBtn.textContent = options?.confirmText || 'Confirm';
     confirmBtn.className = 'primary';
     footer.appendChild(confirmBtn);
-    
+
     const cancelBtn = global.document.createElement('button');
     cancelBtn.textContent = options?.cancelText || 'Cancel';
     cancelBtn.className = 'secondary';
     footer.appendChild(cancelBtn);
-    
+
     article.appendChild(footer);
     dialog.appendChild(article);
-    
+
     return dialog;
   }),
   createTabs: vi.fn((tabs, options) => {

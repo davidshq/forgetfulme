@@ -6,7 +6,7 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
   test.beforeEach(async ({ page, context }) => {
     extensionHelper = new ExtensionHelper(page, context);
-    
+
     // Mock Chrome API before loading the page
     await extensionHelper.mockChromeAPI();
   });
@@ -21,23 +21,25 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
     // Verify configuration form is visible
     const configForm = await page.locator('.config-form');
-    await expect(configForm).toBeVisible({ 
+    await expect(configForm).toBeVisible({
       timeout: 5000,
-      message: 'Configuration form should be visible for unconfigured state'
+      message: 'Configuration form should be visible for unconfigured state',
     });
 
     // Fill in configuration fields
     const urlInput = await page.locator('#supabaseUrl');
     const keyInput = await page.locator('#supabaseAnonKey');
-    
+
     await expect(urlInput).toBeVisible({ timeout: 5000 });
     await expect(keyInput).toBeVisible({ timeout: 5000 });
-    
+
     await urlInput.fill('https://test.supabase.co');
     await keyInput.fill('test-anon-key');
 
     // Submit configuration
-    const submitButton = await page.locator('.config-form button[type="submit"]');
+    const submitButton = await page.locator(
+      '.config-form button[type="submit"]'
+    );
     await expect(submitButton).toBeVisible({ timeout: 5000 });
     await submitButton.click();
 
@@ -46,9 +48,9 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
     // Verify success message
     const successMessage = await page.locator('.ui-message.success');
-    await expect(successMessage).toBeVisible({ 
+    await expect(successMessage).toBeVisible({
       timeout: 5000,
-      message: 'Success message should be displayed after configuration save'
+      message: 'Success message should be displayed after configuration save',
     });
   });
 
@@ -61,7 +63,9 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     // Verify required fields are present
     const urlInput = await page.locator('#supabaseUrl');
     const keyInput = await page.locator('#supabaseAnonKey');
-    const submitButton = await page.locator('.config-form button[type="submit"]');
+    const submitButton = await page.locator(
+      '.config-form button[type="submit"]'
+    );
 
     await expect(urlInput).toBeVisible({ timeout: 5000 });
     await expect(keyInput).toBeVisible({ timeout: 5000 });
@@ -73,9 +77,9 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
     // Should show validation error
     const errorMessage = await page.locator('.ui-message.error');
-    await expect(errorMessage).toBeVisible({ 
+    await expect(errorMessage).toBeVisible({
       timeout: 5000,
-      message: 'Error message should be displayed for invalid form submission'
+      message: 'Error message should be displayed for invalid form submission',
     });
   });
 
@@ -88,12 +92,14 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     // Fill configuration
     const urlInput = await page.locator('#supabaseUrl');
     const keyInput = await page.locator('#supabaseAnonKey');
-    
+
     await urlInput.fill('https://test.supabase.co');
     await keyInput.fill('test-anon-key');
 
     // Submit configuration
-    const submitButton = await page.locator('.config-form button[type="submit"]');
+    const submitButton = await page.locator(
+      '.config-form button[type="submit"]'
+    );
     await submitButton.click();
     await extensionHelper.waitForNetworkIdle();
 
@@ -105,9 +111,10 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
       // Verify connection success
       const successMessage = await page.locator('.ui-message.success');
-      await expect(successMessage).toBeVisible({ 
+      await expect(successMessage).toBeVisible({
         timeout: 5000,
-        message: 'Success message should be displayed after successful connection test'
+        message:
+          'Success message should be displayed after successful connection test',
       });
     }
   });
@@ -121,12 +128,14 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     // Fill configuration with invalid data
     const urlInput = await page.locator('#supabaseUrl');
     const keyInput = await page.locator('#supabaseAnonKey');
-    
+
     await urlInput.fill('https://invalid.supabase.co');
     await keyInput.fill('invalid-key');
 
     // Submit configuration
-    const submitButton = await page.locator('.config-form button[type="submit"]');
+    const submitButton = await page.locator(
+      '.config-form button[type="submit"]'
+    );
     await submitButton.click();
     await extensionHelper.waitForNetworkIdle();
 
@@ -138,9 +147,10 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
 
       // Verify connection error
       const errorMessage = await page.locator('.ui-message.error');
-      await expect(errorMessage).toBeVisible({ 
+      await expect(errorMessage).toBeVisible({
         timeout: 5000,
-        message: 'Error message should be displayed after failed connection test'
+        message:
+          'Error message should be displayed after failed connection test',
       });
     }
   });
@@ -150,20 +160,25 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     const configuredState = {
       supabaseConfig: {
         url: 'https://test.supabase.co',
-        anonKey: 'test-anon-key'
+        anonKey: 'test-anon-key',
       },
       config: {
         supabase: {
           url: 'https://test.supabase.co',
-          anonKey: 'test-anon-key'
+          anonKey: 'test-anon-key',
         },
         preferences: {
-          customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later']
+          customStatusTypes: [
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ],
         },
-        auth: null
-      }
+        auth: null,
+      },
     };
-    
+
     // Mock Chrome API before page loads
     await extensionHelper.mockChromeAPI(configuredState);
 
@@ -173,16 +188,16 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     // Debug: Check what's actually being rendered
     const pageContent = await page.content();
     console.log('Page content:', pageContent.substring(0, 500));
-    
+
     // Check if we're in setup mode or main interface
     const setupContainer = await page.locator('.setup-container');
     const mainContainer = await page.locator('.main-container');
     const configContainer = await page.locator('.config-container');
-    
+
     const isSetupVisible = await setupContainer.isVisible();
     const isMainVisible = await mainContainer.isVisible();
     const isConfigVisible = await configContainer.isVisible();
-    
+
     console.log('Setup container visible:', isSetupVisible);
     console.log('Main container visible:', isMainVisible);
     console.log('Config container visible:', isConfigVisible);
@@ -192,14 +207,17 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
       const configForm = await page.locator('#configForm');
       await expect(configForm).toBeVisible({
         timeout: 5000,
-        message: 'Configuration form should be displayed for configured state'
+        message: 'Configuration form should be displayed for configured state',
       });
     } else {
       // If we're in main mode, we should see the status
-      const statusElement = await page.locator('.config-status, .status-display');
+      const statusElement = await page.locator(
+        '.config-status, .status-display'
+      );
       await expect(statusElement).toBeVisible({
         timeout: 5000,
-        message: 'Configuration status should be displayed for configured state'
+        message:
+          'Configuration status should be displayed for configured state',
       });
     }
   });
@@ -213,23 +231,25 @@ test.describe('ForgetfulMe Configuration Flow Tests', () => {
     // Try to submit invalid configuration
     const urlInput = await page.locator('#supabaseUrl');
     const keyInput = await page.locator('#supabaseAnonKey');
-    
+
     await urlInput.fill('invalid-url');
     await keyInput.fill('invalid-key');
 
-    const submitButton = await page.locator('.config-form button[type="submit"]');
+    const submitButton = await page.locator(
+      '.config-form button[type="submit"]'
+    );
     await submitButton.click();
     await extensionHelper.waitForNetworkIdle();
 
     // Verify error handling
     const errorMessage = await page.locator('.ui-message.error');
-    await expect(errorMessage).toBeVisible({ 
+    await expect(errorMessage).toBeVisible({
       timeout: 5000,
-      message: 'Error message should be displayed for invalid configuration'
+      message: 'Error message should be displayed for invalid configuration',
     });
 
     // Verify form is still accessible for correction
     await expect(urlInput).toBeVisible({ timeout: 5000 });
     await expect(keyInput).toBeVisible({ timeout: 5000 });
   });
-}); 
+});

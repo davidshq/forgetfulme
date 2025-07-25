@@ -701,7 +701,9 @@ describe('UIComponents', () => {
       });
 
       test('should create card-like section when useCard option is true', () => {
-        const card = UIComponents.createSection('Test Card', '', { useCard: true });
+        const card = UIComponents.createSection('Test Card', '', {
+          useCard: true,
+        });
 
         expect(card.tagName).toBe('ARTICLE');
         expect(card.className).toContain('section');
@@ -720,7 +722,10 @@ describe('UIComponents', () => {
       });
 
       test('should create card with title and content', () => {
-        const card = UIComponents.createCard('Test Card', '<p>Test content</p>');
+        const card = UIComponents.createCard(
+          'Test Card',
+          '<p>Test content</p>'
+        );
 
         expect(card.tagName).toBe('ARTICLE');
         expect(card.className).toContain('card');
@@ -744,14 +749,23 @@ describe('UIComponents', () => {
       });
 
       test('should create card with footer', () => {
-        const card = UIComponents.createCard('Test Card', '<p>Content</p>', '<p>Footer</p>');
+        const card = UIComponents.createCard(
+          'Test Card',
+          '<p>Content</p>',
+          '<p>Footer</p>'
+        );
 
         expect(card.querySelector('footer')).toBeTruthy();
         expect(card.querySelector('footer').innerHTML).toBe('<p>Footer</p>');
       });
 
       test('should create card with custom class', () => {
-        const card = UIComponents.createCard('Test Card', 'Content', '', 'custom-card');
+        const card = UIComponents.createCard(
+          'Test Card',
+          'Content',
+          '',
+          'custom-card'
+        );
 
         expect(card.className).toContain('custom-card');
       });
@@ -768,7 +782,11 @@ describe('UIComponents', () => {
           { text: 'Action 2', onClick: vi.fn(), className: 'secondary' },
         ];
 
-        const card = UIComponents.createCardWithActions('Test Card', '<p>Content</p>', actions);
+        const card = UIComponents.createCardWithActions(
+          'Test Card',
+          '<p>Content</p>',
+          actions
+        );
 
         expect(card.tagName).toBe('ARTICLE');
         expect(card.className).toContain('card');
@@ -787,7 +805,11 @@ describe('UIComponents', () => {
       });
 
       test('should create card without actions', () => {
-        const card = UIComponents.createCardWithActions('Test Card', '<p>Content</p>', []);
+        const card = UIComponents.createCardWithActions(
+          'Test Card',
+          '<p>Content</p>',
+          []
+        );
 
         expect(card.querySelector('footer')).toBeFalsy();
       });
@@ -809,7 +831,12 @@ describe('UIComponents', () => {
         ];
 
         const onSubmit = vi.fn();
-        const card = UIComponents.createFormCard('Test Form', formFields, onSubmit, 'Submit');
+        const card = UIComponents.createFormCard(
+          'Test Form',
+          formFields,
+          onSubmit,
+          'Submit'
+        );
 
         expect(card.tagName).toBe('ARTICLE');
         expect(card.className).toContain('form-card');
@@ -922,7 +949,9 @@ describe('UIComponents', () => {
         expect(breadcrumb.querySelectorAll('li')).toHaveLength(3);
         expect(breadcrumb.querySelectorAll('a')).toHaveLength(2);
         // Check if current page span exists
-        const currentSpan = breadcrumb.querySelector('span[aria-current="page"]');
+        const currentSpan = breadcrumb.querySelector(
+          'span[aria-current="page"]'
+        );
         if (currentSpan) {
           expect(currentSpan).toBeTruthy();
         }
@@ -1001,7 +1030,9 @@ describe('UIComponents', () => {
           expect(titleId).toBe('test-title');
         }
         expect(header.querySelector('nav')).toBeTruthy();
-        const navAriaLabel = header.querySelector('nav').getAttribute('aria-label');
+        const navAriaLabel = header
+          .querySelector('nav')
+          .getAttribute('aria-label');
         if (navAriaLabel) {
           expect(navAriaLabel).toBe('Page navigation');
         }
@@ -1066,10 +1097,14 @@ describe('UIComponents', () => {
 
       test('should create modal without close button', () => {
         const content = 'Modal content';
-        const modal = UIComponents.createModal('Test Modal', content, [], { showClose: false });
+        const modal = UIComponents.createModal('Test Modal', content, [], {
+          showClose: false,
+        });
 
         expect(modal.tagName).toBe('DIALOG');
-        expect(modal.querySelector('button[aria-label="Close modal"]')).toBeFalsy();
+        expect(
+          modal.querySelector('button[aria-label="Close modal"]')
+        ).toBeFalsy();
       });
     });
 
@@ -1106,10 +1141,10 @@ describe('UIComponents', () => {
           'Are you sure?',
           mockConfirm,
           mockCancel,
-          { 
-            confirmText: 'Yes', 
+          {
+            confirmText: 'Yes',
             cancelText: 'No',
-            title: 'Custom Title'
+            title: 'Custom Title',
           }
         );
 
@@ -1152,7 +1187,10 @@ describe('UIComponents', () => {
       });
 
       test('should create progress indicator with custom class', () => {
-        const progress = UIComponents.createProgressIndicator('Loading', 'custom-progress');
+        const progress = UIComponents.createProgressIndicator(
+          'Loading',
+          'custom-progress'
+        );
 
         expect(progress.tagName).toBe('PROGRESS');
         expect(progress.getAttribute('aria-label')).toBe('Loading');
@@ -1193,20 +1231,25 @@ describe('UIComponents', () => {
         expect(loading.className).toContain('loading-state');
         expect(loading.querySelector('progress')).toBeTruthy();
         expect(loading.querySelector('.loading-text')).toBeTruthy();
-        expect(loading.querySelector('.loading-text').textContent).toBe('Loading...');
+        expect(loading.querySelector('.loading-text').textContent).toBe(
+          'Loading...'
+        );
       });
 
-          test('should create loading state without text', () => {
-      const loading = UIComponents.createLoadingState('');
+      test('should create loading state without text', () => {
+        const loading = UIComponents.createLoadingState('');
 
-      expect(loading.tagName).toBe('DIV');
-      expect(loading.className).toContain('loading-state');
-      expect(loading.querySelector('progress')).toBeTruthy();
-      expect(loading.querySelector('.loading-text')).toBeFalsy();
-    });
+        expect(loading.tagName).toBe('DIV');
+        expect(loading.className).toContain('loading-state');
+        expect(loading.querySelector('progress')).toBeTruthy();
+        expect(loading.querySelector('.loading-text')).toBeFalsy();
+      });
 
       test('should create loading state with custom class', () => {
-        const loading = UIComponents.createLoadingState('Loading...', 'custom-loading');
+        const loading = UIComponents.createLoadingState(
+          'Loading...',
+          'custom-loading'
+        );
 
         expect(loading.className).toContain('custom-loading');
       });
@@ -1237,7 +1280,9 @@ describe('UIComponents', () => {
         expect(loadingState.className).toContain('loading-state');
         expect(loadingState.querySelector('progress')).toBeTruthy();
         expect(loadingState.querySelector('.loading-text')).toBeTruthy();
-        expect(loadingState.querySelector('.loading-text').textContent).toBe('Loading...');
+        expect(loadingState.querySelector('.loading-text').textContent).toBe(
+          'Loading...'
+        );
       });
 
       test('should create loading state with custom class', () => {

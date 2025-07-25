@@ -21,7 +21,7 @@ const BackgroundErrorHandler = {
   handle(error, context) {
     // Log error for debugging
     console.error(`[${context}] Error:`, error.message);
-    
+
     // Show user-friendly notification if needed
     this.showErrorNotification(error, context);
   },
@@ -53,12 +53,20 @@ const BackgroundErrorHandler = {
     const message = error.message || error.toString();
 
     // Network errors
-    if (message.includes('fetch') || message.includes('network') || message.includes('HTTP')) {
+    if (
+      message.includes('fetch') ||
+      message.includes('network') ||
+      message.includes('HTTP')
+    ) {
       return 'Connection error. Please check your internet connection and try again.';
     }
 
     // Authentication errors
-    if (message.includes('auth') || message.includes('login') || message.includes('sign')) {
+    if (
+      message.includes('auth') ||
+      message.includes('login') ||
+      message.includes('sign')
+    ) {
       return 'Authentication error. Please try signing in again.';
     }
 
@@ -82,7 +90,7 @@ const BackgroundErrorHandler = {
     error.context = context;
     error.timestamp = new Date().toISOString();
     return error;
-  }
+  },
 };
 
 /**
@@ -552,7 +560,10 @@ class ForgetfulMeBackground {
         // Default settings initialized successfully
       }
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.initializeDefaultSettings');
+      BackgroundErrorHandler.handle(
+        error,
+        'background.initializeDefaultSettings'
+      );
     }
   }
 

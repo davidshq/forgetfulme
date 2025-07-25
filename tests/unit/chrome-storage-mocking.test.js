@@ -9,11 +9,11 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { 
-  mockChromeAPI, 
-  createAuthenticatedState, 
-  createUnconfiguredState, 
-  createConfiguredUnauthenticatedState 
+import {
+  mockChromeAPI,
+  createAuthenticatedState,
+  createUnconfiguredState,
+  createConfiguredUnauthenticatedState,
 } from './utils/test-utils.js';
 
 describe('Enhanced Chrome Storage Mocking', () => {
@@ -33,7 +33,7 @@ describe('Enhanced Chrome Storage Mocking', () => {
   describe('ChromeStorageManager State Management', () => {
     test('should initialize with default state', () => {
       mockChrome = mockChromeAPI();
-      
+
       expect(mockChrome.storage.sync.get).toBeDefined();
       expect(mockChrome.storage.sync.set).toBeDefined();
       expect(mockChrome.storage.sync.remove).toBeDefined();
@@ -45,26 +45,33 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle get with array keys', async () => {
       mockChrome = mockChromeAPI({
         supabaseConfig: { url: 'https://test.supabase.co' },
-        auth_session: { user: { id: 'test-user' } }
+        auth_session: { user: { id: 'test-user' } },
       });
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.get(['supabaseConfig', 'auth_session'], (result) => {
-          expect(result.supabaseConfig).toEqual({ url: 'https://test.supabase.co' });
-          expect(result.auth_session).toEqual({ user: { id: 'test-user' } });
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.get(
+          ['supabaseConfig', 'auth_session'],
+          result => {
+            expect(result.supabaseConfig).toEqual({
+              url: 'https://test.supabase.co',
+            });
+            expect(result.auth_session).toEqual({ user: { id: 'test-user' } });
+            resolve();
+          }
+        );
       });
     });
 
     test('should handle get with string key', async () => {
       mockChrome = mockChromeAPI({
-        supabaseConfig: { url: 'https://test.supabase.co' }
+        supabaseConfig: { url: 'https://test.supabase.co' },
       });
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.get('supabaseConfig', (result) => {
-          expect(result.supabaseConfig).toEqual({ url: 'https://test.supabase.co' });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.get('supabaseConfig', result => {
+          expect(result.supabaseConfig).toEqual({
+            url: 'https://test.supabase.co',
+          });
           resolve();
         });
       });
@@ -73,12 +80,14 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle get with null keys (all data)', async () => {
       mockChrome = mockChromeAPI({
         supabaseConfig: { url: 'https://test.supabase.co' },
-        auth_session: { user: { id: 'test-user' } }
+        auth_session: { user: { id: 'test-user' } },
       });
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.get(null, (result) => {
-          expect(result.supabaseConfig).toEqual({ url: 'https://test.supabase.co' });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.get(null, result => {
+          expect(result.supabaseConfig).toEqual({
+            url: 'https://test.supabase.co',
+          });
           expect(result.auth_session).toEqual({ user: { id: 'test-user' } });
           expect(result.customStatusTypes).toBeDefined();
           resolve();
@@ -88,12 +97,14 @@ describe('Enhanced Chrome Storage Mocking', () => {
 
     test('should handle get with undefined keys (all data)', async () => {
       mockChrome = mockChromeAPI({
-        supabaseConfig: { url: 'https://test.supabase.co' }
+        supabaseConfig: { url: 'https://test.supabase.co' },
       });
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.get(undefined, (result) => {
-          expect(result.supabaseConfig).toEqual({ url: 'https://test.supabase.co' });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.get(undefined, result => {
+          expect(result.supabaseConfig).toEqual({
+            url: 'https://test.supabase.co',
+          });
           expect(result.customStatusTypes).toBeDefined();
           resolve();
         });
@@ -103,12 +114,15 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should return null for non-existent keys', async () => {
       mockChrome = mockChromeAPI();
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.get(['nonexistent', 'supabaseConfig'], (result) => {
-          expect(result.nonexistent).toBeNull();
-          expect(result.supabaseConfig).toBeNull();
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.get(
+          ['nonexistent', 'supabaseConfig'],
+          result => {
+            expect(result.nonexistent).toBeNull();
+            expect(result.supabaseConfig).toBeNull();
+            resolve();
+          }
+        );
       });
     });
   });
@@ -117,40 +131,57 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should set data and notify listeners', async () => {
       mockChrome = mockChromeAPI();
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.set({ supabaseConfig: { url: 'https://test.supabase.co' } }, () => {
-          expect(listener).toHaveBeenCalledWith(
-            { supabaseConfig: { oldValue: null, newValue: { url: 'https://test.supabase.co' } } },
-            'sync'
-          );
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.set(
+          { supabaseConfig: { url: 'https://test.supabase.co' } },
+          () => {
+            expect(listener).toHaveBeenCalledWith(
+              {
+                supabaseConfig: {
+                  oldValue: null,
+                  newValue: { url: 'https://test.supabase.co' },
+                },
+              },
+              'sync'
+            );
+            resolve();
+          }
+        );
       });
     });
 
     test('should handle multiple set operations', async () => {
       mockChrome = mockChromeAPI();
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.set({
-          supabaseConfig: { url: 'https://test.supabase.co' },
-          auth_session: { user: { id: 'test-user' } }
-        }, () => {
-          expect(listener).toHaveBeenCalledWith(
-            expect.objectContaining({
-              supabaseConfig: { oldValue: null, newValue: { url: 'https://test.supabase.co' } },
-              auth_session: { oldValue: null, newValue: { user: { id: 'test-user' } } }
-            }),
-            'sync'
-          );
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.set(
+          {
+            supabaseConfig: { url: 'https://test.supabase.co' },
+            auth_session: { user: { id: 'test-user' } },
+          },
+          () => {
+            expect(listener).toHaveBeenCalledWith(
+              expect.objectContaining({
+                supabaseConfig: {
+                  oldValue: null,
+                  newValue: { url: 'https://test.supabase.co' },
+                },
+                auth_session: {
+                  oldValue: null,
+                  newValue: { user: { id: 'test-user' } },
+                },
+              }),
+              'sync'
+            );
+            resolve();
+          }
+        );
       });
     });
 
@@ -158,9 +189,9 @@ describe('Enhanced Chrome Storage Mocking', () => {
       mockChrome = mockChromeAPI();
       const callback = vi.fn();
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.set({ test: 'value' }, callback);
-        
+
         setTimeout(() => {
           expect(callback).toHaveBeenCalled();
           resolve();
@@ -170,7 +201,7 @@ describe('Enhanced Chrome Storage Mocking', () => {
 
     test('should handle set without callback', () => {
       mockChrome = mockChromeAPI();
-      
+
       expect(() => {
         mockChrome.storage.sync.set({ test: 'value' });
       }).not.toThrow();
@@ -181,16 +212,21 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should remove single key', async () => {
       mockChrome = mockChromeAPI({
         supabaseConfig: { url: 'https://test.supabase.co' },
-        auth_session: { user: { id: 'test-user' } }
+        auth_session: { user: { id: 'test-user' } },
       });
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.remove('supabaseConfig', () => {
           expect(listener).toHaveBeenCalledWith(
-            { supabaseConfig: { oldValue: { url: 'https://test.supabase.co' }, newValue: undefined } },
+            {
+              supabaseConfig: {
+                oldValue: { url: 'https://test.supabase.co' },
+                newValue: undefined,
+              },
+            },
             'sync'
           );
           resolve();
@@ -201,33 +237,42 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should remove multiple keys', async () => {
       mockChrome = mockChromeAPI({
         supabaseConfig: { url: 'https://test.supabase.co' },
-        auth_session: { user: { id: 'test-user' } }
+        auth_session: { user: { id: 'test-user' } },
       });
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
-        mockChrome.storage.sync.remove(['supabaseConfig', 'auth_session'], () => {
-          expect(listener).toHaveBeenCalledWith(
-            expect.objectContaining({
-              supabaseConfig: { oldValue: { url: 'https://test.supabase.co' }, newValue: undefined },
-              auth_session: { oldValue: { user: { id: 'test-user' } }, newValue: undefined }
-            }),
-            'sync'
-          );
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.storage.sync.remove(
+          ['supabaseConfig', 'auth_session'],
+          () => {
+            expect(listener).toHaveBeenCalledWith(
+              expect.objectContaining({
+                supabaseConfig: {
+                  oldValue: { url: 'https://test.supabase.co' },
+                  newValue: undefined,
+                },
+                auth_session: {
+                  oldValue: { user: { id: 'test-user' } },
+                  newValue: undefined,
+                },
+              }),
+              'sync'
+            );
+            resolve();
+          }
+        );
       });
     });
 
     test('should handle remove non-existent key', async () => {
       mockChrome = mockChromeAPI();
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.remove('nonexistent', () => {
           expect(listener).not.toHaveBeenCalled();
           resolve();
@@ -240,18 +285,24 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should clear all data and notify listeners', async () => {
       mockChrome = mockChromeAPI({
         supabaseConfig: { url: 'https://test.supabase.co' },
-        auth_session: { user: { id: 'test-user' } }
+        auth_session: { user: { id: 'test-user' } },
       });
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.clear(() => {
           expect(listener).toHaveBeenCalledWith(
             expect.objectContaining({
-              supabaseConfig: { oldValue: { url: 'https://test.supabase.co' }, newValue: undefined },
-              auth_session: { oldValue: { user: { id: 'test-user' } }, newValue: undefined }
+              supabaseConfig: {
+                oldValue: { url: 'https://test.supabase.co' },
+                newValue: undefined,
+              },
+              auth_session: {
+                oldValue: { user: { id: 'test-user' } },
+                newValue: undefined,
+              },
             }),
             'sync'
           );
@@ -265,10 +316,10 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should add and remove listeners', () => {
       mockChrome = mockChromeAPI();
       const listener = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener);
       expect(mockChrome._storageManager.listeners).toContain(listener);
-      
+
       mockChrome.storage.sync.onChanged.removeListener(listener);
       expect(mockChrome._storageManager.listeners).not.toContain(listener);
     });
@@ -277,11 +328,11 @@ describe('Enhanced Chrome Storage Mocking', () => {
       mockChrome = mockChromeAPI();
       const listener1 = vi.fn();
       const listener2 = vi.fn();
-      
+
       mockChrome.storage.sync.onChanged.addListener(listener1);
       mockChrome.storage.sync.onChanged.addListener(listener2);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.set({ test: 'value' }, () => {
           expect(listener1).toHaveBeenCalled();
           expect(listener2).toHaveBeenCalled();
@@ -295,11 +346,11 @@ describe('Enhanced Chrome Storage Mocking', () => {
       const errorListener = vi.fn().mockImplementation(() => {
         throw new Error('Listener error');
       });
-      
+
       mockChrome.storage.sync.onChanged.addListener(errorListener);
 
       // Should not throw error
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.set({ test: 'value' }, () => {
           resolve();
         });
@@ -332,7 +383,7 @@ describe('Enhanced Chrome Storage Mocking', () => {
 
     test('should create configured unauthenticated state', () => {
       const state = createConfiguredUnauthenticatedState({
-        url: 'https://custom.supabase.co'
+        url: 'https://custom.supabase.co',
       });
 
       expect(state.supabaseConfig.url).toBe('https://custom.supabase.co');
@@ -346,8 +397,8 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle GET_AUTH_STATE message', async () => {
       mockChrome = mockChromeAPI(createAuthenticatedState());
 
-      return new Promise((resolve) => {
-        mockChrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, (response) => {
+      return new Promise(resolve => {
+        mockChrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, response => {
           expect(response.authenticated).toBe(true);
           expect(response.user.id).toBe('test-user-id');
           resolve();
@@ -358,8 +409,8 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle GET_AUTH_STATE when not authenticated', async () => {
       mockChrome = mockChromeAPI(createUnconfiguredState());
 
-      return new Promise((resolve) => {
-        mockChrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, (response) => {
+      return new Promise(resolve => {
+        mockChrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, response => {
           expect(response.authenticated).toBe(false);
           expect(response.user).toBeNull();
           resolve();
@@ -370,12 +421,15 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle unknown message types', async () => {
       mockChrome = mockChromeAPI();
 
-      return new Promise((resolve) => {
-        mockChrome.runtime.sendMessage({ type: 'UNKNOWN_MESSAGE' }, (response) => {
-          expect(response.success).toBe(false);
-          expect(response.error).toBe('Unknown message type');
-          resolve();
-        });
+      return new Promise(resolve => {
+        mockChrome.runtime.sendMessage(
+          { type: 'UNKNOWN_MESSAGE' },
+          response => {
+            expect(response.success).toBe(false);
+            expect(response.error).toBe('Unknown message type');
+            resolve();
+          }
+        );
       });
     });
 
@@ -391,7 +445,7 @@ describe('Enhanced Chrome Storage Mocking', () => {
   describe('Error Handling', () => {
     test('should handle storage get errors gracefully', async () => {
       mockChrome = mockChromeAPI();
-      
+
       // Test that the storage manager handles errors gracefully
       // by calling the method directly and ensuring it doesn't throw
       expect(() => {
@@ -401,7 +455,7 @@ describe('Enhanced Chrome Storage Mocking', () => {
 
     test('should handle storage set errors gracefully', async () => {
       mockChrome = mockChromeAPI();
-      
+
       // Test that the storage manager handles errors gracefully
       // by calling the method directly and ensuring it doesn't throw
       expect(() => {
@@ -414,10 +468,10 @@ describe('Enhanced Chrome Storage Mocking', () => {
       const errorListener = vi.fn().mockImplementation(() => {
         throw new Error('Listener error');
       });
-      
+
       mockChrome.storage.sync.onChanged.addListener(errorListener);
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         mockChrome.storage.sync.set({ test: 'value' }, () => {
           // Should not throw error even though listener throws
           resolve();
@@ -431,8 +485,8 @@ describe('Enhanced Chrome Storage Mocking', () => {
       // Test that the global chrome mock works with the storage manager
       global.chrome._storageManager.reset(createAuthenticatedState());
 
-      return new Promise((resolve) => {
-        global.chrome.storage.sync.get(['auth_session'], (result) => {
+      return new Promise(resolve => {
+        global.chrome.storage.sync.get(['auth_session'], result => {
           expect(result.auth_session.user.id).toBe('test-user-id');
           resolve();
         });
@@ -442,13 +496,16 @@ describe('Enhanced Chrome Storage Mocking', () => {
     test('should handle global chrome runtime messages', async () => {
       global.chrome._storageManager.reset(createAuthenticatedState());
 
-      return new Promise((resolve) => {
-        global.chrome.runtime.sendMessage({ type: 'GET_AUTH_STATE' }, (response) => {
-          expect(response.authenticated).toBe(true);
-          expect(response.user.id).toBe('test-user-id');
-          resolve();
-        });
+      return new Promise(resolve => {
+        global.chrome.runtime.sendMessage(
+          { type: 'GET_AUTH_STATE' },
+          response => {
+            expect(response.authenticated).toBe(true);
+            expect(response.user.id).toBe('test-user-id');
+            resolve();
+          }
+        );
       });
     });
   });
-}); 
+});
