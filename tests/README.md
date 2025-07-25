@@ -26,14 +26,22 @@ tests/
 │   ├── ui-messages.test.js
 │   ├── auth-ui.test.js
 │   ├── supabase-service.test.js
-│   └── background.test.js
+│   ├── background.test.js
+│   ├── supabase-config.test.js
+│   ├── config-ui.test.js
+│   ├── popup.test.js
+│   ├── options.test.js
+│   ├── formatters.test.js
+│   ├── bookmark-management.test.js
+│   └── example-usage.test.js
+├── integration/             # End-to-end integration tests (Playwright)
+│   ├── popup.test.js        # Popup interface and user interactions
+│   └── options.test.js      # Options page configuration
 ├── helpers/                 # Test utilities and factories
 │   ├── test-utils.js       # Core test utilities
 │   ├── test-factories.js   # Specialized test factories
 │   └── extension-helper.js # Playwright extension helper
-├── popup.test.js           # Playwright integration tests
-├── options.test.js         # Playwright integration tests
-└── README.md              # This file
+├── README.md               # This file
 ```
 
 ## Test Categories
@@ -52,7 +60,7 @@ These tests focus on individual utility modules and their business logic:
 - **SupabaseService** - Database operations
 - **BackgroundService** - Extension background functionality
 
-### Integration Tests (`tests/`)
+### Integration Tests (`tests/integration/`)
 
 These tests use Playwright for end-to-end functionality:
 
@@ -96,12 +104,13 @@ npm run test:unit
 
 ### Integration Tests Only
 ```bash
-npm run test:integration
+npm run test:playwright
 ```
 
 ### Specific Test File
 ```bash
 npm test tests/unit/error-handler.test.js
+npm run test:playwright tests/integration/popup.test.js
 ```
 
 ## Test Best Practices

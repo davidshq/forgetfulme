@@ -2,22 +2,44 @@
 
 ## Overview
 
-This document outlines the integration tests that should be implemented to cover the major functionality of the ForgetfulMe Chrome extension. Tests are organized by functionality area and priority.
+This document outlines the integration tests that should be implemented to cover the major functionality of the ForgetfulMe Chrome extension. Integration tests focus on end-to-end user workflows and cross-component interactions using Playwright for browser-based testing.
 
-## Test Categories
+## Current Integration Test Architecture
 
-### 1. Popup Interface Tests ✅ (Partially Implemented)
+### Test Framework Setup
+- **Integration Tests**: Playwright for end-to-end testing (`tests/`)
+- **Test Helpers**: Shared utilities in `tests/helpers/`
+- **Test Structure**: Browser-based testing with Chrome extension loading
 
-**Status**: 5/5 tests implemented and passing
+### Integration Test Structure
+```
+tests/
+├── popup.test.js          # Popup interface tests (4 tests)
+├── options.test.js         # Options page tests (6 tests)
+├── bookmark.test.js        # Bookmark management tests (7 tests)
+├── debug-auth.test.js      # Authentication debug tests (1 test)
+├── bookmark-setup.test.js  # Bookmark setup tests (to be analyzed)
+├── debug-bookmark.test.js  # Bookmark debug tests (to be analyzed)
+├── debug.test.js          # General debug tests (to be analyzed)
+└── helpers/
+    ├── extension-helper.js # Playwright extension utilities
+    ├── test-utils.js      # Shared test utilities
+    └── test-factories.js  # Test data factories
+```
 
-**Tests**:
+## Integration Test Categories
+
+### 1. Popup Interface Tests ✅ (Implemented)
+
+**Status**: 4/4 tests implemented and passing
+
+**Current Tests**:
 - ✅ `popup.test.js` - Setup interface display
 - ✅ `popup.test.js` - Settings button functionality  
 - ✅ `popup.test.js` - How it works section
 - ✅ `popup.test.js` - Styling and layout
-- ✅ `popup.test.js` - Error handling
 
-**Missing Tests**:
+**Missing Integration Tests**:
 - ❌ Main interface (when authenticated and configured)
 - ❌ Mark as read functionality
 - ❌ Status selection dropdown
@@ -31,7 +53,7 @@ This document outlines the integration tests that should be implemented to cover
 
 **Status**: 6/6 tests implemented and passing
 
-**Tests**:
+**Current Tests**:
 - ✅ `options.test.js` - Configuration interface
 - ✅ `options.test.js` - Form validation
 - ✅ `options.test.js` - Form submission
@@ -39,7 +61,7 @@ This document outlines the integration tests that should be implemented to cover
 - ✅ `options.test.js` - Help instructions
 - ✅ `options.test.js` - Error handling
 
-**Missing Tests**:
+**Missing Integration Tests**:
 - ❌ Authentication interface (when not authenticated)
 - ❌ Main settings interface (when authenticated)
 - ❌ Custom status types management
@@ -48,11 +70,37 @@ This document outlines the integration tests that should be implemented to cover
 - ❌ Recent entries management
 - ❌ Data clearing functionality
 
-### 3. Authentication Tests 🔄 (Partially Implemented)
+### 3. Bookmark Management Integration Tests ✅ (Partially Implemented)
 
-**Status**: 2/7 tests implemented and passing
+**Status**: 7/7 tests implemented and passing
 
-**Tests**:
+**Current Tests**:
+- ✅ `bookmark.test.js` - Setup interface display
+- ✅ `bookmark.test.js` - Settings button functionality
+- ✅ `bookmark.test.js` - How it works section
+- ✅ `bookmark.test.js` - Styling and layout
+- ✅ `bookmark.test.js` - Authentication interface display
+- ✅ `bookmark.test.js` - Error handling
+- ✅ `bookmark.test.js` - Interface data format validation
+
+**Missing Integration Tests**:
+- ❌ Main bookmark management interface (when authenticated)
+- ❌ Bookmark creation functionality
+- ❌ Bookmark search and filtering
+- ❌ Bookmark editing functionality
+- ❌ Bookmark deletion functionality
+- ❌ Bulk operations
+- ❌ Export functionality
+- ❌ Data synchronization
+
+### 4. Authentication Integration Tests ⚠️ (Partially Implemented)
+
+**Status**: 1/7 tests implemented
+
+**Current Tests**:
+- ✅ `debug-auth.test.js` - Authentication interface display (debug test)
+
+**Missing Integration Tests**:
 - ❌ `auth.test.js` - Authentication interface display
 - ❌ `auth.test.js` - Form validation
 - ❌ `auth.test.js` - Login form submission
@@ -61,7 +109,7 @@ This document outlines the integration tests that should be implemented to cover
 - ❌ `auth.test.js` - Error handling
 - ❌ `auth.test.js` - Auth state messages
 
-**Missing Tests**:
+**Additional Missing Integration Tests**:
 - ❌ Authentication state persistence
 - ❌ Session management
 - ❌ Logout functionality
@@ -70,28 +118,16 @@ This document outlines the integration tests that should be implemented to cover
 - ❌ Invalid credentials handling
 - ❌ Network error handling
 
-### 4. Background Service Tests ❌ (Not Implemented)
+### 5. Background Service Integration Tests ❌ (Not Implemented)
 
 **Tests to Implement**:
 - ❌ `background.test.js` - Service worker initialization
-- ❌ `background.test.js` - Keyboard shortcut handling
+- ❌ `background.test.js` - Keyboard shortcut handling (Ctrl+Shift+R)
 - ❌ `background.test.js` - Message handling
 - ❌ `background.test.js` - Notification display
 - ❌ `background.test.js` - Auth state synchronization
 - ❌ `background.test.js` - Tab query functionality
 - ❌ `background.test.js` - Storage change handling
-
-### 5. Data Management Tests ❌ (Not Implemented)
-
-**Tests to Implement**:
-- ❌ `data.test.js` - Bookmark creation
-- ❌ `data.test.js` - Bookmark retrieval
-- ❌ `data.test.js` - Bookmark updates
-- ❌ `data.test.js` - Bookmark deletion
-- ❌ `data.test.js` - Data synchronization
-- ❌ `data.test.js` - Export functionality
-- ❌ `data.test.js` - Import functionality
-- ❌ `data.test.js` - Data validation
 
 ### 6. Supabase Integration Tests ❌ (Not Implemented)
 
@@ -113,134 +149,189 @@ This document outlines the integration tests that should be implemented to cover
 - ❌ `communication.test.js` - Data synchronization
 - ❌ `communication.test.js` - Error propagation
 
-### 8. UI Component Tests ❌ (Not Implemented)
+### 8. Debug Tests ⚠️ (Partially Implemented)
 
-**Tests to Implement**:
-- ❌ `ui-components.test.js` - Form creation
-- ❌ `ui-components.test.js` - Button creation
-- ❌ `ui-components.test.js` - Message display
-- ❌ `ui-components.test.js` - Loading states
-- ❌ `ui-components.test.js` - Error states
-- ❌ `ui-components.test.js` - Responsive design
+**Status**: 3 debug test files exist but need analysis
 
-### 9. Configuration Management Tests ❌ (Not Implemented)
+**Current Tests**:
+- ✅ `debug-auth.test.js` - Authentication interface debugging
+- ⚠️ `bookmark-setup.test.js` - Bookmark setup debugging (needs analysis)
+- ⚠️ `debug-bookmark.test.js` - Bookmark debugging (needs analysis)
+- ⚠️ `debug.test.js` - General debugging (needs analysis)
 
-**Tests to Implement**:
-- ❌ `config.test.js` - Supabase configuration
-- ❌ `config.test.js` - Custom status types
-- ❌ `config.test.js` - User preferences
-- ❌ `config.test.js` - Default settings
-- ❌ `config.test.js` - Configuration validation
-- ❌ `config.test.js` - Configuration persistence
+## Codebase Analysis - Current Implementation Status
 
-### 10. Error Handling Tests ❌ (Not Implemented)
+### ✅ Implemented Features (Relevant for Integration Tests)
 
-**Tests to Implement**:
-- ❌ `error-handling.test.js` - Network errors
-- ❌ `error-handling.test.js` - Authentication errors
-- ❌ `error-handling.test.js` - Data validation errors
-- ❌ `error-handling.test.js` - Storage errors
-- ❌ `error-handling.test.js` - Chrome API errors
-- ❌ `error-handling.test.js` - User-friendly error messages
+**Authentication System**:
+- ✅ AuthUI class with login/signup forms
+- ✅ AuthStateManager for session management
+- ✅ Supabase authentication integration
+- ✅ User profile display
 
-## Test Implementation Priority
+**Configuration System**:
+- ✅ ConfigUI class with Supabase setup form
+- ✅ ConfigManager for settings persistence
+- ✅ Connection testing functionality
+- ✅ Help instructions and validation
+
+**Popup Interface**:
+- ✅ Setup interface for unconfigured state
+- ✅ Authentication interface
+- ✅ Main interface with bookmark creation
+- ✅ Recent entries display
+- ✅ Status selection and tag input
+- ✅ Settings button functionality
+
+**Options Page**:
+- ✅ Configuration interface
+- ✅ Authentication interface
+- ✅ Main settings interface
+- ✅ Custom status types management
+- ✅ Data export/import
+- ✅ Statistics display
+- ✅ Data clearing functionality
+
+**Background Service**:
+- ✅ Service worker initialization
+- ✅ Keyboard shortcut handling (Ctrl+Shift+R)
+- ✅ Message handling between contexts
+- ✅ Notification display
+- ✅ Auth state synchronization
+- ✅ Tab query functionality
+
+**Bookmark Management**:
+- ✅ Full-page bookmark management interface
+- ✅ Bookmark CRUD operations
+- ✅ Search and filtering
+- ✅ Bulk operations
+- ✅ Export functionality
+
+**Supabase Integration**:
+- ✅ Connection testing
+- ✅ Authentication flow
+- ✅ Data persistence
+- ✅ Real-time updates
+- ✅ Error handling
+
+### ❌ Missing or Incomplete Features
+
+**Integration Test Coverage**:
+- ❌ Authentication flow integration tests (mostly missing)
+- ❌ Background service integration tests
+- ❌ Main bookmark management interface tests (when authenticated)
+- ❌ Cross-context communication tests
+- ❌ Supabase integration tests
+
+## Updated Integration Test Priorities
 
 ### Phase 1: Core Functionality (High Priority)
-1. **Popup Main Interface** - Test the authenticated popup interface
-2. **Mark as Read Functionality** - Test the core bookmark creation
-3. **Background Service** - Test keyboard shortcuts and notifications
-4. **Authentication Flow** - Complete the auth tests
-5. **Data Management** - Test CRUD operations
+1. **Authentication Integration Tests** - Complete auth flow testing
+2. **Popup Main Interface Tests** - Test authenticated popup functionality
+3. **Background Service Tests** - Test keyboard shortcuts and messaging
+4. **Bookmark Management Main Interface Tests** - Test authenticated bookmark management
+5. **Cross-Context Communication** - Test message passing between contexts
 
 ### Phase 2: Advanced Features (Medium Priority)
-1. **Settings Management** - Test custom status types and preferences
-2. **Data Export/Import** - Test data backup and restore
-3. **Cross-Context Communication** - Test message passing
-4. **Error Handling** - Test graceful error recovery
-5. **UI Components** - Test reusable UI elements
+1. **Options Page Advanced Tests** - Test authenticated settings interface
+2. **Supabase Integration Tests** - Test backend connectivity
+3. **Data Export/Import Tests** - Test data backup and restore
+4. **Error Handling Tests** - Test graceful error recovery
+5. **Performance Tests** - Test with large datasets
 
-### Phase 3: Integration & Edge Cases (Lower Priority)
-1. **Supabase Integration** - Test backend connectivity
-2. **Offline Functionality** - Test offline behavior
-3. **Performance Tests** - Test with large datasets
-4. **Accessibility Tests** - Test keyboard navigation
-5. **Cross-browser Tests** - Test in different browsers
+### Phase 3: Edge Cases (Lower Priority)
+1. **Offline Functionality** - Test offline behavior
+2. **Accessibility Tests** - Test keyboard navigation
+3. **Cross-browser Tests** - Test in different browsers
+4. **Security Tests** - Test data protection
+5. **Load Testing** - Test with realistic data volumes
 
-## Test Infrastructure Requirements
+## Current Test Relevance Assessment
 
-### Current Setup ✅
-- ✅ Playwright testing framework
-- ✅ Chrome extension loading
-- ✅ Chrome API mocking
-- ✅ DOM interaction helpers
-- ✅ Screenshot capture
-- ✅ Error debugging tools
+### ✅ Still Relevant Tests
+- **Popup Setup Interface Tests** - Still relevant, matches current implementation
+- **Options Configuration Tests** - Still relevant, matches current implementation
+- **Bookmark Management Setup Tests** - Still relevant, matches current implementation
+- **Error Handling Tests** - Still relevant, error handling is implemented
+- **Styling and Layout Tests** - Still relevant, UI components are implemented
 
-### Additional Requirements ❌
-- ❌ Supabase test environment
-- ❌ Mock Supabase client
-- ❌ Test data fixtures
-- ❌ Performance testing tools
-- ❌ Accessibility testing tools
-- ❌ Cross-browser testing setup
+### ⚠️ Needs Updates
+- **Form Validation Tests** - Need to test actual form validation logic
+- **Form Submission Tests** - Need to test actual submission handlers
+- **Message Handling Tests** - Need to test actual message passing
 
-## Test Data Requirements
+### ❌ Missing Critical Tests
+- **Authentication Flow Tests** - Critical missing coverage
+- **Background Service Tests** - Critical missing coverage
+- **Main Bookmark Management Tests** - Critical missing coverage
+- **Cross-Context Communication Tests** - Critical missing coverage
 
-### Mock Data Sets
-- User accounts (authenticated/unauthenticated)
-- Bookmark entries (various statuses and tags)
-- Configuration settings
-- Error scenarios
-- Large datasets for performance testing
+## Implementation Recommendations
 
-### Test Environment
-- Isolated Supabase test instance
-- Mock Chrome extension APIs
-- Test user accounts
-- Sample websites for bookmarking
+### 1. Create Authentication Integration Tests
+```javascript
+// tests/integration/auth.test.js
+test.describe('Authentication Integration Tests', () => {
+  test('should display login form when not authenticated', async ({ page }) => {
+    // Test AuthUI.showLoginForm()
+  });
+  
+  test('should handle login form submission', async ({ page }) => {
+    // Test AuthUI.handleLogin()
+  });
+  
+  test('should display signup form', async ({ page }) => {
+    // Test AuthUI.showSignupForm()
+  });
+});
+```
 
-## Success Criteria
+### 2. Create Background Service Integration Tests
+```javascript
+// tests/integration/background.test.js
+test.describe('Background Service Integration Tests', () => {
+  test('should handle keyboard shortcut', async ({ page }) => {
+    // Test Ctrl+Shift+R functionality
+  });
+  
+  test('should handle message passing', async ({ page }) => {
+    // Test chrome.runtime.onMessage handling
+  });
+});
+```
 
-### Coverage Goals
-- **Core Functionality**: 100% coverage
-- **User Interface**: 90% coverage
-- **Error Handling**: 80% coverage
-- **Integration Points**: 85% coverage
-
-### Quality Metrics
-- **Test Reliability**: >95% pass rate
-- **Test Performance**: <30 seconds per test suite
-- **Code Coverage**: >80% overall
-- **Bug Detection**: Catch regressions before deployment
-
-## Implementation Notes
-
-### Current Challenges
-1. **Authentication Testing**: Mocking Supabase auth flow
-2. **Background Service**: Testing service worker functionality
-3. **Cross-Context Communication**: Testing message passing
-4. **Real-time Updates**: Testing Supabase subscriptions
-
-### Solutions
-1. **Enhanced Mocking**: Improve Chrome API and Supabase mocking
-2. **Test Utilities**: Create helper functions for common test patterns
-3. **Test Data Management**: Implement fixtures and cleanup
-4. **CI/CD Integration**: Set up automated testing pipeline
-
-## Next Steps
-
-1. **Complete Phase 1 Tests**: Focus on core functionality first
-2. **Improve Test Infrastructure**: Enhance mocking and utilities
-3. **Add Performance Tests**: Test with realistic data volumes
-4. **Implement CI/CD**: Set up automated testing
-5. **Document Test Patterns**: Create testing guidelines
+### 3. Create Main Bookmark Management Integration Tests
+```javascript
+// tests/integration/bookmark-main.test.js
+test.describe('Main Bookmark Management Integration Tests', () => {
+  test('should display main interface when authenticated', async ({ page }) => {
+    // Test authenticated bookmark management interface
+  });
+  
+  test('should handle bookmark creation', async ({ page }) => {
+    // Test bookmark creation workflow
+  });
+});
+```
 
 ## Summary
 
-**Current Status**: 11/50 tests implemented (22% complete)
-- ✅ Popup Setup Interface: 5/5 tests (100% complete)
+**Current Status**: 18/50 integration tests implemented (36% complete)
+- ✅ Popup Setup Interface: 4/4 tests (100% complete)
 - ✅ Options Configuration: 6/6 tests (100% complete)  
-- ❌ Authentication: 0/7 tests (0% complete)
+- ✅ Bookmark Management Setup: 7/7 tests (100% complete)
+- ⚠️ Authentication: 1/7 tests (14% complete)
+- ❌ Background Service: 0/7 tests (0% complete)
+- ❌ Main Bookmark Management: 0/7 tests (0% complete)
 - ❌ All other categories: 0% complete
 
-**Priority**: Focus on completing Phase 1 tests to ensure core functionality is thoroughly tested before moving to advanced features. 
+**Priority**: Focus on completing Phase 1 integration tests to ensure core functionality is thoroughly tested before moving to advanced features.
+
+**Relevance**: The existing tests are still relevant but incomplete. The codebase has more functionality than what's currently tested, requiring additional integration tests to achieve comprehensive coverage.
+
+## References
+
+- [Test Coverage Analysis](../TEST_COVERAGE_ANALYSIS.md) - Current test coverage status
+- [tests/README.md](../../tests/README.md) - General testing guidelines
+- [ExtensionHelper Documentation](../../tests/helpers/extension-helper.js) - Playwright utilities
+- [Playwright Configuration](../../playwright.config.js) - Integration test configuration 

@@ -73,8 +73,8 @@ class ExtensionHelper {
    * Open the extension popup by navigating directly to popup.html
    */
   async openPopup() {
-    // Navigate directly to the popup HTML file
-    await this.page.goto('file://' + path.join(__dirname, '../../popup.html'));
+    // Navigate to popup HTML file via web server
+    await this.page.goto('http://localhost:3000/popup.html');
 
     // Wait for popup to be visible
     await this.page.waitForSelector('#app', { timeout: 10000 });
@@ -84,9 +84,7 @@ class ExtensionHelper {
    * Navigate to the options page
    */
   async openOptions() {
-    await this.page.goto(
-      'file://' + path.join(__dirname, '../../options.html')
-    );
+    await this.page.goto('http://localhost:3000/options.html');
     await this.page.waitForSelector('#app', { timeout: 10000 });
   }
 

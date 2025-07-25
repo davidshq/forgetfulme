@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import ExtensionHelper from './helpers/extension-helper.js';
+import ExtensionHelper from '../helpers/extension-helper.js';
 
 test.describe('ForgetfulMe Options Tests', () => {
   let extensionHelper;

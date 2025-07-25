@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import ExtensionHelper from './helpers/extension-helper.js';
+import ExtensionHelper from '../helpers/extension-helper.js';
 
 test.describe('ForgetfulMe Popup Tests', () => {
   let extensionHelper;
@@ -18,7 +18,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
   });
 
   test('should display setup interface when not configured', async ({
-    _page,
+    page,
   }) => {
     // Test that the setup interface is shown
     const setupContainer =
