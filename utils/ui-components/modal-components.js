@@ -399,4 +399,4 @@ export class ModalComponents {
       panel.classList.toggle('active', index === activeIndex);
     });
   }
-} 
+}

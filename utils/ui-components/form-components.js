@@ -155,13 +155,18 @@ export class FormComponents {
 
     // Add submit button if specified
     if (options.submitText) {
-      const submitBtn = ButtonComponents.createButton(options.submitText, null, 'primary', {
-        type: 'submit',
-        'aria-label': options.submitText,
-      });
+      const submitBtn = ButtonComponents.createButton(
+        options.submitText,
+        null,
+        'primary',
+        {
+          type: 'submit',
+          'aria-label': options.submitText,
+        }
+      );
       form.appendChild(submitBtn);
     }
 
     return form;
   }
-} 
+}

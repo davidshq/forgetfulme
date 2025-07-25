@@ -122,4 +122,4 @@ export { ModalComponents } from './modal-components.js';
 export { NavigationComponents } from './navigation-components.js';
 
 // Default export for backward compatibility
-export default UIComponents; 
+export default UIComponents;
