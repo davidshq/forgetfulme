@@ -40,37 +40,48 @@ export class OptionsInterface {
 
     // Create config card
     const configCard = UIComponents.createCard(
-      'Supabase Configuration',
+      '⚙️ Supabase Configuration',
       '<div id="config-status-container"></div>',
       '',
       'config-card'
     );
     mainContainer.appendChild(configCard);
 
-    // Create stats card
-    const statsGrid = UIComponents.createGrid(
-      [
-        { text: 'Total Entries:', className: 'stat-item' },
-        { text: 'Status Types:', className: 'stat-item' },
-        { text: 'Most Used Status:', className: 'stat-item' },
-      ],
-      { className: 'stats-grid' }
-    );
+    // Create stats card with better structure
+    const statsContainer = document.createElement('div');
+    statsContainer.className = 'stats-grid';
 
-    // Add stat values safely
-    const statItems = statsGrid.querySelectorAll('.grid-item');
-    if (statItems.length >= 3) {
-      statItems[0].innerHTML =
-        '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>';
-      statItems[1].innerHTML =
-        '<span class="stat-label">Status Types:</span><span id="status-types-count" class="stat-value">-</span>';
-      statItems[2].innerHTML =
-        '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>';
-    }
+    // Create individual stat items
+    const statItems = [
+      { id: 'total-entries', label: 'Total Entries', value: '-', icon: '📊' },
+      {
+        id: 'status-types-count',
+        label: 'Status Types',
+        value: '-',
+        icon: '🏷️',
+      },
+      {
+        id: 'most-used-status',
+        label: 'Most Used Status',
+        value: '-',
+        icon: '⭐',
+      },
+    ];
+
+    statItems.forEach(stat => {
+      const statItem = document.createElement('div');
+      statItem.className = 'stat-item';
+      statItem.innerHTML = `
+        <div class="stat-icon">${stat.icon}</div>
+        <span class="stat-label">${stat.label}</span>
+        <span id="${stat.id}" class="stat-value">${stat.value}</span>
+      `;
+      statsContainer.appendChild(statItem);
+    });
 
     const statsCard = UIComponents.createCard(
-      'Statistics',
-      statsGrid.outerHTML,
+      '📈 Usage Statistics',
+      statsContainer.outerHTML,
       '',
       'stats-card'
     );
@@ -120,7 +131,7 @@ export class OptionsInterface {
     addStatusContainer.appendChild(statusListContainer);
 
     const statusCard = UIComponents.createCard(
-      'Custom Status Types',
+      '🏷️ Custom Status Types',
       addStatusContainer.outerHTML,
       '',
       'status-card'
@@ -147,7 +158,7 @@ export class OptionsInterface {
     ];
 
     const dataCard = UIComponents.createCardWithActions(
-      'Data Management',
+      '💾 Data Management',
       '<p>Export your bookmarks to JSON format, import data from a backup, or clear all stored data.</p>',
       dataActions,
       'data-card'
@@ -166,7 +177,7 @@ export class OptionsInterface {
     );
 
     const bookmarkCard = UIComponents.createCard(
-      'Bookmark Management',
+      '📚 Bookmark Management',
       '<p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>',
       manageBookmarksBtn.outerHTML,
       'bookmark-card'
@@ -194,7 +205,9 @@ export class OptionsInterface {
     // Only bind events if elements exist using safe DOM utilities
     const addStatusBtn = UIComponents.DOM.getElement('add-status-btn');
     if (addStatusBtn) {
-      addStatusBtn.addEventListener('click', () => this.dataManager.addStatusType());
+      addStatusBtn.addEventListener('click', () =>
+        this.dataManager.addStatusType()
+      );
     }
 
     const newStatusInput = UIComponents.DOM.getElement('new-status');
@@ -208,7 +221,9 @@ export class OptionsInterface {
 
     const exportDataBtn = UIComponents.DOM.getElement('export-data-btn');
     if (exportDataBtn) {
-      exportDataBtn.addEventListener('click', () => this.dataManager.exportData());
+      exportDataBtn.addEventListener('click', () =>
+        this.dataManager.exportData()
+      );
     }
 
     const importDataBtn = UIComponents.DOM.getElement('import-data-btn');
@@ -223,12 +238,16 @@ export class OptionsInterface {
 
     const importFile = UIComponents.DOM.getElement('import-file');
     if (importFile) {
-      importFile.addEventListener('change', e => this.dataManager.importData(e));
+      importFile.addEventListener('change', e =>
+        this.dataManager.importData(e)
+      );
     }
 
     const clearDataBtn = UIComponents.DOM.getElement('clear-data-btn');
     if (clearDataBtn) {
-      clearDataBtn.addEventListener('click', () => this.dataManager.clearData());
+      clearDataBtn.addEventListener('click', () =>
+        this.dataManager.clearData()
+      );
     }
   }
 
@@ -253,4 +272,4 @@ export class OptionsInterface {
       url: chrome.runtime.getURL('bookmark-management.html'),
     });
   }
-} 
+}

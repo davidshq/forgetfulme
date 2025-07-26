@@ -57,27 +57,82 @@ class UIMessages {
 
     // Create message element
     const messageEl = document.createElement('div');
-    messageEl.className = `ui-message ui-message-${type}`;
-    messageEl.textContent = message;
+    messageEl.className = `message message-${type} animate-fade-in`;
+    messageEl.setAttribute('role', 'alert');
+    messageEl.setAttribute('aria-live', 'polite');
 
-    // Add icon if specified
-    if (options.icon) {
-      const iconEl = document.createElement('span');
-      iconEl.className = 'ui-message-icon';
-      iconEl.textContent = options.icon;
-      messageEl.insertBefore(iconEl, messageEl.firstChild);
+    // Create message structure
+    const iconEl = document.createElement('div');
+    iconEl.className = 'message-icon';
+
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    contentEl.textContent = message;
+
+    // Set default icons based on type
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️',
+    };
+
+    iconEl.textContent = options.icon || icons[type] || icons.info;
+
+    // Create close button if not auto-dismissing
+    let closeBtn = null;
+    if (options.persistent || options.timeout === 0) {
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'message-close';
+      closeBtn.innerHTML = '×';
+      closeBtn.setAttribute('aria-label', 'Close message');
+      closeBtn.onclick = () => this.removeMessage(messageEl);
+    }
+
+    // Assemble message
+    messageEl.appendChild(iconEl);
+    messageEl.appendChild(contentEl);
+    if (closeBtn) {
+      messageEl.appendChild(closeBtn);
     }
 
     // Add to container
     try {
+      // Remove existing messages of same type if specified
+      if (options.replace) {
+        const existingMessages = container.querySelectorAll(`.message-${type}`);
+        existingMessages.forEach(msg => this.removeMessage(msg));
+      }
+
       container.appendChild(messageEl);
     } catch {
       // Error adding message to container
       return;
     }
 
-    // Auto-remove after timeout
-    const timeout = options.timeout || this.getDefaultTimeout(type);
+    // Auto-remove after timeout (unless persistent)
+    if (!options.persistent && options.timeout !== 0) {
+      const timeout = options.timeout || this.getDefaultTimeout(type);
+      setTimeout(() => {
+        this.removeMessage(messageEl);
+      }, timeout);
+    }
+
+    return messageEl;
+  }
+
+  /**
+   * Remove a message element with animation
+   * @param {HTMLElement} messageEl - Message element to remove
+   */
+  static removeMessage(messageEl) {
+    if (!messageEl || !messageEl.parentNode) return;
+
+    // Add fade out animation
+    messageEl.style.opacity = '0';
+    messageEl.style.transform = 'translateY(-10px)';
+    messageEl.style.transition = 'all 0.3s ease-out';
+
     setTimeout(() => {
       if (messageEl.parentNode) {
         try {
@@ -86,9 +141,7 @@ class UIMessages {
           // Ignore removal errors
         }
       }
-    }, timeout);
-
-    return messageEl;
+    }, 300);
   }
 
   /**
@@ -155,27 +208,34 @@ class UIMessages {
       return;
     }
 
-    // Create message element
+    // Create loading message element
     const messageEl = document.createElement('div');
-    messageEl.className = 'ui-message ui-message-loading';
+    messageEl.className = 'loading-state animate-fade-in';
+    messageEl.setAttribute('role', 'status');
+    messageEl.setAttribute('aria-live', 'polite');
     messageEl.setAttribute('aria-busy', 'true');
 
-    // Add Pico progress indicator
-    const progress = document.createElement('progress');
-    progress.setAttribute('aria-label', 'Loading');
-    progress.className = 'loading-progress';
-    messageEl.appendChild(progress);
+    // Create loading spinner
+    const spinner = document.createElement('div');
+    spinner.className = 'loading-spinner';
+    spinner.setAttribute('aria-hidden', 'true');
 
     // Add message text
-    if (message) {
-      const textEl = document.createElement('span');
-      textEl.className = 'ui-message-text';
-      textEl.textContent = message;
-      messageEl.appendChild(textEl);
-    }
+    const textEl = document.createElement('div');
+    textEl.className = 'loading-text';
+    textEl.textContent = message || 'Loading...';
+
+    messageEl.appendChild(spinner);
+    messageEl.appendChild(textEl);
 
     // Add to container
     try {
+      // Remove existing loading messages
+      const existingLoading = container.querySelectorAll(
+        '.loading-state, .ui-message-loading'
+      );
+      existingLoading.forEach(loading => this.removeMessage(loading));
+
       container.appendChild(messageEl);
     } catch (error) {
       ErrorHandler.handle(error, 'ui-messages.loading');
@@ -193,11 +253,11 @@ class UIMessages {
   static clear(container) {
     if (!container) return;
 
-    const messages = container.querySelectorAll('.ui-message');
+    const messages = container.querySelectorAll(
+      '.message, .ui-message, .loading-state'
+    );
     messages.forEach(message => {
-      if (message.parentNode) {
-        message.parentNode.removeChild(message);
-      }
+      this.removeMessage(message);
     });
   }
 

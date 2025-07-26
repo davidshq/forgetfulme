@@ -1,0 +1,530 @@
+/**
+ * Bookmark Management specific styles for ForgetfulMe extension
+ * Built on top of Pico CSS for better bookmark management experience
+ */
+
+/* Custom variables for bookmark management */
+:root {
+  --fm-sidebar-width: 320px;
+  --fm-sidebar-bg: var(--pico-card-sectioning-background-color);
+  --fm-content-bg: var(--pico-background-color);
+  --fm-bookmark-item-hover: var(--pico-secondary-background);
+  --fm-selected-bg: var(--pico-primary-background);
+  --fm-selected-color: var(--pico-primary-inverse);
+  --fm-checkbox-size: 1.25rem;
+}
+
+/* Container improvements */
+.container {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+/* Breadcrumb styling */
+.page-breadcrumb {
+  background: var(--pico-card-sectioning-background-color);
+  padding: 1rem 2rem;
+  border-bottom: var(--pico-border-width) solid var(--fm-border-color);
+  margin: 0;
+}
+
+/* Header improvements */
+header {
+  background: linear-gradient(
+    135deg,
+    var(--pico-primary),
+    var(--pico-primary-hover)
+  );
+  color: var(--pico-primary-inverse);
+  padding: 1.5rem 2rem;
+  margin: 0;
+  border-bottom: var(--pico-border-width) solid var(--fm-border-color);
+}
+
+header h1 {
+  margin: 0;
+  color: var(--pico-primary-inverse);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.header-nav {
+  margin-top: 1rem;
+}
+
+.header-nav button {
+  background: rgba(255, 255, 255, 0.2);
+  border: var(--pico-border-width) solid rgba(255, 255, 255, 0.3);
+  color: var(--pico-primary-inverse);
+}
+
+.header-nav button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Main layout */
+.main-content {
+  display: flex;
+  min-height: calc(100vh - 200px);
+  gap: 0;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: var(--fm-sidebar-width);
+  background: var(--fm-sidebar-bg);
+  border-right: var(--pico-border-width) solid var(--fm-border-color);
+  padding: 1.5rem;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: fit-content;
+  max-height: calc(100vh - 200px);
+}
+
+/* Search card improvements */
+.search-card {
+  margin-bottom: 1.5rem;
+}
+
+.search-card header {
+  background: var(--pico-primary);
+  color: var(--pico-primary-inverse);
+  padding: 1rem;
+  margin: -1rem -1rem 1rem;
+  border-radius: var(--pico-border-radius) var(--pico-border-radius) 0 0;
+}
+
+.search-card header h3 {
+  margin: 0;
+  color: var(--pico-primary-inverse);
+  font-size: 1.1rem;
+}
+
+.search-form label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.search-form input,
+.search-form select {
+  margin-bottom: 1rem;
+}
+
+/* Bulk actions card */
+.bulk-actions-card header {
+  background: var(--fm-warning-color);
+  color: white;
+  padding: 1rem;
+  margin: -1rem -1rem 1rem;
+  border-radius: var(--pico-border-radius) var(--pico-border-radius) 0 0;
+}
+
+.bulk-actions-card header h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.bulk-actions-card footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: var(--pico-border-width) solid var(--fm-border-color);
+}
+
+.bulk-actions-card footer button {
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+/* Content area */
+.content-area {
+  flex: 1;
+  padding: 1.5rem;
+  background: var(--fm-content-bg);
+}
+
+/* Bookmarks card */
+.bookmarks-card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.bookmarks-card header {
+  background: var(--fm-success-color);
+  color: white;
+  padding: 1rem 1.5rem;
+  margin: -1rem -1.5rem 1rem;
+  border-radius: var(--pico-border-radius) var(--pico-border-radius) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bookmarks-card header h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.bookmarks-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--pico-border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Bookmark items */
+#bookmarks-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--pico-card-background-color);
+  border: var(--pico-border-width) solid var(--fm-border-color);
+  border-radius: var(--pico-border-radius);
+  transition: var(--pico-transition);
+  cursor: pointer;
+}
+
+.bookmark-item:hover {
+  background: var(--fm-bookmark-item-hover);
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.bookmark-item.selected {
+  background: var(--fm-selected-bg);
+  color: var(--fm-selected-color);
+  border-color: var(--pico-primary);
+}
+
+.bookmark-item.selected * {
+  color: var(--fm-selected-color);
+}
+
+/* Bookmark checkbox */
+.bookmark-checkbox {
+  appearance: none;
+  width: var(--fm-checkbox-size);
+  height: var(--fm-checkbox-size);
+  border: 2px solid var(--pico-primary);
+  border-radius: calc(var(--pico-border-radius) * 0.5);
+  background: var(--pico-card-background-color);
+  cursor: pointer;
+  position: relative;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.bookmark-checkbox:checked {
+  background: var(--pico-primary);
+  border-color: var(--pico-primary);
+}
+
+.bookmark-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: bold;
+}
+
+/* Bookmark content */
+.bookmark-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.bookmark-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  color: var(--fm-text-color);
+}
+
+.bookmark-url {
+  font-size: 0.875rem;
+  color: var(--fm-muted-color);
+  margin-bottom: 0.75rem;
+  word-break: break-all;
+  font-family: var(--pico-font-family-monospace);
+}
+
+.bookmark-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.bookmark-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--pico-border-radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.bookmark-status[data-status='read'] {
+  background: var(--fm-success-color);
+  color: white;
+}
+
+.bookmark-status[data-status='good-reference'] {
+  background: var(--fm-accent-color);
+  color: white;
+}
+
+.bookmark-status[data-status='low-value'] {
+  background: var(--fm-muted-color);
+  color: white;
+}
+
+.bookmark-status[data-status='revisit-later'] {
+  background: var(--fm-warning-color);
+  color: white;
+}
+
+.bookmark-date {
+  font-size: 0.875rem;
+  color: var(--fm-muted-color);
+}
+
+.bookmark-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.bookmark-tag {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--pico-secondary-background);
+  color: var(--pico-secondary);
+  border-radius: calc(var(--pico-border-radius) * 0.5);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Bookmark actions */
+.bookmark-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.bookmark-actions button {
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  min-width: 80px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--fm-muted-color);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  color: var(--fm-text-color);
+}
+
+.empty-state p {
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Loading state */
+.loading-bookmarks {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.loading-bookmarks progress {
+  margin-bottom: 1rem;
+}
+
+/* Search results info */
+.search-info {
+  background: var(--pico-secondary-background);
+  color: var(--pico-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--pico-border-radius);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: none;
+    position: static;
+    border-right: none;
+    border-bottom: var(--pico-border-width) solid var(--fm-border-color);
+  }
+
+  .bulk-actions-card footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .bulk-actions-card footer button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+
+  .page-breadcrumb,
+  header,
+  .sidebar,
+  .content-area {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  .bookmark-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .bookmark-actions {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .bookmark-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-breadcrumb,
+  header,
+  .sidebar,
+  .content-area {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .bookmark-item {
+    padding: 1rem;
+  }
+
+  .bookmark-actions {
+    flex-direction: column;
+  }
+
+  .bulk-actions-card footer {
+    flex-direction: column;
+  }
+
+  .bulk-actions-card footer button {
+    width: 100%;
+  }
+}
+
+/* Animation improvements */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bookmark-item {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.bookmark-item:nth-child(odd) {
+  animation-delay: 0.05s;
+}
+.bookmark-item:nth-child(even) {
+  animation-delay: 0.1s;
+}
+
+/* Focus and accessibility improvements */
+.bookmark-item:focus {
+  outline: 2px solid var(--pico-primary-focus);
+  outline-offset: 2px;
+}
+
+.bookmark-checkbox:focus {
+  outline: 2px solid var(--pico-primary-focus);
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .sidebar,
+  .bookmark-actions,
+  .bulk-actions-card {
+    display: none;
+  }
+
+  .main-content {
+    flex-direction: column;
+  }
+
+  .content-area {
+    width: 100%;
+    padding: 0;
+  }
+
+  .bookmark-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+  }
+}
