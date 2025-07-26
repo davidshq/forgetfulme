@@ -15,13 +15,28 @@ import { vi } from 'vitest';
  * @type {Object}
  * @description Provides mocked console methods that can be tracked in tests
  */
-global.console = {
+const mockConsole = {
   error: vi.fn(),
   warn: vi.fn(),
   info: vi.fn(),
   log: vi.fn(),
   debug: vi.fn(),
 };
+
+// Ensure console methods are callable and properly bound
+Object.keys(mockConsole).forEach(method => {
+  if (typeof mockConsole[method] !== 'function') {
+    mockConsole[method] = vi.fn();
+  }
+});
+
+// Set global console to the mock
+global.console = mockConsole;
+
+// Also ensure console is available on window for browser-like environment
+if (typeof global.window !== 'undefined') {
+  global.window.console = mockConsole;
+}
 
 /**
  * Enhanced Chrome storage state manager for global mocking
@@ -1328,6 +1343,17 @@ global.ErrorHandler = {
 beforeEach(() => {
   // Clear all mocks before each test
   vi.clearAllMocks();
+
+  // Ensure console methods are properly mocked
+  if (!global.console || typeof global.console.warn !== 'function') {
+    global.console = {
+      error: vi.fn(),
+      warn: vi.fn(),
+      info: vi.fn(),
+      log: vi.fn(),
+      debug: vi.fn(),
+    };
+  }
 
   // Reset DOM
   global.document.body = global.document.createElement('body');

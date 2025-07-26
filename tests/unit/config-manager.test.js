@@ -138,7 +138,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.'
+        'Configuration error. Please check your settings and try again.'
       );
     });
 
