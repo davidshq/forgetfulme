@@ -65,23 +65,34 @@ export async function loadRecentEntries(ctx) {
 
 function createRecentListItem(ctx, bookmark, index) {
   const listItem = document.createElement('div');
+  listItem.className = 'recent-list-item';
   listItem.setAttribute('role', 'listitem');
   listItem.setAttribute(
     'aria-label',
     `Recent bookmark ${index + 1}: ${bookmark.title}`
   );
 
-  // Add title
-  const titleDiv = document.createElement('div');
-  titleDiv.textContent = bookmark.title;
-  titleDiv.setAttribute('title', bookmark.title);
-  listItem.appendChild(titleDiv);
+  // Add title as h4
+  const titleHeading = document.createElement('h4');
+  titleHeading.textContent = bookmark.title;
+  titleHeading.setAttribute('title', bookmark.title);
+  listItem.appendChild(titleHeading);
 
-  // Add meta information
+  // Add URL
+  const urlDiv = document.createElement('div');
+  urlDiv.className = 'url';
+  urlDiv.textContent = bookmark.url;
+  urlDiv.setAttribute('title', bookmark.url);
+  listItem.appendChild(urlDiv);
+
+  // Add meta information container
   const metaDiv = document.createElement('div');
+  metaDiv.className = 'meta';
 
   // Add status badge
-  const statusSpan = document.createElement('small');
+  const statusSpan = document.createElement('span');
+  statusSpan.className = 'status';
+  statusSpan.setAttribute('data-status', bookmark.status);
   statusSpan.textContent = ctx.formatStatus(bookmark.status);
   statusSpan.setAttribute(
     'aria-label',
@@ -100,15 +111,36 @@ function createRecentListItem(ctx, bookmark, index) {
   );
   metaDiv.appendChild(timeSpan);
 
+  listItem.appendChild(metaDiv);
+
   // Add tags if they exist
   if (bookmark.tags && bookmark.tags.length > 0) {
-    const tagsSpan = document.createElement('small');
-    tagsSpan.textContent = `Tags: ${bookmark.tags.join(', ')}`;
-    tagsSpan.setAttribute('aria-label', `Tags: ${bookmark.tags.join(', ')}`);
-    metaDiv.appendChild(tagsSpan);
+    const tagsDiv = document.createElement('div');
+    tagsDiv.className = 'tags';
+    tagsDiv.setAttribute('aria-label', `Tags: ${bookmark.tags.join(', ')}`);
+
+    bookmark.tags.forEach(tag => {
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'tag';
+      tagSpan.textContent = tag;
+      tagsDiv.appendChild(tagSpan);
+    });
+
+    listItem.appendChild(tagsDiv);
   }
 
-  listItem.appendChild(metaDiv);
+  // Make the item clickable to edit
+  listItem.style.cursor = 'pointer';
+  listItem.addEventListener('click', () => {
+    ctx.ui.showEditInterface(ctx, {
+      id: bookmark.id,
+      title: bookmark.title,
+      url: bookmark.url,
+      read_status: bookmark.status,
+      tags: bookmark.tags,
+      created_at: bookmark.created_at,
+    });
+  });
 
   return listItem;
 }

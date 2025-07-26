@@ -546,9 +546,9 @@ describe('UIComponents', () => {
           'Test Label'
         );
 
-        const input = field.querySelector('input');
-        expect(input).toBeTruthy();
-        expect(input.type).toBe('textarea');
+        const textarea = field.querySelector('textarea');
+        expect(textarea).toBeTruthy();
+        expect(textarea.tagName.toLowerCase()).toBe('textarea');
       });
 
       test('should handle field with placeholder', () => {

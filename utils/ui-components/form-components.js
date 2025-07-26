@@ -62,11 +62,23 @@ export class FormComponents {
    */
   static createFormField(type, id, label, options = {}) {
     const formGroup = document.createElement('div');
+    formGroup.className = 'form-field';
 
     // Create label with Pico styling
     const labelEl = document.createElement('label');
     labelEl.htmlFor = id;
     labelEl.textContent = label;
+
+    // Add required indicator
+    if (options.required) {
+      const requiredSpan = document.createElement('span');
+      requiredSpan.textContent = ' *';
+      requiredSpan.className = 'required-indicator';
+      requiredSpan.style.color = 'var(--pico-del-color)';
+      requiredSpan.setAttribute('aria-label', 'required');
+      labelEl.appendChild(requiredSpan);
+    }
+
     formGroup.appendChild(labelEl);
 
     // Create input/select based on type
@@ -82,6 +94,10 @@ export class FormComponents {
           field.appendChild(optionEl);
         });
       }
+    } else if (type === 'textarea') {
+      field = document.createElement('textarea');
+      if (options.rows) field.rows = options.rows;
+      if (options.cols) field.cols = options.cols;
     } else {
       field = document.createElement('input');
       field.type = type;
@@ -92,13 +108,27 @@ export class FormComponents {
     field.name = id; // Add name attribute for form submission
 
     if (options.placeholder) field.placeholder = options.placeholder;
-    if (options.required) field.required = options.required;
     if (options.value) field.value = options.value;
     if (options.disabled) field.disabled = options.disabled;
+
+    // Add Pico validation attributes
+    if (options.required) {
+      field.required = true;
+      field.setAttribute('aria-required', 'true');
+    }
+
+    if (options.invalid) {
+      field.setAttribute('aria-invalid', 'true');
+    }
 
     // Apply accessibility attributes
     if (options['aria-describedby']) {
       field.setAttribute('aria-describedby', options['aria-describedby']);
+    }
+
+    // Apply CSS classes
+    if (options.className) {
+      field.className = options.className;
     }
 
     formGroup.appendChild(field);
@@ -107,11 +137,24 @@ export class FormComponents {
     if (options.helpText) {
       const helpEl = document.createElement('small');
       helpEl.textContent = options.helpText;
+      helpEl.style.color = 'var(--pico-muted-color)';
       if (options['aria-describedby']) {
         helpEl.id = options['aria-describedby'];
       }
       formGroup.appendChild(helpEl);
     }
+
+    // Add validation feedback container
+    const feedbackEl = document.createElement('div');
+    feedbackEl.className = 'validation-feedback';
+    feedbackEl.style.display = 'none';
+    feedbackEl.style.color = 'var(--pico-del-color)';
+    feedbackEl.style.fontSize = '0.75rem';
+    feedbackEl.style.marginTop = '0.25rem';
+    formGroup.appendChild(feedbackEl);
+
+    // Store reference to feedback element for validation
+    field._feedbackElement = feedbackEl;
 
     return formGroup;
   }
@@ -168,5 +211,72 @@ export class FormComponents {
     }
 
     return form;
+  }
+
+  /**
+   * Validate a form field
+   * @param {HTMLElement} field - The form field to validate
+   * @param {string} customMessage - Custom validation message
+   * @returns {boolean} True if valid, false if invalid
+   */
+  static validateField(field, customMessage = null) {
+    const isValid = field.checkValidity();
+    const feedbackEl = field._feedbackElement;
+
+    if (!isValid) {
+      field.setAttribute('aria-invalid', 'true');
+      if (feedbackEl) {
+        feedbackEl.textContent = customMessage || field.validationMessage;
+        feedbackEl.style.display = 'block';
+      }
+    } else {
+      field.removeAttribute('aria-invalid');
+      if (feedbackEl) {
+        feedbackEl.style.display = 'none';
+      }
+    }
+
+    return isValid;
+  }
+
+  /**
+   * Validate an entire form
+   * @param {HTMLFormElement} form - The form to validate
+   * @returns {boolean} True if all fields are valid
+   */
+  static validateForm(form) {
+    const fields = form.querySelectorAll('input, select, textarea');
+    let isFormValid = true;
+
+    fields.forEach(field => {
+      const isFieldValid = this.validateField(field);
+      if (!isFieldValid) {
+        isFormValid = false;
+      }
+    });
+
+    return isFormValid;
+  }
+
+  /**
+   * Set up real-time validation for a form
+   * @param {HTMLFormElement} form - The form to add validation to
+   */
+  static setupRealTimeValidation(form) {
+    const fields = form.querySelectorAll('input, select, textarea');
+
+    fields.forEach(field => {
+      // Validate on blur
+      field.addEventListener('blur', () => {
+        this.validateField(field);
+      });
+
+      // Clear validation on input (for real-time feedback)
+      field.addEventListener('input', () => {
+        if (field.hasAttribute('aria-invalid')) {
+          this.validateField(field);
+        }
+      });
+    });
   }
 }
