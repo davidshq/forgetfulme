@@ -379,7 +379,7 @@ export class ContainerComponents {
 
   /**
    * Create a responsive grid layout
-   * @param {Array} items - Array of items to display in grid
+   * @param {Array} items - Array of items to display in grid (can be DOM nodes or text objects)
    * @param {Object} options - Grid options
    * @returns {HTMLElement}
    */
@@ -396,7 +396,29 @@ export class ContainerComponents {
     items.forEach(item => {
       const gridItem = document.createElement('div');
       gridItem.className = 'grid-item';
-      gridItem.appendChild(item);
+      
+      // Handle different item types
+      if (item instanceof Node) {
+        // If item is already a DOM node, append it directly
+        gridItem.appendChild(item);
+      } else if (typeof item === 'object' && item.text) {
+        // If item is a text object, create a text node
+        const textNode = document.createElement('span');
+        textNode.textContent = item.text;
+        if (item.className) {
+          textNode.className = item.className;
+        }
+        gridItem.appendChild(textNode);
+      } else if (typeof item === 'string') {
+        // If item is a string, create a text node
+        const textNode = document.createTextNode(item);
+        gridItem.appendChild(textNode);
+      } else {
+        // Fallback: convert to string
+        const textNode = document.createTextNode(String(item));
+        gridItem.appendChild(textNode);
+      }
+      
       grid.appendChild(gridItem);
     });
 
