@@ -35,10 +35,14 @@ class PreferencesManager {
 
     // Save to storage
     await chrome.storage.sync.set({
-      customStatusTypes: this.configManager.config.preferences.customStatusTypes,
+      customStatusTypes:
+        this.configManager.config.preferences.customStatusTypes,
     });
 
-    this.configManager.events.notifyListeners('preferencesChanged', this.configManager.config.preferences);
+    this.configManager.events.notifyListeners(
+      'preferencesChanged',
+      this.configManager.config.preferences
+    );
   }
 
   /**
@@ -56,7 +60,10 @@ class PreferencesManager {
       customStatusTypes: statusTypes,
     });
 
-    this.configManager.events.notifyListeners('statusTypesChanged', statusTypes);
+    this.configManager.events.notifyListeners(
+      'statusTypesChanged',
+      statusTypes
+    );
   }
 
   /**
@@ -67,7 +74,8 @@ class PreferencesManager {
   async addCustomStatusType(statusType) {
     this.configManager.validation.validateStatusType(statusType);
 
-    const currentTypes = this.configManager.config.preferences.customStatusTypes;
+    const currentTypes =
+      this.configManager.config.preferences.customStatusTypes;
     if (!currentTypes.includes(statusType)) {
       currentTypes.push(statusType);
       await this.setCustomStatusTypes(currentTypes);
@@ -80,10 +88,11 @@ class PreferencesManager {
    * @description Removes a status type from the list
    */
   async removeCustomStatusType(statusType) {
-    const currentTypes = this.configManager.config.preferences.customStatusTypes;
+    const currentTypes =
+      this.configManager.config.preferences.customStatusTypes;
     const updatedTypes = currentTypes.filter(type => type !== statusType);
     await this.setCustomStatusTypes(updatedTypes);
   }
 }
 
-export default PreferencesManager; 
+export default PreferencesManager;

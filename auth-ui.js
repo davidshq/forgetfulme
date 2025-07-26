@@ -333,7 +333,11 @@ class AuthUI {
       // Successfully signed out
 
       // Refresh the page or show login form
-      location.reload();
+      if (typeof this.onSignOutComplete === 'function') {
+        this.onSignOutComplete();
+      } else {
+        location.reload();
+      }
     } catch (error) {
       ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
         silent: true,

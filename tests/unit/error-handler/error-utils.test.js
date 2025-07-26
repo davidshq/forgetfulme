@@ -35,7 +35,11 @@ describe('ErrorUtils', () => {
 
   describe('createError', () => {
     it('should create standardized error object', () => {
-      const error = utils.createError('Test error', 'VALIDATION', 'test.context');
+      const error = utils.createError(
+        'Test error',
+        'VALIDATION',
+        'test.context'
+      );
 
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe('Test error');
@@ -302,4 +306,4 @@ describe('ErrorUtils', () => {
       expect(types).not.toBe(utils.errorTypes); // Should be a copy
     });
   });
-}); 
+});

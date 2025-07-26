@@ -107,7 +107,11 @@ class ErrorHandler {
    * @param {string} context - Error context
    * @returns {Error} - Standardized error object
    */
-  createError(message, type = ErrorHandler.ERROR_TYPES.UNKNOWN, context = 'unknown') {
+  createError(
+    message,
+    type = ErrorHandler.ERROR_TYPES.UNKNOWN,
+    context = 'unknown'
+  ) {
     return this.utils.createError(message, type, context);
   }
 
@@ -169,4 +173,4 @@ defaultHandler.SEVERITY = ErrorHandler.SEVERITY;
 
 // Export both the class and default instance
 export { ErrorHandler };
-export default defaultHandler; 
+export default defaultHandler;

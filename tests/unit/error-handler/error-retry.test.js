@@ -234,9 +234,9 @@ describe('ErrorRetry', () => {
     it('should reset retry policies to defaults', () => {
       retry.setRetryPolicy('NETWORK', false);
       retry.setRetryPolicy('CUSTOM_TYPE', true);
-      
+
       retry.resetPolicies();
-      
+
       expect(retry.retryPolicies.NETWORK).toBe(true);
       expect(retry.retryPolicies.CUSTOM_TYPE).toBeUndefined();
     });
@@ -244,9 +244,9 @@ describe('ErrorRetry', () => {
     it('should reset display policies to defaults', () => {
       retry.setDisplayPolicy('NETWORK', true);
       retry.setDisplayPolicy('CUSTOM_TYPE', true);
-      
+
       retry.resetPolicies();
-      
+
       expect(retry.displayPolicies.NETWORK).toBe(false);
       expect(retry.displayPolicies.CUSTOM_TYPE).toBeUndefined();
     });
@@ -254,11 +254,11 @@ describe('ErrorRetry', () => {
     it('should reset severity display policies to defaults', () => {
       retry.setSeverityDisplayPolicy('LOW', true);
       retry.setSeverityDisplayPolicy('CUSTOM_SEVERITY', true);
-      
+
       retry.resetPolicies();
-      
+
       expect(retry.severityDisplayPolicies.LOW).toBe(false);
       expect(retry.severityDisplayPolicies.CUSTOM_SEVERITY).toBeUndefined();
     });
   });
-}); 
+});

@@ -143,21 +143,21 @@ describe('ErrorCategorizer', () => {
     it('should match patterns case-insensitively', () => {
       const message = 'NETWORK TIMEOUT ERROR';
       const patterns = ['timeout', 'network'];
-      
+
       expect(categorizer._matchesPatterns(message, patterns)).toBe(true);
     });
 
     it('should return false when no patterns match', () => {
       const message = 'Some random error';
       const patterns = ['timeout', 'network', 'auth'];
-      
+
       expect(categorizer._matchesPatterns(message, patterns)).toBe(false);
     });
 
     it('should handle empty patterns array', () => {
       const message = 'Some error';
       const patterns = [];
-      
+
       expect(categorizer._matchesPatterns(message, patterns)).toBe(false);
     });
   });
@@ -201,4 +201,4 @@ describe('ErrorCategorizer', () => {
       });
     });
   });
-}); 
+});

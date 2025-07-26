@@ -100,4 +100,4 @@ export class RealtimeManager {
       this.subscriptions.delete(channelName);
     }
   }
-} 
+}

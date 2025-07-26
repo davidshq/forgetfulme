@@ -109,12 +109,7 @@ export class ErrorCategorizer {
       'Supabase client not properly initialized',
     ];
 
-    this.uiPatterns = [
-      'DOM',
-      'element',
-      'null',
-      'undefined',
-    ];
+    this.uiPatterns = ['DOM', 'element', 'null', 'undefined'];
   }
 
   /**
@@ -250,4 +245,4 @@ export class ErrorCategorizer {
       originalError,
     };
   }
-} 
+}

@@ -396,7 +396,7 @@ export class ContainerComponents {
     items.forEach(item => {
       const gridItem = document.createElement('div');
       gridItem.className = 'grid-item';
-      
+
       // Handle different item types
       if (item instanceof Node) {
         // If item is already a DOM node, append it directly
@@ -418,7 +418,7 @@ export class ContainerComponents {
         const textNode = document.createTextNode(String(item));
         gridItem.appendChild(textNode);
       }
-      
+
       grid.appendChild(gridItem);
     });
 

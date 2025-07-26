@@ -179,4 +179,4 @@ export class BookmarkQueries {
       throw error;
     }
   }
-} 
+}

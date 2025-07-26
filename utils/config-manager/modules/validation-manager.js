@@ -28,7 +28,10 @@ class ValidationManager {
   async validateConfig() {
     // Validate Supabase configuration if present
     if (this.configManager.config.supabase) {
-      if (!this.configManager.config.supabase.url || !this.configManager.config.supabase.anonKey) {
+      if (
+        !this.configManager.config.supabase.url ||
+        !this.configManager.config.supabase.anonKey
+      ) {
         throw ErrorHandler.createError(
           'Invalid Supabase configuration: missing URL or anon key',
           ErrorHandler.ERROR_TYPES.VALIDATION,
@@ -54,7 +57,9 @@ class ValidationManager {
     }
 
     // Validate preferences
-    if (!Array.isArray(this.configManager.config.preferences.customStatusTypes)) {
+    if (
+      !Array.isArray(this.configManager.config.preferences.customStatusTypes)
+    ) {
       this.configManager.config.preferences.customStatusTypes = [
         'read',
         'good-reference',
@@ -142,4 +147,4 @@ class ValidationManager {
   }
 }
 
-export default ValidationManager; 
+export default ValidationManager;

@@ -5,7 +5,7 @@ const mockReload = vi.fn();
 Object.defineProperty(window, 'location', {
   value: {
     ...window.location,
-    reload: mockReload
+    reload: mockReload,
   },
   writable: true,
 });
@@ -397,20 +397,14 @@ describe('AuthUI', () => {
   describe('handleSignOut', () => {
     it('should call signOut and clear auth state', async () => {
       mockSupabaseConfig.signOut.mockResolvedValue();
+      const onSignOutComplete = vi.fn();
+      authUI.onSignOutComplete = onSignOutComplete;
 
-      // Use try/catch to handle location.reload JSDOM limitation
-      try {
-        await authUI.handleSignOut();
-      } catch (error) {
-        // Ignore JSDOM navigation errors - they're expected in test environment
-        if (!error.message.includes('Not implemented: navigation')) {
-          throw error;
-        }
-      }
+      await authUI.handleSignOut();
 
       expect(mockSupabaseConfig.signOut).toHaveBeenCalled();
       expect(mockAuthStateManager.clearAuthState).toHaveBeenCalled();
-      // Note: location.reload is not testable due to JSDOM limitations
+      expect(onSignOutComplete).toHaveBeenCalled();
     });
 
     it('should handle sign out errors', async () => {

@@ -56,7 +56,8 @@ export class ErrorDisplay {
 
     // Create message element
     const messageDiv = document.createElement('div');
-    messageDiv.className = this.messageClasses[type] || this.messageClasses.error;
+    messageDiv.className =
+      this.messageClasses[type] || this.messageClasses.error;
     messageDiv.textContent = message;
 
     // Add to container
@@ -64,7 +65,10 @@ export class ErrorDisplay {
 
     // Auto-remove after timeout unless persistent
     if (!options.persistent) {
-      const timeout = options.timeout || this.defaultTimeouts[type] || this.defaultTimeouts.error;
+      const timeout =
+        options.timeout ||
+        this.defaultTimeouts[type] ||
+        this.defaultTimeouts.error;
       setTimeout(() => {
         this._removeMessage(messageDiv);
       }, timeout);
@@ -89,10 +93,10 @@ export class ErrorDisplay {
   clearMessages(container, type = null) {
     if (!container) return;
 
-    const selector = type 
-      ? `.${this.messageClasses[type].split(' ')[1]}` 
+    const selector = type
+      ? `.${this.messageClasses[type].split(' ')[1]}`
       : '.message';
-    
+
     const messages = container.querySelectorAll(selector);
     messages.forEach(message => this._removeMessage(message));
   }
@@ -123,7 +127,12 @@ export class ErrorDisplay {
    * @param {Object} options - Additional options
    * @returns {HTMLElement} - Message element with close button
    */
-  showDismissibleMessage(message, type = 'error', container = null, options = {}) {
+  showDismissibleMessage(
+    message,
+    type = 'error',
+    container = null,
+    options = {}
+  ) {
     if (!container) return null;
 
     // Create message wrapper
@@ -151,7 +160,10 @@ export class ErrorDisplay {
 
     // Auto-remove after timeout unless persistent
     if (!options.persistent) {
-      const timeout = options.timeout || this.defaultTimeouts[type] || this.defaultTimeouts.error;
+      const timeout =
+        options.timeout ||
+        this.defaultTimeouts[type] ||
+        this.defaultTimeouts.error;
       setTimeout(() => {
         this._removeMessage(messageWrapper);
       }, timeout);
@@ -206,4 +218,4 @@ export class ErrorDisplay {
   getMessageClasses() {
     return { ...this.messageClasses };
   }
-} 
+}

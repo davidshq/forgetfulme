@@ -45,7 +45,7 @@ class SupabaseService {
     this.config = supabaseConfig;
     /** @type {Object|null} Supabase client instance */
     this.supabase = null;
-    
+
     // Initialize modules with dependency injection
     this.initializer = new ServiceInitializer(supabaseConfig);
     this.bookmarkOperations = new BookmarkOperations(supabaseConfig);
@@ -63,18 +63,18 @@ class SupabaseService {
    */
   async initialize() {
     await this.initializer.initialize();
-    
+
     // Initialize all modules with the configured client
     const supabaseClient = this.initializer.getSupabaseClient();
     this.supabase = supabaseClient; // Set the supabase property for backward compatibility
-    
+
     this.bookmarkOperations.setSupabaseClient(supabaseClient);
     this.bookmarkQueries.setSupabaseClient(supabaseClient);
     this.bookmarkStats.setSupabaseClient(supabaseClient);
     this.userPreferences.setSupabaseClient(supabaseClient);
     this.realtimeManager.setSupabaseClient(supabaseClient);
     this.importExport.setSupabaseClient(supabaseClient);
-    
+
     // Set cross-module references
     this.bookmarkOperations.setBookmarkQueries(this.bookmarkQueries);
   }
@@ -147,4 +147,4 @@ class SupabaseService {
   }
 }
 
-export default SupabaseService; 
+export default SupabaseService;

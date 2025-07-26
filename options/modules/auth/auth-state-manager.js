@@ -77,4 +77,4 @@ export class AuthStateManager {
   setAppContainer(appContainer) {
     this.appContainer = appContainer;
   }
-} 
+}

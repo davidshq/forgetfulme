@@ -27,18 +27,7 @@ class StorageManager {
    */
   async loadAllConfig() {
     try {
-      console.log('StorageManager: Loading all config from Chrome storage...');
-      console.log(
-        'StorageManager: chrome object exists?',
-        typeof chrome !== 'undefined'
-      );
-      console.log(
-        'StorageManager: chrome.storage exists?',
-        typeof chrome !== 'undefined' && chrome.storage
-      );
-
       if (typeof chrome === 'undefined' || !chrome.storage) {
-        console.log('StorageManager: Chrome APIs not available, using defaults');
         this.configManager.config.supabase = null;
         this.configManager.config.preferences = {
           customStatusTypes: [
@@ -57,7 +46,6 @@ class StorageManager {
         'customStatusTypes',
         'auth_session',
       ]);
-      console.log('StorageManager: Chrome storage result:', result);
 
       this.configManager.config.supabase = result.supabaseConfig || null;
       this.configManager.config.preferences = {
@@ -69,8 +57,6 @@ class StorageManager {
         ],
       };
       this.configManager.config.auth = result.auth_session || null;
-
-      console.log('StorageManager: Final config:', this.configManager.config);
     } catch (error) {
       console.error('StorageManager: Error loading config:', error);
       const errorResult = ErrorHandler.handle(
@@ -100,7 +86,10 @@ class StorageManager {
       supabaseConfig: this.configManager.config.supabase,
     });
 
-    this.configManager.events.notifyListeners('supabaseConfigChanged', this.configManager.config.supabase);
+    this.configManager.events.notifyListeners(
+      'supabaseConfigChanged',
+      this.configManager.config.supabase
+    );
 
     return { success: true, message: 'Configuration saved successfully' };
   }
@@ -177,7 +166,9 @@ class StorageManager {
     }
 
     if (configData.preferences) {
-      await this.configManager.preferences.setPreferences(configData.preferences);
+      await this.configManager.preferences.setPreferences(
+        configData.preferences
+      );
     }
 
     if (configData.auth) {
@@ -207,4 +198,4 @@ class StorageManager {
   }
 }
 
-export default StorageManager; 
+export default StorageManager;

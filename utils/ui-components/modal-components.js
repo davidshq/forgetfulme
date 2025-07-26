@@ -28,88 +28,141 @@ import { ButtonComponents } from './button-components.js';
 export class ModalComponents {
   /**
    * Create a confirmation dialog
-   * @param {string} message - Confirmation message
-   * @param {Function} onConfirm - Confirm callback
-   * @param {Function} onCancel - Cancel callback
-   * @param {Object} options - Dialog options
+   * @param {Object|string} options - Dialog options or message (for backward compatibility)
+   * @param {Function} onConfirm - Confirm callback (for backward compatibility)
+   * @param {Function} onCancel - Cancel callback (for backward compatibility)
+   * @param {Object} extraOptions - Extra options (for backward compatibility)
    * @returns {HTMLElement}
    */
-  static createConfirmDialog(message, onConfirm, onCancel, options = {}) {
+  static createConfirmDialog(options, onConfirm, onCancel, extraOptions = {}) {
+    // Handle both new object API and old parameter API
+    let config;
+    if (typeof options === 'string') {
+      // Old API: createConfirmDialog(message, onConfirm, onCancel, options)
+      config = {
+        message: options,
+        onConfirm,
+        onCancel,
+        ...extraOptions,
+      };
+    } else {
+      // New API: createConfirmDialog(options)
+      config = {
+        message: '',
+        onConfirm: () => {},
+        onCancel: () => {},
+        ...options,
+      };
+    }
+
     const actions = [
       {
-        text: options.confirmText || 'Confirm',
+        text: config.confirmText || 'Confirm',
         onClick: () => {
           this.closeModal(dialog);
-          if (onConfirm) onConfirm();
+          if (config.onConfirm) config.onConfirm();
         },
-        className: 'primary',
+        className: config.confirmStyle || 'primary',
       },
       {
-        text: options.cancelText || 'Cancel',
+        text: config.cancelText || 'Cancel',
         onClick: () => {
           this.closeModal(dialog);
-          if (onCancel) onCancel();
+          if (config.onCancel) config.onCancel();
         },
         className: 'secondary',
       },
     ];
 
-    const dialog = this.createModal(
-      options.title || 'Confirm',
-      message,
+    const dialog = this.createModal({
+      title: config.title || 'Confirm',
+      content: config.message,
       actions,
-      {
-        showClose: false,
-        className: 'confirm-dialog',
-        ...options,
-      }
-    );
+      showClose: false,
+      className: 'confirm-dialog',
+      ...config,
+    });
 
     return dialog;
   }
 
   /**
    * Create a modal dialog using Pico's dialog system
-   * @param {string} title - Modal title
-   * @param {HTMLElement|string} content - Modal content
-   * @param {Array} actions - Array of action buttons
-   * @param {Object} options - Modal options
+   * @param {Object|string} options - Modal options or title (for backward compatibility)
+   * @param {string} content - Modal content (for backward compatibility)
+   * @param {Array} actions - Array of action buttons (for backward compatibility)
+   * @param {Object} extraOptions - Extra options (for backward compatibility)
    * @returns {HTMLElement}
    */
-  static createModal(title, content, actions = [], options = {}) {
+  static createModal(options, content, actions, extraOptions) {
+    // Handle both new object API and old parameter API
+    let config;
+    if (typeof options === 'string') {
+      // Old API: createModal(title, content, actions, options)
+      config = {
+        title: options,
+        content: content,
+        actions: actions || [],
+        ...extraOptions,
+      };
+    } else {
+      // New API: createModal(options)
+      config = {
+        title: '',
+        content: '',
+        actions: [],
+        ...options,
+      };
+    }
+
     const dialog = document.createElement('dialog');
-    dialog.className = options.className || '';
+    dialog.className = config.className || '';
+
+    // Add accessibility attributes
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+
+    // Set unique ID for ARIA labelling if title exists
+    if (config.title && config.id) {
+      dialog.setAttribute('aria-labelledby', `${config.id}-title`);
+    }
 
     // Create article container for Pico styling
     const article = document.createElement('article');
 
     // Add header if title is provided
-    if (title) {
+    if (config.title) {
       const header = document.createElement('header');
       const titleEl = document.createElement('h3');
-      titleEl.textContent = title;
+      const titleId = config.id ? `${config.id}-title` : undefined;
+      if (titleId) titleEl.id = titleId;
+      titleEl.textContent = config.title;
       header.appendChild(titleEl);
       article.appendChild(header);
     }
 
     // Add main content
     const mainContent = document.createElement('div');
-    if (typeof content === 'string') {
-      mainContent.innerHTML = content;
-    } else {
-      mainContent.appendChild(content);
+    mainContent.className = 'modal-content';
+    if (typeof config.content === 'string') {
+      mainContent.innerHTML = config.content;
+    } else if (config.content) {
+      mainContent.appendChild(config.content);
     }
     article.appendChild(mainContent);
 
     // Add footer with actions if provided
-    if (actions.length > 0) {
+    if (config.actions && config.actions.length > 0) {
       const footer = document.createElement('footer');
-      actions.forEach(action => {
+      config.actions.forEach(action => {
         const button = ButtonComponents.createButton(
           action.text,
           action.onClick,
           action.className || 'outline',
-          action.options || {}
+          {
+            'data-action': action.text.toLowerCase(),
+            ...action.options,
+          }
         );
         footer.appendChild(button);
       });
@@ -117,7 +170,7 @@ export class ModalComponents {
     }
 
     // Add close button if not disabled
-    if (options.showClose !== false) {
+    if (config.showClose !== false) {
       const closeBtn = ButtonComponents.createButton(
         '×',
         () => this.closeModal(dialog),
@@ -136,6 +189,12 @@ export class ModalComponents {
     dialog.appendChild(article);
 
     // Add backdrop click to close
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    backdrop.addEventListener('click', () => {
+      this.closeModal(dialog);
+    });
+
     dialog.addEventListener('click', e => {
       if (e.target === dialog) {
         this.closeModal(dialog);
@@ -150,11 +209,25 @@ export class ModalComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static closeModal(modal) {
-    if (modal && modal.tagName === 'DIALOG') {
-      modal.close();
-    }
-    if (modal && modal.parentNode) {
-      modal.parentNode.removeChild(modal);
+    if (modal) {
+      if (modal.tagName === 'DIALOG') {
+        try {
+          if (modal.close) {
+            modal.close();
+          }
+        } catch (error) {
+          // Fallback for JSDOM
+        }
+      }
+
+      // Clean up modal state
+      modal.style.display = 'none';
+      modal.classList.remove('modal-open');
+      document.body.style.overflow = '';
+
+      if (modal.parentNode) {
+        modal.parentNode.removeChild(modal);
+      }
     }
   }
 
@@ -164,10 +237,37 @@ export class ModalComponents {
    */
   static showModal(modal) {
     if (modal && modal.tagName === 'DIALOG') {
-      modal.showModal();
+      // Try to use native dialog API, fallback for JSDOM/testing
+      try {
+        if (modal.showModal) {
+          modal.showModal();
+        } else {
+          // Fallback for JSDOM - simulate modal display
+          modal.style.display = 'block';
+          modal.classList.add('modal-open');
+          document.body.style.overflow = 'hidden';
+        }
+      } catch (error) {
+        // Fallback for environments without showModal support
+        modal.style.display = 'block';
+        modal.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+      }
     } else {
       document.body.appendChild(modal);
+      modal.style.display = 'block';
+      modal.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
     }
+
+    // Add escape key listener
+    const escapeHandler = e => {
+      if (e.key === 'Escape') {
+        this.closeModal(modal);
+        document.removeEventListener('keydown', escapeHandler);
+      }
+    };
+    document.addEventListener('keydown', escapeHandler);
   }
 
   /**

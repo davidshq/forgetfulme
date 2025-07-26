@@ -51,7 +51,9 @@ vi.mock('../../../utils/ui-components.js', () => ({
     createGrid: vi.fn().mockReturnValue(document.createElement('div')),
     createListItem: vi.fn().mockReturnValue(document.createElement('li')),
     createCard: vi.fn().mockReturnValue(document.createElement('div')),
-    createCardWithActions: vi.fn().mockReturnValue(document.createElement('div')),
+    createCardWithActions: vi
+      .fn()
+      .mockReturnValue(document.createElement('div')),
   },
 }));
 
@@ -128,26 +130,29 @@ vi.mock('../../../config-ui.js', () => ({
 }));
 
 // Mock the modules
-vi.mock('../../../options/modules/initialization/options-initializer.js', () => ({
-  OptionsInitializer: vi.fn().mockImplementation(() => ({
-    initializeAsync: vi.fn().mockResolvedValue(),
-    initializeApp: vi.fn().mockResolvedValue({ interfaceType: 'main' }),
-    initializeAuthState: vi.fn().mockResolvedValue(),
-    getElements: vi.fn().mockReturnValue({
-      appContainer: { innerHTML: '', appendChild: vi.fn() },
-      statusTypesList: null,
-      newStatusInput: null,
-      addStatusBtn: null,
-      exportDataBtn: null,
-      importDataBtn: null,
-      importFile: null,
-      clearDataBtn: null,
-      totalEntries: null,
-      statusTypesCount: null,
-      mostUsedStatus: null,
-    }),
-  })),
-}));
+vi.mock(
+  '../../../options/modules/initialization/options-initializer.js',
+  () => ({
+    OptionsInitializer: vi.fn().mockImplementation(() => ({
+      initializeAsync: vi.fn().mockResolvedValue(),
+      initializeApp: vi.fn().mockResolvedValue({ interfaceType: 'main' }),
+      initializeAuthState: vi.fn().mockResolvedValue(),
+      getElements: vi.fn().mockReturnValue({
+        appContainer: { innerHTML: '', appendChild: vi.fn() },
+        statusTypesList: null,
+        newStatusInput: null,
+        addStatusBtn: null,
+        exportDataBtn: null,
+        importDataBtn: null,
+        importFile: null,
+        clearDataBtn: null,
+        totalEntries: null,
+        statusTypesCount: null,
+        mostUsedStatus: null,
+      }),
+    })),
+  })
+);
 
 vi.mock('../../../options/modules/auth/auth-state-manager.js', () => ({
   AuthStateManager: vi.fn().mockImplementation(() => ({
@@ -321,4 +326,4 @@ describe('ForgetfulMeOptions (Refactored)', () => {
       expect(options.showAuthInterface).not.toHaveBeenCalled();
     });
   });
-}); 
+});

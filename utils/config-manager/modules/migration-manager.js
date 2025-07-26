@@ -77,4 +77,4 @@ class MigrationManager {
   }
 }
 
-export default MigrationManager; 
+export default MigrationManager;

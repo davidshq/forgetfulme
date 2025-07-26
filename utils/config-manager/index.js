@@ -116,10 +116,10 @@ class ConfigManager {
    */
   async setSupabaseConfig(url, anonKey) {
     await this.ensureInitialized();
-    
+
     // Validate input
     this.validation.validateSupabaseConfig(url, anonKey);
-    
+
     return await this.storage.setSupabaseConfig(url, anonKey);
   }
 
@@ -332,4 +332,4 @@ class ConfigManager {
 }
 
 // Export for use in other files
-export default ConfigManager; 
+export default ConfigManager;

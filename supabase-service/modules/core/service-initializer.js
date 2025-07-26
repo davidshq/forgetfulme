@@ -65,4 +65,4 @@ export class ServiceInitializer {
   getCurrentUser() {
     return this.config.getCurrentUser();
   }
-} 
+}

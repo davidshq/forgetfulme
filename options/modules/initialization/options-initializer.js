@@ -169,4 +169,4 @@ export class OptionsInitializer {
       mostUsedStatus: this.mostUsedStatus,
     };
   }
-} 
+}

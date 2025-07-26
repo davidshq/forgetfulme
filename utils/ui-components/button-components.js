@@ -64,15 +64,26 @@ export class ButtonComponents {
 
     button.className = picoClass;
 
-    if (onClick) {
+    // Set disabled state BEFORE adding click listener
+    if (options.disabled) {
+      button.disabled = options.disabled;
+    }
+
+    // Only add click listener if button is not disabled and onClick is provided
+    if (onClick && !options.disabled) {
       button.addEventListener('click', onClick);
     }
 
     // Apply additional attributes
     if (options.type) button.type = options.type;
-    if (options.disabled) button.disabled = options.disabled;
     if (options.title) button.title = options.title;
     if (options.id) button.id = options.id;
+
+    // Apply ARIA attributes for accessibility
+    if (options.ariaLabel) button.setAttribute('aria-label', options.ariaLabel);
+    if (options.ariaDescribedBy)
+      button.setAttribute('aria-describedby', options.ariaDescribedBy);
+    if (options.role) button.setAttribute('role', options.role);
 
     return button;
   }

@@ -105,8 +105,8 @@ class ForgetfulMeOptions {
       this.authManager.setAppContainer(this.appContainer);
 
       // Initialize auth state with callbacks
-      await this.initializer.initializeAuthState(
-        session => this.handleAuthStateChange(session)
+      await this.initializer.initializeAuthState(session =>
+        this.handleAuthStateChange(session)
       );
 
       // Get initialization result
@@ -221,4 +221,4 @@ class ForgetfulMeOptions {
 new ForgetfulMeOptions();
 
 // Export for testing
-export default ForgetfulMeOptions; 
+export default ForgetfulMeOptions;

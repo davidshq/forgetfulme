@@ -2,7 +2,6 @@
 export function bindEvents(_ctx) {}
 export async function markAsRead(ctx) {
   try {
-    console.log('[markAsRead] called', ctx);
     // Validate context
     if (
       !ctx ||
@@ -22,14 +21,12 @@ export async function markAsRead(ctx) {
     // Safely get form values using DOM utilities
     const status = ctx.UIComponents.DOM.getValue('read-status') || 'read';
     const tags = ctx.UIComponents.DOM.getValue('tags') || '';
-    console.log('[markAsRead] status:', status, 'tags:', tags);
 
     // Get current tab info
     const [tab] = await chrome.tabs.query({
       active: true,
       currentWindow: true,
     });
-    console.log('[markAsRead] tab:', tab);
 
     if (
       !tab.url ||
@@ -48,10 +45,8 @@ export async function markAsRead(ctx) {
       status,
       tags.trim() ? tags.trim().split(',') : []
     );
-    console.log('[markAsRead] bookmark:', bookmark);
 
     const result = await ctx.supabaseService.saveBookmark(bookmark);
-    console.log('[markAsRead] saveBookmark result:', result);
 
     if (result.isDuplicate) {
       // Show edit interface for existing bookmark

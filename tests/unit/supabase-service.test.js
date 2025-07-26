@@ -101,14 +101,8 @@ describe('SupabaseService', () => {
       expect(result).toEqual(mockBookmark);
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('bookmarks');
       expect(mockChain.select).toHaveBeenCalledWith('*');
-      expect(mockChain.eq).toHaveBeenCalledWith(
-        'user_id',
-        'test-user-id'
-      );
-      expect(mockChain.eq).toHaveBeenCalledWith(
-        'url',
-        'https://example.com'
-      );
+      expect(mockChain.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
+      expect(mockChain.eq).toHaveBeenCalledWith('url', 'https://example.com');
       expect(mockChain.single).toHaveBeenCalled();
     });
 
@@ -149,22 +143,28 @@ describe('SupabaseService', () => {
     it('should initialize successfully', async () => {
       // Create a new service instance for this test to avoid double initialization
       const testService = new SupabaseService(mockSupabaseConfig);
-      
+
       // Reset the mocks to ensure clean state
       vi.clearAllMocks();
-      
+
       // Re-setup the mocks for the new service instance
       mockSupabaseConfig.initialize.mockResolvedValue();
       mockSupabaseConfig.getSupabaseClient.mockReturnValue(mockSupabaseClient);
-      
+
       // Ensure the supabase property is initially null
       expect(testService.supabase).toBeNull();
-      
+
       await testService.initialize();
 
       // Debug: Check what's happening
-      console.log('mockSupabaseConfig.initialize called:', mockSupabaseConfig.initialize.mock.calls.length);
-      console.log('mockSupabaseConfig.getSupabaseClient called:', mockSupabaseConfig.getSupabaseClient.mock.calls.length);
+      console.log(
+        'mockSupabaseConfig.initialize called:',
+        mockSupabaseConfig.initialize.mock.calls.length
+      );
+      console.log(
+        'mockSupabaseConfig.getSupabaseClient called:',
+        mockSupabaseConfig.getSupabaseClient.mock.calls.length
+      );
       console.log('testService.supabase:', testService.supabase);
       console.log('mockSupabaseClient:', mockSupabaseClient);
 

@@ -45,10 +45,12 @@ describe('UIMessages', () => {
 
       expect(messageEl).toBeDefined();
       expect(messageEl.tagName).toBe('DIV');
-      expect(messageEl.className).toContain('ui-message');
-      expect(messageEl.className).toContain('ui-message-info');
-      expect(messageEl.textContent).toBe('Test message');
-      expect(container.querySelector('.ui-message')).toBe(messageEl);
+      expect(messageEl.getAttribute('role')).toBe('alert');
+      expect(messageEl.getAttribute('aria-live')).toBe('polite');
+      expect(messageEl.querySelector('.message-content').textContent).toBe(
+        'Test message'
+      );
+      expect(container.querySelector('[role="alert"]')).toBe(messageEl);
     });
 
     test('should show message with icon', () => {
@@ -56,10 +58,8 @@ describe('UIMessages', () => {
         icon: '✅',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '✅'
-      );
+      expect(messageEl.querySelector('.message-icon')).toBeTruthy();
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('✅');
     });
 
     test('should auto-remove message after timeout', async () => {
@@ -67,12 +67,12 @@ describe('UIMessages', () => {
         timeout: 10, // 10ms timeout for testing
       });
 
-      expect(container.querySelector('.ui-message')).toBe(messageEl);
+      expect(container.querySelector('[role="alert"]')).toBe(messageEl);
 
-      // Wait for timeout
-      await new Promise(resolve => setTimeout(resolve, 20));
+      // Wait for timeout + animation (10ms + 300ms animation)
+      await new Promise(resolve => setTimeout(resolve, 350));
 
-      expect(container.querySelector('.ui-message')).toBeNull();
+      expect(container.querySelector('[role="alert"]')).toBeNull();
     });
 
     test('should handle missing container', () => {
@@ -103,11 +103,9 @@ describe('UIMessages', () => {
     test('should show success message', () => {
       const messageEl = UIMessages.success('Operation successful!', container);
 
-      expect(messageEl.className).toContain('ui-message-success');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '✅'
-      );
+      expect(messageEl.className).toContain('message-success');
+      expect(messageEl.querySelector('.message-icon')).toBeTruthy();
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('✅');
     });
 
     test('should show success message with custom options', () => {
@@ -116,9 +114,7 @@ describe('UIMessages', () => {
         icon: '🎉',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '🎉'
-      );
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('🎉');
     });
   });
 
@@ -126,11 +122,9 @@ describe('UIMessages', () => {
     test('should show error message', () => {
       const messageEl = UIMessages.error('Something went wrong!', container);
 
-      expect(messageEl.className).toContain('ui-message-error');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '❌'
-      );
+      expect(messageEl.className).toContain('message-error');
+      expect(messageEl.querySelector('.message-icon')).toBeTruthy();
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('❌');
     });
 
     test('should show error message with custom options', () => {
@@ -139,9 +133,7 @@ describe('UIMessages', () => {
         icon: '💥',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '💥'
-      );
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('💥');
     });
   });
 
@@ -149,11 +141,9 @@ describe('UIMessages', () => {
     test('should show warning message', () => {
       const messageEl = UIMessages.warning('Please be careful!', container);
 
-      expect(messageEl.className).toContain('ui-message-warning');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '⚠️'
-      );
+      expect(messageEl.className).toContain('message-warning');
+      expect(messageEl.querySelector('.message-icon')).toBeTruthy();
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('⚠️');
     });
 
     test('should show warning message with custom options', () => {
@@ -162,9 +152,7 @@ describe('UIMessages', () => {
         icon: '🚨',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '🚨'
-      );
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('🚨');
     });
   });
 
@@ -172,11 +160,9 @@ describe('UIMessages', () => {
     test('should show info message', () => {
       const messageEl = UIMessages.info('Here is some information.', container);
 
-      expect(messageEl.className).toContain('ui-message-info');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        'ℹ️'
-      );
+      expect(messageEl.className).toContain('message-info');
+      expect(messageEl.querySelector('.message-icon')).toBeTruthy();
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('ℹ️');
     });
 
     test('should show info message with custom options', () => {
@@ -185,9 +171,7 @@ describe('UIMessages', () => {
         icon: '📋',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '📋'
-      );
+      expect(messageEl.querySelector('.message-icon').textContent).toBe('📋');
     });
   });
 
@@ -195,14 +179,14 @@ describe('UIMessages', () => {
     test('should show loading message with Pico progress', () => {
       const messageEl = UIMessages.loading('Please wait...', container);
 
-      expect(messageEl.className).toContain('ui-message-loading');
+      expect(messageEl.className).toContain('message-loading');
       expect(messageEl.getAttribute('aria-busy')).toBe('true');
       expect(messageEl.querySelector('progress')).toBeTruthy();
       expect(
         messageEl.querySelector('progress').getAttribute('aria-label')
       ).toBe('Loading');
-      expect(messageEl.querySelector('.ui-message-text')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-text').textContent).toBe(
+      expect(messageEl.querySelector('.message-text')).toBeTruthy();
+      expect(messageEl.querySelector('.message-text').textContent).toBe(
         'Please wait...'
       );
     });
@@ -210,22 +194,22 @@ describe('UIMessages', () => {
     test('should not auto-remove loading message', async () => {
       const messageEl = UIMessages.loading('Loading...', container);
 
-      expect(container.querySelector('.ui-message')).toBe(messageEl);
+      expect(container.querySelector('.message')).toBe(messageEl);
 
       // Wait for a while
       await new Promise(resolve => setTimeout(resolve, 100));
 
       // Message should still be there
-      expect(container.querySelector('.ui-message')).toBe(messageEl);
+      expect(container.querySelector('.message')).toBe(messageEl);
     });
 
     test('should show loading message without text', () => {
       const messageEl = UIMessages.loading('', container);
 
-      expect(messageEl.className).toContain('ui-message-loading');
+      expect(messageEl.className).toContain('message-loading');
       expect(messageEl.getAttribute('aria-busy')).toBe('true');
       expect(messageEl.querySelector('progress')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-text')).toBeFalsy();
+      expect(messageEl.querySelector('.message-text')).toBeFalsy();
     });
 
     test('should handle null container gracefully', () => {
@@ -251,16 +235,16 @@ describe('UIMessages', () => {
       UIMessages.error('Error 1', container);
       UIMessages.info('Info 1', container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(3);
+      expect(container.querySelectorAll('.message')).toHaveLength(3);
 
       UIMessages.clear(container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
+      expect(container.querySelectorAll('.message')).toHaveLength(0);
     });
 
     test('should handle empty container', () => {
       UIMessages.clear(container);
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
+      expect(container.querySelectorAll('.message')).toHaveLength(0);
     });
 
     test('should handle null container', () => {
@@ -303,9 +287,9 @@ describe('UIMessages', () => {
         container
       );
 
-      expect(messageEl.className).toContain('ui-message-error');
-      expect(messageEl.querySelector('.ui-message-retry-btn')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-retry-btn').textContent).toBe(
+      expect(messageEl.className).toContain('message-error');
+      expect(messageEl.querySelector('.message-retry-btn')).toBeTruthy();
+      expect(messageEl.querySelector('.message-retry-btn').textContent).toBe(
         'Retry'
       );
     });
@@ -321,11 +305,11 @@ describe('UIMessages', () => {
         container
       );
 
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
+      const retryBtn = messageEl.querySelector('.message-retry-btn');
       retryBtn.click();
 
       expect(mockRetryFunction).toHaveBeenCalled();
-      expect(container.querySelector('.ui-message-error')).toBeNull();
+      expect(container.querySelector('.message-error')).toBeNull();
     });
 
     test('should remove message when retry button is clicked', () => {
@@ -339,10 +323,10 @@ describe('UIMessages', () => {
         container
       );
 
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
+      const retryBtn = messageEl.querySelector('.message-retry-btn');
       retryBtn.click();
 
-      expect(container.querySelector('.ui-message-error')).toBeNull();
+      expect(container.querySelector('.message-error')).toBeNull();
     });
 
     test('should handle missing retry function', () => {
@@ -355,8 +339,8 @@ describe('UIMessages', () => {
         container
       );
 
-      expect(messageEl.className).toContain('ui-message-error');
-      expect(messageEl.querySelector('.ui-message-retry-btn')).toBeFalsy();
+      expect(messageEl.className).toContain('message-error');
+      expect(messageEl.querySelector('.message-retry-btn')).toBeFalsy();
     });
 
     test('should handle retry function errors', () => {
@@ -373,7 +357,7 @@ describe('UIMessages', () => {
         container
       );
 
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
+      const retryBtn = messageEl.querySelector('.message-retry-btn');
 
       // The implementation doesn't have a try-catch around the retry function
       // so the error will be thrown, which is expected behavior
@@ -596,11 +580,11 @@ describe('UIMessages', () => {
       const warningMsg = UIMessages.warning('Warning!', container);
       const infoMsg = UIMessages.info('Info!', container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(4);
-      expect(container.querySelector('.ui-message-success')).toBe(successMsg);
-      expect(container.querySelector('.ui-message-error')).toBe(errorMsg);
-      expect(container.querySelector('.ui-message-warning')).toBe(warningMsg);
-      expect(container.querySelector('.ui-message-info')).toBe(infoMsg);
+      expect(container.querySelectorAll('.message')).toHaveLength(4);
+      expect(container.querySelector('.message-success')).toBe(successMsg);
+      expect(container.querySelector('.message-error')).toBe(errorMsg);
+      expect(container.querySelector('.message-warning')).toBe(warningMsg);
+      expect(container.querySelector('.message-info')).toBe(infoMsg);
     });
 
     test('should clear all messages at once', () => {
@@ -608,11 +592,11 @@ describe('UIMessages', () => {
       UIMessages.error('Error!', container);
       UIMessages.warning('Warning!', container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(3);
+      expect(container.querySelectorAll('.message')).toHaveLength(3);
 
       UIMessages.clear(container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
+      expect(container.querySelectorAll('.message')).toHaveLength(0);
     });
 
     test('should handle message removal when parent is removed', () => {

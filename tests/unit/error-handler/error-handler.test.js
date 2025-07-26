@@ -4,7 +4,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import ErrorHandler, { ErrorHandler as ErrorHandlerClass } from '../../../utils/error-handler/index.js';
+import ErrorHandler, {
+  ErrorHandler as ErrorHandlerClass,
+} from '../../../utils/error-handler/index.js';
 
 describe('ErrorHandler', () => {
   let handler;
@@ -50,8 +52,8 @@ describe('ErrorHandler', () => {
       const customHandler = new ErrorHandlerClass({
         logging: {
           enabled: false,
-          level: 'HIGH'
-        }
+          level: 'HIGH',
+        },
       });
       expect(customHandler.logger.enabled).toBe(false);
       expect(customHandler.logger.level).toBe('HIGH');
@@ -65,7 +67,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('NETWORK');
       expect(result.errorInfo.severity).toBe('MEDIUM');
-      expect(result.userMessage).toBe('Connection error. Please check your internet connection and try again.');
+      expect(result.userMessage).toBe(
+        'Connection error. Please check your internet connection and try again.'
+      );
       expect(result.shouldRetry).toBe(true);
       expect(result.shouldShowToUser).toBe(false);
     });
@@ -87,7 +91,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('VALIDATION');
       expect(result.errorInfo.severity).toBe('LOW');
-      expect(result.userMessage).toBe('Please enter both the Project URL and anon key.');
+      expect(result.userMessage).toBe(
+        'Please enter both the Project URL and anon key.'
+      );
       expect(result.shouldRetry).toBe(false);
       expect(result.shouldShowToUser).toBe(true);
     });
@@ -98,7 +104,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('DATABASE');
       expect(result.errorInfo.severity).toBe('HIGH');
-      expect(result.userMessage).toBe('Data error. Please try again or contact support if the problem persists.');
+      expect(result.userMessage).toBe(
+        'Data error. Please try again or contact support if the problem persists.'
+      );
       expect(result.shouldRetry).toBe(true);
       expect(result.shouldShowToUser).toBe(false);
     });
@@ -109,7 +117,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('CONFIG');
       expect(result.errorInfo.severity).toBe('MEDIUM');
-      expect(result.userMessage).toBe('Configuration error. Please check your Supabase settings.');
+      expect(result.userMessage).toBe(
+        'Configuration error. Please check your Supabase settings.'
+      );
       expect(result.shouldRetry).toBe(false);
       expect(result.shouldShowToUser).toBe(true);
     });
@@ -120,7 +130,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('UI');
       expect(result.errorInfo.severity).toBe('MEDIUM');
-      expect(result.userMessage).toBe('Interface error. Please refresh the page and try again.');
+      expect(result.userMessage).toBe(
+        'Interface error. Please refresh the page and try again.'
+      );
       expect(result.shouldRetry).toBe(false);
       expect(result.shouldShowToUser).toBe(false);
     });
@@ -131,7 +143,9 @@ describe('ErrorHandler', () => {
 
       expect(result.errorInfo.type).toBe('UNKNOWN');
       expect(result.errorInfo.severity).toBe('MEDIUM');
-      expect(result.userMessage).toBe('An unexpected error occurred. Please try again.');
+      expect(result.userMessage).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
       expect(result.shouldRetry).toBe(false);
       expect(result.shouldShowToUser).toBe(false);
     });
@@ -139,18 +153,17 @@ describe('ErrorHandler', () => {
     it('should respect silent logging option', () => {
       const error = new Error('Test error');
       const spy = vi.spyOn(handler.logger, 'logError');
-      
+
       handler.handle(error, 'test.context', { silent: true });
-      
-      expect(spy).toHaveBeenCalledWith(
-        expect.any(Object),
-        { silent: true }
-      );
+
+      expect(spy).toHaveBeenCalledWith(expect.any(Object), { silent: true });
     });
 
     it('should respect showTechnical option', () => {
       const error = new Error('Technical error message');
-      const result = handler.handle(error, 'test.context', { showTechnical: true });
+      const result = handler.handle(error, 'test.context', {
+        showTechnical: true,
+      });
 
       expect(result.userMessage).toBe('Technical error message');
     });
@@ -158,7 +171,11 @@ describe('ErrorHandler', () => {
 
   describe('createError', () => {
     it('should create standardized error object', () => {
-      const error = handler.createError('Test error', 'VALIDATION', 'test.context');
+      const error = handler.createError(
+        'Test error',
+        'VALIDATION',
+        'test.context'
+      );
 
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toBe('Test error');
@@ -189,7 +206,9 @@ describe('ErrorHandler', () => {
       const error = new Error('Async operation failed');
       const operation = vi.fn().mockRejectedValue(error);
 
-      await expect(handler.handleAsync(operation, 'test.context')).rejects.toThrow();
+      await expect(
+        handler.handleAsync(operation, 'test.context')
+      ).rejects.toThrow();
     });
 
     it('should re-throw with user-friendly message for showable errors', async () => {
@@ -222,9 +241,13 @@ describe('ErrorHandler', () => {
       const spy = vi.spyOn(handler.display, 'showMessage');
       const container = document.createElement('div');
 
-      handler.showMessage('Test message', 'error', container, { timeout: 5000 });
+      handler.showMessage('Test message', 'error', container, {
+        timeout: 5000,
+      });
 
-      expect(spy).toHaveBeenCalledWith('Test message', 'error', container, { timeout: 5000 });
+      expect(spy).toHaveBeenCalledWith('Test message', 'error', container, {
+        timeout: 5000,
+      });
     });
 
     it('should handle null container gracefully', () => {
@@ -276,4 +299,4 @@ describe('ErrorHandler', () => {
       expect(typeof ErrorHandler.validateInput).toBe('function');
     });
   });
-}); 
+});

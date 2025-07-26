@@ -205,4 +205,4 @@ export class BookmarkOperations {
       throw error;
     }
   }
-} 
+}

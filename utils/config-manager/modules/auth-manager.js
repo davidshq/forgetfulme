@@ -79,4 +79,4 @@ class AuthManager {
   }
 }
 
-export default AuthManager; 
+export default AuthManager;

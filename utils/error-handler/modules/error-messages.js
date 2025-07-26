@@ -24,38 +24,48 @@ export class ErrorMessages {
   constructor() {
     // Define user-friendly messages for different error types
     this.messages = {
-      NETWORK: 'Connection error. Please check your internet connection and try again.',
-      DATABASE: 'Data error. Please try again or contact support if the problem persists.',
+      NETWORK:
+        'Connection error. Please check your internet connection and try again.',
+      DATABASE:
+        'Data error. Please try again or contact support if the problem persists.',
       UI: 'Interface error. Please refresh the page and try again.',
       UNKNOWN: 'An unexpected error occurred. Please try again.',
     };
 
     // Define specific auth error messages
     this.authMessages = {
-      'Invalid login credentials': 'Invalid email or password. Please try again.',
+      'Invalid login credentials':
+        'Invalid email or password. Please try again.',
       'User already registered': 'An account with this email already exists.',
       'Password should be at least': 'Password must be at least 6 characters.',
-      'Email not confirmed': 'Please check your email and click the verification link before signing in.',
+      'Email not confirmed':
+        'Please check your email and click the verification link before signing in.',
       'User not authenticated': 'Please sign in to continue.',
       default: 'Authentication error. Please try signing in again.',
     };
 
     // Define specific validation error messages
     this.validationMessages = {
-      'Both URL and anon key are required': 'Please enter both the Project URL and anon key.',
+      'Both URL and anon key are required':
+        'Please enter both the Project URL and anon key.',
       'URL must start with https://': 'Project URL must start with https://',
       'Invalid anon key format': 'Please check your anon key format.',
       'Please fill in all fields': 'Please fill in all required fields.',
-      'Invalid Supabase configuration: missing URL or anon key': 'Configuration error. Please check your settings and try again.',
-      'Invalid Supabase URL: must start with https://': 'Configuration error. Please check your settings and try again.',
+      'Invalid Supabase configuration: missing URL or anon key':
+        'Configuration error. Please check your settings and try again.',
+      'Invalid Supabase URL: must start with https://':
+        'Configuration error. Please check your settings and try again.',
       default: 'Please check your input and try again.',
     };
 
     // Define specific config error messages
     this.configMessages = {
-      'Supabase client not loaded': 'Configuration error. Please check your Supabase settings.',
-      'Invalid Supabase configuration: missing URL or anon key': 'Configuration error. Please check your settings and try again.',
-      'Invalid Supabase URL: must start with https://': 'Configuration error. Please check your settings and try again.',
+      'Supabase client not loaded':
+        'Configuration error. Please check your Supabase settings.',
+      'Invalid Supabase configuration: missing URL or anon key':
+        'Configuration error. Please check your settings and try again.',
+      'Invalid Supabase URL: must start with https://':
+        'Configuration error. Please check your settings and try again.',
       default: 'Configuration error. Please check your settings and try again.',
     };
   }
@@ -127,7 +137,9 @@ export class ErrorMessages {
    */
   _getValidationMessage(message) {
     // Check for specific validation error patterns
-    for (const [pattern, userMessage] of Object.entries(this.validationMessages)) {
+    for (const [pattern, userMessage] of Object.entries(
+      this.validationMessages
+    )) {
       if (pattern === 'default') continue;
       if (message.includes(pattern)) {
         return userMessage;
@@ -188,4 +200,4 @@ export class ErrorMessages {
       config: this.configMessages,
     };
   }
-} 
+}

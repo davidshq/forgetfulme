@@ -22,8 +22,13 @@ vi.mock('../../utils/error-handler.js', () => ({
 vi.mock('../../utils/bookmark-transformer.js', () => ({
   default: {
     validate: vi.fn(() => ({ isValid: true, errors: [] })),
-    toSupabaseFormat: vi.fn((bookmark, userId) => ({ ...bookmark, user_id: userId })),
-    transformMultiple: vi.fn((bookmarks, userId) => bookmarks.map(b => ({ ...b, user_id: userId }))),
+    toSupabaseFormat: vi.fn((bookmark, userId) => ({
+      ...bookmark,
+      user_id: userId,
+    })),
+    transformMultiple: vi.fn((bookmarks, userId) =>
+      bookmarks.map(b => ({ ...b, user_id: userId }))
+    ),
   },
 }));
 
@@ -75,10 +80,16 @@ describe('SupabaseService Modular Structure', () => {
       // Mock successful database responses
       mockSupabaseClient.from.mockReturnValue({
         select: vi.fn().mockResolvedValue({ data: [], error: null }),
-        insert: vi.fn().mockResolvedValue({ data: [{ id: 'test-id' }], error: null }),
-        update: vi.fn().mockResolvedValue({ data: [{ id: 'test-id' }], error: null }),
+        insert: vi
+          .fn()
+          .mockResolvedValue({ data: [{ id: 'test-id' }], error: null }),
+        update: vi
+          .fn()
+          .mockResolvedValue({ data: [{ id: 'test-id' }], error: null }),
         delete: vi.fn().mockResolvedValue({ error: null }),
-        upsert: vi.fn().mockResolvedValue({ data: [{ id: 'test-user-id' }], error: null }),
+        upsert: vi
+          .fn()
+          .mockResolvedValue({ data: [{ id: 'test-user-id' }], error: null }),
       });
 
       await supabaseService.initialize();
@@ -91,7 +102,9 @@ describe('SupabaseService Modular Structure', () => {
       await supabaseService.initialize();
 
       // Verify that all modules have access to the client
-      expect(supabaseService.bookmarkOperations.supabase).toBe(mockSupabaseClient);
+      expect(supabaseService.bookmarkOperations.supabase).toBe(
+        mockSupabaseClient
+      );
       expect(supabaseService.bookmarkQueries.supabase).toBe(mockSupabaseClient);
       expect(supabaseService.bookmarkStats.supabase).toBe(mockSupabaseClient);
       expect(supabaseService.userPreferences.supabase).toBe(mockSupabaseClient);
@@ -110,11 +123,15 @@ describe('SupabaseService Modular Structure', () => {
       const mockResponse = { id: 'test-id', ...mockBookmark };
 
       // Mock the bookmark operations module
-      supabaseService.bookmarkOperations.saveBookmark = vi.fn().mockResolvedValue(mockResponse);
+      supabaseService.bookmarkOperations.saveBookmark = vi
+        .fn()
+        .mockResolvedValue(mockResponse);
 
       const result = await supabaseService.saveBookmark(mockBookmark);
 
-      expect(supabaseService.bookmarkOperations.saveBookmark).toHaveBeenCalledWith(mockBookmark);
+      expect(
+        supabaseService.bookmarkOperations.saveBookmark
+      ).toHaveBeenCalledWith(mockBookmark);
       expect(result).toEqual(mockResponse);
     });
 
@@ -123,11 +140,15 @@ describe('SupabaseService Modular Structure', () => {
       const mockBookmarks = [{ id: '1', title: 'Test' }];
 
       // Mock the bookmark queries module
-      supabaseService.bookmarkQueries.getBookmarks = vi.fn().mockResolvedValue(mockBookmarks);
+      supabaseService.bookmarkQueries.getBookmarks = vi
+        .fn()
+        .mockResolvedValue(mockBookmarks);
 
       const result = await supabaseService.getBookmarks(mockOptions);
 
-      expect(supabaseService.bookmarkQueries.getBookmarks).toHaveBeenCalledWith(mockOptions);
+      expect(supabaseService.bookmarkQueries.getBookmarks).toHaveBeenCalledWith(
+        mockOptions
+      );
       expect(result).toEqual(mockBookmarks);
     });
 
@@ -136,11 +157,15 @@ describe('SupabaseService Modular Structure', () => {
       const mockResponse = { id: 'test-user-id', preferences: mockPreferences };
 
       // Mock the user preferences module
-      supabaseService.userPreferences.saveUserPreferences = vi.fn().mockResolvedValue(mockResponse);
+      supabaseService.userPreferences.saveUserPreferences = vi
+        .fn()
+        .mockResolvedValue(mockResponse);
 
       const result = await supabaseService.saveUserPreferences(mockPreferences);
 
-      expect(supabaseService.userPreferences.saveUserPreferences).toHaveBeenCalledWith(mockPreferences);
+      expect(
+        supabaseService.userPreferences.saveUserPreferences
+      ).toHaveBeenCalledWith(mockPreferences);
       expect(result).toEqual(mockResponse);
     });
 
@@ -149,19 +174,29 @@ describe('SupabaseService Modular Structure', () => {
       const mockSubscription = { id: 'subscription-1' };
 
       // Mock the realtime manager
-      supabaseService.realtimeManager.subscribeToBookmarks = vi.fn().mockReturnValue(mockSubscription);
+      supabaseService.realtimeManager.subscribeToBookmarks = vi
+        .fn()
+        .mockReturnValue(mockSubscription);
 
       const result = supabaseService.subscribeToBookmarks(mockCallback);
 
-      expect(supabaseService.realtimeManager.subscribeToBookmarks).toHaveBeenCalledWith(mockCallback);
+      expect(
+        supabaseService.realtimeManager.subscribeToBookmarks
+      ).toHaveBeenCalledWith(mockCallback);
       expect(result).toEqual(mockSubscription);
     });
 
     it('should delegate import/export to the import export module', async () => {
-      const mockExportData = { bookmarks: [], preferences: {}, exportDate: '2024-01-01' };
+      const mockExportData = {
+        bookmarks: [],
+        preferences: {},
+        exportDate: '2024-01-01',
+      };
 
       // Mock the import export module
-      supabaseService.importExport.exportData = vi.fn().mockResolvedValue(mockExportData);
+      supabaseService.importExport.exportData = vi
+        .fn()
+        .mockResolvedValue(mockExportData);
 
       const result = await supabaseService.exportData();
 
@@ -189,4 +224,4 @@ describe('SupabaseService Modular Structure', () => {
       expect(result).toEqual({ id: 'test-user-id' });
     });
   });
-}); 
+});

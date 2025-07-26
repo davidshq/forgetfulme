@@ -103,4 +103,4 @@ export class UserPreferences {
       throw error;
     }
   }
-} 
+}

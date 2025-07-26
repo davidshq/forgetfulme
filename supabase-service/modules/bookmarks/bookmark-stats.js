@@ -71,4 +71,4 @@ export class BookmarkStats {
       throw error;
     }
   }
-} 
+}
