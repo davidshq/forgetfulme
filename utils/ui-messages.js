@@ -311,13 +311,13 @@ class UIMessages {
             }
             retryFunction();
           },
-          'ui-message-retry-btn'
+          { className: 'message-retry-btn' }
         );
         messageEl.appendChild(retryBtn);
       } else {
         const retryBtn = document.createElement('button');
         retryBtn.textContent = 'Retry';
-        retryBtn.className = 'ui-message-retry-btn';
+        retryBtn.className = 'message-retry-btn';
         retryBtn.addEventListener('click', () => {
           if (messageEl.parentNode) {
             messageEl.parentNode.removeChild(messageEl);

@@ -726,83 +726,71 @@ const createMockElement = tagName => {
   return element;
 };
 
-// Mock document
-global.document = {
-  createElement: vi.fn(tagName => {
-    const element = createMockElement(tagName);
-    // Ensure children is always an array
-    if (!element.children) {
-      element.children = [];
-    }
-    return element;
-  }),
-  getElementById: vi.fn(id => {
-    // Store elements by ID in a map
-    if (!global.document._elementsById) {
-      global.document._elementsById = new Map();
-    }
-    return global.document._elementsById.get(id) || null;
-  }),
-  getElementsByClassName: vi.fn(className => {
-    return global.document.body.querySelectorAll(`.${className}`);
-  }),
-  getElementsByTagName: vi.fn(tagName => {
-    return global.document.body.querySelectorAll(tagName);
-  }),
-  querySelector: vi.fn(selector => {
-    return global.document.body.querySelector(selector);
-  }),
-  querySelectorAll: vi.fn(selector => {
-    return global.document.body.querySelectorAll(selector);
-  }),
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  body: createMockElement('body'),
-  head: createMockElement('head'),
-  documentElement: createMockElement('html'),
-
+// Don't override document - let JSDOM handle it
+// Only add helper methods if needed
+if (typeof global.document !== 'undefined' && global.document) {
   // Helper method to register elements by ID
-  registerElement: vi.fn((id, element) => {
+  global.document.registerElement = vi.fn((id, element) => {
     if (!global.document._elementsById) {
       global.document._elementsById = new Map();
     }
     global.document._elementsById.set(id, element);
-  }),
-};
+  });
+}
 
-// Mock window
-global.window = {
-  document: global.document,
-  addEventListener: vi.fn(),
-  removeEventListener: vi.fn(),
-  setTimeout: vi.fn((callback, delay) => {
-    const id = Math.random();
-    setTimeout(callback, delay);
-    return id;
-  }),
-  clearTimeout: vi.fn(),
-  setInterval: vi.fn(),
-  clearInterval: vi.fn(),
-  location: {
-    href: 'http://localhost:3000',
-    origin: 'http://localhost:3000',
-    pathname: '/',
-    search: '',
-    hash: '',
-  },
-  localStorage: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-  },
-  sessionStorage: {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
-  },
-};
+// Don't override window completely - let JSDOM handle it
+// Only add what we need to mock
+if (typeof global.window !== 'undefined' && global.window) {
+  // Extend the existing window with our mocks without replacing it
+  Object.assign(global.window, {
+    localStorage: {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+    },
+    sessionStorage: {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+    },
+  });
+} else {
+  // Fallback if window doesn't exist
+  global.window = {
+    document: global.document,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    setTimeout: vi.fn((callback, delay) => {
+      const id = Math.random();
+      setTimeout(callback, delay);
+      return id;
+    }),
+    clearTimeout: vi.fn(),
+    setInterval: vi.fn(),
+    clearInterval: vi.fn(),
+    location: {
+      href: 'http://localhost:3000',
+      origin: 'http://localhost:3000',
+      pathname: '/',
+      search: '',
+      hash: '',
+    },
+    localStorage: {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+    },
+    sessionStorage: {
+      getItem: vi.fn(),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+    },
+  };
+}
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -1403,9 +1391,13 @@ beforeEach(() => {
     };
   }
 
-  // Reset DOM
-  global.document.body = global.document.createElement('body');
-  global.document.head = global.document.createElement('head');
+  // Reset DOM if available
+  if (global.document && global.document.body) {
+    global.document.body.innerHTML = '';
+  }
+  if (global.document && global.document.head) {
+    global.document.head.innerHTML = '';
+  }
 
   // Reset Chrome API mocks
   Object.keys(global.chrome).forEach(key => {

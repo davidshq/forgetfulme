@@ -360,8 +360,9 @@ describe('UIMessages', () => {
       const retryBtn = messageEl.querySelector('.message-retry-btn');
 
       // The implementation doesn't have a try-catch around the retry function
-      // so the error will be thrown, which is expected behavior
-      expect(() => retryBtn.click()).toThrow('Retry error');
+      // In real DOM (JSDOM), errors in event listeners become unhandled exceptions
+      // but the retry function should still be called
+      retryBtn.click();
       expect(mockRetryFunction).toHaveBeenCalled();
     });
   });
