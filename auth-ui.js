@@ -309,8 +309,11 @@ class AuthUI {
         }, 3000);
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignup');
-      UIMessages.error(errorResult.userMessage, container);
+      const { userMessage } = ErrorHandler.handle(
+        error,
+        'auth-ui.handleSignup'
+      );
+      UIMessages.error(userMessage, container);
     }
   }
 
@@ -332,7 +335,7 @@ class AuthUI {
       // Refresh the page or show login form
       location.reload();
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
+      ErrorHandler.handle(error, 'auth-ui.handleSignOut', {
         silent: true,
       });
       // Error during sign out

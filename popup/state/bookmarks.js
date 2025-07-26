@@ -169,14 +169,14 @@ export async function checkCurrentTabUrlStatus(ctx) {
         type: 'URL_STATUS_RESULT',
         data: { url: tab.url, isSaved },
       });
-    } catch (error) {
+    } catch {
       // Error checking URL in database - send default state
       await chrome.runtime.sendMessage({
         type: 'URL_STATUS_RESULT',
         data: { url: tab.url, isSaved: false },
       });
     }
-  } catch (error) {
+  } catch {
     // Error checking URL status
   }
 }

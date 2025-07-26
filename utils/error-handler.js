@@ -214,12 +214,13 @@ class ErrorHandler {
    * @param {Object} options - Additional options
    */
   static logError(errorInfo, options = {}) {
-    const { type, severity, message, context, originalError } = errorInfo;
+    const { type, severity, message, context } = errorInfo;
     const silent = options.silent || false;
 
     if (silent) return;
 
-    const logMessage = `[${type}] [${severity}] ${context}: ${message}`;
+    // Log message for debugging (unused but kept for future use)
+    // const logMessage = `[${type}] [${severity}] ${context}: ${message}`;
 
     // Log error based on severity level
     switch (severity) {

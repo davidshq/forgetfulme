@@ -8,8 +8,6 @@
  * @since 2024-01-01
  */
 
-import ErrorHandler from './error-handler.js';
-
 /**
  * BookmarkTransformer - Unified bookmark data transformation utility
  * @class BookmarkTransformer

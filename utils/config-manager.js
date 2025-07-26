@@ -238,7 +238,7 @@ class ConfigManager {
   async setMigrationVersion(version) {
     try {
       await chrome.storage.sync.set({ configVersion: version });
-    } catch (error) {
+    } catch {
       // Error setting migration version
     }
   }
@@ -615,7 +615,7 @@ class ConfigManager {
       if (listener.event === event) {
         try {
           listener.callback(data);
-        } catch (error) {
+        } catch {
           // Error in config listener
         }
       }

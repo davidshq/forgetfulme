@@ -1,5 +1,5 @@
 // Event handlers for popup
-export function bindEvents(ctx) {}
+export function bindEvents(_ctx) {}
 export async function markAsRead(ctx) {
   try {
     console.log('[markAsRead] called', ctx);
@@ -70,7 +70,7 @@ export async function markAsRead(ctx) {
           type: 'BOOKMARK_SAVED',
           data: { url: bookmark.url },
         });
-      } catch (error) {
+      } catch {
         // Error notifying background about saved bookmark
       }
 
@@ -110,7 +110,7 @@ export async function updateBookmark(ctx, bookmarkId) {
         type: 'BOOKMARK_UPDATED',
         data: { url: updates.url || ctx.currentBookmarkUrl },
       });
-    } catch (error) {
+    } catch {
       // Error notifying background about updated bookmark
     }
 
@@ -124,10 +124,10 @@ export async function updateBookmark(ctx, bookmarkId) {
     ctx.UIMessages.error(errorResult.userMessage, ctx.appContainer);
   }
 }
-export function openSettings(ctx) {
+export function openSettings(_ctx) {
   chrome.runtime.openOptionsPage();
 }
-export function showBookmarkManagement(ctx) {
+export function showBookmarkManagement(_ctx) {
   // Open bookmark management page in a new tab
   chrome.tabs.create({
     url: chrome.runtime.getURL('bookmark-management.html'),

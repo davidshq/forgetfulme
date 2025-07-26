@@ -49,7 +49,7 @@ const BackgroundErrorHandler = {
    * @param {string} context - Where the error occurred
    * @returns {string} User-friendly error message
    */
-  getUserMessage(error, context) {
+  getUserMessage(error, _context) {
     const message = error.message || error.toString();
 
     // Network errors
@@ -377,7 +377,7 @@ class ForgetfulMeBackground {
         // User is not authenticated - show warning or clear badge
         chrome.action.setBadgeText({ text: '' });
       }
-    } catch (error) {
+    } catch {
       // Ignore badge update errors
     }
   }
@@ -420,7 +420,7 @@ class ForgetfulMeBackground {
       // For now, show default state since we can't access database from background
       // The popup will handle the actual URL checking when opened
       this.updateIconForUrl(tab.url, false);
-    } catch (error) {
+    } catch {
       // Error checking URL status - show default icon
       // On error, show default icon
       this.updateIconForUrl(null, false);
@@ -451,7 +451,7 @@ class ForgetfulMeBackground {
         chrome.action.setBadgeText({ text: '+' });
         chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
       }
-    } catch (error) {
+    } catch {
       // Ignore icon update errors
     }
   }

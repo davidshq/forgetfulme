@@ -17,7 +17,7 @@ import SupabaseService from './supabase-service.js';
 import AuthUI from './auth-ui.js';
 import AuthStateManager from './utils/auth-state-manager.js';
 import ConfigUI from './config-ui.js';
-import { formatStatus, formatTime } from './utils/formatters.js';
+import { formatStatus } from './utils/formatters.js';
 
 /**
  * Options page class for ForgetfulMe extension
