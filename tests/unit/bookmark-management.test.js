@@ -30,16 +30,16 @@ vi.mock('../../bookmark-management/state/auth.js', () => ({
 
 // Mock the formatters
 vi.mock('../../utils/formatters.js', () => ({
-  formatStatus: (status) => {
+  formatStatus: status => {
     const statusMap = {
       'good-reference': 'Good Reference',
       'read-later': 'Read Later',
       'in-progress': 'In Progress',
-      'archived': 'Archived',
+      archived: 'Archived',
     };
     return statusMap[status] || 'Unknown Status';
   },
-  formatTime: (date) => {
+  formatTime: date => {
     return date.toLocaleString();
   },
 }));
@@ -88,7 +88,7 @@ describe('Bookmark Management Module', () => {
         isAuthenticated: vi.fn().mockResolvedValue(true),
       },
     });
-    
+
     // Mock the Event constructor if needed
     if (typeof window.Event === 'undefined') {
       window.Event = class Event {
@@ -115,7 +115,7 @@ describe('Bookmark Management Module', () => {
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Bookmark Editing', () => {
     it('should show edit interface for a bookmark', async () => {
       // This test needs to be updated once we confirm the actual function name
@@ -123,7 +123,7 @@ describe('Bookmark Management Module', () => {
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Authentication', () => {
     it('should show auth interface when not authenticated', async () => {
       // Skip this test for now as it's causing issues with the test environment
@@ -131,7 +131,7 @@ describe('Bookmark Management Module', () => {
       expect(true).toBe(true);
     });
   });
-  
+
   describe('Formatters', () => {
     it('should format status correctly', () => {
       expect(formatStatus('good-reference')).toBe('Good Reference');
@@ -150,13 +150,15 @@ describe('Bookmark Management Module', () => {
           return new RealDate('2024-01-01T12:00:00Z');
         }
       };
-      
+
       const testDate = new Date();
       const formattedTime = formatTime(testDate);
-      
+
       // Use a more flexible regex that matches the actual format
-      expect(formattedTime).toMatch(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}, \d{1,2}:\d{2}:[0-9]{2} [AP]M/);
-      
+      expect(formattedTime).toMatch(
+        /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}, \d{1,2}:\d{2}:[0-9]{2} [AP]M/
+      );
+
       // Restore original Date
       global.Date = RealDate;
     });

@@ -4,7 +4,13 @@ export async function markAsRead(ctx) {
   try {
     console.log('[markAsRead] called', ctx);
     // Validate context
-    if (!ctx || !ctx.supabaseService || !ctx.UIComponents || !ctx.UIMessages || !ctx.BookmarkTransformer) {
+    if (
+      !ctx ||
+      !ctx.supabaseService ||
+      !ctx.UIComponents ||
+      !ctx.UIMessages ||
+      !ctx.BookmarkTransformer
+    ) {
       const msg = '[markAsRead] Missing required context properties.';
       console.error(msg, ctx);
       if (ctx && ctx.UIMessages && ctx.appContainer) {
