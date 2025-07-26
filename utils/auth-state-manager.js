@@ -98,11 +98,11 @@ class AuthStateManager {
     } catch (error) {
       // Handle storage errors gracefully
       ErrorHandler.handle(error, 'auth-state-manager.setAuthState.storage');
-      
+
       // Still notify contexts even if storage fails
       this.notifyAllContexts(session);
       this.notifyListeners('authStateChanged', session);
-      
+
       // Re-throw to let caller know storage failed
       throw ErrorHandler.createError(
         'Failed to save authentication state to storage',

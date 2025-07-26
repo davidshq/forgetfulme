@@ -230,7 +230,7 @@ describe('UIMessages', () => {
 
   describe('clear', () => {
     test('should clear all messages from container', () => {
-      // Add multiple messages
+      // Add multiple messages using UIMessages methods
       UIMessages.success('Success 1', container);
       UIMessages.error('Error 1', container);
       UIMessages.info('Info 1', container);

@@ -1,6 +1,12 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run test:*)", "Bash(npm test:*)"],
+    "allow": [
+      "Bash(npm run test:*)",
+      "Bash(npm test:*)",
+      "Bash(grep:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx vitest list:*)"
+    ],
     "deny": []
   }
 }

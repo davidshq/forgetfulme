@@ -121,9 +121,11 @@ export class ModalComponents {
     // Add accessibility attributes
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
-    
+
     // Generate unique ID if not provided
-    const dialogId = config.id || `modal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const dialogId =
+      config.id ||
+      `modal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     dialog.id = dialogId;
 
     // Set ARIA labelling for title
@@ -295,7 +297,7 @@ export class ModalComponents {
       }
     };
     document.addEventListener('keydown', escapeHandler);
-    
+
     // Store escape handler for cleanup
     modal._escapeHandler = escapeHandler;
 

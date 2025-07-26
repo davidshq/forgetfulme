@@ -71,14 +71,14 @@ export class ButtonComponents {
 
     // Add click listener with disabled state checking
     if (onClick) {
-      button.addEventListener('click', (event) => {
+      button.addEventListener('click', event => {
         // Prevent execution if button is disabled
         if (button.disabled) {
           event.preventDefault();
           event.stopPropagation();
           return false;
         }
-        
+
         // Execute the original click handler
         onClick(event);
       });

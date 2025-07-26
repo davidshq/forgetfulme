@@ -145,7 +145,9 @@ class ConfigUI {
           'Container element is required to load config',
           'config-ui.loadCurrentConfig'
         );
-        ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', { silent: true });
+        ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
+          silent: true,
+        });
         return;
       }
 

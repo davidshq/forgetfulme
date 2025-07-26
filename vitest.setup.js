@@ -513,17 +513,38 @@ const createMockElement = tagName => {
     querySelector: vi.fn(function (selector) {
       // Return the first child that matches the selector
       for (const child of this.children) {
+        // Handle class selectors
         if (
+          selector.startsWith('.') &&
           child.className &&
-          child.className.includes(selector.replace('.', ''))
+          child.className.includes(selector.substring(1))
         ) {
           return child;
         }
+        // Handle tag selectors
         if (
+          !selector.includes('[') &&
+          !selector.includes('.') &&
           child.tagName &&
           child.tagName.toLowerCase() === selector.toLowerCase()
         ) {
           return child;
+        }
+        // Handle attribute selectors
+        if (selector.includes('[') && selector.includes(']')) {
+          const match = selector.match(/\[([^=\]]+)(?:="([^"]+)")?\]/);
+          if (match) {
+            const [, attrName, attrValue] = match;
+            const childAttrValue = child.getAttribute
+              ? child.getAttribute(attrName)
+              : child._attributes?.[attrName];
+            if (attrValue) {
+              if (childAttrValue === attrValue) return child;
+            } else {
+              if (childAttrValue !== null && childAttrValue !== undefined)
+                return child;
+            }
+          }
         }
         // Check nested children
         const nested = child.querySelector(selector);
@@ -551,15 +572,35 @@ const createMockElement = tagName => {
         }
         // Handle tag selectors
         else if (
+          !selector.includes('[') &&
+          !selector.includes('.') &&
           element.tagName &&
           element.tagName.toLowerCase() === selector.toLowerCase()
         ) {
           results.push(element);
         }
+        // Handle attribute selectors
+        else if (selector.includes('[') && selector.includes(']')) {
+          const match = selector.match(/\[([^=\]]+)(?:="([^"]+)")?\]/);
+          if (match) {
+            const [, attrName, attrValue] = match;
+            const elemAttrValue = element.getAttribute
+              ? element.getAttribute(attrName)
+              : element._attributes?.[attrName];
+            if (attrValue) {
+              if (elemAttrValue === attrValue) results.push(element);
+            } else {
+              if (elemAttrValue !== null && elemAttrValue !== undefined)
+                results.push(element);
+            }
+          }
+        }
 
-        // Search children
-        for (const child of element.children) {
-          searchElement(child);
+        // Search children - ensure children is an array
+        if (element.children && Array.isArray(element.children)) {
+          for (const child of element.children) {
+            searchElement(child);
+          }
         }
       };
 
@@ -687,7 +728,14 @@ const createMockElement = tagName => {
 
 // Mock document
 global.document = {
-  createElement: vi.fn(tagName => createMockElement(tagName)),
+  createElement: vi.fn(tagName => {
+    const element = createMockElement(tagName);
+    // Ensure children is always an array
+    if (!element.children) {
+      element.children = [];
+    }
+    return element;
+  }),
   getElementById: vi.fn(id => {
     // Store elements by ID in a map
     if (!global.document._elementsById) {

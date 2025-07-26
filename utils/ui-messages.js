@@ -210,29 +210,31 @@ class UIMessages {
 
     // Create loading message element
     const messageEl = document.createElement('div');
-    messageEl.className = 'loading-state animate-fade-in';
+    messageEl.className = 'message message-loading animate-fade-in';
     messageEl.setAttribute('role', 'status');
     messageEl.setAttribute('aria-live', 'polite');
     messageEl.setAttribute('aria-busy', 'true');
 
-    // Create loading spinner
-    const spinner = document.createElement('div');
-    spinner.className = 'loading-spinner';
-    spinner.setAttribute('aria-hidden', 'true');
+    // Create progress element
+    const progress = document.createElement('progress');
+    progress.setAttribute('aria-label', 'Loading');
 
-    // Add message text
-    const textEl = document.createElement('div');
-    textEl.className = 'loading-text';
-    textEl.textContent = message || 'Loading...';
+    // Add to message
+    messageEl.appendChild(progress);
 
-    messageEl.appendChild(spinner);
-    messageEl.appendChild(textEl);
+    // Add message text if provided
+    if (message) {
+      const textEl = document.createElement('div');
+      textEl.className = 'message-text';
+      textEl.textContent = message;
+      messageEl.appendChild(textEl);
+    }
 
     // Add to container
     try {
       // Remove existing loading messages
       const existingLoading = container.querySelectorAll(
-        '.loading-state, .ui-message-loading'
+        '.message-loading, .loading-state, .ui-message-loading'
       );
       existingLoading.forEach(loading => this.removeMessage(loading));
 
@@ -257,7 +259,14 @@ class UIMessages {
       '.message, .ui-message, .loading-state'
     );
     messages.forEach(message => {
-      this.removeMessage(message);
+      // Remove immediately without animation for clear operation
+      if (message.parentNode) {
+        try {
+          message.parentNode.removeChild(message);
+        } catch {
+          // Ignore removal errors
+        }
+      }
     });
   }
 

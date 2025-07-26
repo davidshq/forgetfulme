@@ -262,9 +262,9 @@ class ForgetfulMeBackground {
           }
 
           await this.handleMarkAsRead(message);
-          sendResponse({ 
+          sendResponse({
             success: true,
-            message: 'Page marked as read successfully'
+            message: 'Page marked as read successfully',
           });
           break;
 
@@ -344,18 +344,18 @@ class ForgetfulMeBackground {
           break;
 
         default:
-          sendResponse({ 
-            success: false, 
-            error: `Unknown message type: ${message.type}` 
+          sendResponse({
+            success: false,
+            error: `Unknown message type: ${message.type}`,
           });
       }
     } catch (error) {
       BackgroundErrorHandler.handle(error, 'background.handleMessage');
-      sendResponse({ 
-        success: false, 
-        error: error.message.includes('Extension context') 
-          ? error.message 
-          : 'An unexpected error occurred while processing your request'
+      sendResponse({
+        success: false,
+        error: error.message.includes('Extension context')
+          ? error.message
+          : 'An unexpected error occurred while processing your request',
       });
     }
   }
