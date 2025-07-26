@@ -43,6 +43,8 @@ class SupabaseService {
   constructor(supabaseConfig) {
     /** @type {SupabaseConfig} Supabase configuration instance */
     this.config = supabaseConfig;
+    /** @type {Object|null} Supabase client instance */
+    this.supabase = null;
     
     // Initialize modules with dependency injection
     this.initializer = new ServiceInitializer(supabaseConfig);
@@ -64,6 +66,7 @@ class SupabaseService {
     
     // Initialize all modules with the configured client
     const supabaseClient = this.initializer.getSupabaseClient();
+    this.supabase = supabaseClient; // Set the supabase property for backward compatibility
     
     this.bookmarkOperations.setSupabaseClient(supabaseClient);
     this.bookmarkQueries.setSupabaseClient(supabaseClient);
@@ -71,6 +74,9 @@ class SupabaseService {
     this.userPreferences.setSupabaseClient(supabaseClient);
     this.realtimeManager.setSupabaseClient(supabaseClient);
     this.importExport.setSupabaseClient(supabaseClient);
+    
+    // Set cross-module references
+    this.bookmarkOperations.setBookmarkQueries(this.bookmarkQueries);
   }
 
   // Bookmark Operations - Delegate to bookmark operations module
@@ -113,7 +119,7 @@ class SupabaseService {
     return this.userPreferences.getUserPreferences();
   }
 
-  // Real-time Subscriptions - Delegate to realtime manager
+  // Realtime - Delegate to realtime manager module
   subscribeToBookmarks(callback) {
     return this.realtimeManager.subscribeToBookmarks(callback);
   }
@@ -131,7 +137,7 @@ class SupabaseService {
     return this.importExport.importData(importData);
   }
 
-  // Utility methods
+  // Utility methods - Delegate to initializer
   isAuthenticated() {
     return this.initializer.isAuthenticated();
   }
@@ -141,5 +147,4 @@ class SupabaseService {
   }
 }
 
-// Export for use in other files
 export default SupabaseService; 

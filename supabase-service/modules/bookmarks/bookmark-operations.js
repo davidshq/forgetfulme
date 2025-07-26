@@ -28,6 +28,8 @@ export class BookmarkOperations {
     this.config = supabaseConfig;
     /** @type {Object|null} Supabase client instance */
     this.supabase = null;
+    /** @type {Object|null} Reference to bookmark queries for internal use */
+    this.bookmarkQueries = null;
   }
 
   /**
@@ -37,6 +39,15 @@ export class BookmarkOperations {
    */
   setSupabaseClient(supabaseClient) {
     this.supabase = supabaseClient;
+  }
+
+  /**
+   * Set the bookmark queries reference for internal use
+   * @param {Object} bookmarkQueries - Bookmark queries instance
+   * @description Sets the queries reference for internal bookmark lookups
+   */
+  setBookmarkQueries(bookmarkQueries) {
+    this.bookmarkQueries = bookmarkQueries;
   }
 
   /**
@@ -71,7 +82,7 @@ export class BookmarkOperations {
 
     const userId = this.config.getCurrentUser().id;
 
-    // Check if bookmark already exists
+    // Check if bookmark already exists using the public method
     const existingBookmark = await this._getBookmarkByUrl(bookmark.url);
 
     if (existingBookmark) {

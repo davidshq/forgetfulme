@@ -11,6 +11,7 @@ describe('SupabaseService', () => {
   let supabaseService;
   let mockSupabaseConfig;
   let mockSupabaseClient;
+  let mockChain;
 
   beforeEach(async () => {
     // Reset mocks
@@ -24,9 +25,8 @@ describe('SupabaseService', () => {
       getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
     };
 
-    // Mock Supabase client
-    mockSupabaseClient = {
-      from: vi.fn().mockReturnThis(),
+    // Create mock chain object
+    mockChain = {
       select: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       update: vi.fn().mockReturnThis(),
@@ -37,6 +37,11 @@ describe('SupabaseService', () => {
       range: vi.fn().mockReturnThis(),
       or: vi.fn().mockReturnThis(),
       overlaps: vi.fn().mockReturnThis(),
+    };
+
+    // Mock Supabase client with proper chaining
+    mockSupabaseClient = {
+      from: vi.fn().mockReturnValue(mockChain),
     };
 
     mockSupabaseConfig.getSupabaseClient.mockReturnValue(mockSupabaseClient);
@@ -84,7 +89,7 @@ describe('SupabaseService', () => {
         tags: ['test'],
       };
 
-      mockSupabaseClient.single.mockResolvedValue({
+      mockChain.single.mockResolvedValue({
         data: mockBookmark,
         error: null,
       });
@@ -95,20 +100,20 @@ describe('SupabaseService', () => {
 
       expect(result).toEqual(mockBookmark);
       expect(mockSupabaseClient.from).toHaveBeenCalledWith('bookmarks');
-      expect(mockSupabaseClient.select).toHaveBeenCalledWith('*');
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith(
+      expect(mockChain.select).toHaveBeenCalledWith('*');
+      expect(mockChain.eq).toHaveBeenCalledWith(
         'user_id',
         'test-user-id'
       );
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith(
+      expect(mockChain.eq).toHaveBeenCalledWith(
         'url',
         'https://example.com'
       );
-      expect(mockSupabaseClient.single).toHaveBeenCalled();
+      expect(mockChain.single).toHaveBeenCalled();
     });
 
     it('should return null when bookmark does not exist', async () => {
-      mockSupabaseClient.single.mockResolvedValue({
+      mockChain.single.mockResolvedValue({
         data: null,
         error: { code: 'PGRST116' }, // No rows returned
       });
@@ -121,10 +126,9 @@ describe('SupabaseService', () => {
     });
 
     it('should throw error for other database errors', async () => {
-      const mockError = new Error('Database error');
-      mockSupabaseClient.single.mockResolvedValue({
+      mockChain.single.mockResolvedValue({
         data: null,
-        error: mockError,
+        error: { message: 'Database error' },
       });
 
       await expect(
@@ -141,6 +145,35 @@ describe('SupabaseService', () => {
     });
   });
 
+  describe('initialize', () => {
+    it('should initialize successfully', async () => {
+      // Create a new service instance for this test to avoid double initialization
+      const testService = new SupabaseService(mockSupabaseConfig);
+      
+      // Reset the mocks to ensure clean state
+      vi.clearAllMocks();
+      
+      // Re-setup the mocks for the new service instance
+      mockSupabaseConfig.initialize.mockResolvedValue();
+      mockSupabaseConfig.getSupabaseClient.mockReturnValue(mockSupabaseClient);
+      
+      // Ensure the supabase property is initially null
+      expect(testService.supabase).toBeNull();
+      
+      await testService.initialize();
+
+      // Debug: Check what's happening
+      console.log('mockSupabaseConfig.initialize called:', mockSupabaseConfig.initialize.mock.calls.length);
+      console.log('mockSupabaseConfig.getSupabaseClient called:', mockSupabaseConfig.getSupabaseClient.mock.calls.length);
+      console.log('testService.supabase:', testService.supabase);
+      console.log('mockSupabaseClient:', mockSupabaseClient);
+
+      expect(mockSupabaseConfig.initialize).toHaveBeenCalled();
+      expect(mockSupabaseConfig.getSupabaseClient).toHaveBeenCalled();
+      expect(testService.supabase).toBe(mockSupabaseClient);
+    });
+  });
+
   describe('saveBookmark', () => {
     it('should return existing bookmark with isDuplicate flag when bookmark already exists', async () => {
       const existingBookmark = {
@@ -152,10 +185,11 @@ describe('SupabaseService', () => {
         tags: ['test'],
       };
 
-      // Mock getBookmarkByUrl to return existing bookmark
-      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(
-        existingBookmark
-      );
+      // Mock the internal _getBookmarkByUrl call to return existing bookmark
+      mockChain.single.mockResolvedValue({
+        data: existingBookmark,
+        error: null,
+      });
 
       const bookmark = {
         url: 'https://example.com',
@@ -170,10 +204,7 @@ describe('SupabaseService', () => {
         ...existingBookmark,
         isDuplicate: true,
       });
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
-        'https://example.com'
-      );
-      expect(mockSupabaseClient.insert).not.toHaveBeenCalled();
+      expect(mockChain.insert).not.toHaveBeenCalled();
     });
 
     it('should save new bookmark when it does not exist', async () => {
@@ -186,12 +217,40 @@ describe('SupabaseService', () => {
         tags: ['test'],
       };
 
-      // Mock getBookmarkByUrl to return null (no existing bookmark)
-      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(null);
+      // Set up the main mock chain to return no existing bookmark for _getBookmarkByUrl
+      mockChain.single.mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116' }, // No rows returned
+      });
 
-      mockSupabaseClient.select.mockResolvedValue({
-        data: [newBookmark],
-        error: null,
+      // Create a separate mock for the insert query chain to avoid conflicts
+      const insertMockChain = {
+        select: vi.fn().mockResolvedValue({
+          data: [newBookmark],
+          error: null,
+        }),
+        insert: vi.fn().mockReturnThis(),
+        update: vi.fn().mockReturnThis(),
+        delete: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockReturnThis(),
+        or: vi.fn().mockReturnThis(),
+        overlaps: vi.fn().mockReturnThis(),
+      };
+
+      // Mock from to return different chains for different calls
+      let callCount = 0;
+      mockSupabaseClient.from.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          // First call is for _getBookmarkByUrl - return the regular chain
+          return mockChain;
+        } else {
+          // Second call is for insert - return the insert chain
+          return insertMockChain;
+        }
       });
 
       const bookmark = {
@@ -204,10 +263,7 @@ describe('SupabaseService', () => {
       const result = await supabaseService.saveBookmark(bookmark);
 
       expect(result).toEqual(newBookmark);
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
-        'https://example.com'
-      );
-      expect(mockSupabaseClient.insert).toHaveBeenCalled();
+      expect(insertMockChain.insert).toHaveBeenCalled();
     });
 
     it('should validate bookmark data before saving', async () => {
@@ -238,16 +294,6 @@ describe('SupabaseService', () => {
       await expect(supabaseService.saveBookmark(bookmark)).rejects.toThrow(
         'User not authenticated'
       );
-    });
-  });
-
-  describe('initialize', () => {
-    it('should initialize successfully', async () => {
-      await supabaseService.initialize();
-
-      expect(mockSupabaseConfig.initialize).toHaveBeenCalled();
-      expect(mockSupabaseConfig.getSupabaseClient).toHaveBeenCalled();
-      expect(supabaseService.supabase).toBe(mockSupabaseClient);
     });
   });
 });

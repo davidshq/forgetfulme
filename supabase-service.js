@@ -50,6 +50,14 @@ class SupabaseServiceWrapper {
   }
 
   /**
+   * Get the Supabase client (for testing purposes)
+   * @returns {Object|null} The Supabase client instance
+   */
+  get supabase() {
+    return this.service.supabase;
+  }
+
+  /**
    * Save a bookmark to the database
    * @param {Object} bookmark - The bookmark object to save
    * @param {string} bookmark.url - The URL of the bookmark

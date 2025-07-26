@@ -1,8 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock location.reload globally to prevent JSDOM navigation errors
-Object.defineProperty(window.location, 'reload', {
-  value: vi.fn(),
+const mockReload = vi.fn();
+Object.defineProperty(window, 'location', {
+  value: {
+    ...window.location,
+    reload: mockReload
+  },
   writable: true,
 });
 
@@ -128,6 +132,9 @@ describe('AuthUI', () => {
   let mockContainer;
 
   beforeEach(() => {
+    // Reset location reload mock
+    mockReload.mockClear();
+
     // Create mock dependencies
     mockSupabaseConfig = {
       signIn: vi.fn(),
@@ -391,11 +398,19 @@ describe('AuthUI', () => {
     it('should call signOut and clear auth state', async () => {
       mockSupabaseConfig.signOut.mockResolvedValue();
 
-      await authUI.handleSignOut();
+      // Use try/catch to handle location.reload JSDOM limitation
+      try {
+        await authUI.handleSignOut();
+      } catch (error) {
+        // Ignore JSDOM navigation errors - they're expected in test environment
+        if (!error.message.includes('Not implemented: navigation')) {
+          throw error;
+        }
+      }
 
       expect(mockSupabaseConfig.signOut).toHaveBeenCalled();
       expect(mockAuthStateManager.clearAuthState).toHaveBeenCalled();
-      // Note: location.reload is not tested due to JSDOM limitations
+      // Note: location.reload is not testable due to JSDOM limitations
     });
 
     it('should handle sign out errors', async () => {
