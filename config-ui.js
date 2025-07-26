@@ -40,6 +40,16 @@ class ConfigUI {
    * @description Creates and displays the Supabase configuration form with help section
    */
   showConfigForm(container) {
+    // Validate container parameter
+    if (!container) {
+      const error = ErrorHandler.createError(
+        'Container element is required for config form',
+        'config-ui.showConfigForm'
+      );
+      ErrorHandler.handle(error, 'config-ui.showConfigForm');
+      return;
+    }
+
     // Create container with header
     const containerEl = UIComponents.createContainer(
       'Supabase Configuration',
@@ -129,6 +139,16 @@ class ConfigUI {
    */
   async loadCurrentConfig(container) {
     try {
+      // Validate container parameter
+      if (!container) {
+        const error = ErrorHandler.createError(
+          'Container element is required to load config',
+          'config-ui.loadCurrentConfig'
+        );
+        ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', { silent: true });
+        return;
+      }
+
       const currentConfig = await this.config.getConfiguration();
 
       if (currentConfig) {
@@ -228,6 +248,16 @@ class ConfigUI {
    * @description Shows current configuration status with test and edit buttons
    */
   showConfigStatus(container) {
+    // Validate container parameter
+    if (!container) {
+      const error = ErrorHandler.createError(
+        'Container element is required for config status',
+        'config-ui.showConfigStatus'
+      );
+      ErrorHandler.handle(error, 'config-ui.showConfigStatus');
+      return;
+    }
+
     const statusHTML = `
       <div class="config-status">
         <h3>Configuration Status</h3>

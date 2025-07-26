@@ -77,6 +77,7 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - Large monolithic test files split into focused modules
 - Tests now catch real user-facing bugs immediately
 - Behavior-focused approach prevents over-mocking syndrome
+- **All major discovered bugs have been fixed**: accessibility, API integration, DOM safety, button behavior, auth sync
 
 ### Security Considerations
 

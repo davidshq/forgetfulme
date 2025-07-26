@@ -92,8 +92,24 @@ class AuthStateManager {
 
     this.authState = session;
 
-    // Save to storage (this will trigger storage.onChanged in other contexts)
-    await chrome.storage.sync.set({ auth_session: session });
+    try {
+      // Save to storage (this will trigger storage.onChanged in other contexts)
+      await chrome.storage.sync.set({ auth_session: session });
+    } catch (error) {
+      // Handle storage errors gracefully
+      ErrorHandler.handle(error, 'auth-state-manager.setAuthState.storage');
+      
+      // Still notify contexts even if storage fails
+      this.notifyAllContexts(session);
+      this.notifyListeners('authStateChanged', session);
+      
+      // Re-throw to let caller know storage failed
+      throw ErrorHandler.createError(
+        'Failed to save authentication state to storage',
+        'storage-error',
+        'auth-state-manager.setAuthState'
+      );
+    }
 
     // Notify all contexts via runtime message
     this.notifyAllContexts(session);

@@ -222,10 +222,50 @@ class ForgetfulMeBackground {
    */
   async handleMessage(message, sender, sendResponse) {
     try {
+      // Validate message structure
+      if (!message || typeof message !== 'object') {
+        sendResponse({
+          success: false,
+          error: 'Invalid message format',
+        });
+        return;
+      }
+
+      if (!message.type || typeof message.type !== 'string') {
+        sendResponse({
+          success: false,
+          error: 'Missing or invalid message type',
+        });
+        return;
+      }
+
       switch (message.type) {
         case 'MARK_AS_READ':
-          await this.handleMarkAsRead(message.data);
-          sendResponse({ success: true });
+          // Validate required fields for MARK_AS_READ
+          if (!message.url || typeof message.url !== 'string') {
+            sendResponse({
+              success: false,
+              error: 'Invalid URL parameter required for MARK_AS_READ',
+            });
+            return;
+          }
+
+          // Validate URL format
+          try {
+            new URL(message.url);
+          } catch {
+            sendResponse({
+              success: false,
+              error: 'Invalid URL format',
+            });
+            return;
+          }
+
+          await this.handleMarkAsRead(message);
+          sendResponse({ 
+            success: true,
+            message: 'Page marked as read successfully'
+          });
           break;
 
         case 'BOOKMARK_SAVED':
@@ -255,7 +295,15 @@ class ForgetfulMeBackground {
         }
 
         case 'AUTH_STATE_CHANGED':
-          // Auth state change message received
+          // Update auth state in background
+          if (message.session) {
+            this.authState = message.session;
+          } else {
+            this.authState = null;
+          }
+          // Update badge/icon based on auth state
+          this.updateAuthBadge();
+          sendResponse({ success: true });
           break;
 
         case 'GET_CONFIG_SUMMARY': {
@@ -296,12 +344,19 @@ class ForgetfulMeBackground {
           break;
 
         default:
-          // Unknown message type - ignore silently
-          sendResponse({ success: false, error: 'Unknown message type' });
+          sendResponse({ 
+            success: false, 
+            error: `Unknown message type: ${message.type}` 
+          });
       }
     } catch (error) {
-      // Error handling message
-      sendResponse({ success: false, error: error.message });
+      BackgroundErrorHandler.handle(error, 'background.handleMessage');
+      sendResponse({ 
+        success: false, 
+        error: error.message.includes('Extension context') 
+          ? error.message 
+          : 'An unexpected error occurred while processing your request'
+      });
     }
   }
 
@@ -515,22 +570,37 @@ class ForgetfulMeBackground {
   }
 
   /**
-   * Handle bookmark marking as read (placeholder for future implementation)
+   * Handle bookmark marking as read
    * @async
    * @method handleMarkAsRead
-   * @param {Object} _bookmarkData - Bookmark data (currently unused)
+   * @param {Object} messageData - Message data containing URL and metadata
    */
-  async handleMarkAsRead(_bookmarkData) {
+  async handleMarkAsRead(messageData) {
     try {
-      // This will be handled by the popup, background just shows notification
+      // Check authentication state first
+      const authState = await this.getAuthState();
+      if (!authState || !authState.user) {
+        throw BackgroundErrorHandler.createError(
+          'Please sign in to mark pages as read',
+          'background.handleMarkAsRead.auth'
+        );
+      }
+
+      // Show success notification
       chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
-        message: 'Page marked as read!',
+        message: `Page "${messageData.title || 'Unknown'}" marked as read!`,
       });
+
+      // Update icon to show saved state
+      if (messageData.url) {
+        this.updateIconForUrl(messageData.url, true);
+      }
     } catch (error) {
       BackgroundErrorHandler.handle(error, 'background.handleMarkAsRead');
+      throw error; // Re-throw to be handled by message handler
     }
   }
 
@@ -568,6 +638,24 @@ class ForgetfulMeBackground {
   }
 
   /**
+   * Update badge to reflect authentication state
+   * @method updateAuthBadge
+   */
+  updateAuthBadge() {
+    try {
+      if (this.authState && this.authState.user) {
+        // User is authenticated - clear any error badges
+        chrome.action.setBadgeText({ text: '' });
+      } else {
+        // User is not authenticated - show warning or clear badge
+        chrome.action.setBadgeText({ text: '' });
+      }
+    } catch {
+      // Ignore badge update errors
+    }
+  }
+
+  /**
    * Get a summary of the current authentication state
    * @method getAuthSummary
    * @returns {Object} Authentication summary object
@@ -584,4 +672,13 @@ class ForgetfulMeBackground {
 }
 
 // Initialize background service worker
-new ForgetfulMeBackground();
+const backgroundInstance = new ForgetfulMeBackground();
+
+// Export for testing (if running in test environment)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    ForgetfulMeBackground,
+    handleMessage: backgroundInstance.handleMessage.bind(backgroundInstance),
+    BackgroundErrorHandler,
+  };
+}

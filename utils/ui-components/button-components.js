@@ -69,9 +69,19 @@ export class ButtonComponents {
       button.disabled = options.disabled;
     }
 
-    // Only add click listener if button is not disabled and onClick is provided
-    if (onClick && !options.disabled) {
-      button.addEventListener('click', onClick);
+    // Add click listener with disabled state checking
+    if (onClick) {
+      button.addEventListener('click', (event) => {
+        // Prevent execution if button is disabled
+        if (button.disabled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        }
+        
+        // Execute the original click handler
+        onClick(event);
+      });
     }
 
     // Apply additional attributes

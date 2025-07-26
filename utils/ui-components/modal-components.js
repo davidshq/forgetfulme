@@ -121,10 +121,14 @@ export class ModalComponents {
     // Add accessibility attributes
     dialog.setAttribute('role', 'dialog');
     dialog.setAttribute('aria-modal', 'true');
+    
+    // Generate unique ID if not provided
+    const dialogId = config.id || `modal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    dialog.id = dialogId;
 
-    // Set unique ID for ARIA labelling if title exists
-    if (config.title && config.id) {
-      dialog.setAttribute('aria-labelledby', `${config.id}-title`);
+    // Set ARIA labelling for title
+    if (config.title) {
+      dialog.setAttribute('aria-labelledby', `${dialogId}-title`);
     }
 
     // Create article container for Pico styling
@@ -134,8 +138,7 @@ export class ModalComponents {
     if (config.title) {
       const header = document.createElement('header');
       const titleEl = document.createElement('h3');
-      const titleId = config.id ? `${config.id}-title` : undefined;
-      if (titleId) titleEl.id = titleId;
+      titleEl.id = `${dialogId}-title`;
       titleEl.textContent = config.title;
       header.appendChild(titleEl);
       article.appendChild(header);
@@ -209,25 +212,42 @@ export class ModalComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static closeModal(modal) {
-    if (modal) {
-      if (modal.tagName === 'DIALOG') {
-        try {
-          if (modal.close) {
-            modal.close();
-          }
-        } catch (error) {
-          // Fallback for JSDOM
+    if (!modal) return;
+
+    if (modal.tagName === 'DIALOG') {
+      try {
+        if (modal.close) {
+          modal.close();
         }
+      } catch (error) {
+        // Fallback for JSDOM
       }
+    }
 
-      // Clean up modal state
-      modal.style.display = 'none';
-      modal.classList.remove('modal-open');
-      document.body.style.overflow = '';
+    // Clean up modal state
+    modal.style.display = 'none';
+    modal.classList.remove('modal-open');
+    document.body.style.overflow = '';
 
-      if (modal.parentNode) {
-        modal.parentNode.removeChild(modal);
+    // Clean up escape key listener
+    if (modal._escapeHandler) {
+      document.removeEventListener('keydown', modal._escapeHandler);
+      delete modal._escapeHandler;
+    }
+
+    // Restore previous focus
+    if (modal._previousFocus && modal._previousFocus.focus) {
+      try {
+        modal._previousFocus.focus();
+      } catch (error) {
+        // Ignore focus restoration errors
       }
+      delete modal._previousFocus;
+    }
+
+    // Remove modal from DOM
+    if (modal.parentNode) {
+      modal.parentNode.removeChild(modal);
     }
   }
 
@@ -236,7 +256,12 @@ export class ModalComponents {
    * @param {HTMLElement} modal - Modal element
    */
   static showModal(modal) {
-    if (modal && modal.tagName === 'DIALOG') {
+    if (!modal) return;
+
+    // Store previous focus for restoration
+    modal._previousFocus = document.activeElement;
+
+    if (modal.tagName === 'DIALOG') {
       // Try to use native dialog API, fallback for JSDOM/testing
       try {
         if (modal.showModal) {
@@ -254,7 +279,9 @@ export class ModalComponents {
         document.body.style.overflow = 'hidden';
       }
     } else {
-      document.body.appendChild(modal);
+      if (!modal.parentNode) {
+        document.body.appendChild(modal);
+      }
       modal.style.display = 'block';
       modal.classList.add('modal-open');
       document.body.style.overflow = 'hidden';
@@ -268,6 +295,17 @@ export class ModalComponents {
       }
     };
     document.addEventListener('keydown', escapeHandler);
+    
+    // Store escape handler for cleanup
+    modal._escapeHandler = escapeHandler;
+
+    // Focus first focusable element in modal
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusableElements.length > 0) {
+      focusableElements[0].focus();
+    }
   }
 
   /**
