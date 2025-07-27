@@ -379,7 +379,7 @@ This document tracks all major completed tasks and achievements for the Forgetfu
 ## Historical Achievements Summary ✅
 
 ### Quantitative Improvements ✅
-- **Test Reliability**: From failing test suite to 630+ passing tests (85% pass rate)
+- **Test Reliability**: From failing test suite to 693+ passing tests (88% pass rate)
 - **Mock Reduction**: 93% reduction in test mocking complexity
 - **Bug Discovery**: 15+ real user-facing bugs found and fixed
 - **E2E Reliability**: 87% pass rate for Chrome extension E2E tests
@@ -404,4 +404,4 @@ This document tracks all major completed tasks and achievements for the Forgetfu
 - **Performance Optimization**: Efficient memory usage and responsive UI
 - **Cross-Platform Ready**: Architecture supports Chrome/Firefox/Safari expansion
 
-This document serves as a historical record of all major completed work. For current status, ongoing work, and next steps, refer to the main DEVELOPMENT_SUMMARY.md document.
+This document serves as a historical record of all major completed work. For current development status and roadmap, see [DEVELOPMENT_SUMMARY.md](./DEVELOPMENT_SUMMARY.md). For testing strategies and metrics, see [TESTING_STRATEGY.md](./TESTING_STRATEGY.md).
