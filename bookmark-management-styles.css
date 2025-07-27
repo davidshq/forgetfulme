@@ -11,6 +11,7 @@
   --fm-bookmark-item-hover: var(--pico-secondary-background);
   --fm-selected-bg: var(--pico-primary-background);
   --fm-selected-color: var(--pico-primary-inverse);
+  --fm-success-color: var(--pico-ins-color);
   --fm-checkbox-size: 1.25rem;
 }
 
@@ -155,7 +156,7 @@ header h1 {
 }
 
 .bookmarks-card header {
-  background: var(--fm-success-color);
+  /* background: var(--fm-success-color); */
   color: white;
   padding: 1rem 1.5rem;
   margin: -1rem -1.5rem 1rem;
@@ -275,6 +276,7 @@ header h1 {
 }
 
 .bookmark-status {
+  background-color: var(--fm-success-color);
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: var(--pico-border-radius);
@@ -329,7 +331,7 @@ header h1 {
 /* Bookmark actions */
 .bookmark-actions {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   gap: 0.5rem;
   flex-shrink: 0;
 }
