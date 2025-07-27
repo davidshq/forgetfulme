@@ -8,15 +8,15 @@ vi.mock('../../../../utils/simple-modal.js', () => ({
     confirm: vi.fn((message, onConfirm, onCancel, options) => {
       // For testing, we'll track the calls
       return { message, onConfirm, onCancel, options };
-    })
-  }
+    }),
+  },
 }));
 
 // Mock chrome.tabs API
 global.chrome = {
   tabs: {
-    create: vi.fn()
-  }
+    create: vi.fn(),
+  },
 };
 
 describe('Bookmark Event Handlers', () => {
@@ -28,29 +28,29 @@ describe('Bookmark Event Handlers', () => {
       supabaseService: {
         getBookmarks: vi.fn(),
         deleteBookmark: vi.fn(),
-        updateBookmark: vi.fn()
+        updateBookmark: vi.fn(),
       },
       UIComponents: {
         DOM: {
           getValue: vi.fn(),
-          getElement: vi.fn()
-        }
+          getElement: vi.fn(),
+        },
       },
       UIMessages: {
         success: vi.fn(),
-        error: vi.fn()
+        error: vi.fn(),
       },
       ErrorHandler: {
         handle: vi.fn().mockReturnValue({
-          userMessage: 'Test error message'
-        })
+          userMessage: 'Test error message',
+        }),
       },
       BookmarkTransformer: {
-        toUIFormat: vi.fn(b => b)
+        toUIFormat: vi.fn(b => b),
       },
       appContainer: document.createElement('div'),
       displayBookmarks: vi.fn(),
-      loadAllBookmarks: vi.fn()
+      loadAllBookmarks: vi.fn(),
     };
   });
 
@@ -66,12 +66,12 @@ describe('Bookmark Event Handlers', () => {
       await handlers.deleteBookmark({
         ...mockDependencies,
         bookmarkId,
-        bookmarkTitle
+        bookmarkTitle,
       });
 
       expect(SimpleModal.confirm).toHaveBeenCalledTimes(1);
       const [message, , , options] = SimpleModal.confirm.mock.calls[0];
-      
+
       expect(message).toContain(bookmarkTitle);
       expect(message).toContain('Are you sure');
       expect(message).toContain('cannot be undone');
@@ -82,22 +82,24 @@ describe('Bookmark Event Handlers', () => {
     it('should delete bookmark when confirmed', async () => {
       const bookmarkId = 'test-123';
       const bookmarkTitle = 'Test Bookmark';
-      
+
       mockDependencies.supabaseService.deleteBookmark.mockResolvedValue(true);
 
       await handlers.deleteBookmark({
         ...mockDependencies,
         bookmarkId,
-        bookmarkTitle
+        bookmarkTitle,
       });
 
       // Get the onConfirm callback from the mock
       const onConfirm = SimpleModal.confirm.mock.calls[0][1];
-      
+
       // Call the confirm callback
       await onConfirm();
 
-      expect(mockDependencies.supabaseService.deleteBookmark).toHaveBeenCalledWith(bookmarkId);
+      expect(
+        mockDependencies.supabaseService.deleteBookmark
+      ).toHaveBeenCalledWith(bookmarkId);
       expect(mockDependencies.UIMessages.success).toHaveBeenCalledWith(
         'Bookmark deleted successfully!',
         mockDependencies.appContainer
@@ -109,18 +111,20 @@ describe('Bookmark Event Handlers', () => {
       const bookmarkId = 'test-123';
       const bookmarkTitle = 'Test Bookmark';
       const testError = new Error('Delete failed');
-      
-      mockDependencies.supabaseService.deleteBookmark.mockRejectedValue(testError);
+
+      mockDependencies.supabaseService.deleteBookmark.mockRejectedValue(
+        testError
+      );
 
       await handlers.deleteBookmark({
         ...mockDependencies,
         bookmarkId,
-        bookmarkTitle
+        bookmarkTitle,
       });
 
       // Get the onConfirm callback
       const onConfirm = SimpleModal.confirm.mock.calls[0][1];
-      
+
       // Call the confirm callback
       await onConfirm();
 
@@ -141,16 +145,18 @@ describe('Bookmark Event Handlers', () => {
       await handlers.deleteBookmark({
         ...mockDependencies,
         bookmarkId,
-        bookmarkTitle
+        bookmarkTitle,
       });
 
       // Get the onCancel callback
       const onCancel = SimpleModal.confirm.mock.calls[0][2];
-      
+
       // Call the cancel callback
       onCancel();
 
-      expect(mockDependencies.supabaseService.deleteBookmark).not.toHaveBeenCalled();
+      expect(
+        mockDependencies.supabaseService.deleteBookmark
+      ).not.toHaveBeenCalled();
       expect(mockDependencies.UIMessages.success).not.toHaveBeenCalled();
       expect(mockDependencies.loadAllBookmarks).not.toHaveBeenCalled();
     });
@@ -159,7 +165,7 @@ describe('Bookmark Event Handlers', () => {
   describe('openBookmark', () => {
     it('should use chrome.tabs.create when available', () => {
       const url = 'https://example.com';
-      
+
       handlers.openBookmark({ url });
 
       expect(chrome.tabs.create).toHaveBeenCalledWith({ url });
@@ -169,7 +175,7 @@ describe('Bookmark Event Handlers', () => {
       // Remove chrome.tabs temporarily
       const originalChrome = global.chrome;
       global.chrome = {};
-      
+
       // Mock window.open
       const mockOpen = vi.fn();
       global.window = { open: mockOpen };
@@ -186,7 +192,7 @@ describe('Bookmark Event Handlers', () => {
 
   describe('searchBookmarks', () => {
     it('should search with correct filters', async () => {
-      mockDependencies.UIComponents.DOM.getValue.mockImplementation((id) => {
+      mockDependencies.UIComponents.DOM.getValue.mockImplementation(id => {
         if (id === 'search-query') return 'test search';
         if (id === 'status-filter') return 'read';
         return '';
@@ -194,15 +200,17 @@ describe('Bookmark Event Handlers', () => {
 
       mockDependencies.supabaseService.getBookmarks.mockResolvedValue([
         { id: '1', title: 'Test 1' },
-        { id: '2', title: 'Test 2' }
+        { id: '2', title: 'Test 2' },
       ]);
 
       await handlers.searchBookmarks(mockDependencies);
 
-      expect(mockDependencies.supabaseService.getBookmarks).toHaveBeenCalledWith({
+      expect(
+        mockDependencies.supabaseService.getBookmarks
+      ).toHaveBeenCalledWith({
         limit: 100,
         search: 'test search',
-        status: 'read'
+        status: 'read',
       });
 
       expect(mockDependencies.displayBookmarks).toHaveBeenCalled();
@@ -210,7 +218,9 @@ describe('Bookmark Event Handlers', () => {
 
     it('should handle search errors', async () => {
       const testError = new Error('Search failed');
-      mockDependencies.supabaseService.getBookmarks.mockRejectedValue(testError);
+      mockDependencies.supabaseService.getBookmarks.mockRejectedValue(
+        testError
+      );
 
       await handlers.searchBookmarks(mockDependencies);
 
@@ -227,7 +237,7 @@ describe('Bookmark Event Handlers', () => {
       const bookmarkId = 'test-123';
       const showMainInterface = vi.fn();
 
-      mockDependencies.UIComponents.DOM.getValue.mockImplementation((id) => {
+      mockDependencies.UIComponents.DOM.getValue.mockImplementation(id => {
         if (id === 'edit-read-status') return 'good-reference';
         if (id === 'edit-tags') return 'tag1, tag2, tag3';
         return '';
@@ -241,15 +251,17 @@ describe('Bookmark Event Handlers', () => {
       await handlers.updateBookmark({
         ...mockDependencies,
         bookmarkId,
-        showMainInterface
+        showMainInterface,
       });
 
-      expect(mockDependencies.supabaseService.updateBookmark).toHaveBeenCalledWith(
+      expect(
+        mockDependencies.supabaseService.updateBookmark
+      ).toHaveBeenCalledWith(
         bookmarkId,
         expect.objectContaining({
           read_status: 'good-reference',
           tags: ['tag1', 'tag2', 'tag3'],
-          updated_at: expect.any(String)
+          updated_at: expect.any(String),
         })
       );
 
@@ -268,7 +280,7 @@ describe('Bookmark Event Handlers', () => {
     it('should handle empty tags', async () => {
       const bookmarkId = 'test-123';
 
-      mockDependencies.UIComponents.DOM.getValue.mockImplementation((id) => {
+      mockDependencies.UIComponents.DOM.getValue.mockImplementation(id => {
         if (id === 'edit-read-status') return 'read';
         if (id === 'edit-tags') return ''; // Empty tags
         return '';
@@ -277,10 +289,11 @@ describe('Bookmark Event Handlers', () => {
       await handlers.updateBookmark({
         ...mockDependencies,
         bookmarkId,
-        showMainInterface: vi.fn()
+        showMainInterface: vi.fn(),
       });
 
-      const updateCall = mockDependencies.supabaseService.updateBookmark.mock.calls[0];
+      const updateCall =
+        mockDependencies.supabaseService.updateBookmark.mock.calls[0];
       expect(updateCall[1].tags).toEqual([]);
     });
   });

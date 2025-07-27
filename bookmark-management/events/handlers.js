@@ -118,7 +118,7 @@ export async function deleteBookmark({
     },
     {
       confirmText: 'Delete',
-      cancelText: 'Cancel'
+      cancelText: 'Cancel',
     }
   );
 }

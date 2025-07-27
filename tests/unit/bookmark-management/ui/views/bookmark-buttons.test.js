@@ -19,7 +19,7 @@ describe('Bookmark Management Button Handlers', () => {
       status: 'read',
       tags: ['test', 'example'],
       created_at: '2024-01-01',
-      description: 'Test description'
+      description: 'Test description',
     };
 
     // Setup mock callbacks
@@ -27,7 +27,7 @@ describe('Bookmark Management Button Handlers', () => {
       onEdit: vi.fn(),
       onDelete: vi.fn(),
       onOpen: vi.fn(),
-      updateBulkActions: vi.fn()
+      updateBulkActions: vi.fn(),
     };
   });
 
@@ -41,16 +41,22 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       container.appendChild(listItem);
 
       // Check that all buttons exist
       const buttons = listItem.querySelectorAll('button');
-      const editBtn = Array.from(buttons).find(btn => btn.textContent.includes('Edit'));
-      const deleteBtn = Array.from(buttons).find(btn => btn.textContent.includes('Delete'));
-      const openBtn = Array.from(buttons).find(btn => btn.textContent.includes('Open'));
+      const editBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Edit')
+      );
+      const deleteBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Delete')
+      );
+      const openBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Open')
+      );
 
       expect(editBtn).toBeTruthy();
       expect(deleteBtn).toBeTruthy();
@@ -65,13 +71,15 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       container.appendChild(listItem);
 
       const buttons = listItem.querySelectorAll('button');
-      const editBtn = Array.from(buttons).find(btn => btn.textContent.includes('Edit'));
+      const editBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Edit')
+      );
       editBtn.click();
 
       expect(mockCallbacks.onEdit).toHaveBeenCalledTimes(1);
@@ -82,7 +90,7 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       container.appendChild(listItem);
@@ -101,13 +109,15 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       container.appendChild(listItem);
 
       const buttons = listItem.querySelectorAll('button');
-      const openBtn = Array.from(buttons).find(btn => btn.textContent.includes('Open'));
+      const openBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Open')
+      );
       openBtn.click();
 
       expect(mockCallbacks.onOpen).toHaveBeenCalledTimes(1);
@@ -118,16 +128,22 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        updateBulkActions: mockCallbacks.updateBulkActions
+        updateBulkActions: mockCallbacks.updateBulkActions,
         // Intentionally not providing onEdit, onDelete, onOpen
       });
 
       container.appendChild(listItem);
 
       const buttons = listItem.querySelectorAll('button');
-      const editBtn = Array.from(buttons).find(btn => btn.textContent.includes('Edit'));
-      const deleteBtn = Array.from(buttons).find(btn => btn.textContent.includes('Delete'));
-      const openBtn = Array.from(buttons).find(btn => btn.textContent.includes('Open'));
+      const editBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Edit')
+      );
+      const deleteBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Delete')
+      );
+      const openBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Open')
+      );
 
       // Buttons should still exist
       expect(editBtn).toBeTruthy();
@@ -149,7 +165,7 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       container.appendChild(listItem);
@@ -168,17 +184,29 @@ describe('Bookmark Management Button Handlers', () => {
       const listItem = createBookmarkListItem({
         bookmark: mockBookmark,
         index: 0,
-        ...mockCallbacks
+        ...mockCallbacks,
       });
 
       const buttons = listItem.querySelectorAll('button');
-      const editBtn = Array.from(buttons).find(btn => btn.textContent.includes('Edit'));
-      const deleteBtn = Array.from(buttons).find(btn => btn.textContent.includes('Delete'));
-      const openBtn = Array.from(buttons).find(btn => btn.textContent.includes('Open'));
+      const editBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Edit')
+      );
+      const deleteBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Delete')
+      );
+      const openBtn = Array.from(buttons).find(btn =>
+        btn.textContent.includes('Open')
+      );
 
-      expect(editBtn.getAttribute('aria-label')).toBe(`Edit bookmark: ${mockBookmark.title}`);
-      expect(deleteBtn.getAttribute('aria-label')).toBe(`Delete bookmark: ${mockBookmark.title}`);
-      expect(openBtn.getAttribute('aria-label')).toBe(`Open bookmark: ${mockBookmark.title}`);
+      expect(editBtn.getAttribute('aria-label')).toBe(
+        `Edit bookmark: ${mockBookmark.title}`
+      );
+      expect(deleteBtn.getAttribute('aria-label')).toBe(
+        `Delete bookmark: ${mockBookmark.title}`
+      );
+      expect(openBtn.getAttribute('aria-label')).toBe(
+        `Open bookmark: ${mockBookmark.title}`
+      );
     });
   });
 });
