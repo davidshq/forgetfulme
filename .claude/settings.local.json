@@ -9,7 +9,8 @@
       "Bash(timeout 60 npx playwright test tests/integration/popup.test.js --project=component-integration --reporter=line)",
       "Bash(timeout 120 npm run test:e2e)",
       "Bash(timeout 60 npx playwright test:*)",
-      "Bash(timeout 60 npm run test:quick)"
+      "Bash(timeout 60 npm run test:quick)",
+      "Bash(NODE_ENV=test npm test tests/unit/background-enhanced.test.js)"
     ],
     "deny": []
   }

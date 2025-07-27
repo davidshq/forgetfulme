@@ -107,8 +107,16 @@ class ForgetfulMeBackground {
    * Initialize the background service worker
    * @constructor
    * @description Sets up event listeners and initializes authentication state
+   * @param {Object} dependencies - Injected dependencies for testing
+   * @param {Object} [dependencies.chrome] - Chrome API object (defaults to global chrome)
+   * @param {Object} [dependencies.errorHandler] - Error handler (defaults to BackgroundErrorHandler)
+   * @param {boolean} [dependencies.autoInit=true] - Whether to auto-initialize (set false for testing)
    */
-  constructor() {
+  constructor(dependencies = {}) {
+    // Dependency injection for testability
+    this.chrome = dependencies.chrome || (typeof chrome !== 'undefined' ? chrome : null);
+    this.errorHandler = dependencies.errorHandler || BackgroundErrorHandler;
+    
     /** @type {Object|null} Current authentication state */
     this.authState = null;
     /** @type {Object} Cache for URL status to avoid repeated database calls */
@@ -116,8 +124,11 @@ class ForgetfulMeBackground {
     /** @type {number} Cache timeout in milliseconds (5 minutes) */
     this.cacheTimeout = 5 * 60 * 1000;
 
-    this.initializeEventListeners();
-    this.initializeAuthState();
+    // Auto-initialize unless explicitly disabled (for testing)
+    if (dependencies.autoInit !== false) {
+      this.initializeEventListeners();
+      this.initializeAuthState();
+    }
   }
 
   /**
@@ -134,12 +145,12 @@ class ForgetfulMeBackground {
   async initializeAuthState() {
     try {
       // Load current auth state from storage
-      const result = await chrome.storage.sync.get(['auth_session']);
+      const result = await this.chrome.storage.sync.get(['auth_session']);
       this.authState = result.auth_session || null;
 
       // Auth state initialized successfully
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.initializeAuthState');
+      this.errorHandler.handle(error, 'background.initializeAuthState');
     }
   }
 
@@ -154,53 +165,53 @@ class ForgetfulMeBackground {
    */
   initializeEventListeners() {
     // Handle keyboard shortcuts
-    chrome.commands.onCommand.addListener(command => {
+    this.chrome.commands.onCommand.addListener(command => {
       if (command === 'mark-as-read') {
         this.handleKeyboardShortcut();
       }
     });
 
     // Handle installation
-    chrome.runtime.onInstalled.addListener(async details => {
+    this.chrome.runtime.onInstalled.addListener(async details => {
       if (details.reason === 'install') {
         await this.initializeDefaultSettings();
       }
     });
 
     // Handle messages from popup and other contexts
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    this.chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       this.handleMessage(message, sender, sendResponse);
       return true; // Keep message channel open for async responses
     });
 
     // Handle storage changes (auth state changes)
-    chrome.storage.onChanged.addListener((changes, namespace) => {
+    this.chrome.storage.onChanged.addListener((changes, namespace) => {
       if (namespace === 'sync' && changes.auth_session) {
         this.handleStorageAuthChange(changes.auth_session.newValue);
       }
     });
 
     // Handle tab updates to check URL status
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    this.chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       if (changeInfo.status === 'complete' && tab.url) {
         this.checkUrlStatus(tab);
       }
     });
 
     // Handle tab activation to check URL status
-    chrome.tabs.onActivated.addListener(async activeInfo => {
+    this.chrome.tabs.onActivated.addListener(async activeInfo => {
       try {
-        const tab = await chrome.tabs.get(activeInfo.tabId);
+        const tab = await this.chrome.tabs.get(activeInfo.tabId);
         if (tab.url) {
           this.checkUrlStatus(tab);
         }
       } catch (error) {
-        BackgroundErrorHandler.handle(error, 'background.tabActivation');
+        this.errorHandler.handle(error, 'background.tabActivation');
       }
     });
 
     // Handle action button click to check URL status
-    chrome.action.onClicked.addListener(async tab => {
+    this.chrome.action.onClicked.addListener(async tab => {
       if (tab.url) {
         await this.checkUrlStatus(tab);
       }
@@ -314,7 +325,7 @@ class ForgetfulMeBackground {
 
         case 'CHECK_URL_STATUS': {
           // Handle request to check current tab URL status
-          const [currentTab] = await chrome.tabs.query({
+          const [currentTab] = await this.chrome.tabs.query({
             active: true,
             currentWindow: true,
           });
@@ -350,7 +361,7 @@ class ForgetfulMeBackground {
           });
       }
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.handleMessage');
+      this.errorHandler.handle(error, 'background.handleMessage');
       sendResponse({
         success: false,
         error: error.message.includes('Extension context')
@@ -367,7 +378,7 @@ class ForgetfulMeBackground {
    * @returns {Promise<Object|null>} The current authentication session or null if not authenticated
    */
   async getAuthState() {
-    const result = await chrome.storage.sync.get(['auth_session']);
+    const result = await this.chrome.storage.sync.get(['auth_session']);
     return result.auth_session || null;
   }
 
@@ -426,11 +437,11 @@ class ForgetfulMeBackground {
     try {
       if (session) {
         // User is authenticated - show green badge or checkmark
-        chrome.action.setBadgeText({ text: '✓' });
-        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+        this.chrome.action.setBadgeText({ text: '✓' });
+        this.chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
       } else {
         // User is not authenticated - show warning or clear badge
-        chrome.action.setBadgeText({ text: '' });
+        this.chrome.action.setBadgeText({ text: '' });
       }
     } catch {
       // Ignore badge update errors
@@ -499,12 +510,12 @@ class ForgetfulMeBackground {
 
       if (isSaved) {
         // URL is already saved - show checkmark
-        chrome.action.setBadgeText({ text: '✓' });
-        chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+        this.chrome.action.setBadgeText({ text: '✓' });
+        this.chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
       } else {
         // URL is not saved - show plus sign
-        chrome.action.setBadgeText({ text: '+' });
-        chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
+        this.chrome.action.setBadgeText({ text: '+' });
+        this.chrome.action.setBadgeBackgroundColor({ color: '#2196F3' });
       }
     } catch {
       // Ignore icon update errors
@@ -544,7 +555,7 @@ class ForgetfulMeBackground {
       }
 
       // Get the active tab
-      const [tab] = await chrome.tabs.query({
+      const [tab] = await this.chrome.tabs.query({
         active: true,
         currentWindow: true,
       });
@@ -558,14 +569,14 @@ class ForgetfulMeBackground {
       }
 
       // Show notification to open popup for marking
-      chrome.notifications.create({
+      this.chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
         message: 'Click the extension icon to mark this page as read',
       });
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.handleKeyboardShortcut');
+      this.errorHandler.handle(error, 'background.handleKeyboardShortcut');
     }
   }
 
@@ -580,14 +591,14 @@ class ForgetfulMeBackground {
       // Check authentication state first
       const authState = await this.getAuthState();
       if (!authState || !authState.user) {
-        throw BackgroundErrorHandler.createError(
+        throw this.errorHandler.createError(
           'Please sign in to mark pages as read',
           'background.handleMarkAsRead.auth'
         );
       }
 
       // Show success notification
-      chrome.notifications.create({
+      this.chrome.notifications.create({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
         title: 'ForgetfulMe',
@@ -599,7 +610,7 @@ class ForgetfulMeBackground {
         this.updateIconForUrl(messageData.url, true);
       }
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.handleMarkAsRead');
+      this.errorHandler.handle(error, 'background.handleMarkAsRead');
       throw error; // Re-throw to be handled by message handler
     }
   }
@@ -612,7 +623,7 @@ class ForgetfulMeBackground {
   async initializeDefaultSettings() {
     try {
       // Check if default settings already exist
-      const result = await chrome.storage.sync.get(['customStatusTypes']);
+      const result = await this.chrome.storage.sync.get(['customStatusTypes']);
 
       // Only initialize if custom status types don't exist
       if (!result.customStatusTypes) {
@@ -623,14 +634,14 @@ class ForgetfulMeBackground {
           'revisit-later',
         ];
 
-        await chrome.storage.sync.set({
+        await this.chrome.storage.sync.set({
           customStatusTypes: defaultStatusTypes,
         });
 
         // Default settings initialized successfully
       }
     } catch (error) {
-      BackgroundErrorHandler.handle(
+      this.errorHandler.handle(
         error,
         'background.initializeDefaultSettings'
       );
@@ -645,10 +656,10 @@ class ForgetfulMeBackground {
     try {
       if (this.authState && this.authState.user) {
         // User is authenticated - clear any error badges
-        chrome.action.setBadgeText({ text: '' });
+        this.chrome.action.setBadgeText({ text: '' });
       } else {
         // User is not authenticated - show warning or clear badge
-        chrome.action.setBadgeText({ text: '' });
+        this.chrome.action.setBadgeText({ text: '' });
       }
     } catch {
       // Ignore badge update errors
@@ -671,14 +682,17 @@ class ForgetfulMeBackground {
   }
 }
 
-// Initialize background service worker
-const backgroundInstance = new ForgetfulMeBackground();
+// Initialize background service worker (only in production, not during testing)
+let backgroundInstance;
+if (typeof process === 'undefined' || process.env.NODE_ENV !== 'test') {
+  backgroundInstance = new ForgetfulMeBackground();
+}
 
 // Export for testing (if running in test environment)
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     ForgetfulMeBackground,
-    handleMessage: backgroundInstance.handleMessage.bind(backgroundInstance),
+    handleMessage: backgroundInstance?.handleMessage?.bind(backgroundInstance),
     BackgroundErrorHandler,
   };
 }
