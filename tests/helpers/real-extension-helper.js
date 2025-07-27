@@ -2,7 +2,7 @@
  * @fileoverview Real Chrome Extension Helper for E2E testing
  * @module real-extension-helper
  * @description Utilities for testing actual Chrome extension in real browser environment
- * 
+ *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2025-01-01
@@ -14,7 +14,7 @@ import { expect } from '@playwright/test';
  * Real Chrome Extension Helper for E2E testing
  * @class RealExtensionHelper
  * @description Provides utilities for testing real Chrome extension functionality with Playwright
- * 
+ *
  * @example
  * const helper = new RealExtensionHelper(page, context);
  * await helper.getExtensionId();
@@ -58,7 +58,7 @@ class RealExtensionHelper {
       this.extensionId = await this.page.evaluate(async () => {
         return new Promise((resolve, reject) => {
           if (typeof chrome !== 'undefined' && chrome.management) {
-            chrome.management.getSelf((extension) => {
+            chrome.management.getSelf(extension => {
               if (extension && extension.id) {
                 resolve(extension.id);
               } else {
@@ -72,22 +72,22 @@ class RealExtensionHelper {
       });
     } catch (managementError) {
       console.log('Chrome management API failed:', managementError.message);
-      
+
       // Fallback: Use a common extension ID pattern for testing
       // In a real Playwright environment with --load-extension, we can try to detect
       // the extension by attempting to access its pages
       const testExtensionIds = [
         'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk', // Common test ID pattern
         'abcdefghijklmnopqrstuvwxyzabcdef', // Another test pattern
-        'test-extension-id-placeholder'
+        'test-extension-id-placeholder',
       ];
-      
+
       for (const testId of testExtensionIds) {
         try {
           // Try to access the extension's popup page
           const testUrl = `chrome-extension://${testId}/popup.html`;
           await this.page.goto(testUrl);
-          
+
           // If no error occurred, we found a working extension ID
           this.extensionId = testId;
           break;
@@ -96,7 +96,7 @@ class RealExtensionHelper {
           continue;
         }
       }
-      
+
       if (!this.extensionId) {
         // Final fallback: use a deterministic test ID
         this.extensionId = 'playwright-test-extension-id';
@@ -122,22 +122,25 @@ class RealExtensionHelper {
 
     // Create new page for popup
     this.popupPage = await this.context.newPage();
-    
+
     try {
       // Try to navigate to the real extension popup
       const popupURL = `chrome-extension://${this.extensionId}/popup.html`;
       await this.popupPage.goto(popupURL);
-      
+
       // Wait for popup to be ready
       await this.popupPage.waitForSelector('#app', { timeout: 10000 });
     } catch (error) {
-      console.log('Could not access real extension popup, using fallback:', error.message);
-      
+      console.log(
+        'Could not access real extension popup, using fallback:',
+        error.message
+      );
+
       // Fallback: Use HTTP server approach for testing popup functionality
       try {
         await this.popupPage.goto('http://localhost:3000/popup.html');
         await this.popupPage.waitForSelector('#app', { timeout: 10000 });
-        
+
         // Mock Chrome APIs in the fallback environment
         await this.popupPage.addInitScript(() => {
           if (typeof window.chrome === 'undefined') {
@@ -149,28 +152,33 @@ class RealExtensionHelper {
                 openOptionsPage: () => {
                   window.optionsPageOpened = true;
                 },
-                getURL: (path) => `chrome-extension://test-id/${path}`
+                getURL: path => `chrome-extension://test-id/${path}`,
               },
               storage: {
                 sync: {
                   get: (keys, callback) => callback({}),
                   set: (data, callback) => callback(),
-                }
+                },
               },
               tabs: {
                 query: (queryInfo, callback) => {
-                  callback([{ id: 1, url: 'https://example.com', title: 'Test Page' }]);
-                }
-              }
+                  callback([
+                    { id: 1, url: 'https://example.com', title: 'Test Page' },
+                  ]);
+                },
+              },
             };
           }
         });
       } catch (fallbackError) {
-        console.error('Both extension and fallback popup failed:', fallbackError.message);
+        console.error(
+          'Both extension and fallback popup failed:',
+          fallbackError.message
+        );
         throw new Error('Could not open popup in any mode');
       }
     }
-    
+
     return this.popupPage;
   }
 
@@ -188,21 +196,24 @@ class RealExtensionHelper {
 
     // Create new page for options
     this.optionsPage = await this.context.newPage();
-    
+
     try {
       // Try to navigate to the real extension options
       const optionsURL = `chrome-extension://${this.extensionId}/options.html`;
       await this.optionsPage.goto(optionsURL);
-      
+
       // Wait for options page to be ready
       await this.optionsPage.waitForSelector('#app', { timeout: 10000 });
     } catch (error) {
-      console.log('Could not access real extension options, using fallback:', error.message);
-      
+      console.log(
+        'Could not access real extension options, using fallback:',
+        error.message
+      );
+
       // Fallback: Use HTTP server approach
       await this.optionsPage.goto('http://localhost:3000/options.html');
       await this.optionsPage.waitForSelector('#app', { timeout: 10000 });
-      
+
       // Mock Chrome APIs in the fallback environment
       await this.optionsPage.addInitScript(() => {
         if (typeof window.chrome === 'undefined') {
@@ -213,19 +224,19 @@ class RealExtensionHelper {
               },
               openOptionsPage: () => {
                 window.optionsPageOpened = true;
-              }
+              },
             },
             storage: {
               sync: {
                 get: (keys, callback) => callback({}),
                 set: (data, callback) => callback(),
-              }
-            }
+              },
+            },
           };
         }
       });
     }
-    
+
     return this.optionsPage;
   }
 
@@ -241,18 +252,21 @@ class RealExtensionHelper {
     }
 
     const bookmarkPage = await this.context.newPage();
-    
+
     try {
       const bookmarkURL = `chrome-extension://${this.extensionId}/bookmark-management.html`;
       await bookmarkPage.goto(bookmarkURL);
       await bookmarkPage.waitForSelector('#app', { timeout: 10000 });
     } catch (error) {
-      console.log('Could not access real extension bookmark management, using fallback:', error.message);
-      
+      console.log(
+        'Could not access real extension bookmark management, using fallback:',
+        error.message
+      );
+
       // Fallback: Use HTTP server approach
       await bookmarkPage.goto('http://localhost:3000/bookmark-management.html');
       await bookmarkPage.waitForSelector('#app', { timeout: 10000 });
-      
+
       // Mock Chrome APIs in the fallback environment
       await bookmarkPage.addInitScript(() => {
         if (typeof window.chrome === 'undefined') {
@@ -260,19 +274,19 @@ class RealExtensionHelper {
             runtime: {
               sendMessage: (message, callback) => {
                 setTimeout(() => callback({ success: true }), 100);
-              }
+              },
             },
             storage: {
               sync: {
                 get: (keys, callback) => callback({}),
                 set: (data, callback) => callback(),
-              }
-            }
+              },
+            },
           };
         }
       });
     }
-    
+
     return bookmarkPage;
   }
 
@@ -289,11 +303,11 @@ class RealExtensionHelper {
 
     // This is more complex in real environments
     // We can use the chrome.action API or simulate the click
-    await this.page.evaluate(async (extensionId) => {
+    await this.page.evaluate(async extensionId => {
       // Simulate extension icon click via background script message
       if (window.chrome && window.chrome.runtime) {
         await window.chrome.runtime.sendMessage(extensionId, {
-          type: 'EXTENSION_ICON_CLICKED'
+          type: 'EXTENSION_ICON_CLICKED',
         });
       }
     }, this.extensionId);
@@ -328,7 +342,7 @@ class RealExtensionHelper {
       return {
         url: window.location.href,
         title: document.title,
-        id: 'current-tab'
+        id: 'current-tab',
       };
     });
   }
@@ -341,20 +355,29 @@ class RealExtensionHelper {
    * @param {string} title - Title for the test page
    * @returns {Promise<import('@playwright/test').Page>} The test page
    */
-  async createTestPage(url = 'https://example.com/test-page', title = 'Test Page') {
+  async createTestPage(
+    url = 'https://example.com/test-page',
+    title = 'Test Page'
+  ) {
     const testPage = await this.context.newPage();
-    
+
     // Create a simple test page
-    await testPage.goto('data:text/html,<html><head><title>' + title + '</title></head><body><h1>' + title + '</h1><p>Test content for bookmarking</p></body></html>');
-    
+    await testPage.goto(
+      'data:text/html,<html><head><title>' +
+        title +
+        '</title></head><body><h1>' +
+        title +
+        '</h1><p>Test content for bookmarking</p></body></html>'
+    );
+
     // Override the URL in the location bar
-    await testPage.evaluate((testUrl) => {
+    await testPage.evaluate(testUrl => {
       Object.defineProperty(window.location, 'href', {
         value: testUrl,
-        writable: true
+        writable: true,
       });
     }, url);
-    
+
     return testPage;
   }
 
@@ -366,9 +389,12 @@ class RealExtensionHelper {
    */
   async waitForExtensionReady(timeout = 10000) {
     // Wait for service worker to be active
-    await this.page.waitForFunction(() => {
-      return window.chrome && window.chrome.runtime;
-    }, { timeout });
+    await this.page.waitForFunction(
+      () => {
+        return window.chrome && window.chrome.runtime;
+      },
+      { timeout }
+    );
 
     // Additional wait for extension initialization
     await this.page.waitForTimeout(2000);
@@ -386,14 +412,14 @@ class RealExtensionHelper {
       const hasChrome = await this.page.evaluate(() => {
         return typeof window.chrome !== 'undefined';
       });
-      
+
       if (!hasChrome) {
         console.log('Chrome APIs not available in test environment');
         // In Playwright, Chrome APIs might not be available in the main page context
         // But we can still proceed with testing using fallback mechanisms
         return true; // Allow tests to proceed with mocked functionality
       }
-      
+
       await this.getExtensionId();
       return true;
     } catch (error) {
@@ -412,21 +438,21 @@ class RealExtensionHelper {
    */
   async getExtensionLogs() {
     const logs = [];
-    
+
     // Listen to console messages from all extension pages
     const pages = [this.popupPage, this.optionsPage].filter(p => p !== null);
-    
+
     for (const page of pages) {
       page.on('console', msg => {
         logs.push({
           type: msg.type(),
           text: msg.text(),
           location: msg.location(),
-          page: page.url()
+          page: page.url(),
         });
       });
     }
-    
+
     return logs;
   }
 
@@ -440,11 +466,11 @@ class RealExtensionHelper {
     if (this.popupPage && !this.popupPage.isClosed()) {
       await this.popupPage.close();
     }
-    
+
     if (this.optionsPage && !this.optionsPage.isClosed()) {
       await this.optionsPage.close();
     }
-    
+
     this.popupPage = null;
     this.optionsPage = null;
   }

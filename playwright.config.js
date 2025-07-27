@@ -86,7 +86,7 @@ export default defineConfig({
         // Chrome extension permissions
         permissions: [
           'geolocation',
-          'notifications', 
+          'notifications',
           'camera',
           'microphone',
           'clipboard-read',

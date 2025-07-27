@@ -10,7 +10,9 @@
       "Bash(timeout 120 npm run test:e2e)",
       "Bash(timeout 60 npx playwright test:*)",
       "Bash(timeout 60 npm run test:quick)",
-      "Bash(NODE_ENV=test npm test tests/unit/background-enhanced.test.js)"
+      "Bash(NODE_ENV=test npm test tests/unit/background-enhanced.test.js)",
+      "Bash(npm run check:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": []
   }

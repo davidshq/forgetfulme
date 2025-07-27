@@ -17,36 +17,46 @@ export function createEnhancedChromeMock() {
     // Commands API - keyboard shortcuts
     commands: {
       onCommand: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn(listener => {
           mockChrome._commandListeners = mockChrome._commandListeners || [];
           mockChrome._commandListeners.push(listener);
         }),
         removeListener: vi.fn(),
         hasListener: vi.fn(() => true),
       },
-      getAll: vi.fn(() => Promise.resolve([
-        { name: 'mark-as-read', description: 'Mark current page as read', shortcut: 'Ctrl+Shift+R' }
-      ])),
+      getAll: vi.fn(() =>
+        Promise.resolve([
+          {
+            name: 'mark-as-read',
+            description: 'Mark current page as read',
+            shortcut: 'Ctrl+Shift+R',
+          },
+        ])
+      ),
     },
 
     // Tabs API - tab management
     tabs: {
-      query: vi.fn(() => Promise.resolve([
-        { 
-          id: 1, 
-          url: 'https://example.com/test', 
+      query: vi.fn(() =>
+        Promise.resolve([
+          {
+            id: 1,
+            url: 'https://example.com/test',
+            title: 'Test Page',
+            active: true,
+            windowId: 1,
+          },
+        ])
+      ),
+      get: vi.fn(tabId =>
+        Promise.resolve({
+          id: tabId,
+          url: 'https://example.com/test',
           title: 'Test Page',
           active: true,
-          windowId: 1
-        }
-      ])),
-      get: vi.fn((tabId) => Promise.resolve({
-        id: tabId,
-        url: 'https://example.com/test',
-        title: 'Test Page',
-        active: true,
-        windowId: 1
-      })),
+          windowId: 1,
+        })
+      ),
       onActivated: {
         addListener: vi.fn(),
         removeListener: vi.fn(),
@@ -57,19 +67,21 @@ export function createEnhancedChromeMock() {
         removeListener: vi.fn(),
         hasListener: vi.fn(() => true),
       },
-      create: vi.fn((createProperties) => Promise.resolve({
-        id: 2,
-        url: createProperties.url,
-        title: 'New Tab',
-        active: createProperties.active || false,
-        windowId: 1
-      })),
+      create: vi.fn(createProperties =>
+        Promise.resolve({
+          id: 2,
+          url: createProperties.url,
+          title: 'New Tab',
+          active: createProperties.active || false,
+          windowId: 1,
+        })
+      ),
     },
 
     // Runtime API - messaging and lifecycle
     runtime: {
       onMessage: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn(listener => {
           mockChrome._messageListeners = mockChrome._messageListeners || [];
           mockChrome._messageListeners.push(listener);
         }),
@@ -81,7 +93,7 @@ export function createEnhancedChromeMock() {
         removeListener: vi.fn(),
       },
       onInstalled: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn(listener => {
           mockChrome._installedListeners = mockChrome._installedListeners || [];
           mockChrome._installedListeners.push(listener);
         }),
@@ -100,7 +112,7 @@ export function createEnhancedChromeMock() {
       getManifest: vi.fn(() => ({
         name: 'ForgetfulMe',
         version: '1.0.0',
-        manifest_version: 3
+        manifest_version: 3,
       })),
       id: 'test-extension-id',
     },
@@ -125,7 +137,7 @@ export function createEnhancedChromeMock() {
               result[key] = value;
             }
           }
-          
+
           if (callback) {
             setTimeout(() => callback(result), 0);
           }
@@ -138,12 +150,12 @@ export function createEnhancedChromeMock() {
             storageData.set(key, newValue);
             changes[key] = { oldValue, newValue };
           }
-          
+
           // Emit storage change events
           storageListeners.forEach(listener => {
             setTimeout(() => listener(changes, 'sync'), 0);
           });
-          
+
           if (callback) {
             setTimeout(callback, 0);
           }
@@ -161,33 +173,33 @@ export function createEnhancedChromeMock() {
               changes[key] = { oldValue, newValue: undefined };
             }
           });
-          
+
           // Emit storage change events
           if (Object.keys(changes).length > 0) {
             storageListeners.forEach(listener => {
               setTimeout(() => listener(changes, 'sync'), 0);
             });
           }
-          
+
           if (callback) {
             setTimeout(callback, 0);
           }
           return Promise.resolve();
         }),
-        clear: vi.fn((callback) => {
+        clear: vi.fn(callback => {
           const changes = {};
           for (const [key, oldValue] of storageData.entries()) {
             changes[key] = { oldValue, newValue: undefined };
           }
           storageData.clear();
-          
+
           // Emit storage change events
           if (Object.keys(changes).length > 0) {
             storageListeners.forEach(listener => {
               setTimeout(() => listener(changes, 'sync'), 0);
             });
           }
-          
+
           if (callback) {
             setTimeout(callback, 0);
           }
@@ -215,7 +227,7 @@ export function createEnhancedChromeMock() {
           }
           return Promise.resolve();
         }),
-        clear: vi.fn((callback) => {
+        clear: vi.fn(callback => {
           if (callback) {
             setTimeout(callback, 0);
           }
@@ -223,10 +235,10 @@ export function createEnhancedChromeMock() {
         }),
       },
       onChanged: {
-        addListener: vi.fn((listener) => {
+        addListener: vi.fn(listener => {
           storageListeners.push(listener);
         }),
-        removeListener: vi.fn((listener) => {
+        removeListener: vi.fn(listener => {
           const index = storageListeners.indexOf(listener);
           if (index > -1) {
             storageListeners.splice(index, 1);
@@ -245,7 +257,7 @@ export function createEnhancedChromeMock() {
           options = notificationId;
           notificationId = 'test-notification-' + Date.now();
         }
-        
+
         if (callback) {
           setTimeout(() => callback(notificationId), 0);
         }
@@ -257,7 +269,7 @@ export function createEnhancedChromeMock() {
         }
         return Promise.resolve(true);
       }),
-      getAll: vi.fn((callback) => {
+      getAll: vi.fn(callback => {
         const notifications = {};
         if (callback) {
           setTimeout(() => callback(notifications), 0);
@@ -332,7 +344,7 @@ export function createEnhancedChromeMock() {
       vi.clearAllMocks();
     },
 
-    _triggerCommand: (command) => {
+    _triggerCommand: command => {
       if (mockChrome._commandListeners) {
         mockChrome._commandListeners.forEach(listener => listener(command));
       }
@@ -397,13 +409,13 @@ export function createMockErrorHandler() {
 export function createTestDependencies(overrides = {}) {
   const chromeMock = overrides.chrome || createEnhancedChromeMock();
   const errorHandlerMock = overrides.errorHandler || createMockErrorHandler();
-  
+
   return {
     chromeMock,
     errorHandlerMock,
     cleanup: () => {
       chromeMock._reset();
       vi.clearAllMocks();
-    }
+    },
   };
 }

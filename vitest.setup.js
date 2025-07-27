@@ -382,9 +382,9 @@ global.chrome = {
       addListener: vi.fn(),
       removeListener: vi.fn(),
     },
-    getAll: vi.fn((callback) => {
+    getAll: vi.fn(callback => {
       callback([
-        { name: 'mark-as-read', description: 'Mark current page as read' }
+        { name: 'mark-as-read', description: 'Mark current page as read' },
       ]);
     }),
   },
@@ -1381,8 +1381,11 @@ global.ErrorHandler = {
 };
 
 // Add HTMLFormElement.requestSubmit polyfill for JSDOM
-if (typeof global.HTMLFormElement !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
-  HTMLFormElement.prototype.requestSubmit = function() {
+if (
+  typeof global.HTMLFormElement !== 'undefined' &&
+  !HTMLFormElement.prototype.requestSubmit
+) {
+  HTMLFormElement.prototype.requestSubmit = function () {
     const event = new Event('submit', { bubbles: true, cancelable: true });
     this.dispatchEvent(event);
   };
@@ -1395,7 +1398,7 @@ beforeEach(() => {
 
   // Add HTMLFormElement.requestSubmit polyfill for JSDOM (after JSDOM loads)
   if (typeof HTMLFormElement !== 'undefined') {
-    HTMLFormElement.prototype.requestSubmit = function() {
+    HTMLFormElement.prototype.requestSubmit = function () {
       const event = new Event('submit', { bubbles: true, cancelable: true });
       this.dispatchEvent(event);
     };
@@ -1428,10 +1431,12 @@ beforeEach(() => {
       tabs: {},
       action: {},
       notifications: {},
-      commands: { onCommand: { addListener: vi.fn(), removeListener: vi.fn() } },
+      commands: {
+        onCommand: { addListener: vi.fn(), removeListener: vi.fn() },
+      },
     };
   }
-  
+
   // Ensure chrome.commands exists
   if (!global.chrome.commands) {
     global.chrome.commands = {
@@ -1439,9 +1444,9 @@ beforeEach(() => {
         addListener: vi.fn(),
         removeListener: vi.fn(),
       },
-      getAll: vi.fn((callback) => {
+      getAll: vi.fn(callback => {
         callback([
-          { name: 'mark-as-read', description: 'Mark current page as read' }
+          { name: 'mark-as-read', description: 'Mark current page as read' },
         ]);
       }),
     };

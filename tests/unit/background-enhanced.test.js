@@ -3,7 +3,11 @@
  * Tests the refactored background service with comprehensive Chrome API mocking
  */
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { createEnhancedChromeMock, createMockErrorHandler, createTestDependencies } from '../helpers/chrome-mock-enhanced.js';
+import {
+  createEnhancedChromeMock,
+  createMockErrorHandler,
+  createTestDependencies,
+} from '../helpers/chrome-mock-enhanced.js';
 
 // Mock the global chrome object before importing background
 const globalChromeMock = createEnhancedChromeMock();
@@ -37,7 +41,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
     background = new ForgetfulMeBackground({
       chrome: chromeMock,
       errorHandler: errorHandlerMock,
-      autoInit: true
+      autoInit: true,
     });
   });
 
@@ -57,7 +61,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const manualBackground = new ForgetfulMeBackground({
         chrome: testSetup.chromeMock,
         errorHandler: testSetup.errorHandlerMock,
-        autoInit: false
+        autoInit: false,
       });
 
       expect(manualBackground.chrome).toBe(testSetup.chromeMock);
@@ -68,9 +72,13 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       manualBackground.initializeEventListeners();
 
       // Verify event listeners were set up
-      expect(testSetup.chromeMock.commands.onCommand.addListener).toHaveBeenCalled();
-      expect(testSetup.chromeMock.runtime.onMessage.addListener).toHaveBeenCalled();
-      
+      expect(
+        testSetup.chromeMock.commands.onCommand.addListener
+      ).toHaveBeenCalled();
+      expect(
+        testSetup.chromeMock.runtime.onMessage.addListener
+      ).toHaveBeenCalled();
+
       // Cleanup
       testSetup.cleanup();
     });
@@ -79,7 +87,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const testBackground = new ForgetfulMeBackground({
         chrome: null,
         errorHandler: createMockErrorHandler(),
-        autoInit: false
+        autoInit: false,
       });
 
       expect(testBackground.chrome).toBeNull();
@@ -99,17 +107,19 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       await chromeMock.storage.sync.set({
         auth_session: {
           user: { id: 'test-user', email: 'test@example.com' },
-          access_token: 'test-token'
-        }
+          access_token: 'test-token',
+        },
       });
 
       // Mock tabs.query to return a valid tab
-      chromeMock.tabs.query.mockResolvedValue([{
-        id: 1,
-        url: 'https://example.com/article',
-        title: 'Test Article',
-        active: true
-      }]);
+      chromeMock.tabs.query.mockResolvedValue([
+        {
+          id: 1,
+          url: 'https://example.com/article',
+          title: 'Test Article',
+          active: true,
+        },
+      ]);
 
       // Trigger the keyboard command
       chromeMock._triggerCommand('mark-as-read');
@@ -121,7 +131,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       expect(chromeMock.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'ForgetfulMe',
-          message: 'Click the extension icon to mark this page as read'
+          message: 'Click the extension icon to mark this page as read',
         })
       );
     });
@@ -140,7 +150,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       expect(chromeMock.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'ForgetfulMe',
-          message: 'Please sign in to use keyboard shortcuts'
+          message: 'Please sign in to use keyboard shortcuts',
         })
       );
     });
@@ -150,17 +160,19 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       await chromeMock.storage.sync.set({
         auth_session: {
           user: { id: 'test-user', email: 'test@example.com' },
-          access_token: 'test-token'
-        }
+          access_token: 'test-token',
+        },
       });
 
       // Mock tabs.query to return a browser page
-      chromeMock.tabs.query.mockResolvedValue([{
-        id: 1,
-        url: 'chrome://extensions/',
-        title: 'Extensions',
-        active: true
-      }]);
+      chromeMock.tabs.query.mockResolvedValue([
+        {
+          id: 1,
+          url: 'chrome://extensions/',
+          title: 'Extensions',
+          active: true,
+        },
+      ]);
 
       // Trigger the keyboard command
       chromeMock._triggerCommand('mark-as-read');
@@ -179,15 +191,15 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       await chromeMock.storage.sync.set({
         auth_session: {
           user: { id: 'test-user', email: 'test@example.com' },
-          access_token: 'test-token'
-        }
+          access_token: 'test-token',
+        },
       });
 
       const sendResponse = vi.fn();
       const message = {
         type: 'MARK_AS_READ',
         url: 'https://example.com/test',
-        title: 'Test Page'
+        title: 'Test Page',
       };
 
       // Trigger message handling
@@ -199,14 +211,14 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send success response
       expect(sendResponse).toHaveBeenCalledWith({
         success: true,
-        message: 'Page marked as read successfully'
+        message: 'Page marked as read successfully',
       });
 
       // Should show success notification
       expect(chromeMock.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'ForgetfulMe',
-          message: expect.stringContaining('marked as read')
+          message: expect.stringContaining('marked as read'),
         })
       );
     });
@@ -216,7 +228,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const message = {
         type: 'MARK_AS_READ',
         url: 'invalid-url',
-        title: 'Test Page'
+        title: 'Test Page',
       };
 
       // Trigger message handling
@@ -228,7 +240,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send error response for invalid URL
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: 'Invalid URL format'
+        error: 'Invalid URL format',
       });
     });
 
@@ -236,7 +248,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const sendResponse = vi.fn();
       const message = {
         type: 'MARK_AS_READ',
-        title: 'Test Page'
+        title: 'Test Page',
         // Missing URL
       };
 
@@ -249,7 +261,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send error response for missing URL
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: 'Invalid URL parameter required for MARK_AS_READ'
+        error: 'Invalid URL parameter required for MARK_AS_READ',
       });
     });
 
@@ -257,7 +269,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Set up authenticated state
       const authState = {
         user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token'
+        access_token: 'test-token',
       };
       await chromeMock.storage.sync.set({ auth_session: authState });
 
@@ -273,7 +285,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should return auth state
       expect(sendResponse).toHaveBeenCalledWith({
         success: true,
-        authState: authState
+        authState: authState,
       });
     });
 
@@ -290,7 +302,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send error response
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: 'Invalid message format'
+        error: 'Invalid message format',
       });
     });
 
@@ -307,7 +319,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send error response
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: 'Missing or invalid message type'
+        error: 'Missing or invalid message type',
       });
     });
   });
@@ -316,7 +328,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
     test('should initialize auth state from storage', async () => {
       const authState = {
         user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token'
+        access_token: 'test-token',
       };
 
       // Set storage data before initialization
@@ -327,14 +339,14 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const newBackground = new ForgetfulMeBackground({
         chrome: testSetup.chromeMock,
         errorHandler: testSetup.errorHandlerMock,
-        autoInit: true
+        autoInit: true,
       });
 
       // Wait for initialization
       await new Promise(resolve => setTimeout(resolve, 10));
 
       expect(newBackground.authState).toEqual(authState);
-      
+
       // Cleanup
       testSetup.cleanup();
     });
@@ -342,7 +354,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
     test('should handle auth state changes from storage events', async () => {
       const newAuthState = {
         user: { id: 'new-user', email: 'new@example.com' },
-        access_token: 'new-token'
+        access_token: 'new-token',
       };
 
       // Trigger storage change
@@ -358,21 +370,23 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       expect(chromeMock.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'ForgetfulMe',
-          message: 'Successfully signed in!'
+          message: 'Successfully signed in!',
         })
       );
 
       // Should update badge
-      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
-      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ 
-        color: '#4CAF50' 
+      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({
+        text: '✓',
+      });
+      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#4CAF50',
       });
     });
 
     test('should handle auth state being cleared', async () => {
       // First set an auth state
       await chromeMock.storage.sync.set({
-        auth_session: { user: { id: 'test' }, access_token: 'token' }
+        auth_session: { user: { id: 'test' }, access_token: 'token' },
       });
 
       // Wait for processing
@@ -396,18 +410,22 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
     test('should update icon for saved URL', () => {
       background.updateIconForUrl('https://example.com', true);
 
-      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
-      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ 
-        color: '#4CAF50' 
+      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({
+        text: '✓',
+      });
+      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#4CAF50',
       });
     });
 
     test('should update icon for unsaved URL', () => {
       background.updateIconForUrl('https://example.com', false);
 
-      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({ text: '+' });
-      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({ 
-        color: '#2196F3' 
+      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({
+        text: '+',
+      });
+      expect(chromeMock.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
+        color: '#2196F3',
       });
     });
 
@@ -442,17 +460,17 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       expect(chromeMock.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: [
           'read',
-          'good-reference', 
+          'good-reference',
           'low-value',
-          'revisit-later'
-        ]
+          'revisit-later',
+        ],
       });
     });
 
     test('should not reinitialize existing settings', async () => {
       // Set existing settings
       await chromeMock.storage.sync.set({
-        customStatusTypes: ['existing-status']
+        customStatusTypes: ['existing-status'],
       });
 
       // Reset call count
@@ -484,15 +502,17 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
     test('should use injected error handler', async () => {
       // Create a new chrome mock that will cause an error
       const errorChromeMock = createEnhancedChromeMock();
-      errorChromeMock.storage.sync.get.mockRejectedValue(new Error('Storage error'));
-      
+      errorChromeMock.storage.sync.get.mockRejectedValue(
+        new Error('Storage error')
+      );
+
       const testErrorHandler = createMockErrorHandler();
 
       // Create new background to trigger initialization error
       new ForgetfulMeBackground({
         chrome: errorChromeMock,
         errorHandler: testErrorHandler,
-        autoInit: true
+        autoInit: true,
       });
 
       // Wait for error handling
@@ -511,7 +531,9 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       const message = { type: 'MARK_AS_READ', url: 'https://example.com' };
 
       // Make storage.sync.get throw an error
-      chromeMock.storage.sync.get.mockRejectedValue(new Error('Storage unavailable'));
+      chromeMock.storage.sync.get.mockRejectedValue(
+        new Error('Storage unavailable')
+      );
 
       // Trigger message
       chromeMock._triggerMessage(message, {}, sendResponse);
@@ -528,7 +550,7 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       // Should send error response
       expect(sendResponse).toHaveBeenCalledWith({
         success: false,
-        error: expect.stringContaining('error occurred')
+        error: expect.stringContaining('error occurred'),
       });
     });
   });
@@ -536,11 +558,11 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
   describe('Enhanced URL Status Caching', () => {
     test('should cache URL status results', () => {
       const url = 'https://example.com/test';
-      
+
       // Simulate URL status check result
       background.urlStatusCache.set(url, {
         isSaved: true,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       expect(background.urlStatusCache.has(url)).toBe(true);
@@ -549,19 +571,23 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
 
     test('should clear URL cache when bookmark is saved', async () => {
       const url = 'https://example.com/test';
-      
+
       // Add to cache
       background.urlStatusCache.set(url, {
         isSaved: false,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       // Handle bookmark saved message
       const sendResponse = vi.fn();
-      chromeMock._triggerMessage({
-        type: 'BOOKMARK_SAVED',
-        data: { url }
-      }, {}, sendResponse);
+      chromeMock._triggerMessage(
+        {
+          type: 'BOOKMARK_SAVED',
+          data: { url },
+        },
+        {},
+        sendResponse
+      );
 
       // Wait for processing
       await new Promise(resolve => setTimeout(resolve, 10));
@@ -570,22 +596,24 @@ describe('ForgetfulMe Background Service - Enhanced with Dependency Injection', 
       expect(background.urlStatusCache.has(url)).toBe(false);
 
       // Should update icon to saved state
-      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({ text: '✓' });
+      expect(chromeMock.action.setBadgeText).toHaveBeenCalledWith({
+        text: '✓',
+      });
     });
 
     test('should handle cache timeout correctly', () => {
       const url = 'https://example.com/test';
-      
+
       // Add expired cache entry
       background.urlStatusCache.set(url, {
         isSaved: true,
-        timestamp: Date.now() - (10 * 60 * 1000) // 10 minutes ago
+        timestamp: Date.now() - 10 * 60 * 1000, // 10 minutes ago
       });
 
       // Check if cache is considered expired (5 minute timeout)
       const cached = background.urlStatusCache.get(url);
       const isExpired = Date.now() - cached.timestamp > background.cacheTimeout;
-      
+
       expect(isExpired).toBe(true);
     });
   });

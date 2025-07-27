@@ -32,12 +32,12 @@ export default defineConfig({
 
     // Setup files
     setupFiles: ['./vitest.setup.js'],
-    
+
     // Ensure JSDOM environment is properly configured
     environmentOptions: {
       jsdom: {
-        resources: 'usable'
-      }
+        resources: 'usable',
+      },
     },
 
     // Coverage configuration

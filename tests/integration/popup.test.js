@@ -17,9 +17,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
     await extensionHelper.waitForExtensionReady();
   });
 
-  test('should display interface when loaded', async ({
-    page,
-  }) => {
+  test('should display interface when loaded', async ({ page }) => {
     // Test that the interface loads - could be setup or main interface
     const appContainer = await extensionHelper.isElementVisible('#app');
     expect(appContainer).toBeTruthy();
@@ -36,9 +34,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
     expect(hasButtons).toBeGreaterThan(0);
   });
 
-  test('should have settings/navigation functionality', async ({
-    page,
-  }) => {
+  test('should have settings/navigation functionality', async ({ page }) => {
     // Mock the chrome.runtime.openOptionsPage function
     await page.addInitScript(() => {
       if (window.chrome && window.chrome.runtime) {
@@ -53,18 +49,20 @@ test.describe('ForgetfulMe Popup Tests', () => {
     const settingsButton = await page
       .locator('button')
       .filter({ hasText: /settings|⚙️/i });
-    
-    if (await settingsButton.count() > 0) {
+
+    if ((await settingsButton.count()) > 0) {
       // Settings button exists - click it
       await settingsButton.click();
       await page.waitForTimeout(1000);
 
       // Check that some navigation action occurred
       const hasNavigated = await page.evaluate(() => {
-        return window.optionsPageOpened || 
-               document.querySelector('.setup-container') ||
-               document.querySelector('.auth-form') ||
-               window.location.href.includes('options');
+        return (
+          window.optionsPageOpened ||
+          document.querySelector('.setup-container') ||
+          document.querySelector('.auth-form') ||
+          window.location.href.includes('options')
+        );
       });
       expect(hasNavigated).toBeTruthy();
     } else {
@@ -78,7 +76,13 @@ test.describe('ForgetfulMe Popup Tests', () => {
     // Check for any content sections
     const hasSections = await page.evaluate(() => {
       // Look for various possible section types
-      const selectors = ['.section', 'section', 'article', '.card', '.container'];
+      const selectors = [
+        '.section',
+        'section',
+        'article',
+        '.card',
+        '.container',
+      ];
       return selectors.some(selector => {
         const elements = document.querySelectorAll(selector);
         return elements.length > 0;
@@ -89,17 +93,19 @@ test.describe('ForgetfulMe Popup Tests', () => {
     // Check for meaningful text content (either instructions or interface elements)
     const hasInstructions = await page.evaluate(() => {
       const textContent = document.body.textContent || '';
-      return textContent.includes('extension') || 
-             textContent.includes('bookmark') || 
-             textContent.includes('mark') || 
-             textContent.includes('read') ||
-             textContent.includes('ForgetfulMe');
+      return (
+        textContent.includes('extension') ||
+        textContent.includes('bookmark') ||
+        textContent.includes('mark') ||
+        textContent.includes('read') ||
+        textContent.includes('ForgetfulMe')
+      );
     });
     expect(hasInstructions).toBeTruthy();
 
     // If there are lists, they should contain relevant content
     const lists = await page.locator('ul, ol');
-    if (await lists.count() > 0) {
+    if ((await lists.count()) > 0) {
       const listContent = await lists.first().textContent();
       expect(listContent.length).toBeGreaterThan(5); // Should have some meaningful content
     }
@@ -113,8 +119,14 @@ test.describe('ForgetfulMe Popup Tests', () => {
     // Check for proper layout elements (various container types)
     const hasLayoutElements = await page.evaluate(() => {
       const layoutSelectors = [
-        '.container', '.ui-container', 'main', '[role="main"]',
-        'header', 'section', 'article', '.card'
+        '.container',
+        '.ui-container',
+        'main',
+        '[role="main"]',
+        'header',
+        'section',
+        'article',
+        '.card',
       ];
       return layoutSelectors.some(selector => {
         return document.querySelectorAll(selector).length > 0;
@@ -125,7 +137,9 @@ test.describe('ForgetfulMe Popup Tests', () => {
     // Check that interactive elements exist
     const interactiveElements = await page.evaluate(() => {
       const buttons = document.querySelectorAll('button').length;
-      const inputs = document.querySelectorAll('input, select, textarea').length;
+      const inputs = document.querySelectorAll(
+        'input, select, textarea'
+      ).length;
       const links = document.querySelectorAll('a').length;
       return buttons + inputs + links;
     });

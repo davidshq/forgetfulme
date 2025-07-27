@@ -114,9 +114,10 @@ class ForgetfulMeBackground {
    */
   constructor(dependencies = {}) {
     // Dependency injection for testability
-    this.chrome = dependencies.chrome || (typeof chrome !== 'undefined' ? chrome : null);
+    this.chrome =
+      dependencies.chrome || (typeof chrome !== 'undefined' ? chrome : null);
     this.errorHandler = dependencies.errorHandler || BackgroundErrorHandler;
-    
+
     /** @type {Object|null} Current authentication state */
     this.authState = null;
     /** @type {Object} Cache for URL status to avoid repeated database calls */
@@ -179,10 +180,12 @@ class ForgetfulMeBackground {
     });
 
     // Handle messages from popup and other contexts
-    this.chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      this.handleMessage(message, sender, sendResponse);
-      return true; // Keep message channel open for async responses
-    });
+    this.chrome.runtime.onMessage.addListener(
+      (message, sender, sendResponse) => {
+        this.handleMessage(message, sender, sendResponse);
+        return true; // Keep message channel open for async responses
+      }
+    );
 
     // Handle storage changes (auth state changes)
     this.chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -641,10 +644,7 @@ class ForgetfulMeBackground {
         // Default settings initialized successfully
       }
     } catch (error) {
-      this.errorHandler.handle(
-        error,
-        'background.initializeDefaultSettings'
-      );
+      this.errorHandler.handle(error, 'background.initializeDefaultSettings');
     }
   }
 
