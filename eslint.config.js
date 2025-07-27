@@ -62,6 +62,7 @@ export default [
         // Browser APIs
         URL: 'readonly',
         Blob: 'readonly',
+        FormData: 'readonly',
         requestAnimationFrame: 'readonly',
         location: 'readonly',
         // Supabase globals

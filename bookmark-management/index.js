@@ -2,7 +2,6 @@
 // Wires together UI, state, and event modules
 
 import * as UI from './ui/render.js';
-import * as EditUI from './ui/edit.js';
 import * as State from './state/init.js';
 import * as Auth from './state/auth.js';
 import * as Handlers from './events/handlers.js';
@@ -36,22 +35,23 @@ function showMainInterface() {
         appContainer,
         UIMessages,
         ErrorHandler,
-        displayBookmarks: (params) => UI.displayBookmarks({
-          ...params,
-          updateBulkActions: Handlers.updateBulkActions,
-          onEdit: bookmark => showEditInterface(bookmark),
-          onDelete: (bookmarkId, bookmarkTitle) =>
-            Handlers.deleteBookmark({
-              supabaseService,
-              appContainer,
-              UIMessages,
-              ErrorHandler,
-              bookmarkId,
-              bookmarkTitle,
-              loadAllBookmarks,
-            }),
-          onOpen: url => Handlers.openBookmark({ url }),
-        }),
+        displayBookmarks: params =>
+          UI.displayBookmarks({
+            ...params,
+            updateBulkActions: Handlers.updateBulkActions,
+            onEdit: bookmark => showEditInterface(bookmark),
+            onDelete: (bookmarkId, bookmarkTitle) =>
+              Handlers.deleteBookmark({
+                supabaseService,
+                appContainer,
+                UIMessages,
+                ErrorHandler,
+                bookmarkId,
+                bookmarkTitle,
+                loadAllBookmarks,
+              }),
+            onOpen: url => Handlers.openBookmark({ url }),
+          }),
       });
     },
     onSelectAll: () =>
@@ -119,28 +119,115 @@ function showEditInterface(existingBookmark) {
     title: existingBookmark.title,
     description: existingBookmark.description,
     read_status: existingBookmark.status, // UI format uses 'status' instead of 'read_status'
-    tags: existingBookmark.tags,
+    tags: BookmarkTransformer.normalizeTags(existingBookmark.tags),
     created_at: existingBookmark.created_at,
   };
-  
-  EditUI.showEditInterface({
-    existingBookmark: dbBookmark,
-    UIComponents,
-    appContainer,
-    onBack: () => showMainInterface(),
-    onUpdate: bookmarkId =>
-      Handlers.updateBookmark({
-        UIComponents,
-        supabaseService,
-        appContainer,
-        UIMessages,
-        ErrorHandler,
-        bookmarkId,
-        showMainInterface,
-      }),
-    formatStatus,
-    formatTime,
+
+  // Create the edit form content
+  const editFormContent = document.createElement('div');
+  editFormContent.className = 'edit-form-content';
+
+  // Bookmark info section
+  const infoSection = UIComponents.createSection(
+    'Bookmark Info',
+    'info-section'
+  );
+  infoSection.innerHTML = `
+    <div class="bookmark-info">
+      <p><strong>Title:</strong> ${dbBookmark.title}</p>
+      <p><strong>URL:</strong> <a href="${dbBookmark.url}" target="_blank">${dbBookmark.url}</a></p>
+      <p><strong>Current Status:</strong> ${formatStatus(dbBookmark.read_status)}</p>
+      <p><strong>Current Tags:</strong> ${dbBookmark.tags ? dbBookmark.tags.join(', ') : 'None'}</p>
+      <p><strong>Created:</strong> ${formatTime(new Date(dbBookmark.created_at).getTime())}</p>
+    </div>
+  `;
+  editFormContent.appendChild(infoSection);
+
+  // Status options
+  const statusOptions = [
+    { value: 'read', text: 'Read' },
+    { value: 'good-reference', text: 'Good Reference' },
+    { value: 'low-value', text: 'Low Value' },
+    { value: 'revisit-later', text: 'Revisit Later' },
+  ];
+  statusOptions.forEach(option => {
+    if (option.value === dbBookmark.read_status) {
+      option.selected = true;
+    }
   });
+
+  // Create form
+  const editForm = UIComponents.createForm(
+    'editBookmarkForm',
+    async e => {
+      e.preventDefault();
+
+      // Extract form data directly from the modal form
+      const formData = new FormData(e.target);
+      const status = formData.get('edit-read-status') || 'read';
+      const tags = formData.get('edit-tags') || '';
+
+      const updateData = {
+        read_status: status,
+        tags: tags.trim()
+          ? tags
+              .trim()
+              .split(',')
+              .map(tag => tag.trim())
+              .filter(tag => tag.length > 0)
+          : [],
+        updated_at: new Date().toISOString(),
+      };
+
+      try {
+        UIComponents.closeModal(modal);
+        await supabaseService.updateBookmark(dbBookmark.id, updateData);
+        UIMessages.success('Bookmark updated successfully!', appContainer);
+        await loadAllBookmarks(); // Refresh the list after update
+      } catch (error) {
+        const errorResult = ErrorHandler.handle(
+          error,
+          'bookmark-management.updateBookmark'
+        );
+        UIMessages.error(errorResult.userMessage, appContainer);
+      }
+    },
+    [
+      {
+        type: 'select',
+        id: 'edit-read-status',
+        label: 'Update Status:',
+        options: {
+          options: statusOptions,
+        },
+      },
+      {
+        type: 'text',
+        id: 'edit-tags',
+        label: 'Update Tags (comma separated):',
+        options: {
+          placeholder: 'research, tutorial, important',
+          value: dbBookmark.tags ? dbBookmark.tags.join(', ') : '',
+        },
+      },
+    ],
+    {
+      submitText: 'Update Bookmark',
+    }
+  );
+  editFormContent.appendChild(editForm);
+
+  // Create modal with edit form
+  const modal = UIComponents.createModal({
+    title: 'Edit Bookmark',
+    content: editFormContent,
+    className: 'edit-bookmark-modal',
+    showClose: true,
+  });
+
+  // Add modal to DOM and show it
+  document.body.appendChild(modal);
+  UIComponents.showModal(modal);
 }
 
 async function loadAllBookmarks() {

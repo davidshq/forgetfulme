@@ -22,6 +22,36 @@
   margin: 0;
 }
 
+/* Modal specific styles */
+.edit-bookmark-modal .modal-content {
+  min-width: 600px;
+  max-width: 800px;
+}
+
+.edit-bookmark-modal .bookmark-info {
+  background: var(--pico-card-sectioning-background-color);
+  padding: 1rem;
+  border-radius: var(--pico-border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.edit-bookmark-modal .bookmark-info p {
+  margin: 0.5rem 0;
+}
+
+.edit-bookmark-modal .bookmark-info a {
+  color: var(--pico-primary);
+  text-decoration: none;
+}
+
+.edit-bookmark-modal .bookmark-info a:hover {
+  text-decoration: underline;
+}
+
+.edit-form-content .info-section {
+  margin-bottom: 1.5rem;
+}
+
 /* Breadcrumb styling */
 .page-breadcrumb {
   background: var(--pico-card-sectioning-background-color);
