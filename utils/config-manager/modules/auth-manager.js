@@ -5,6 +5,7 @@
  */
 
 import ErrorHandler from '../../error-handler.js';
+import ChromeStorageAdapter from '../../chrome-storage-adapter.js';
 
 /**
  * Auth Manager for Authentication Session Management
@@ -16,9 +17,17 @@ class AuthManager {
    * Initialize the auth manager
    * @constructor
    * @param {Object} configManager - Reference to the main config manager
+   * @param {Object} dependencies - Dependency injection object
+   * @param {ChromeStorageAdapter} dependencies.storageAdapter - Storage adapter instance
    */
-  constructor(configManager) {
+  constructor(configManager, dependencies = {}) {
     this.configManager = configManager;
+    /** @type {ChromeStorageAdapter} Storage adapter for Chrome storage operations */
+    this.storageAdapter =
+      dependencies.storageAdapter || new ChromeStorageAdapter(dependencies);
+    /** @type {Object} Chrome APIs object */
+    this.chrome =
+      dependencies.chrome || (typeof chrome !== 'undefined' ? chrome : null);
   }
 
   /**
@@ -29,23 +38,23 @@ class AuthManager {
   async setAuthSession(session) {
     this.configManager.config.auth = session;
 
-    // Save to storage
-    await chrome.storage.sync.set({
-      auth_session: session,
-    });
+    // Save to storage using adapter
+    await this.storageAdapter.setItem('auth_session', session);
 
     this.configManager.events.notifyListeners('authSessionChanged', session);
 
     // Notify all contexts via runtime message
     try {
-      chrome.runtime
-        .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
-          session: session,
-        })
-        .catch(error => {
-          ErrorHandler.handle(error, 'auth-manager.setAuthSession.runtime');
-        });
+      if (this.chrome && this.chrome.runtime) {
+        this.chrome.runtime
+          .sendMessage({
+            type: 'AUTH_STATE_CHANGED',
+            session: session,
+          })
+          .catch(error => {
+            ErrorHandler.handle(error, 'auth-manager.setAuthSession.runtime');
+          });
+      }
     } catch (error) {
       ErrorHandler.handle(error, 'auth-manager.setAuthSession');
     }
@@ -58,21 +67,23 @@ class AuthManager {
   async clearAuthSession() {
     this.configManager.config.auth = null;
 
-    // Remove from storage
-    await chrome.storage.sync.remove(['auth_session']);
+    // Remove from storage using adapter
+    await this.storageAdapter.removeItem('auth_session');
 
     this.configManager.events.notifyListeners('authSessionChanged', null);
 
     // Notify all contexts via runtime message
     try {
-      chrome.runtime
-        .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
-          session: null,
-        })
-        .catch(error => {
-          ErrorHandler.handle(error, 'auth-manager.clearAuthSession.runtime');
-        });
+      if (this.chrome && this.chrome.runtime) {
+        this.chrome.runtime
+          .sendMessage({
+            type: 'AUTH_STATE_CHANGED',
+            session: null,
+          })
+          .catch(error => {
+            ErrorHandler.handle(error, 'auth-manager.clearAuthSession.runtime');
+          });
+      }
     } catch (error) {
       ErrorHandler.handle(error, 'auth-manager.clearAuthSession');
     }

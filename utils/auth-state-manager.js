@@ -9,6 +9,7 @@
  */
 
 import ErrorHandler from './error-handler.js';
+import ChromeStorageAdapter from './chrome-storage-adapter.js';
 
 /**
  * Authentication State Manager for ForgetfulMe extension
@@ -27,15 +28,24 @@ class AuthStateManager {
   /**
    * Initialize the authentication state manager
    * @constructor
+   * @param {Object} dependencies - Dependency injection object
+   * @param {ChromeStorageAdapter} dependencies.storageAdapter - Storage adapter instance
+   * @param {Object} dependencies.chrome - Chrome APIs object (for testing)
    * @description Sets up the auth state manager with initial state and listener management
    */
-  constructor() {
+  constructor(dependencies = {}) {
     /** @type {Object|null} Current authentication session */
     this.authState = null;
     /** @type {Set} Set of event listeners */
     this.listeners = new Set();
     /** @type {boolean} Whether the manager has been initialized */
     this.initialized = false;
+    /** @type {ChromeStorageAdapter} Storage adapter for Chrome storage operations */
+    this.storageAdapter =
+      dependencies.storageAdapter || new ChromeStorageAdapter(dependencies);
+    /** @type {Object} Chrome APIs object */
+    this.chrome =
+      dependencies.chrome || (typeof chrome !== 'undefined' ? chrome : null);
   }
 
   /**
@@ -47,16 +57,17 @@ class AuthStateManager {
     if (this.initialized) return;
 
     try {
-      // Load current auth state from storage
-      const result = await chrome.storage.sync.get(['auth_session']);
-      this.authState = result.auth_session || null;
+      // Load current auth state from storage using adapter
+      this.authState = await this.storageAdapter.getItem('auth_session');
 
-      // Set up storage change listener
-      chrome.storage.onChanged.addListener((changes, namespace) => {
-        if (namespace === 'sync' && changes.auth_session) {
-          this.handleAuthStateChange(changes.auth_session.newValue);
+      // Set up storage change listener using adapter
+      this.storageChangeCleanup = this.storageAdapter.addChangeListener(
+        (changes, namespace) => {
+          if (changes.auth_session) {
+            this.handleAuthStateChange(changes.auth_session.newValue);
+          }
         }
-      });
+      );
 
       this.initialized = true;
       // AuthStateManager initialized successfully
@@ -93,8 +104,8 @@ class AuthStateManager {
     this.authState = session;
 
     try {
-      // Save to storage (this will trigger storage.onChanged in other contexts)
-      await chrome.storage.sync.set({ auth_session: session });
+      // Save to storage using adapter (this will trigger storage.onChanged in other contexts)
+      await this.storageAdapter.setItem('auth_session', session);
     } catch (error) {
       // Handle storage errors gracefully
       ErrorHandler.handle(error, 'auth-state-manager.setAuthState.storage');
@@ -129,8 +140,8 @@ class AuthStateManager {
 
     this.authState = null;
 
-    // Remove from storage
-    await chrome.storage.sync.remove(['auth_session']);
+    // Remove from storage using adapter
+    await this.storageAdapter.removeItem('auth_session');
 
     // Notify all contexts
     this.notifyAllContexts(null);
@@ -173,17 +184,19 @@ class AuthStateManager {
    */
   notifyAllContexts(session) {
     try {
-      chrome.runtime
-        .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
-          session: session,
-        })
-        .catch(error => {
-          ErrorHandler.handle(
-            error,
-            'auth-state-manager.notifyAllContexts.runtime'
-          );
-        });
+      if (this.chrome && this.chrome.runtime) {
+        this.chrome.runtime
+          .sendMessage({
+            type: 'AUTH_STATE_CHANGED',
+            session: session,
+          })
+          .catch(error => {
+            ErrorHandler.handle(
+              error,
+              'auth-state-manager.notifyAllContexts.runtime'
+            );
+          });
+      }
     } catch (error) {
       ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts');
     }
@@ -254,7 +267,21 @@ class AuthStateManager {
       userId: this.authState?.user?.id || null,
       email: this.authState?.user?.email || null,
       initialized: this.initialized,
+      storageArea: this.storageAdapter.getStorageArea(),
     };
+  }
+
+  /**
+   * Cleanup resources
+   * @description Removes storage listeners and cleans up resources
+   */
+  cleanup() {
+    if (this.storageChangeCleanup) {
+      this.storageChangeCleanup();
+      this.storageChangeCleanup = null;
+    }
+    this.listeners.clear();
+    this.initialized = false;
   }
 }
 
