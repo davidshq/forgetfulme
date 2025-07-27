@@ -1,7 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  createMockSupabaseConfig,
-} from '../helpers/test-utils.js';
+import { createMockSupabaseConfig } from '../helpers/test-utils.js';
 
 // Only mock UI messages for external interactions
 vi.mock('../../utils/ui-messages.js', () => ({
@@ -54,6 +52,28 @@ describe('ConfigUI', () => {
 
   describe('showConfigForm', () => {
     it('should create and display configuration form', async () => {
+      // Mock UIComponents methods to return actual DOM elements
+      const mockContainerEl = document.createElement('div');
+      mockContainerEl.className = 'ui-container';
+
+      const mockForm = document.createElement('form');
+      const urlInput = document.createElement('input');
+      urlInput.id = 'supabaseUrl';
+      const keyInput = document.createElement('input');
+      keyInput.id = 'supabaseAnonKey';
+      const submitButton = document.createElement('button');
+      submitButton.type = 'submit';
+
+      mockForm.appendChild(urlInput);
+      mockForm.appendChild(keyInput);
+      mockForm.appendChild(submitButton);
+
+      UIComponents.createContainer = vi.fn().mockReturnValue(mockContainerEl);
+      UIComponents.createForm = vi.fn().mockReturnValue(mockForm);
+      UIComponents.createSection = vi
+        .fn()
+        .mockReturnValue(document.createElement('div'));
+
       // Call the method
       configUI.showConfigForm(container);
 
