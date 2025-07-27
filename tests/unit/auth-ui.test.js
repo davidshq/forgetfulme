@@ -10,77 +10,7 @@ Object.defineProperty(window, 'location', {
   writable: true,
 });
 
-// Mock dependencies before importing AuthUI
-vi.mock('../../utils/ui-components.js', () => ({
-  default: {
-    createContainer: vi.fn((title, subtitle, className) => {
-      const container = document.createElement('div');
-      container.className = `ui-container ${className}`.trim();
-      container.innerHTML = `
-        <div class="ui-container-header">
-          <h2>${title}</h2>
-          ${subtitle ? `<p>${subtitle}</p>` : ''}
-        </div>
-      `;
-      return container;
-    }),
-    createForm: vi.fn((id, onSubmit, fields, options) => {
-      const form = document.createElement('form');
-      form.id = id;
-      form.className = options.className || '';
-
-      fields.forEach(field => {
-        const fieldElement = document.createElement('input');
-        fieldElement.id = field.id;
-        fieldElement.type = field.type;
-        fieldElement.required = field.options?.required || false;
-        fieldElement.placeholder = field.options?.placeholder || '';
-        form.appendChild(fieldElement);
-      });
-
-      const submitButton = document.createElement('button');
-      submitButton.type = 'submit';
-      submitButton.textContent = options.submitText || 'Submit';
-      form.appendChild(submitButton);
-
-      return form;
-    }),
-    createButton: vi.fn((text, onClick, className) => {
-      const button = document.createElement('button');
-      button.textContent = text;
-      button.className = className;
-      if (onClick) {
-        button.addEventListener('click', onClick);
-      }
-      return button;
-    }),
-    DOM: {
-      getElement: vi.fn((id, container) => {
-        return container?.getElementById?.(id) || document.getElementById(id);
-      }),
-      querySelector: vi.fn((selector, container) => {
-        return (
-          container?.querySelector?.(selector) ||
-          document.querySelector(selector)
-        );
-      }),
-      getValue: vi.fn((id, container) => {
-        const element =
-          container?.getElementById?.(id) || document.getElementById(id);
-        return element?.value || '';
-      }),
-      setValue: vi.fn((id, value, container) => {
-        const element =
-          container?.getElementById?.(id) || document.getElementById(id);
-        if (element) {
-          element.value = value;
-        }
-      }),
-      ready: vi.fn(() => Promise.resolve()),
-    },
-  },
-}));
-
+// Only mock external UI message calls - let other utilities use real implementations
 vi.mock('../../utils/ui-messages.js', () => ({
   default: {
     success: vi.fn(),
@@ -92,31 +22,7 @@ vi.mock('../../utils/ui-messages.js', () => ({
   },
 }));
 
-vi.mock('../../utils/error-handler.js', () => ({
-  default: {
-    handle: vi.fn((error, context) => ({
-      shouldShowToUser: true,
-      userMessage: error.message || 'An error occurred',
-      technicalMessage: error.message,
-      context: context,
-    })),
-    createError: vi.fn((message, type, context) => ({
-      message,
-      type,
-      context,
-      name: 'Error',
-    })),
-    ERROR_TYPES: {
-      NETWORK: 'network',
-      AUTH: 'auth',
-      VALIDATION: 'validation',
-      STORAGE: 'storage',
-      UNKNOWN: 'unknown',
-    },
-  },
-}));
-
-// Import the mocked modules
+// Import the actual modules (not mocked)
 import UIComponents from '../../utils/ui-components.js';
 import UIMessages from '../../utils/ui-messages.js';
 import ErrorHandler from '../../utils/error-handler.js';
@@ -180,17 +86,27 @@ describe('AuthUI', () => {
 
   describe('handleLogin', () => {
     beforeEach(() => {
-      // Mock the UIComponents.DOM.getValue to return test values
-      UIComponents.DOM.getValue.mockImplementation((id, _container) => {
-        if (id === 'loginEmail') return 'test@example.com';
-        if (id === 'loginPassword') return 'password123';
-        return '';
-      });
+      // Clear container
+      mockContainer.innerHTML = '';
+      
+      // Set up real DOM elements with test values  
+      const emailInput = document.createElement('input');
+      emailInput.id = 'loginEmail';
+      emailInput.value = 'test@example.com';
+      mockContainer.appendChild(emailInput);
+      
+      const passwordInput = document.createElement('input');
+      passwordInput.id = 'loginPassword';  
+      passwordInput.value = 'password123';
+      mockContainer.appendChild(passwordInput);
     });
 
     it('should validate required fields', async () => {
-      // Mock empty values
-      UIComponents.DOM.getValue.mockReturnValue('');
+      // Clear the input values
+      const emailInput = mockContainer.querySelector('#loginEmail');
+      const passwordInput = mockContainer.querySelector('#loginPassword');
+      if (emailInput) emailInput.value = '';
+      if (passwordInput) passwordInput.value = '';
 
       await authUI.handleLogin(mockContainer);
 
@@ -263,18 +179,31 @@ describe('AuthUI', () => {
 
   describe('handleSignup', () => {
     beforeEach(() => {
-      // Mock the UIComponents.DOM.getValue to return test values
-      UIComponents.DOM.getValue.mockImplementation((id, _container) => {
-        if (id === 'signupEmail') return 'test@example.com';
-        if (id === 'signupPassword') return 'password123';
-        if (id === 'confirmPassword') return 'password123';
-        return '';
-      });
+      // Clear container  
+      mockContainer.innerHTML = '';
+      
+      // Set up real DOM elements with test values
+      const emailInput = document.createElement('input');
+      emailInput.id = 'signupEmail';
+      emailInput.value = 'test@example.com';
+      mockContainer.appendChild(emailInput);
+      
+      const passwordInput = document.createElement('input');
+      passwordInput.id = 'signupPassword';
+      passwordInput.value = 'password123';
+      mockContainer.appendChild(passwordInput);
+      
+      const confirmInput = document.createElement('input');
+      confirmInput.id = 'confirmPassword';
+      confirmInput.value = 'password123';
+      mockContainer.appendChild(confirmInput);
     });
 
     it('should validate required fields', async () => {
-      // Mock empty values
-      UIComponents.DOM.getValue.mockReturnValue('');
+      // Clear the input values
+      mockContainer.querySelectorAll('input').forEach(input => {
+        input.value = '';
+      });
 
       await authUI.handleSignup(mockContainer);
 
@@ -285,13 +214,9 @@ describe('AuthUI', () => {
     });
 
     it('should validate password confirmation', async () => {
-      // Mock mismatched passwords
-      UIComponents.DOM.getValue.mockImplementation((id, _container) => {
-        if (id === 'signupEmail') return 'test@example.com';
-        if (id === 'signupPassword') return 'password123';
-        if (id === 'confirmPassword') return 'different';
-        return '';
-      });
+      // Set mismatched passwords
+      const confirmInput = mockContainer.querySelector('#confirmPassword');
+      if (confirmInput) confirmInput.value = 'different';
 
       await authUI.handleSignup(mockContainer);
 
@@ -302,13 +227,11 @@ describe('AuthUI', () => {
     });
 
     it('should validate password length', async () => {
-      // Mock short password
-      UIComponents.DOM.getValue.mockImplementation((id, _container) => {
-        if (id === 'signupEmail') return 'test@example.com';
-        if (id === 'signupPassword') return '123';
-        if (id === 'confirmPassword') return '123';
-        return '';
-      });
+      // Set short passwords
+      const passwordInput = mockContainer.querySelector('#signupPassword');
+      const confirmInput = mockContainer.querySelector('#confirmPassword');
+      if (passwordInput) passwordInput.value = '123';
+      if (confirmInput) confirmInput.value = '123';
 
       await authUI.handleSignup(mockContainer);
 

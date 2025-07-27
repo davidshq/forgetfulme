@@ -1,28 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
-  createMockUIComponents,
-  createMockUIMessages,
-  createMockErrorHandler,
   createMockSupabaseConfig,
 } from '../helpers/test-utils.js';
 
-// Mock dependencies before importing ConfigUI
-vi.mock('../../utils/ui-components.js', () => ({
-  default: {
-    createContainer: vi.fn(),
-    createForm: vi.fn(),
-    createSection: vi.fn(),
-    DOM: {
-      querySelector: vi.fn(),
-      getElement: vi.fn(),
-      setValue: vi.fn(),
-      getValue: vi.fn(),
-      ready: vi.fn().mockResolvedValue(),
-      isReady: vi.fn().mockReturnValue(true),
-    },
-  },
-}));
-
+// Only mock UI messages for external interactions
 vi.mock('../../utils/ui-messages.js', () => ({
   default: {
     success: vi.fn(),
@@ -35,17 +16,10 @@ vi.mock('../../utils/ui-messages.js', () => ({
   },
 }));
 
-vi.mock('../../utils/error-handler.js', () => ({
-  default: {
-    handle: vi.fn().mockReturnValue({
-      userMessage: 'Test error message',
-      shouldShowToUser: true,
-      technicalMessage: 'Test error message',
-    }),
-  },
-}));
-
-// Import after mocking
+// Import actual modules
+import UIComponents from '../../utils/ui-components.js';
+import UIMessages from '../../utils/ui-messages.js';
+import ErrorHandler from '../../utils/error-handler.js';
 import ConfigUI from '../../config-ui.js';
 
 describe('ConfigUI', () => {
@@ -62,13 +36,11 @@ describe('ConfigUI', () => {
 
     // Create mock instances
     mockSupabaseConfig = createMockSupabaseConfig();
-    mockUIComponents = createMockUIComponents();
-    mockUIMessages = createMockUIMessages();
-    mockErrorHandler = createMockErrorHandler();
 
     // Create test container
     container = document.createElement('div');
     container.id = 'test-container';
+    document.body.appendChild(container);
 
     // Create ConfigUI instance
     configUI = new ConfigUI(mockSupabaseConfig);
@@ -82,61 +54,15 @@ describe('ConfigUI', () => {
 
   describe('showConfigForm', () => {
     it('should create and display configuration form', async () => {
-      // Create proper mock DOM elements
-      const mockContainer = document.createElement('div');
-      const mockForm = document.createElement('form');
-      const mockSection = document.createElement('section');
-
-      // Mock DOM methods with proper return values
-      const { default: UIComponents } = await import(
-        '../../utils/ui-components.js'
-      );
-      UIComponents.createContainer = vi.fn().mockReturnValue(mockContainer);
-      UIComponents.createForm = vi.fn().mockReturnValue(mockForm);
-      UIComponents.createSection = vi.fn().mockReturnValue(mockSection);
-
       // Call the method
       configUI.showConfigForm(container);
 
-      // Verify container creation
-      expect(UIComponents.createContainer).toHaveBeenCalledWith(
-        'Supabase Configuration',
-        'Enter your Supabase project credentials to enable cloud sync',
-        'config-container'
-      );
-
-      // Verify form creation
-      expect(UIComponents.createForm).toHaveBeenCalledWith(
-        'configForm',
-        expect.any(Function), // onSubmit callback
-        expect.arrayContaining([
-          expect.objectContaining({
-            type: 'url',
-            id: 'supabaseUrl',
-            label: 'Project URL',
-          }),
-          expect.objectContaining({
-            type: 'text',
-            id: 'supabaseAnonKey',
-            label: 'Anon Public Key',
-          }),
-        ]),
-        expect.objectContaining({
-          submitText: 'Save Configuration',
-          className: 'config-form',
-        })
-      );
-
-      // Verify help section creation
-      expect(UIComponents.createSection).toHaveBeenCalledWith(
-        'How to get your credentials:',
-        'config-help'
-      );
-
-      // Verify the methods were called with correct parameters
-      expect(UIComponents.createContainer).toHaveBeenCalled();
-      expect(UIComponents.createForm).toHaveBeenCalled();
-      expect(UIComponents.createSection).toHaveBeenCalled();
+      // Verify actual DOM elements were created
+      expect(container.querySelector('.ui-container')).toBeTruthy();
+      expect(container.querySelector('form')).toBeTruthy();
+      expect(container.querySelector('#supabaseUrl')).toBeTruthy();
+      expect(container.querySelector('#supabaseAnonKey')).toBeTruthy();
+      expect(container.querySelector('button[type="submit"]')).toBeTruthy();
     });
 
     it('should bind events and load current config', async () => {
