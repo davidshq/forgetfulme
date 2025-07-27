@@ -348,11 +348,18 @@ class UIMessages {
    */
   static confirm(message, onConfirm, onCancel, container, options = {}) {
     // Check if UIComponents is available globally or in window
-    const UIComponentsAvailable = typeof UIComponents !== 'undefined' || 
-                                 (typeof window !== 'undefined' && window.UIComponents);
-    const UIComponentsRef = UIComponentsAvailable ? (UIComponents || window.UIComponents) : null;
-    
-    if (UIComponentsRef && UIComponentsRef.createConfirmDialog && UIComponentsRef.showModal) {
+    const UIComponentsAvailable =
+      typeof UIComponents !== 'undefined' ||
+      (typeof window !== 'undefined' && window.UIComponents);
+    const UIComponentsRef = UIComponentsAvailable
+      ? UIComponents || window.UIComponents
+      : null;
+
+    if (
+      UIComponentsRef &&
+      UIComponentsRef.createConfirmDialog &&
+      UIComponentsRef.showModal
+    ) {
       const confirmEl = UIComponentsRef.createConfirmDialog(
         message,
         onConfirm,

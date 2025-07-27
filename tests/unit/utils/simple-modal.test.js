@@ -8,13 +8,13 @@ describe('SimpleModal', () => {
     // Setup DOM
     container = document.createElement('div');
     document.body.appendChild(container);
-    
+
     // Mock dialog.showModal (not available in JSDOM)
-    HTMLDialogElement.prototype.showModal = vi.fn(function() {
+    HTMLDialogElement.prototype.showModal = vi.fn(function () {
       this.setAttribute('open', '');
     });
-    
-    HTMLDialogElement.prototype.close = vi.fn(function() {
+
+    HTMLDialogElement.prototype.close = vi.fn(function () {
       this.removeAttribute('open');
       this.dispatchEvent(new Event('close'));
     });
@@ -31,21 +31,17 @@ describe('SimpleModal', () => {
     it('should create and show a confirmation dialog', () => {
       const onConfirm = vi.fn();
       const onCancel = vi.fn();
-      
-      const dialog = SimpleModal.confirm(
-        'Are you sure?',
-        onConfirm,
-        onCancel
-      );
+
+      const dialog = SimpleModal.confirm('Are you sure?', onConfirm, onCancel);
 
       expect(dialog).toBeInstanceOf(HTMLDialogElement);
       expect(dialog.showModal).toHaveBeenCalled();
       expect(document.body.contains(dialog)).toBe(true);
-      
+
       // Check dialog structure
       const message = dialog.querySelector('p');
       expect(message.textContent).toBe('Are you sure?');
-      
+
       const buttons = dialog.querySelectorAll('button');
       expect(buttons).toHaveLength(2);
       expect(buttons[0].textContent).toBe('Cancel');
@@ -55,7 +51,7 @@ describe('SimpleModal', () => {
     it('should call onConfirm when confirm button is clicked', () => {
       const onConfirm = vi.fn();
       const onCancel = vi.fn();
-      
+
       const dialog = SimpleModal.confirm(
         'Delete this item?',
         onConfirm,
@@ -73,7 +69,7 @@ describe('SimpleModal', () => {
     it('should call onCancel when cancel button is clicked', () => {
       const onConfirm = vi.fn();
       const onCancel = vi.fn();
-      
+
       const dialog = SimpleModal.confirm(
         'Delete this item?',
         onConfirm,
@@ -91,7 +87,7 @@ describe('SimpleModal', () => {
     it('should call onCancel when close button is clicked', () => {
       const onConfirm = vi.fn();
       const onCancel = vi.fn();
-      
+
       const dialog = SimpleModal.confirm(
         'Delete this item?',
         onConfirm,
@@ -106,15 +102,10 @@ describe('SimpleModal', () => {
     });
 
     it('should use custom button text when provided', () => {
-      const dialog = SimpleModal.confirm(
-        'Are you sure?',
-        vi.fn(),
-        vi.fn(),
-        {
-          confirmText: 'Delete',
-          cancelText: 'Keep'
-        }
-      );
+      const dialog = SimpleModal.confirm('Are you sure?', vi.fn(), vi.fn(), {
+        confirmText: 'Delete',
+        cancelText: 'Keep',
+      });
 
       const buttons = dialog.querySelectorAll('button');
       expect(buttons[0].textContent).toBe('Keep');
@@ -122,11 +113,7 @@ describe('SimpleModal', () => {
     });
 
     it('should remove dialog from DOM when closed', () => {
-      const dialog = SimpleModal.confirm(
-        'Test',
-        vi.fn(),
-        vi.fn()
-      );
+      const dialog = SimpleModal.confirm('Test', vi.fn(), vi.fn());
 
       expect(document.body.contains(dialog)).toBe(true);
 
@@ -141,20 +128,17 @@ describe('SimpleModal', () => {
   describe('alert', () => {
     it('should create and show an alert dialog', () => {
       const onClose = vi.fn();
-      
-      const dialog = SimpleModal.alert(
-        'Operation completed!',
-        onClose
-      );
+
+      const dialog = SimpleModal.alert('Operation completed!', onClose);
 
       expect(dialog).toBeInstanceOf(HTMLDialogElement);
       expect(dialog.showModal).toHaveBeenCalled();
       expect(document.body.contains(dialog)).toBe(true);
-      
+
       // Check dialog structure
       const message = dialog.querySelector('p');
       expect(message.textContent).toBe('Operation completed!');
-      
+
       const button = dialog.querySelector('button');
       expect(button).toBeTruthy();
       expect(button.textContent).toBe('OK');
@@ -162,11 +146,8 @@ describe('SimpleModal', () => {
 
     it('should call onClose when OK button is clicked', () => {
       const onClose = vi.fn();
-      
-      const dialog = SimpleModal.alert(
-        'Success!',
-        onClose
-      );
+
+      const dialog = SimpleModal.alert('Success!', onClose);
 
       const okBtn = dialog.querySelector('button');
       okBtn.click();
@@ -176,11 +157,9 @@ describe('SimpleModal', () => {
     });
 
     it('should use custom OK button text when provided', () => {
-      const dialog = SimpleModal.alert(
-        'Message',
-        vi.fn(),
-        { okText: 'Got it!' }
-      );
+      const dialog = SimpleModal.alert('Message', vi.fn(), {
+        okText: 'Got it!',
+      });
 
       const button = dialog.querySelector('button');
       expect(button.textContent).toBe('Got it!');
