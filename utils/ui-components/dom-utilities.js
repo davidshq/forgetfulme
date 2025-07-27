@@ -96,7 +96,7 @@ export class DOM {
       return container.querySelectorAll(selector);
     } catch (error) {
       ErrorHandler.handle(error, 'ui-components.DOM.querySelectorAll');
-      return document.querySelectorAll(''); // Return empty NodeList
+      return []; // Return empty array-like object
     }
   }
 

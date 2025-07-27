@@ -85,7 +85,7 @@ export class ButtonComponents {
     }
 
     // Apply additional attributes
-    if (options.type) button.type = options.type;
+    button.type = options.type || 'button'; // Default to 'button' type
     if (options.title) button.title = options.title;
     if (options.id) button.id = options.id;
 

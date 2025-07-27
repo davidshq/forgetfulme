@@ -322,7 +322,14 @@ class UIMessages {
           if (messageEl.parentNode) {
             messageEl.parentNode.removeChild(messageEl);
           }
-          retryFunction();
+          try {
+            retryFunction();
+          } catch (error) {
+            // Safe console logging with fallback
+            if (typeof console !== 'undefined' && console.error) {
+              console.error('Retry function failed:', error);
+            }
+          }
         });
         messageEl.appendChild(retryBtn);
       }

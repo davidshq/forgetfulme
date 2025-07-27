@@ -382,6 +382,11 @@ global.chrome = {
       addListener: vi.fn(),
       removeListener: vi.fn(),
     },
+    getAll: vi.fn((callback) => {
+      callback([
+        { name: 'mark-as-read', description: 'Mark current page as read' }
+      ]);
+    }),
   },
 };
 
@@ -1375,10 +1380,26 @@ global.ErrorHandler = {
   },
 };
 
+// Add HTMLFormElement.requestSubmit polyfill for JSDOM
+if (typeof global.HTMLFormElement !== 'undefined' && !HTMLFormElement.prototype.requestSubmit) {
+  HTMLFormElement.prototype.requestSubmit = function() {
+    const event = new Event('submit', { bubbles: true, cancelable: true });
+    this.dispatchEvent(event);
+  };
+}
+
 // Setup test environment
 beforeEach(() => {
   // Clear all mocks before each test
   vi.clearAllMocks();
+
+  // Add HTMLFormElement.requestSubmit polyfill for JSDOM (after JSDOM loads)
+  if (typeof HTMLFormElement !== 'undefined') {
+    HTMLFormElement.prototype.requestSubmit = function() {
+      const event = new Event('submit', { bubbles: true, cancelable: true });
+      this.dispatchEvent(event);
+    };
+  }
 
   // Ensure console methods are properly mocked
   if (!global.console || typeof global.console.warn !== 'function') {
@@ -1399,7 +1420,33 @@ beforeEach(() => {
     global.document.head.innerHTML = '';
   }
 
-  // Reset Chrome API mocks
+  // Ensure Chrome API exists and reset mocks
+  if (!global.chrome) {
+    global.chrome = {
+      storage: { sync: {}, local: {} },
+      runtime: {},
+      tabs: {},
+      action: {},
+      notifications: {},
+      commands: { onCommand: { addListener: vi.fn(), removeListener: vi.fn() } },
+    };
+  }
+  
+  // Ensure chrome.commands exists
+  if (!global.chrome.commands) {
+    global.chrome.commands = {
+      onCommand: {
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+      },
+      getAll: vi.fn((callback) => {
+        callback([
+          { name: 'mark-as-read', description: 'Mark current page as read' }
+        ]);
+      }),
+    };
+  }
+
   Object.keys(global.chrome).forEach(key => {
     if (typeof global.chrome[key] === 'object' && global.chrome[key] !== null) {
       Object.keys(global.chrome[key]).forEach(subKey => {
