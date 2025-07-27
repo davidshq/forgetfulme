@@ -347,15 +347,19 @@ class UIMessages {
    * @param {Object} options - Additional options
    */
   static confirm(message, onConfirm, onCancel, container, options = {}) {
-    // Use UIComponents if available, otherwise fall back to manual creation
-    if (typeof UIComponents !== 'undefined') {
-      const confirmEl = UIComponents.createConfirmDialog(
+    // Check if UIComponents is available globally or in window
+    const UIComponentsAvailable = typeof UIComponents !== 'undefined' || 
+                                 (typeof window !== 'undefined' && window.UIComponents);
+    const UIComponentsRef = UIComponentsAvailable ? (UIComponents || window.UIComponents) : null;
+    
+    if (UIComponentsRef && UIComponentsRef.createConfirmDialog && UIComponentsRef.showModal) {
+      const confirmEl = UIComponentsRef.createConfirmDialog(
         message,
         onConfirm,
         onCancel,
         options
       );
-      UIComponents.showModal(confirmEl);
+      UIComponentsRef.showModal(confirmEl);
       return confirmEl;
     }
 

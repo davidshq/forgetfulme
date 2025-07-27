@@ -191,7 +191,7 @@ header h1 {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  padding: 1.25rem;
+  /* padding: 1.25rem; */
   background: var(--pico-card-background-color);
   border: var(--pico-border-width) solid var(--fm-border-color);
   border-radius: var(--pico-border-radius);

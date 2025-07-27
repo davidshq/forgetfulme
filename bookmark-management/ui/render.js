@@ -206,7 +206,16 @@ export function displayBookmarks({
   bookmarks,
   BookmarkTransformer,
   updateBulkActions,
+  onEdit,
+  onDelete,
+  onOpen,
 }) {
+  console.log('displayBookmarks called with:', {
+    bookmarksCount: bookmarks?.length,
+    hasOnEdit: !!onEdit,
+    hasOnDelete: !!onDelete,
+    hasOnOpen: !!onOpen,
+  });
   const bookmarksList = document.getElementById('bookmarks-list');
   if (!bookmarksList) return;
   bookmarksList.innerHTML = '';
@@ -238,6 +247,9 @@ export function displayBookmarks({
       bookmark,
       index,
       updateBulkActions,
+      onEdit,
+      onDelete,
+      onOpen,
     });
     bookmarksList.appendChild(listItem);
   });
@@ -308,24 +320,42 @@ export function createBookmarkListItem({
   editBtn.textContent = '✏️ Edit';
   editBtn.setAttribute('aria-label', `Edit bookmark: ${bookmark.title}`);
   editBtn.setAttribute('title', 'Edit bookmark');
-  if (onEdit) editBtn.addEventListener('click', () => onEdit(bookmark));
+  if (onEdit) {
+    editBtn.addEventListener('click', () => {
+      console.log('Edit button clicked for:', bookmark);
+      onEdit(bookmark);
+    });
+  } else {
+    console.warn('No onEdit handler provided for bookmark:', bookmark);
+  }
   actionsDiv.appendChild(editBtn);
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'contrast';
   deleteBtn.textContent = '🗑️ Delete';
   deleteBtn.setAttribute('aria-label', `Delete bookmark: ${bookmark.title}`);
   deleteBtn.setAttribute('title', 'Delete bookmark');
-  if (onDelete)
-    deleteBtn.addEventListener('click', () =>
-      onDelete(bookmark.id, bookmark.title)
-    );
+  if (onDelete) {
+    deleteBtn.addEventListener('click', () => {
+      console.log('Delete button clicked for:', bookmark.id, bookmark.title);
+      onDelete(bookmark.id, bookmark.title);
+    });
+  } else {
+    console.warn('No onDelete handler provided for bookmark:', bookmark);
+  }
   actionsDiv.appendChild(deleteBtn);
   const openBtn = document.createElement('button');
   openBtn.className = 'secondary';
   openBtn.textContent = '🔗 Open';
   openBtn.setAttribute('aria-label', `Open bookmark: ${bookmark.title}`);
   openBtn.setAttribute('title', 'Open bookmark in new tab');
-  if (onOpen) openBtn.addEventListener('click', () => onOpen(bookmark.url));
+  if (onOpen) {
+    openBtn.addEventListener('click', () => {
+      console.log('Open button clicked for:', bookmark.url);
+      onOpen(bookmark.url);
+    });
+  } else {
+    console.warn('No onOpen handler provided for bookmark:', bookmark);
+  }
   actionsDiv.appendChild(openBtn);
   contentDiv.appendChild(actionsDiv);
   listItem.appendChild(contentDiv);

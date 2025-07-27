@@ -36,7 +36,22 @@ function showMainInterface() {
         appContainer,
         UIMessages,
         ErrorHandler,
-        displayBookmarks: UI.displayBookmarks,
+        displayBookmarks: (params) => UI.displayBookmarks({
+          ...params,
+          updateBulkActions: Handlers.updateBulkActions,
+          onEdit: bookmark => showEditInterface(bookmark),
+          onDelete: (bookmarkId, bookmarkTitle) =>
+            Handlers.deleteBookmark({
+              supabaseService,
+              appContainer,
+              UIMessages,
+              ErrorHandler,
+              bookmarkId,
+              bookmarkTitle,
+              loadAllBookmarks,
+            }),
+          onOpen: url => Handlers.openBookmark({ url }),
+        }),
       });
     },
     onSelectAll: () =>
@@ -97,8 +112,19 @@ function showAuthInterface() {
 }
 
 function showEditInterface(existingBookmark) {
+  // Convert UI format back to database format for edit interface
+  const dbBookmark = {
+    id: existingBookmark.id,
+    url: existingBookmark.url,
+    title: existingBookmark.title,
+    description: existingBookmark.description,
+    read_status: existingBookmark.status, // UI format uses 'status' instead of 'read_status'
+    tags: existingBookmark.tags,
+    created_at: existingBookmark.created_at,
+  };
+  
   EditUI.showEditInterface({
-    existingBookmark,
+    existingBookmark: dbBookmark,
     UIComponents,
     appContainer,
     onBack: () => showMainInterface(),
@@ -133,6 +159,7 @@ async function loadAllBookmarks() {
           supabaseService,
           appContainer,
           UIMessages,
+          UIComponents,
           ErrorHandler,
           bookmarkId,
           bookmarkTitle,

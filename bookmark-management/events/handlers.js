@@ -1,5 +1,7 @@
 // Event handler functions for bookmark management
 
+import SimpleModal from '../../utils/simple-modal.js';
+
 export async function searchBookmarks({
   UIComponents,
   supabaseService,
@@ -90,12 +92,13 @@ export async function deleteBookmark({
   supabaseService,
   appContainer,
   UIMessages,
+  UIComponents,
   ErrorHandler,
   bookmarkId,
   bookmarkTitle,
   loadAllBookmarks,
 }) {
-  UIMessages.confirm(
+  SimpleModal.confirm(
     `Are you sure you want to delete "${bookmarkTitle}"? This action cannot be undone.`,
     async () => {
       try {
@@ -113,12 +116,20 @@ export async function deleteBookmark({
     () => {
       // User cancelled
     },
-    appContainer
+    {
+      confirmText: 'Delete',
+      cancelText: 'Cancel'
+    }
   );
 }
 
 export function openBookmark({ url }) {
-  chrome.tabs.create({ url });
+  if (chrome.tabs && chrome.tabs.create) {
+    chrome.tabs.create({ url });
+  } else {
+    // Fallback for when chrome.tabs API is not available
+    window.open(url, '_blank');
+  }
 }
 
 export function bindBulkActions({
