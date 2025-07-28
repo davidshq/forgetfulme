@@ -22,8 +22,89 @@
       <section id="config-interface" aria-labelledby="config-heading">
         <h2 id="config-heading">Database Configuration</h2>
         <p>Connect ForgetfulMe to your Supabase database to sync your bookmarks across devices.</p>
-        <!-- Configuration content loads here -->
-        <div id="config-loading" aria-live="polite">
+        
+        <!-- Configuration Form -->
+        <div id="config-form-container" class="config-container">
+          <header class="config-header">
+            <h3>Supabase Configuration</h3>
+            <p>Enter your Supabase project credentials to enable cloud sync</p>
+          </header>
+          
+          <form id="configForm" class="config-form">
+            <div class="form-group">
+              <label for="supabaseUrl">Project URL</label>
+              <input 
+                type="url" 
+                id="supabaseUrl" 
+                name="url" 
+                placeholder="https://your-project.supabase.co" 
+                required 
+                aria-describedby="supabaseUrl-help supabaseUrl-error"
+              />
+              <small id="supabaseUrl-help" class="help-text">Your Supabase project URL (found in Settings > API)</small>
+              <small id="supabaseUrl-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <div class="form-group">
+              <label for="supabaseAnonKey">Anon Public Key</label>
+              <input 
+                type="text" 
+                id="supabaseAnonKey" 
+                name="anonKey" 
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." 
+                required 
+                aria-describedby="supabaseAnonKey-help supabaseAnonKey-error"
+              />
+              <small id="supabaseAnonKey-help" class="help-text">Your anon public key (found in Settings > API)</small>
+              <small id="supabaseAnonKey-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <button type="submit" class="config-btn primary">Save Configuration</button>
+          </form>
+          
+          <div class="config-help">
+            <h4>How to get your credentials:</h4>
+            <ol>
+              <li>Go to <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a> and create an account</li>
+              <li>Create a new project</li>
+              <li>Go to Settings > API in your project dashboard</li>
+              <li>Copy the "Project URL" and "anon public" key</li>
+              <li>Paste them in the form above</li>
+            </ol>
+            
+            <div class="config-note">
+              <strong>Note:</strong> Your credentials are stored securely in your browser's sync storage and are never shared with anyone.
+            </div>
+          </div>
+          
+          <div id="configMessage" class="config-message" role="alert" aria-live="polite"></div>
+        </div>
+        
+        <!-- Configuration Status Display -->
+        <div id="config-status-container" class="config-container" hidden>
+          <div class="config-status">
+            <h3>Configuration Status</h3>
+            <div class="status-item">
+              <span class="status-label">Supabase URL:</span>
+              <span class="status-value" id="statusUrl">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Anon Key:</span>
+              <span class="status-value" id="statusKey">-</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Connection:</span>
+              <span class="status-value" id="statusConnection">-</span>
+            </div>
+            
+            <div class="status-actions">
+              <button id="testConnectionBtn" class="config-btn secondary">Test Connection</button>
+              <button id="editConfigBtn" class="config-btn secondary">Edit Configuration</button>
+            </div>
+          </div>
+        </div>
+        
+        <div id="config-loading" aria-live="polite" hidden>
           <progress>Loading configuration...</progress>
         </div>
       </section>

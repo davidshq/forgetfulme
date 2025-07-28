@@ -118,10 +118,14 @@ describe('Enhanced Static Structure Accessibility', () => {
 
     // Test ARIA labelling
     const configSection = document.getElementById('config-interface');
-    expect(configSection.getAttribute('aria-labelledby')).toBe('config-heading');
+    expect(configSection.getAttribute('aria-labelledby')).toBe(
+      'config-heading'
+    );
 
     const statusSection = document.getElementById('status-settings');
-    expect(statusSection.getAttribute('aria-labelledby')).toBe('status-heading');
+    expect(statusSection.getAttribute('aria-labelledby')).toBe(
+      'status-heading'
+    );
   });
 
   it('should have proper semantic structure in bookmark management page', () => {
@@ -195,8 +199,13 @@ describe('Enhanced Static Structure Accessibility', () => {
     `;
 
     // Test that only one interface should be visible at a time
-    const interfaces = ['main-interface', 'auth-interface', 'setup-interface', 'error-interface'];
-    
+    const interfaces = [
+      'main-interface',
+      'auth-interface',
+      'setup-interface',
+      'error-interface',
+    ];
+
     // Initially main-interface is visible
     expect(document.getElementById('main-interface').hidden).toBeFalsy();
     expect(document.getElementById('auth-interface').hidden).toBe(true);
@@ -257,10 +266,10 @@ describe('Enhanced Static Structure Accessibility', () => {
 
     const mainInterface = document.getElementById('main-interface');
     const loadingIndicator = document.getElementById('loading-indicator');
-    
+
     // Simulate content loading completion
     loadingIndicator.hidden = true;
-    
+
     // Add dynamic content while preserving structure
     const dynamicContainer = document.createElement('div');
     dynamicContainer.className = 'dynamic-content';

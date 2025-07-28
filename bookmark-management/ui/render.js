@@ -4,72 +4,68 @@
  * Show setup interface when Supabase is not configured
  */
 export function showSetupInterface({
-  UIComponents,
+  _UIComponents,
   appContainer,
   openSettings,
 }) {
-  const container = UIComponents.createContainer(
-    'Welcome to ForgetfulMe!',
-    'This extension helps you mark websites as read for research purposes.',
-    'setup-container'
-  );
+  // Show setup interface, hide others
+  const mainInterface = appContainer.querySelector('#main-interface');
+  const setupInterface = appContainer.querySelector('#setup-interface');
+  const authInterface = appContainer.querySelector('#auth-interface');
+  const emptyState = appContainer.querySelector('#empty-state');
+  const errorInterface = appContainer.querySelector('#error-interface');
 
-  const setupSection = UIComponents.createSection(
-    '🔧 Setup Required',
-    'setup-section'
-  );
-  setupSection.innerHTML = `
-    <p>To use this extension, you need to configure your Supabase backend:</p>
-    <ol>
-      <li>Create a Supabase project at <a href="https://supabase.com" target="_blank">supabase.com</a></li>
-      <li>Get your Project URL and anon public key</li>
-      <li>Open the extension settings to configure</li>
-    </ol>
-  `;
-  const settingsBtn = UIComponents.createButton(
-    'Open Settings',
-    openSettings,
-    'primary'
-  );
-  setupSection.appendChild(settingsBtn);
-  container.appendChild(setupSection);
+  if (mainInterface) mainInterface.hidden = true;
+  if (setupInterface) setupInterface.hidden = false;
+  if (authInterface) authInterface.hidden = true;
+  if (emptyState) emptyState.hidden = true;
+  if (errorInterface) errorInterface.hidden = true;
 
-  const howItWorksSection = UIComponents.createSection(
-    '📚 How it works',
-    'setup-section'
-  );
-  howItWorksSection.innerHTML = `
-    <ul>
-      <li>Click the extension icon to mark the current page</li>
-      <li>Choose a status (Read, Good Reference, etc.)</li>
-      <li>Add tags to organize your entries</li>
-      <li>View your recent entries in the popup</li>
-    </ul>
-  `;
-  container.appendChild(howItWorksSection);
-
-  appContainer.innerHTML = '';
-  appContainer.appendChild(container);
+  // Add settings button functionality if not already present
+  const settingsBtn = setupInterface.querySelector('a[href="options.html"]');
+  if (settingsBtn && openSettings) {
+    // Convert link to button with openSettings callback
+    const btn = document.createElement('button');
+    btn.textContent = 'Open Settings';
+    btn.className = 'primary';
+    btn.onclick = openSettings;
+    settingsBtn.parentNode.replaceChild(btn, settingsBtn);
+  }
 }
 
 /**
  * Show authentication interface
  */
 export function showAuthInterface({ appContainer }) {
-  appContainer.innerHTML = `
-    <div class="auth-container">
-      <h2>Authentication Required</h2>
-      <p>Please authenticate in the extension popup to access bookmark management.</p>
-      <button onclick="window.close()" class="primary">Close</button>
-    </div>
-  `;
+  // Show auth interface, hide others
+  const mainInterface = appContainer.querySelector('#main-interface');
+  const setupInterface = appContainer.querySelector('#setup-interface');
+  const authInterface = appContainer.querySelector('#auth-interface');
+  const emptyState = appContainer.querySelector('#empty-state');
+  const errorInterface = appContainer.querySelector('#error-interface');
+
+  if (mainInterface) mainInterface.hidden = true;
+  if (setupInterface) setupInterface.hidden = true;
+  if (authInterface) authInterface.hidden = false;
+  if (emptyState) emptyState.hidden = true;
+  if (errorInterface) errorInterface.hidden = true;
+
+  // Add close button functionality if not already present
+  const existingBtn = authInterface.querySelector('button');
+  if (!existingBtn) {
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.className = 'primary';
+    closeBtn.onclick = () => window.close();
+    authInterface.appendChild(closeBtn);
+  }
 }
 
 /**
  * Show main bookmark management interface
  */
 export function showMainInterface({
-  UIComponents,
+  _UIComponents,
   appContainer,
   onSearch,
   onSelectAll,
@@ -78,123 +74,51 @@ export function showMainInterface({
   loadAllBookmarks,
   bindBulkActions,
 }) {
-  const breadcrumbItems = [
-    { text: 'ForgetfulMe', href: '#' },
-    { text: 'Bookmark Management' },
-  ];
-  const breadcrumb = UIComponents.createBreadcrumb(
-    breadcrumbItems,
-    'page-breadcrumb'
-  );
-  const navItems = [
-    {
-      text: '← Back to Extension',
-      onClick: () => window.close(),
-      className: 'secondary',
-      title: 'Close bookmark management and return to extension',
-      'aria-label': 'Close bookmark management and return to extension',
-    },
-  ];
-  const header = UIComponents.createHeaderWithNav(
-    'Bookmark Management',
-    navItems,
-    {
-      titleId: 'page-title',
-      navAriaLabel: 'Page actions',
-      navClassName: 'header-nav',
-    }
-  );
-  const mainContent = document.createElement('div');
-  mainContent.className = 'main-content';
-  mainContent.setAttribute('role', 'main');
-  const sidebar = document.createElement('aside');
-  sidebar.className = 'sidebar';
-  sidebar.setAttribute('role', 'complementary');
-  const searchForm = UIComponents.createForm(
-    'search-form',
-    onSearch,
-    [
-      {
-        type: 'text',
-        id: 'search-query',
-        label: 'Search Bookmarks:',
-        options: {
-          placeholder: 'Search by title, URL, or tags...',
-          helpText: 'Search through your bookmarks',
-        },
-      },
-      {
-        type: 'select',
-        id: 'status-filter',
-        label: 'Filter by Status:',
-        options: {
-          options: [
-            { value: 'all', text: 'All Statuses' },
-            { value: 'read', text: 'Read' },
-            { value: 'good-reference', text: 'Good Reference' },
-            { value: 'low-value', text: 'Low Value' },
-            { value: 'revisit-later', text: 'Revisit Later' },
-          ],
-          helpText: 'Filter bookmarks by their status',
-        },
-      },
-    ],
-    {
-      submitText: 'Search',
-      className: 'search-form',
-    }
-  );
-  const searchCard = UIComponents.createCard(
-    'Search & Filter',
-    searchForm.outerHTML,
-    '',
-    'search-card'
-  );
-  sidebar.appendChild(searchCard);
-  const bulkActions = [
-    {
-      text: 'Select All',
-      onClick: onSelectAll,
-      className: 'secondary',
-    },
-    {
-      text: 'Delete Selected',
-      onClick: onDeleteSelected,
-      className: 'contrast',
-    },
-    {
-      text: 'Export Selected',
-      onClick: onExportSelected,
-      className: 'secondary',
-    },
-  ];
-  const bulkCard = UIComponents.createCardWithActions(
-    'Bulk Actions',
-    '<p>Select multiple bookmarks to perform bulk operations like deletion or export.</p>',
-    bulkActions,
-    'bulk-actions-card'
-  );
-  sidebar.appendChild(bulkCard);
-  const contentArea = document.createElement('div');
-  contentArea.className = 'content-area';
-  contentArea.setAttribute('role', 'main');
-  const bookmarksList = document.createElement('div');
-  bookmarksList.id = 'bookmarks-list';
-  bookmarksList.setAttribute('role', 'list');
-  bookmarksList.setAttribute('aria-label', 'Bookmarks');
-  const bookmarksCard = UIComponents.createCard(
-    'Bookmarks',
-    bookmarksList.outerHTML,
-    '',
-    'bookmarks-card'
-  );
-  contentArea.appendChild(bookmarksCard);
-  appContainer.innerHTML = '';
-  appContainer.appendChild(breadcrumb);
-  appContainer.appendChild(header);
-  appContainer.appendChild(mainContent);
-  mainContent.appendChild(sidebar);
-  mainContent.appendChild(contentArea);
+  // Show main interface, hide other sections
+  const mainInterface = appContainer.querySelector('#main-interface');
+  const setupInterface = appContainer.querySelector('#setup-interface');
+  const authInterface = appContainer.querySelector('#auth-interface');
+  const emptyState = appContainer.querySelector('#empty-state');
+  const errorInterface = appContainer.querySelector('#error-interface');
+
+  if (mainInterface) mainInterface.hidden = false;
+  if (setupInterface) setupInterface.hidden = true;
+  if (authInterface) authInterface.hidden = true;
+  if (emptyState) emptyState.hidden = true;
+  if (errorInterface) errorInterface.hidden = true;
+
+  // Add back button to navigation
+  const navigation = appContainer.querySelector('#bookmark-navigation');
+  if (navigation) {
+    navigation.innerHTML = `
+      <button class="nav-btn secondary" onclick="window.close()" 
+              title="Close bookmark management and return to extension"
+              aria-label="Close bookmark management and return to extension">
+        ← Back to Extension
+      </button>
+    `;
+  }
+
+  // Bind search form
+  const searchForm = appContainer.querySelector('#search-form');
+  if (searchForm) {
+    searchForm.onsubmit = e => {
+      e.preventDefault();
+      if (onSearch) onSearch(e, searchForm);
+    };
+  }
+
+  // Bind bulk action buttons
+  const selectAllBtn = appContainer.querySelector('#select-all-btn');
+  const deleteSelectedBtn = appContainer.querySelector('#delete-selected-btn');
+  const exportSelectedBtn = appContainer.querySelector('#export-selected-btn');
+
+  if (selectAllBtn && onSelectAll) selectAllBtn.onclick = onSelectAll;
+  if (deleteSelectedBtn && onDeleteSelected)
+    deleteSelectedBtn.onclick = onDeleteSelected;
+  if (exportSelectedBtn && onExportSelected)
+    exportSelectedBtn.onclick = onExportSelected;
+
   loadAllBookmarks();
   bindBulkActions();
 }

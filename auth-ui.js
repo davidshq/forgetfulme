@@ -8,9 +8,7 @@
  * @since 2024-01-01
  */
 
-import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
-import UIMessages from './utils/ui-messages.js';
 
 /**
  * Authentication UI component for ForgetfulMe extension
@@ -46,60 +44,28 @@ class AuthUI {
    * @param {HTMLElement} container - Container element to render the form
    */
   showLoginForm(container) {
-    // Create container with header
-    const containerEl = UIComponents.createContainer(
-      'Sign in to ForgetfulMe',
-      'Access your bookmarks across all devices',
-      'auth-container'
-    );
+    // Show login container, hide others
+    const loginContainer = container.querySelector('#login-container');
+    const signupContainer = container.querySelector('#signup-container');
+    const profileContainer = container.querySelector('#profile-container');
 
-    // Create login form
-    const loginForm = UIComponents.createForm(
-      'loginForm',
-      (_e, _form) => this.handleLogin(document),
-      [
-        {
-          type: 'email',
-          id: 'loginEmail',
-          label: 'Email',
-          options: {
-            placeholder: 'Enter your email',
-            required: true,
-          },
-        },
-        {
-          type: 'password',
-          id: 'loginPassword',
-          label: 'Password',
-          options: {
-            placeholder: 'Enter your password',
-            required: true,
-          },
-        },
-      ],
-      {
-        submitText: 'Sign In',
-        className: 'auth-form',
-      }
-    );
+    if (loginContainer) loginContainer.hidden = false;
+    if (signupContainer) signupContainer.hidden = true;
+    if (profileContainer) profileContainer.hidden = true;
 
-    containerEl.appendChild(loginForm);
+    // Clear any existing messages
+    const messageContainer = container.querySelector('#authMessage');
+    if (messageContainer) messageContainer.innerHTML = '';
 
-    // Create footer
-    const footer = document.createElement('div');
-    footer.className = 'auth-footer';
-    footer.innerHTML =
-      '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>';
-    containerEl.appendChild(footer);
+    // Bind form submission
+    const loginForm = container.querySelector('#loginForm');
+    if (loginForm) {
+      loginForm.onsubmit = e => {
+        e.preventDefault();
+        this.handleLogin(container);
+      };
+    }
 
-    // Create message container
-    const messageContainer = document.createElement('div');
-    messageContainer.id = 'authMessage';
-    messageContainer.className = 'auth-message';
-    containerEl.appendChild(messageContainer);
-
-    container.innerHTML = '';
-    container.appendChild(containerEl);
     this.bindAuthEvents(container);
   }
 
@@ -108,70 +74,28 @@ class AuthUI {
    * @param {HTMLElement} container - Container element to render the form
    */
   showSignupForm(container) {
-    // Create container with header
-    const containerEl = UIComponents.createContainer(
-      'Create Account',
-      'Start organizing your bookmarks with ForgetfulMe',
-      'auth-container'
-    );
+    // Show signup container, hide others
+    const loginContainer = container.querySelector('#login-container');
+    const signupContainer = container.querySelector('#signup-container');
+    const profileContainer = container.querySelector('#profile-container');
 
-    // Create signup form
-    const signupForm = UIComponents.createForm(
-      'signupForm',
-      (_e, _form) => this.handleSignup(document),
-      [
-        {
-          type: 'email',
-          id: 'signupEmail',
-          label: 'Email',
-          options: {
-            placeholder: 'Enter your email',
-            required: true,
-          },
-        },
-        {
-          type: 'password',
-          id: 'signupPassword',
-          label: 'Password',
-          options: {
-            placeholder: 'Create a password',
-            required: true,
-            helpText: 'Password must be at least 6 characters',
-          },
-        },
-        {
-          type: 'password',
-          id: 'confirmPassword',
-          label: 'Confirm Password',
-          options: {
-            placeholder: 'Confirm your password',
-            required: true,
-          },
-        },
-      ],
-      {
-        submitText: 'Create Account',
-        className: 'auth-form',
-      }
-    );
+    if (loginContainer) loginContainer.hidden = true;
+    if (signupContainer) signupContainer.hidden = false;
+    if (profileContainer) profileContainer.hidden = true;
 
-    containerEl.appendChild(signupForm);
+    // Clear any existing messages
+    const messageContainer = container.querySelector('#authMessageSignup');
+    if (messageContainer) messageContainer.innerHTML = '';
 
-    // Create footer
-    const footer = document.createElement('div');
-    footer.className = 'auth-footer';
-    footer.innerHTML =
-      '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>';
-    containerEl.appendChild(footer);
+    // Bind form submission
+    const signupForm = container.querySelector('#signupForm');
+    if (signupForm) {
+      signupForm.onsubmit = e => {
+        e.preventDefault();
+        this.handleSignup(container);
+      };
+    }
 
-    // Create message container
-    const messageContainer = document.createElement('div');
-    messageContainer.id = 'authMessage';
-    messageContainer.className = 'auth-message';
-    containerEl.appendChild(messageContainer);
-
-    container.innerHTML = '';
-    container.appendChild(containerEl);
     this.bindAuthEvents(container);
   }
 
@@ -180,14 +104,8 @@ class AuthUI {
    * @param {HTMLElement} container - Container element with auth forms
    */
   bindAuthEvents(container) {
-    const showSignupLink = UIComponents.DOM.querySelector(
-      '#showSignup',
-      container
-    );
-    const showLoginLink = UIComponents.DOM.querySelector(
-      '#showLogin',
-      container
-    );
+    const showSignupLink = container.querySelector('#showSignup');
+    const showLoginLink = container.querySelector('#showLogin');
 
     if (showSignupLink) {
       showSignupLink.addEventListener('click', e => {
@@ -209,20 +127,22 @@ class AuthUI {
    * @param {HTMLElement} container - Container element for displaying messages
    */
   async handleLogin(container) {
-    const email = UIComponents.DOM.getValue('loginEmail', container);
-    const password = UIComponents.DOM.getValue('loginPassword', container);
+    const emailInput = container.querySelector('#loginEmail');
+    const passwordInput = container.querySelector('#loginPassword');
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
 
     if (!email || !password) {
-      UIMessages.error('Please fill in all fields', container);
+      this.showAuthMessage(container, 'Please fill in all fields', 'error');
       return;
     }
 
     try {
-      UIMessages.loading('Signing in...', container);
+      this.showAuthMessage(container, 'Signing in...', 'loading');
 
       await this.config.signIn(email, password);
 
-      UIMessages.success('Successfully signed in!', container);
+      this.showAuthMessage(container, 'Successfully signed in!', 'success');
 
       // Call the success callback
       if (this.onAuthSuccess) {
@@ -232,7 +152,7 @@ class AuthUI {
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'auth-ui.handleLogin');
-      UIMessages.error(errorResult.userMessage, container);
+      this.showAuthMessage(container, errorResult.userMessage, 'error');
     }
   }
 
@@ -241,30 +161,52 @@ class AuthUI {
    * @param {HTMLElement} container - Container element for displaying messages
    */
   async handleSignup(container) {
-    const email = UIComponents.DOM.getValue('signupEmail', container);
-    const password = UIComponents.DOM.getValue('signupPassword', container);
-    const confirmPassword = UIComponents.DOM.getValue(
-      'confirmPassword',
-      container
-    );
+    const emailInput = container.querySelector('#signupEmail');
+    const passwordInput = container.querySelector('#signupPassword');
+    const confirmPasswordInput = container.querySelector('#confirmPassword');
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = passwordInput ? passwordInput.value : '';
+    const confirmPassword = confirmPasswordInput
+      ? confirmPasswordInput.value
+      : '';
 
     if (!email || !password || !confirmPassword) {
-      UIMessages.error('Please fill in all fields', container);
+      this.showAuthMessage(
+        container,
+        'Please fill in all fields',
+        'error',
+        'signup'
+      );
       return;
     }
 
     if (password !== confirmPassword) {
-      UIMessages.error('Passwords do not match', container);
+      this.showAuthMessage(
+        container,
+        'Passwords do not match',
+        'error',
+        'signup'
+      );
       return;
     }
 
     if (password.length < 6) {
-      UIMessages.error('Password must be at least 6 characters', container);
+      this.showAuthMessage(
+        container,
+        'Password must be at least 6 characters',
+        'error',
+        'signup'
+      );
       return;
     }
 
     try {
-      UIMessages.loading('Creating account...', container);
+      this.showAuthMessage(
+        container,
+        'Creating account...',
+        'loading',
+        'signup'
+      );
 
       const result = await this.config.signUp(email, password);
 
@@ -274,9 +216,11 @@ class AuthUI {
         // since email verification links don't work well with extensions
         try {
           await this.config.signIn(email, password);
-          UIMessages.success(
+          this.showAuthMessage(
+            container,
             'Account created and signed in successfully!',
-            container
+            'success',
+            'signup'
           );
 
           // Call the success callback
@@ -287,9 +231,11 @@ class AuthUI {
           }
         } catch {
           // If auto-signin fails, show the email verification message
-          UIMessages.success(
+          this.showAuthMessage(
+            container,
             'Account created! Please check your email to verify your account, then sign in.',
-            container
+            'success',
+            'signup'
           );
 
           // Switch to login form after successful signup
@@ -298,9 +244,11 @@ class AuthUI {
           }, 3000);
         }
       } else {
-        UIMessages.success(
+        this.showAuthMessage(
+          container,
           'Account created! Please check your email to verify your account.',
-          container
+          'success',
+          'signup'
         );
 
         // Switch to login form after successful signup
@@ -313,7 +261,7 @@ class AuthUI {
         error,
         'auth-ui.handleSignup'
       );
-      UIMessages.error(userMessage, container);
+      this.showAuthMessage(container, userMessage, 'error', 'signup');
     }
   }
 
@@ -352,10 +300,17 @@ class AuthUI {
    * @param {HTMLElement} container - Container element for displaying messages
    * @param {string} message - Message to display
    * @param {string} type - Message type (success, error, loading)
+   * @param {string} [form='login'] - Which form's message container to use ('login' or 'signup')
    */
-  showAuthMessage(container, message, type) {
-    // Use the centralized UIMessages system
-    UIMessages.show(message, type, container);
+  showAuthMessage(container, message, type, form = 'login') {
+    const messageId = form === 'signup' ? '#authMessageSignup' : '#authMessage';
+    const messageContainer = container.querySelector(messageId);
+
+    if (messageContainer) {
+      messageContainer.className = `auth-message ${type}`;
+      messageContainer.innerHTML = message;
+      messageContainer.setAttribute('aria-live', 'polite');
+    }
   }
 
   /**
@@ -387,26 +342,27 @@ class AuthUI {
    * @param {Object} user - User object with profile information
    */
   showUserProfile(container, user) {
-    const profileHTML = `
-      <div class="user-profile">
-        <div class="profile-header">
-          <h3>Welcome back!</h3>
-          <p>Signed in as ${user.email}</p>
-        </div>
-        
-        <div class="profile-actions">
-          <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
-        </div>
-      </div>
-    `;
+    // Show profile container, hide others
+    const loginContainer = container.querySelector('#login-container');
+    const signupContainer = container.querySelector('#signup-container');
+    const profileContainer = container.querySelector('#profile-container');
 
-    container.innerHTML = profileHTML;
+    if (loginContainer) loginContainer.hidden = true;
+    if (signupContainer) signupContainer.hidden = true;
+    if (profileContainer) profileContainer.hidden = false;
 
+    // Update user email in profile
+    const userEmailElement = container.querySelector('#user-email');
+    if (userEmailElement && user && user.email) {
+      userEmailElement.textContent = `Signed in as ${user.email}`;
+    }
+
+    // Bind sign out button
     const signOutBtn = container.querySelector('#signOutBtn');
     if (signOutBtn) {
-      signOutBtn.addEventListener('click', async () => {
+      signOutBtn.onclick = async () => {
         await this.handleSignOut();
-      });
+      };
     }
   }
 }

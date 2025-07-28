@@ -65,7 +65,7 @@ describe('UIMessages Confirm Dialog', () => {
     const options = {
       confirmText: 'Delete',
       cancelText: 'Keep',
-      confirmClass: 'danger'
+      confirmClass: 'danger',
     };
 
     UIMessages.confirm(
@@ -89,26 +89,23 @@ describe('UIMessages Confirm Dialog', () => {
     // Temporarily remove the methods to simulate them not being available
     const originalCreateConfirmDialog = UIComponents.createConfirmDialog;
     const originalShowModal = UIComponents.showModal;
-    
+
     delete UIComponents.createConfirmDialog;
     delete UIComponents.showModal;
-    
+
     const onConfirm = vi.fn();
     const onCancel = vi.fn();
 
-    UIMessages.confirm(
-      'Are you sure?',
-      onConfirm,
-      onCancel,
-      mockContainer
-    );
+    UIMessages.confirm('Are you sure?', onConfirm, onCancel, mockContainer);
 
     // Should fall back to legacy implementation
     // Check that a confirm element was appended to the container
     const confirmEl = mockContainer.querySelector('.ui-confirm');
     expect(confirmEl).toBeTruthy();
-    expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe('Are you sure?');
-    
+    expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe(
+      'Are you sure?'
+    );
+
     // Restore the methods
     UIComponents.createConfirmDialog = originalCreateConfirmDialog;
     UIComponents.showModal = originalShowModal;
@@ -116,17 +113,21 @@ describe('UIMessages Confirm Dialog', () => {
 
   it('should integrate with options page data manager', async () => {
     // Import the actual data manager to test integration
-    const { DataManager } = await import('../../../options/modules/data/data-manager.js');
-    
+    const { DataManager } = await import(
+      '../../../options/modules/data/data-manager.js'
+    );
+
     const mockConfigManager = {
       initialize: vi.fn().mockResolvedValue(undefined),
       getCustomStatusTypes: vi.fn().mockResolvedValue([]),
     };
 
     const mockSupabaseService = {
-      getBookmarks: vi.fn().mockResolvedValue([
-        { id: '1', title: 'Test', url: 'http://test.com' }
-      ]),
+      getBookmarks: vi
+        .fn()
+        .mockResolvedValue([
+          { id: '1', title: 'Test', url: 'http://test.com' },
+        ]),
       deleteBookmark: vi.fn().mockResolvedValue(undefined),
     };
 
@@ -142,7 +143,9 @@ describe('UIMessages Confirm Dialog', () => {
     showModalSpy.mockImplementation(() => {});
 
     // Spy on success message
-    const successSpy = vi.spyOn(UIMessages, 'success').mockImplementation(() => {});
+    const successSpy = vi
+      .spyOn(UIMessages, 'success')
+      .mockImplementation(() => {});
 
     // Call clearData which should show a confirm dialog
     await dataManager.clearData();
@@ -154,7 +157,7 @@ describe('UIMessages Confirm Dialog', () => {
     // Get the onConfirm callback and execute it
     const confirmCall = createConfirmDialogSpy.mock.calls[0];
     const onConfirmCallback = confirmCall[1];
-    
+
     // Execute the confirm callback
     await onConfirmCallback();
 

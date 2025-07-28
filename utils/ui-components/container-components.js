@@ -40,7 +40,7 @@ export class ContainerComponents {
 
     if (title) {
       const header = document.createElement('header');
-      
+
       const titleEl = document.createElement('h2');
       titleEl.textContent = title;
       header.appendChild(titleEl);

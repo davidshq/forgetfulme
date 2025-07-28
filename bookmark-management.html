@@ -22,22 +22,76 @@
         </nav>
       </header>
       
-      <section id="search-interface" aria-labelledby="search-heading">
-        <h2 id="search-heading" class="sr-only">Search and Filter</h2>
-        <!-- Search and filter content loads here -->
-        <div id="search-loading" aria-live="polite">
-          <progress>Loading search interface...</progress>
-        </div>
-      </section>
-      
-      <section id="bookmark-list" aria-labelledby="list-heading">
-        <h2 id="list-heading" class="sr-only">Bookmark List</h2>
-        <!-- Bookmark list content loads here -->
-        <div id="list-loading" aria-live="polite">
-          <progress>Loading bookmarks...</progress>
-          <p>Fetching your saved bookmarks...</p>
-        </div>
-      </section>
+      <!-- Main bookmark management interface -->
+      <div id="main-interface" class="main-content" hidden>
+        <!-- Sidebar with search and bulk actions -->
+        <aside class="sidebar" role="complementary">
+          <!-- Search and Filter Card -->
+          <section id="search-interface" aria-labelledby="search-heading" class="search-card">
+            <h2 id="search-heading">Search & Filter</h2>
+            
+            <form id="search-form" class="search-form">
+              <div class="form-group">
+                <label for="search-query">Search Bookmarks:</label>
+                <input 
+                  type="text" 
+                  id="search-query" 
+                  name="query" 
+                  placeholder="Search by title, URL, or tags..." 
+                  aria-describedby="search-query-help"
+                />
+                <small id="search-query-help" class="help-text">Search through your bookmarks</small>
+              </div>
+              
+              <div class="form-group">
+                <label for="status-filter">Filter by Status:</label>
+                <select 
+                  id="status-filter" 
+                  name="status" 
+                  aria-describedby="status-filter-help"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="read">Read</option>
+                  <option value="good-reference">Good Reference</option>
+                  <option value="low-value">Low Value</option>
+                  <option value="revisit-later">Revisit Later</option>
+                </select>
+                <small id="status-filter-help" class="help-text">Filter bookmarks by their status</small>
+              </div>
+              
+              <button type="submit" class="search-btn primary">Search</button>
+            </form>
+          </section>
+          
+          <!-- Bulk Actions Card -->
+          <section id="bulk-actions" aria-labelledby="bulk-heading" class="bulk-actions-card">
+            <h2 id="bulk-heading">Bulk Actions</h2>
+            <p>Select multiple bookmarks to perform bulk operations like deletion or export.</p>
+            
+            <div class="bulk-actions-buttons">
+              <button id="select-all-btn" class="bulk-btn secondary">Select All</button>
+              <button id="delete-selected-btn" class="bulk-btn contrast">Delete Selected</button>
+              <button id="export-selected-btn" class="bulk-btn secondary">Export Selected</button>
+            </div>
+          </section>
+        </aside>
+        
+        <!-- Main content area -->
+        <section id="bookmark-list" aria-labelledby="list-heading" class="content-area" role="main">
+          <h2 id="list-heading">Bookmarks</h2>
+          
+          <!-- Bookmark list container -->
+          <div id="bookmarks-list" role="list" aria-label="Bookmarks">
+            <!-- Dynamic bookmark items will be inserted here -->
+          </div>
+          
+          <!-- Loading state -->
+          <div id="list-loading" aria-live="polite" hidden>
+            <progress>Loading bookmarks...</progress>
+            <p>Fetching your saved bookmarks...</p>
+          </div>
+        </section>
+      </div>
       
       <section id="setup-interface" aria-labelledby="setup-heading" hidden>
         <h2 id="setup-heading">Setup Required</h2>

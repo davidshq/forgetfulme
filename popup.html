@@ -32,8 +32,122 @@
       
       <section id="auth-interface" aria-labelledby="auth-heading" hidden>
         <h2 id="auth-heading">Authentication Required</h2>
-        <p>Please sign in to continue using ForgetfulMe.</p>
-        <!-- Auth content loads here -->
+        
+        <!-- Login Form -->
+        <div id="login-container" class="auth-container">
+          <header class="auth-header">
+            <h3>Sign in to ForgetfulMe</h3>
+            <p>Access your bookmarks across all devices</p>
+          </header>
+          
+          <form id="loginForm" class="auth-form">
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input 
+                type="email" 
+                id="loginEmail" 
+                name="email" 
+                placeholder="Enter your email" 
+                required 
+                aria-describedby="loginEmail-error"
+              />
+              <small id="loginEmail-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input 
+                type="password" 
+                id="loginPassword" 
+                name="password" 
+                placeholder="Enter your password" 
+                required 
+                aria-describedby="loginPassword-error"
+              />
+              <small id="loginPassword-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <button type="submit" class="auth-btn primary">Sign In</button>
+          </form>
+          
+          <div class="auth-footer">
+            <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+          </div>
+          
+          <div id="authMessage" class="auth-message" role="alert" aria-live="polite"></div>
+        </div>
+        
+        <!-- Signup Form -->
+        <div id="signup-container" class="auth-container" hidden>
+          <header class="auth-header">
+            <h3>Create Account</h3>
+            <p>Start organizing your bookmarks with ForgetfulMe</p>
+          </header>
+          
+          <form id="signupForm" class="auth-form">
+            <div class="form-group">
+              <label for="signupEmail">Email</label>
+              <input 
+                type="email" 
+                id="signupEmail" 
+                name="email" 
+                placeholder="Enter your email" 
+                required 
+                aria-describedby="signupEmail-error"
+              />
+              <small id="signupEmail-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <div class="form-group">
+              <label for="signupPassword">Password</label>
+              <input 
+                type="password" 
+                id="signupPassword" 
+                name="password" 
+                placeholder="Create a password" 
+                required 
+                aria-describedby="signupPassword-help signupPassword-error"
+              />
+              <small id="signupPassword-help" class="help-text">Password must be at least 6 characters</small>
+              <small id="signupPassword-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password</label>
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                name="confirmPassword" 
+                placeholder="Confirm your password" 
+                required 
+                aria-describedby="confirmPassword-error"
+              />
+              <small id="confirmPassword-error" class="error-text" role="alert"></small>
+            </div>
+            
+            <button type="submit" class="auth-btn primary">Create Account</button>
+          </form>
+          
+          <div class="auth-footer">
+            <p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>
+          </div>
+          
+          <div id="authMessageSignup" class="auth-message" role="alert" aria-live="polite"></div>
+        </div>
+        
+        <!-- User Profile Display -->
+        <div id="profile-container" class="auth-container" hidden>
+          <div class="user-profile">
+            <div class="profile-header">
+              <h3>Welcome back!</h3>
+              <p id="user-email">Signed in as user@example.com</p>
+            </div>
+            
+            <div class="profile-actions">
+              <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
+            </div>
+          </div>
+        </div>
       </section>
       
       <section id="setup-interface" aria-labelledby="setup-heading" hidden>

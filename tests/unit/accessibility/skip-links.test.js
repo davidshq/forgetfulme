@@ -109,10 +109,10 @@ describe('Skip Links Accessibility', () => {
     `;
 
     const skipLink = document.querySelector('.skip-link');
-    
+
     // Test that skip link has the correct class for styling
     expect(skipLink.classList.contains('skip-link')).toBe(true);
-    
+
     // The actual CSS styling is tested through visual testing
     // but we can verify the structure is in place
     expect(skipLink.tagName).toBe('A');
@@ -138,7 +138,9 @@ describe('Skip Links Accessibility', () => {
     mainContent.appendChild(dynamicContent);
 
     expect(mainContent.children.length).toBeGreaterThan(1);
-    expect(mainContent.querySelector('h1').textContent).toBe('Dynamically Added Content');
+    expect(mainContent.querySelector('h1').textContent).toBe(
+      'Dynamically Added Content'
+    );
   });
 
   it('should maintain accessibility with multiple navigation elements', () => {
@@ -167,11 +169,15 @@ describe('Skip Links Accessibility', () => {
     const mainContent = document.querySelector('#main-content');
 
     // Test that skip link comes before navigation
-    expect(skipLink.compareDocumentPosition(nav)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    
+    expect(skipLink.compareDocumentPosition(nav)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+
     // Test that navigation comes before main content
-    expect(nav.compareDocumentPosition(mainContent)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    
+    expect(nav.compareDocumentPosition(mainContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+
     // Test that skip link correctly targets main content
     expect(skipLink.getAttribute('href')).toBe('#main-content');
   });

@@ -8,9 +8,7 @@
  * @since 2024-01-01
  */
 
-import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
-import UIMessages from './utils/ui-messages.js';
 
 /**
  * Configuration UI component for ForgetfulMe extension
@@ -37,7 +35,7 @@ class ConfigUI {
   /**
    * Display the configuration form
    * @param {HTMLElement} container - Container element to render the form
-   * @description Creates and displays the Supabase configuration form with help section
+   * @description Shows the Supabase configuration form using static HTML
    */
   showConfigForm(container) {
     // Validate container parameter
@@ -50,75 +48,28 @@ class ConfigUI {
       return;
     }
 
-    // Create container with header
-    const containerEl = UIComponents.createContainer(
-      'Supabase Configuration',
-      'Enter your Supabase project credentials to enable cloud sync',
-      'config-container'
-    );
+    // Show config form container, hide status container
+    const formContainer = container.querySelector('#config-form-container');
+    const statusContainer = container.querySelector('#config-status-container');
+    const loadingContainer = container.querySelector('#config-loading');
 
-    // Create config form
-    const configForm = UIComponents.createForm(
-      'configForm',
-      (_e, _form) => this.handleConfigSubmit(document),
-      [
-        {
-          type: 'url',
-          id: 'supabaseUrl',
-          label: 'Project URL',
-          options: {
-            placeholder: 'https://your-project.supabase.co',
-            required: true,
-            helpText: 'Your Supabase project URL (found in Settings > API)',
-          },
-        },
-        {
-          type: 'text',
-          id: 'supabaseAnonKey',
-          label: 'Anon Public Key',
-          options: {
-            placeholder: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            required: true,
-            helpText: 'Your anon public key (found in Settings > API)',
-          },
-        },
-      ],
-      {
-        submitText: 'Save Configuration',
-        className: 'config-form',
-      }
-    );
+    if (formContainer) formContainer.hidden = false;
+    if (statusContainer) statusContainer.hidden = true;
+    if (loadingContainer) loadingContainer.hidden = true;
 
-    containerEl.appendChild(configForm);
+    // Clear any existing messages
+    const messageContainer = container.querySelector('#configMessage');
+    if (messageContainer) messageContainer.innerHTML = '';
 
-    // Create help section
-    const helpSection = UIComponents.createSection(
-      'How to get your credentials:',
-      'config-help'
-    );
-    helpSection.innerHTML = `
-      <ol>
-        <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create an account</li>
-        <li>Create a new project</li>
-        <li>Go to Settings > API in your project dashboard</li>
-        <li>Copy the "Project URL" and "anon public" key</li>
-        <li>Paste them in the form above</li>
-      </ol>
-      
-      <div class="config-note">
-        <strong>Note:</strong> Your credentials are stored securely in your browser's sync storage and are never shared with anyone.
-      </div>
-    `;
-    containerEl.appendChild(helpSection);
+    // Bind form submission
+    const configForm = container.querySelector('#configForm');
+    if (configForm) {
+      configForm.onsubmit = e => {
+        e.preventDefault();
+        this.handleConfigSubmit(container);
+      };
+    }
 
-    // Create message container
-    const messageContainer = document.createElement('div');
-    messageContainer.id = 'configMessage';
-    messageContainer.className = 'config-message';
-    containerEl.appendChild(messageContainer);
-
-    container.innerHTML = '';
-    container.appendChild(containerEl);
     this.bindConfigEvents(container);
     this.loadCurrentConfig(container);
   }
@@ -154,19 +105,17 @@ class ConfigUI {
       const currentConfig = await this.config.getConfiguration();
 
       if (currentConfig) {
-        const urlInput = UIComponents.DOM.querySelector(
-          '#supabaseUrl',
-          container
-        );
-        const keyInput = UIComponents.DOM.querySelector(
-          '#supabaseAnonKey',
-          container
-        );
+        const urlInput = container.querySelector('#supabaseUrl');
+        const keyInput = container.querySelector('#supabaseAnonKey');
 
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
 
-        UIMessages.info('Current configuration loaded', container);
+        this.showConfigMessage(
+          container,
+          'Current configuration loaded',
+          'info'
+        );
       }
     } catch (error) {
       ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
@@ -182,53 +131,56 @@ class ConfigUI {
    * @description Validates and saves configuration, then tests the connection
    */
   async handleConfigSubmit(container) {
-    const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
-    const keyInput = UIComponents.DOM.querySelector(
-      '#supabaseAnonKey',
-      container
-    );
+    const urlInput = container.querySelector('#supabaseUrl');
+    const keyInput = container.querySelector('#supabaseAnonKey');
 
     const url = urlInput ? urlInput.value.trim() : '';
     const anonKey = keyInput ? keyInput.value.trim() : '';
 
     if (!url || !anonKey) {
-      UIMessages.error('Please fill in all fields', container);
+      this.showConfigMessage(container, 'Please fill in all fields', 'error');
       return;
     }
 
     try {
-      UIMessages.loading('Saving configuration...', container);
+      this.showConfigMessage(container, 'Saving configuration...', 'loading');
 
       const result = await this.config.setConfiguration(url, anonKey);
 
       if (result.success) {
-        UIMessages.success('Configuration saved successfully!', container);
+        this.showConfigMessage(
+          container,
+          'Configuration saved successfully!',
+          'success'
+        );
 
         // Test the configuration
         setTimeout(async () => {
           try {
             await this.config.initialize();
-            UIMessages.success(
+            this.showConfigMessage(
+              container,
               'Configuration test successful! You can now use the extension.',
-              container
+              'success'
             );
           } catch (error) {
             ErrorHandler.handle(error, 'config-ui.testConfiguration');
-            UIMessages.error(
+            this.showConfigMessage(
+              container,
               'Configuration saved but test failed. Please check your credentials.',
-              container
+              'error'
             );
           }
         }, 1000);
       } else {
-        UIMessages.error(`Error: ${result.message}`, container);
+        this.showConfigMessage(container, `Error: ${result.message}`, 'error');
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(
         error,
         'config-ui.handleConfigSubmit'
       );
-      UIMessages.error(errorResult.userMessage, container);
+      this.showConfigMessage(container, errorResult.userMessage, 'error');
     }
   }
 
@@ -237,17 +189,22 @@ class ConfigUI {
    * @param {HTMLElement} container - Container element
    * @param {string} message - Message to display
    * @param {string} type - Message type (success, error, info, loading)
-   * @description Shows user feedback messages using centralized UIMessages system
+   * @description Shows user feedback messages in static HTML message container
    */
   showConfigMessage(container, message, type) {
-    // Use the centralized UIMessages system
-    UIMessages.show(message, type, container);
+    const messageContainer = container.querySelector('#configMessage');
+
+    if (messageContainer) {
+      messageContainer.className = `config-message ${type}`;
+      messageContainer.innerHTML = message;
+      messageContainer.setAttribute('aria-live', 'polite');
+    }
   }
 
   /**
    * Display configuration status
    * @param {HTMLElement} container - Container element
-   * @description Shows current configuration status with test and edit buttons
+   * @description Shows current configuration status using static HTML
    */
   showConfigStatus(container) {
     // Validate container parameter
@@ -260,28 +217,15 @@ class ConfigUI {
       return;
     }
 
-    const statusHTML = `
-      <div class="config-status">
-        <h3>Configuration Status</h3>
-        <div class="status-item">
-          <span class="status-label">Supabase URL:</span>
-          <span class="status-value" id="statusUrl">-</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Anon Key:</span>
-          <span class="status-value" id="statusKey">-</span>
-        </div>
-        <div class="status-item">
-          <span class="status-label">Connection:</span>
-          <span class="status-value" id="statusConnection">-</span>
-        </div>
-        
-        <button id="testConnectionBtn" class="config-btn secondary">Test Connection</button>
-        <button id="editConfigBtn" class="config-btn secondary">Edit Configuration</button>
-      </div>
-    `;
+    // Show status container, hide form container
+    const formContainer = container.querySelector('#config-form-container');
+    const statusContainer = container.querySelector('#config-status-container');
+    const loadingContainer = container.querySelector('#config-loading');
 
-    container.innerHTML = statusHTML;
+    if (formContainer) formContainer.hidden = true;
+    if (statusContainer) statusContainer.hidden = false;
+    if (loadingContainer) loadingContainer.hidden = true;
+
     this.loadConfigStatus(container);
     this.bindStatusEvents(container);
   }
@@ -296,8 +240,8 @@ class ConfigUI {
       const config = await this.config.getConfiguration();
 
       if (config) {
-        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container);
-        const keyEl = UIComponents.DOM.querySelector('#statusKey', container);
+        const urlEl = container.querySelector('#statusUrl');
+        const keyEl = container.querySelector('#statusKey');
 
         if (urlEl) urlEl.textContent = config.url || 'Not set';
         if (keyEl)
@@ -308,12 +252,9 @@ class ConfigUI {
         // Test connection
         await this.testConnection(container);
       } else {
-        const urlEl = UIComponents.DOM.querySelector('#statusUrl', container);
-        const keyEl = UIComponents.DOM.querySelector('#statusKey', container);
-        const connectionEl = UIComponents.DOM.querySelector(
-          '#statusConnection',
-          container
-        );
+        const urlEl = container.querySelector('#statusUrl');
+        const keyEl = container.querySelector('#statusKey');
+        const connectionEl = container.querySelector('#statusConnection');
 
         if (urlEl) urlEl.textContent = 'Not configured';
         if (keyEl) keyEl.textContent = 'Not configured';
@@ -333,10 +274,7 @@ class ConfigUI {
    * @description Attempts to connect to Supabase and updates connection status
    */
   async testConnection(container) {
-    const connectionEl = UIComponents.DOM.querySelector(
-      '#statusConnection',
-      container
-    );
+    const connectionEl = container.querySelector('#statusConnection');
 
     try {
       await this.config.initialize();
@@ -358,22 +296,19 @@ class ConfigUI {
    * @description Sets up event listeners for test connection and edit configuration buttons
    */
   bindStatusEvents(container) {
-    const testBtn = UIComponents.DOM.querySelector(
-      '#testConnectionBtn',
-      container
-    );
-    const editBtn = UIComponents.DOM.querySelector('#editConfigBtn', container);
+    const testBtn = container.querySelector('#testConnectionBtn');
+    const editBtn = container.querySelector('#editConfigBtn');
 
     if (testBtn) {
-      testBtn.addEventListener('click', async () => {
+      testBtn.onclick = async () => {
         await this.testConnection(container);
-      });
+      };
     }
 
     if (editBtn) {
-      editBtn.addEventListener('click', () => {
+      editBtn.onclick = () => {
         this.showConfigForm(container);
-      });
+      };
     }
   }
 }

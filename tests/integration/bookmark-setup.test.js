@@ -88,9 +88,7 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
       await extensionHelper.isElementVisible('.setup-container');
     expect(setupContainer).toBeTruthy();
 
-    const welcomeText = await extensionHelper.getElementText(
-      'header h2'
-    );
+    const welcomeText = await extensionHelper.getElementText('header h2');
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
     const setupSection =

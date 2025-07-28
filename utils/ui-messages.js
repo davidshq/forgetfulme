@@ -48,7 +48,7 @@ class UIMessages {
    */
   static createLiveRegion() {
     if (document.getElementById('status-announcements')) return;
-    
+
     const region = document.createElement('div');
     region.id = 'status-announcements';
     region.setAttribute('aria-live', 'polite');
@@ -66,7 +66,7 @@ class UIMessages {
     this.createLiveRegion();
     const region = document.getElementById('status-announcements');
     region.textContent = message;
-    
+
     // Clear after announcement
     setTimeout(() => {
       region.textContent = '';
@@ -136,7 +136,7 @@ class UIMessages {
       }
 
       container.appendChild(messageEl);
-      
+
       // Announce to screen readers
       this.announceToScreenReader(message);
     } catch {

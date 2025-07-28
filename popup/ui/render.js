@@ -4,7 +4,7 @@ export function showMainInterface(ctx) {
   const loadingIndicator = document.getElementById('loading-indicator');
   const mainInterface = document.getElementById('main-interface');
   const appNavigation = document.getElementById('app-navigation');
-  
+
   if (loadingIndicator) loadingIndicator.hidden = true;
   if (mainInterface) mainInterface.hidden = false;
 
@@ -31,12 +31,12 @@ export function showMainInterface(ctx) {
     appNavigation.innerHTML = '';
     navItems.forEach(item => {
       const button = ctx.UIComponents.createButton(
-        item.text, 
-        item.onClick, 
-        item.className, 
+        item.text,
+        item.onClick,
+        item.className,
         {
           title: item.title,
-          'aria-label': item['aria-label']
+          'aria-label': item['aria-label'],
         }
       );
       appNavigation.appendChild(button);
@@ -84,8 +84,6 @@ export function showMainInterface(ctx) {
     'mark-as-read-card'
   );
 
-  mainContent.appendChild(formCard);
-
   // Create recent entries card
   const recentList = document.createElement('div');
   recentList.id = 'recent-list';
@@ -105,21 +103,20 @@ export function showMainInterface(ctx) {
     cardList.appendChild(recentList);
   }
 
-  mainContent.appendChild(recentCard);
-
-  // Clear existing dynamic content and add form to main interface
+  // Clear existing dynamic content and add both cards to main interface
   if (mainContent) {
     // Clear any existing dynamic content but keep static structure
     const existingContent = mainContent.querySelector('.dynamic-content');
     if (existingContent) {
       existingContent.remove();
     }
-    
-    // Create container for dynamic content
+
+    // Create container for dynamic content - mark as read form first, then recent entries
     const dynamicContainer = document.createElement('div');
     dynamicContainer.className = 'dynamic-content';
     dynamicContainer.appendChild(formCard);
-    
+    dynamicContainer.appendChild(recentCard);
+
     // Add to main interface section
     mainContent.appendChild(dynamicContainer);
   }
@@ -134,23 +131,23 @@ export function showSetupInterface(ctx) {
     const el = document.getElementById(id);
     if (el) el.hidden = true;
   });
-  
+
   const setupInterface = document.getElementById('setup-interface');
   if (setupInterface) {
     setupInterface.hidden = false;
-    
+
     // Clear existing content
     const existingContent = setupInterface.querySelector('.dynamic-content');
     if (existingContent) {
       existingContent.remove();
     }
 
-  // Create setup section
-  const setupSection = ctx.UIComponents.createSection(
-    '🔧 Setup Required',
-    'setup-section'
-  );
-  setupSection.innerHTML = `
+    // Create setup section
+    const setupSection = ctx.UIComponents.createSection(
+      '🔧 Setup Required',
+      'setup-section'
+    );
+    setupSection.innerHTML = `
     <p>To use this extension, you need to configure your Supabase backend:</p>
     <ol>
       <li>Create a Supabase project at <a href="https://supabase.com" target="_blank">supabase.com</a></li>
@@ -159,20 +156,19 @@ export function showSetupInterface(ctx) {
     </ol>
   `;
 
-  const settingsBtn = ctx.UIComponents.createButton(
-    'Open Settings',
-    () => ctx.events.openSettings(ctx),
-    'primary'
-  );
-  setupSection.appendChild(settingsBtn);
-  container.appendChild(setupSection);
+    const settingsBtn = ctx.UIComponents.createButton(
+      'Open Settings',
+      () => ctx.events.openSettings(ctx),
+      'primary'
+    );
+    setupSection.appendChild(settingsBtn);
 
-  // Create how it works section
-  const howItWorksSection = ctx.UIComponents.createSection(
-    '📚 How it works',
-    'setup-section'
-  );
-  howItWorksSection.innerHTML = `
+    // Create how it works section
+    const howItWorksSection = ctx.UIComponents.createSection(
+      '📚 How it works',
+      'setup-section'
+    );
+    howItWorksSection.innerHTML = `
     <ul>
       <li>Click the extension icon to mark the current page</li>
       <li>Choose a status (Read, Good Reference, etc.)</li>
@@ -180,13 +176,13 @@ export function showSetupInterface(ctx) {
       <li>View your recent entries in the popup</li>
     </ul>
   `;
-  
+
     // Create dynamic content container
     const dynamicContainer = document.createElement('div');
     dynamicContainer.className = 'dynamic-content';
     dynamicContainer.appendChild(setupSection);
     dynamicContainer.appendChild(howItWorksSection);
-    
+
     // Add to setup interface
     setupInterface.appendChild(dynamicContainer);
   }
@@ -198,21 +194,21 @@ export function showAuthInterface(ctx) {
     const el = document.getElementById(id);
     if (el) el.hidden = true;
   });
-  
+
   const authInterface = document.getElementById('auth-interface');
   if (authInterface) {
     authInterface.hidden = false;
-    
+
     // Clear existing content
     const existingContent = authInterface.querySelector('.dynamic-content');
     if (existingContent) {
       existingContent.remove();
     }
-    
+
     // Create dynamic content container for auth form
     const dynamicContainer = document.createElement('div');
     dynamicContainer.className = 'dynamic-content';
-    
+
     // Add auth form to dynamic container
     ctx.authUI.showLoginForm(dynamicContainer);
     authInterface.appendChild(dynamicContainer);
