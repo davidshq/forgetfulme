@@ -11,43 +11,51 @@
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
-    
+
     <main id="main-content" class="container">
       <!-- Static semantic structure for accessibility -->
       <header>
         <h1 id="page-title">Bookmark Management</h1>
-        <p id="page-description">View, edit, and organize your saved bookmarks.</p>
+        <p id="page-description">
+          View, edit, and organize your saved bookmarks.
+        </p>
         <nav aria-label="Bookmark actions" id="bookmark-navigation">
           <!-- Navigation will be enhanced by JS -->
         </nav>
       </header>
-      
+
       <!-- Main bookmark management interface -->
       <div id="main-interface" class="main-content" hidden>
         <!-- Sidebar with search and bulk actions -->
         <aside class="sidebar" role="complementary">
           <!-- Search and Filter Card -->
-          <section id="search-interface" aria-labelledby="search-heading" class="search-card">
+          <section
+            id="search-interface"
+            aria-labelledby="search-heading"
+            class="search-card"
+          >
             <h2 id="search-heading">Search & Filter</h2>
-            
+
             <form id="search-form">
               <fieldset>
                 <label for="search-query">Search Bookmarks:</label>
-                <input 
-                  type="text" 
-                  id="search-query" 
-                  name="query" 
-                  placeholder="Search by title, URL, or tags..." 
+                <input
+                  type="text"
+                  id="search-query"
+                  name="query"
+                  placeholder="Search by title, URL, or tags..."
                   aria-describedby="search-query-help"
                 />
-                <small id="search-query-help" class="help-text">Search through your bookmarks</small>
+                <small id="search-query-help" class="help-text"
+                  >Search through your bookmarks</small
+                >
               </fieldset>
-              
+
               <fieldset>
                 <label for="status-filter">Filter by Status:</label>
-                <select 
-                  id="status-filter" 
-                  name="status" 
+                <select
+                  id="status-filter"
+                  name="status"
                   aria-describedby="status-filter-help"
                 >
                   <option value="all">All Statuses</option>
@@ -56,35 +64,53 @@
                   <option value="low-value">Low Value</option>
                   <option value="revisit-later">Revisit Later</option>
                 </select>
-                <small id="status-filter-help" class="help-text">Filter bookmarks by their status</small>
+                <small id="status-filter-help" class="help-text"
+                  >Filter bookmarks by their status</small
+                >
               </fieldset>
-              
+
               <button type="submit">Search</button>
             </form>
           </section>
-          
+
           <!-- Bulk Actions Card -->
-          <section id="bulk-actions" aria-labelledby="bulk-heading" class="bulk-actions-card">
+          <section
+            id="bulk-actions"
+            aria-labelledby="bulk-heading"
+            class="bulk-actions-card"
+          >
             <h2 id="bulk-heading">Bulk Actions</h2>
-            <p>Select multiple bookmarks to perform bulk operations like deletion or export.</p>
-            
+            <p>
+              Select multiple bookmarks to perform bulk operations like deletion
+              or export.
+            </p>
+
             <div class="bulk-actions-buttons">
               <button id="select-all-btn" class="secondary">Select All</button>
-              <button id="delete-selected-btn" class="contrast">Delete Selected</button>
-              <button id="export-selected-btn" class="secondary">Export Selected</button>
+              <button id="delete-selected-btn" class="contrast">
+                Delete Selected
+              </button>
+              <button id="export-selected-btn" class="secondary">
+                Export Selected
+              </button>
             </div>
           </section>
         </aside>
-        
+
         <!-- Main content area -->
-        <section id="bookmark-list" aria-labelledby="list-heading" class="content-area" role="main">
+        <section
+          id="bookmark-list"
+          aria-labelledby="list-heading"
+          class="content-area"
+          role="main"
+        >
           <h2 id="list-heading">Bookmarks</h2>
-          
+
           <!-- Bookmark list container -->
           <div id="bookmarks-list" role="list" aria-label="Bookmarks">
             <!-- Dynamic bookmark items will be inserted here -->
           </div>
-          
+
           <!-- Loading state -->
           <div id="list-loading" aria-live="polite" hidden>
             <progress>Loading bookmarks...</progress>
@@ -92,35 +118,48 @@
           </div>
         </section>
       </div>
-      
+
       <section id="setup-interface" aria-labelledby="setup-heading" hidden>
         <h2 id="setup-heading">Setup Required</h2>
-        <p>Please configure ForgetfulMe in the settings before managing bookmarks.</p>
+        <p>
+          Please configure ForgetfulMe in the settings before managing
+          bookmarks.
+        </p>
         <p><a href="options.html">Go to Settings</a></p>
         <!-- Setup content loads here -->
       </section>
-      
+
       <section id="auth-interface" aria-labelledby="auth-heading" hidden>
         <h2 id="auth-heading">Authentication Required</h2>
         <p>Please sign in to view and manage your bookmarks.</p>
         <!-- Auth content loads here -->
       </section>
-      
+
       <section id="empty-state" aria-labelledby="empty-heading" hidden>
         <h2 id="empty-heading">No Bookmarks Found</h2>
-        <p>You haven't saved any bookmarks yet. Start browsing and use the ForgetfulMe popup to mark pages as read.</p>
+        <p>
+          You haven't saved any bookmarks yet. Start browsing and use the
+          ForgetfulMe popup to mark pages as read.
+        </p>
       </section>
-      
+
       <section id="error-interface" aria-labelledby="error-heading" hidden>
         <h2 id="error-heading">Error Loading Bookmarks</h2>
-        <p id="error-message">Unable to load your bookmarks. Please try refreshing the page.</p>
+        <p id="error-message">
+          Unable to load your bookmarks. Please try refreshing the page.
+        </p>
         <!-- Error content loads here -->
       </section>
     </main>
 
     <!-- ARIA live region for announcements -->
-    <div id="status-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
-    
+    <div
+      id="status-announcements"
+      aria-live="polite"
+      aria-atomic="true"
+      class="sr-only"
+    ></div>
+
     <!-- Load Supabase library -->
     <script src="supabase-js.min.js"></script>
     <!-- Load main bookmark management script (modular version) -->

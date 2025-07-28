@@ -238,14 +238,25 @@ export class ModalComponents {
       delete modal._escapeHandler;
     }
 
+    // Clean up focus trap listener
+    if (modal._tabTrapHandler) {
+      modal.removeEventListener('keydown', modal._tabTrapHandler);
+      delete modal._tabTrapHandler;
+    }
+
     // Restore previous focus
     if (modal._previousFocus && modal._previousFocus.focus) {
       try {
         modal._previousFocus.focus();
       } catch (error) {
-        // Ignore focus restoration errors
+        // Ignore focus restoration errors - element may no longer exist
       }
       delete modal._previousFocus;
+    }
+
+    // Remove temporary tabindex if added
+    if (modal.getAttribute('tabindex') === '-1') {
+      modal.removeAttribute('tabindex');
     }
 
     // Remove modal from DOM
@@ -296,11 +307,13 @@ export class ModalComponents {
       document.body.classList.add('modal-is-open');
     }
 
+    // Create focus trap for accessibility
+    this.createFocusTrap(modal);
+
     // Add escape key listener
     const escapeHandler = e => {
       if (e.key === 'Escape') {
         this.closeModal(modal);
-        document.removeEventListener('keydown', escapeHandler);
       }
     };
     document.addEventListener('keydown', escapeHandler);
@@ -309,11 +322,76 @@ export class ModalComponents {
     modal._escapeHandler = escapeHandler;
 
     // Focus first focusable element in modal
+    this.focusFirstElement(modal);
+  }
+
+  /**
+   * Create focus trap for modal accessibility
+   * @param {HTMLElement} modal - Modal element
+   */
+  static createFocusTrap(modal) {
     const focusableElements = modal.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
+
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Create tab trap handler
+    const tabTrapHandler = e => {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          // Shift + Tab: moving backwards
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          // Tab: moving forwards
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    // Add tab trap listener
+    modal.addEventListener('keydown', tabTrapHandler);
+
+    // Store handler for cleanup
+    modal._tabTrapHandler = tabTrapHandler;
+  }
+
+  /**
+   * Focus the first focusable element in modal
+   * @param {HTMLElement} modal - Modal element
+   */
+  static focusFirstElement(modal) {
+    const focusableElements = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+
     if (focusableElements.length > 0) {
-      focusableElements[0].focus();
+      // Focus first element, with preference for buttons or primary actions
+      const primaryButton = modal.querySelector(
+        'button:not(.secondary):not(.contrast)'
+      );
+      const firstButton = modal.querySelector('button');
+
+      if (primaryButton) {
+        primaryButton.focus();
+      } else if (firstButton) {
+        firstButton.focus();
+      } else {
+        focusableElements[0].focus();
+      }
+    } else {
+      // If no focusable elements, focus the modal itself for keyboard access
+      modal.setAttribute('tabindex', '-1');
+      modal.focus();
     }
   }
 
