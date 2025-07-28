@@ -1016,112 +1016,6 @@ global.UIComponents = {
     card.appendChild(listContainer);
     return card;
   }),
-  createNavigation: vi.fn((items, ariaLabel, className) => {
-    const nav = global.document.createElement('nav');
-    nav.setAttribute('aria-label', ariaLabel || 'Main navigation');
-    nav.className = className || '';
-
-    const ul = global.document.createElement('ul');
-    items.forEach(item => {
-      const li = global.document.createElement('li');
-      if (item.href) {
-        const a = global.document.createElement('a');
-        a.href = item.href;
-        a.textContent = item.text;
-        if (item.active) {
-          a.setAttribute('aria-current', 'page');
-        }
-        li.appendChild(a);
-      } else if (item.onClick) {
-        const button = global.document.createElement('button');
-        button.textContent = item.text;
-        button.className = item.className || 'outline';
-        li.appendChild(button);
-      }
-      ul.appendChild(li);
-    });
-    nav.appendChild(ul);
-    return nav;
-  }),
-  createBreadcrumb: vi.fn((items, className) => {
-    const nav = global.document.createElement('nav');
-    nav.setAttribute('aria-label', 'Breadcrumb');
-    nav.className = `breadcrumb ${className || ''}`.trim();
-
-    const ol = global.document.createElement('ol');
-    items.forEach((item, index) => {
-      const li = global.document.createElement('li');
-      if (index === items.length - 1) {
-        const span = global.document.createElement('span');
-        span.textContent = item.text;
-        span.setAttribute('aria-current', 'page');
-        li.appendChild(span);
-      } else {
-        const a = global.document.createElement('a');
-        a.href = item.href;
-        a.textContent = item.text;
-        li.appendChild(a);
-      }
-      ol.appendChild(li);
-    });
-    nav.appendChild(ol);
-    return nav;
-  }),
-  createNavMenu: vi.fn((items, ariaLabel, className) => {
-    const nav = global.document.createElement('nav');
-    nav.setAttribute('aria-label', ariaLabel || 'Navigation menu');
-    nav.className = `nav-menu ${className || ''}`.trim();
-
-    const ul = global.document.createElement('ul');
-    items.forEach(item => {
-      const li = global.document.createElement('li');
-      if (item.dropdown) {
-        const details = global.document.createElement('details');
-        details.className = 'dropdown';
-        const summary = global.document.createElement('summary');
-        summary.textContent = item.text;
-        details.appendChild(summary);
-        li.appendChild(details);
-      } else if (item.href) {
-        const a = global.document.createElement('a');
-        a.href = item.href;
-        a.textContent = item.text;
-        li.appendChild(a);
-      } else if (item.onClick) {
-        const button = global.document.createElement('button');
-        button.textContent = item.text;
-        button.className = item.className || 'outline';
-        li.appendChild(button);
-      }
-      ul.appendChild(li);
-    });
-    nav.appendChild(ul);
-    return nav;
-  }),
-  createHeaderWithNav: vi.fn((title, navItems, options) => {
-    const header = global.document.createElement('header');
-    header.setAttribute('role', 'banner');
-    header.className = options?.className || '';
-
-    if (title) {
-      const titleEl = global.document.createElement('h1');
-      titleEl.textContent = title;
-      titleEl.setAttribute('id', options?.titleId || 'page-title');
-      header.appendChild(titleEl);
-    }
-
-    if (navItems && navItems.length > 0) {
-      const nav = global.document.createElement('nav');
-      nav.setAttribute(
-        'aria-label',
-        options?.navAriaLabel || 'Main navigation'
-      );
-      nav.className = options?.navClassName || '';
-      header.appendChild(nav);
-    }
-
-    return header;
-  }),
   createModal: vi.fn((title, content, actions, options) => {
     const dialog = global.document.createElement('dialog');
     dialog.className = options?.className || '';
@@ -1243,12 +1137,6 @@ global.UIComponents = {
   }),
   closeModal: vi.fn(modal => {
     modal.classList.remove('ui-modal-show');
-  }),
-  createTooltip: vi.fn((element, text, _position = 'top') => {
-    const tooltip = global.document.createElement('div');
-    tooltip.className = 'ui-tooltip';
-    tooltip.textContent = text;
-    return tooltip;
   }),
   DOM: {
     getElement: vi.fn(id => {

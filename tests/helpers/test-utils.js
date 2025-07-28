@@ -149,12 +149,9 @@ export const createMockUIComponents = () => ({
   createLoadingState: vi.fn(),
   setBusyState: vi.fn(),
   createStatusIndicator: vi.fn(),
-  createTabs: vi.fn(),
-  switchTab: vi.fn(),
   createModal: vi.fn(),
   showModal: vi.fn(),
   closeModal: vi.fn(),
-  createTooltip: vi.fn(),
   createConfirmDialog: vi.fn(),
   createFormField: vi.fn(),
   COMPONENT_TYPES: {
@@ -426,8 +423,7 @@ export const setupModuleMocks = () => {
       createModal: vi.fn(),
       showModal: vi.fn(),
       closeModal: vi.fn(),
-      createTooltip: vi.fn(),
-      createConfirmDialog: vi.fn(),
+          createConfirmDialog: vi.fn(),
       createFormField: vi.fn(),
       COMPONENT_TYPES: {
         BUTTON: 'button',
