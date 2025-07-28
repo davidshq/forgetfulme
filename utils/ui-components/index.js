@@ -98,7 +98,6 @@ export class UIComponents {
   static createLoadingState = ModalComponents.createLoadingState;
   static setBusyState = ModalComponents.setBusyState;
   static createStatusIndicator = ModalComponents.createStatusIndicator;
-
 }
 
 // Export individual component classes for modular usage

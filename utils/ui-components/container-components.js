@@ -339,7 +339,6 @@ export class ContainerComponents {
     return article;
   }
 
-
   /**
    * Create a responsive grid layout
    * @param {Array} items - Array of items to display in grid (can be DOM nodes or text objects)

@@ -875,7 +875,6 @@ describe('UIComponents', () => {
       });
     });
 
-
     describe('createModal', () => {
       test('should create modal with dialog element', () => {
         const content = document.createElement('div');
@@ -1149,6 +1148,5 @@ describe('UIComponents', () => {
         expect(indicator.querySelector('.status-icon').textContent).toBe('⚠');
       });
     });
-
   });
 });

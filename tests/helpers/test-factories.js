@@ -9,10 +9,7 @@
  */
 
 import { vi } from 'vitest';
-import {
-  setupTestWithMocks,
-  createMockElement,
-} from './test-utils.js';
+import { setupTestWithMocks, createMockElement } from './test-utils.js';
 
 /**
  * Test factories for creating specialized test instances

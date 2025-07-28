@@ -395,7 +395,6 @@ export class ModalComponents {
     }
   }
 
-
   /**
    * Create a Pico progress indicator (indeterminate)
    * @param {string} ariaLabel - ARIA label for accessibility
@@ -513,5 +512,4 @@ export class ModalComponents {
 
     return indicator;
   }
-
 }

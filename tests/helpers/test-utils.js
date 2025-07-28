@@ -423,7 +423,7 @@ export const setupModuleMocks = () => {
       createModal: vi.fn(),
       showModal: vi.fn(),
       closeModal: vi.fn(),
-          createConfirmDialog: vi.fn(),
+      createConfirmDialog: vi.fn(),
       createFormField: vi.fn(),
       COMPONENT_TYPES: {
         BUTTON: 'button',
