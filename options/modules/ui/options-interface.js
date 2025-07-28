@@ -132,10 +132,15 @@ export class OptionsInterface {
 
     const statusCard = UIComponents.createCard(
       '🏷️ Custom Status Types',
-      addStatusContainer.outerHTML,
+      '',
       '',
       'status-card'
     );
+    // Append the actual elements, not their HTML copies
+    const cardContent = statusCard.querySelector('div');
+    if (cardContent) {
+      cardContent.appendChild(addStatusContainer);
+    }
     mainContainer.appendChild(statusCard);
 
     // Create data management card
@@ -202,22 +207,8 @@ export class OptionsInterface {
    * @description Sets up click and keyboard event handlers
    */
   bindEvents() {
-    // Only bind events if elements exist using safe DOM utilities
-    const addStatusBtn = UIComponents.DOM.getElement('add-status-btn');
-    if (addStatusBtn) {
-      addStatusBtn.addEventListener('click', () =>
-        this.dataManager.addStatusType()
-      );
-    }
-
-    const newStatusInput = UIComponents.DOM.getElement('new-status');
-    if (newStatusInput) {
-      newStatusInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          this.dataManager.addStatusType();
-        }
-      });
-    }
+    // Form submission is already handled by the form's onSubmit callback
+    // No need for additional event bindings for the status form
 
     const exportDataBtn = UIComponents.DOM.getElement('export-data-btn');
     if (exportDataBtn) {

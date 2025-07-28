@@ -55,7 +55,9 @@ export class DataManager {
    * @description Populates the status types list with current data
    */
   loadStatusTypes(statusTypes) {
-    const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
+    const statusTypesListEl = UIComponents.DOM.getElement(
+      'status-list-container'
+    );
     if (!statusTypesListEl) return;
 
     statusTypesListEl.innerHTML = '';
@@ -100,7 +102,7 @@ export class DataManager {
    */
   async addStatusType() {
     // Safely get the status input value
-    const statusValue = UIComponents.DOM.getValue('new-status');
+    const statusValue = UIComponents.DOM.getValue('new-status-name');
     if (!statusValue) {
       UIMessages.error('Please enter a status type', this.appContainer);
       return;
@@ -118,7 +120,8 @@ export class DataManager {
       await this.configManager.addCustomStatusType(status);
 
       // Clear input safely
-      UIComponents.DOM.setValue('new-status', '');
+      UIComponents.DOM.setValue('new-status-name', '');
+      UIComponents.DOM.setValue('new-status-description', '');
 
       const customStatusTypes = await this.configManager.getCustomStatusTypes();
       this.loadStatusTypes(customStatusTypes);
