@@ -1,7 +1,12 @@
 /**
- * @fileoverview Data management module for options page
- * @module data-manager
- * @description Handles data operations, statistics, and import/export functionality
+ * @fileoverview Data management module for ForgetfulMe options page
+ * @module options/modules/data/data-manager
+ * @description Handles bookmark data operations, usage statistics, custom status types, and import/export functionality
+ * @since 1.0.0
+ * @requires utils/ui-components
+ * @requires utils/error-handler
+ * @requires utils/ui-messages
+ * @requires utils/formatters
  */
 
 import UIComponents from '../../../utils/ui-components.js';
@@ -12,16 +17,17 @@ import { formatStatus } from '../../../utils/formatters.js';
 /**
  * Data manager for options page
  * @class DataManager
- * @description Manages data operations, statistics, and import/export
+ * @description Manages bookmark data operations, calculates usage statistics, handles custom status types, and provides import/export functionality
+ * @since 1.0.0
  */
 export class DataManager {
   /**
    * Initialize the data manager
    * @constructor
-   * @param {Object} dependencies - Required dependencies
-   * @param {Object} dependencies.configManager - Config manager instance
-   * @param {Object} dependencies.supabaseService - Supabase service instance
-   * @param {Object} dependencies.appContainer - App container element
+   * @param {Object} dependencies - Required dependencies for data operations
+   * @param {ConfigManager} dependencies.configManager - Configuration manager for custom status types
+   * @param {SupabaseService} dependencies.supabaseService - Supabase service for bookmark operations
+   * @param {HTMLElement} dependencies.appContainer - Main app container for displaying messages
    */
   constructor(dependencies) {
     this.configManager = dependencies.configManager;
@@ -31,7 +37,9 @@ export class DataManager {
 
   /**
    * Load and display application data
-   * @description Fetches bookmarks and status types, updates UI
+   * @description Fetches bookmarks and custom status types from storage, then updates the UI
+   * @returns {Promise<void>}
+   * @async
    */
   async loadData() {
     try {
@@ -51,8 +59,10 @@ export class DataManager {
 
   /**
    * Load status types into the UI
-   * @param {Array} statusTypes - Array of custom status types
-   * @description Populates the status types list with current data
+   * @param {string[]} statusTypes - Array of custom status type strings
+   * @description Populates the status types list container with formatted status items
+   * @returns {void}
+   * @private
    */
   loadStatusTypes(statusTypes) {
     const statusTypesListEl = UIComponents.DOM.getElement(
@@ -98,7 +108,9 @@ export class DataManager {
 
   /**
    * Add a new status type
-   * @description Validates input and adds new custom status type
+   * @description Validates user input from form and adds new custom status type to configuration
+   * @returns {Promise<void>}
+   * @async
    */
   async addStatusType() {
     // Safely get the status input value
@@ -134,8 +146,10 @@ export class DataManager {
 
   /**
    * Remove a status type
-   * @param {string} status - Status type to remove
-   * @description Removes specified status type from configuration
+   * @param {string} status - Status type identifier to remove
+   * @description Removes the specified status type from user configuration and updates UI
+   * @returns {Promise<void>}
+   * @async
    */
   async removeStatusType(status) {
     try {
@@ -156,9 +170,11 @@ export class DataManager {
 
   /**
    * Load statistics into the UI
-   * @param {Array} bookmarks - Array of bookmark objects
-   * @param {Array} statusTypes - Array of status type objects
-   * @description Updates statistics display with current data
+   * @param {Object[]} bookmarks - Array of bookmark objects with read_status properties
+   * @param {string[]} statusTypes - Array of custom status type strings
+   * @description Calculates and updates usage statistics display including totals and most used status
+   * @returns {void}
+   * @private
    */
   loadStatistics(bookmarks, statusTypes) {
     // Safely update statistics using DOM utilities
@@ -197,7 +213,9 @@ export class DataManager {
 
   /**
    * Export application data
-   * @description Exports all data to JSON file for backup
+   * @description Exports all bookmarks and configuration data to a downloadable JSON file for backup
+   * @returns {Promise<void>}
+   * @async
    */
   async exportData() {
     try {
@@ -225,8 +243,10 @@ export class DataManager {
 
   /**
    * Import application data
-   * @param {Event} event - File input change event
-   * @description Imports data from JSON file
+   * @param {Event} event - File input change event containing the selected file
+   * @description Imports bookmark and configuration data from a JSON file and refreshes the UI
+   * @returns {Promise<void>}
+   * @async
    */
   async importData(event) {
     const file = event.target.files[0];

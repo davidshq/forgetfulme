@@ -1,7 +1,11 @@
 /**
- * @fileoverview Options page initialization module
- * @module options-initializer
- * @description Handles options page initialization, DOM setup, and service initialization
+ * @fileoverview Options page initialization module for ForgetfulMe extension
+ * @module options/modules/initialization/options-initializer
+ * @description Handles options page DOM setup, service initialization, and app state determination
+ * @since 1.0.0
+ * @requires utils/ui-components
+ * @requires utils/error-handler
+ * @requires utils/ui-messages
  */
 
 import UIComponents from '../../../utils/ui-components.js';
@@ -11,16 +15,17 @@ import UIMessages from '../../../utils/ui-messages.js';
 /**
  * Options page initializer class
  * @class OptionsInitializer
- * @description Manages options page initialization and service setup
+ * @description Coordinates the initialization sequence for the options page including DOM setup and service configuration
+ * @since 1.0.0
  */
 export class OptionsInitializer {
   /**
    * Initialize the options page initializer
    * @constructor
-   * @param {Object} dependencies - Required dependencies
-   * @param {Object} dependencies.supabaseConfig - Supabase configuration
-   * @param {Object} dependencies.supabaseService - Supabase service
-   * @param {Object} dependencies.authStateManager - Auth state manager
+   * @param {Object} dependencies - Required service dependencies
+   * @param {SupabaseConfig} dependencies.supabaseConfig - Supabase configuration manager
+   * @param {SupabaseService} dependencies.supabaseService - Supabase data service
+   * @param {AuthStateManager} dependencies.authStateManager - Authentication state manager
    */
   constructor(dependencies) {
     this.supabaseConfig = dependencies.supabaseConfig;
@@ -31,8 +36,9 @@ export class OptionsInitializer {
 
   /**
    * Initialize the options page asynchronously
-   * @description Sets up DOM elements and app initialization
+   * @description Waits for DOM ready, sets up elements, and initializes the application
    * @returns {Promise<void>}
+   * @async
    */
   async initializeAsync() {
     try {

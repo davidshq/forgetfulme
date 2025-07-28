@@ -39,7 +39,7 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 
 **Chrome Extension Architecture**:
 - `popup.js` - Main popup interface (uses `popup/` modules)
-- `options.js` - Settings page (uses `options/` modules)  
+- `options/` - Modular settings page architecture  
 - `background.js` - Service worker for background operations
 - `bookmark-management.html` - Dedicated bookmark management interface
 

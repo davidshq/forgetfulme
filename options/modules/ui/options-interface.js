@@ -1,7 +1,9 @@
 /**
- * @fileoverview Options interface module for options page
- * @module options-interface
- * @description Handles main interface management and event binding
+ * @fileoverview Options interface module for ForgetfulMe options page
+ * @module options/modules/ui/options-interface
+ * @description Manages the main user interface, creates dynamic cards, and handles event binding
+ * @since 1.0.0
+ * @requires utils/ui-components
  */
 
 import UIComponents from '../../../utils/ui-components.js';
@@ -9,16 +11,17 @@ import UIComponents from '../../../utils/ui-components.js';
 /**
  * Options interface manager for options page
  * @class OptionsInterface
- * @description Manages main interface and event binding
+ * @description Manages the creation of dynamic UI cards and handles user interactions
+ * @since 1.0.0
  */
 export class OptionsInterface {
   /**
    * Initialize the options interface manager
    * @constructor
-   * @param {Object} dependencies - Required dependencies
-   * @param {Object} dependencies.appContainer - App container element
-   * @param {Object} dependencies.configUI - Config UI manager
-   * @param {Object} dependencies.dataManager - Data manager instance
+   * @param {Object} dependencies - Required dependencies for the interface
+   * @param {HTMLElement} dependencies.appContainer - Main app container element
+   * @param {ConfigUI} dependencies.configUI - Configuration UI manager instance
+   * @param {DataManager} dependencies.dataManager - Data manager instance for handling data operations
    */
   constructor(dependencies) {
     this.appContainer = dependencies.appContainer;
@@ -28,24 +31,64 @@ export class OptionsInterface {
 
   /**
    * Show main application interface
-   * @description Creates and displays the main options interface with all cards
+   * @description Shows the main options interface using static HTML sections and adds dynamic cards where needed
+   * @returns {void}
+   * @fires OptionsInterface#interfaceReady
    */
   showMainInterface() {
-    // Create main container
-    const mainContainer = UIComponents.createContainer(
-      'ForgetfulMe Settings',
-      '',
-      'main-container'
-    );
+    // Show the static config interface
+    const configInterface = document.getElementById('config-interface');
+    if (configInterface) {
+      configInterface.hidden = false;
+      // Show the configuration status using static HTML
+      this.configUI.showConfigStatus();
+    }
 
-    // Create config card
-    const configCard = UIComponents.createCard(
-      '⚙️ Supabase Configuration',
-      '<div id="config-status-container"></div>',
-      '',
-      'config-card'
-    );
-    mainContainer.appendChild(configCard);
+    // Show the static settings interface
+    const settingsInterface = document.getElementById('settings-interface');
+    if (settingsInterface) {
+      settingsInterface.hidden = false;
+    }
+
+    // Hide other interfaces
+    const authInterface = document.getElementById('auth-interface');
+    const errorInterface = document.getElementById('error-interface');
+    if (authInterface) authInterface.hidden = true;
+    if (errorInterface) errorInterface.hidden = true;
+
+    // Add dynamic content to the existing static sections
+    this.populateStaticSections();
+  }
+
+  /**
+   * Populate static HTML sections with dynamic content
+   * @description Adds dynamic cards to existing static sections in the HTML
+   * @returns {void}
+   * @private
+   */
+  populateStaticSections() {
+    // Populate stats section
+    this.populateStatsSection();
+    
+    // Populate status settings section
+    this.populateStatusSection();
+    
+    // Populate data settings section
+    this.populateDataSection();
+    
+    // Add bookmark management link
+    this.addBookmarkManagementLink();
+  }
+
+  /**
+   * Populate the statistics section with usage stats
+   * @description Creates and adds statistics display to the static stats section
+   * @returns {void}
+   * @private
+   */
+  populateStatsSection() {
+    const statsSection = document.getElementById('stats-section');
+    if (!statsSection) return;
 
     // Create stats card with better structure
     const statsContainer = document.createElement('div');
@@ -79,15 +122,25 @@ export class OptionsInterface {
       statsContainer.appendChild(statItem);
     });
 
-    const statsCard = UIComponents.createCard(
-      '📈 Usage Statistics',
-      statsContainer.outerHTML,
-      '',
-      'stats-card'
-    );
-    mainContainer.appendChild(statsCard);
+    // Clear existing content and add the stats container
+    const existingContent = statsSection.querySelector('.stats-grid');
+    if (existingContent) {
+      existingContent.remove();
+    }
+    statsSection.appendChild(statsContainer);
+  }
 
-    // Create status types card
+  /**
+   * Populate the status settings section with custom status form and list
+   * @description Creates and adds status management UI to the static status section
+   * @returns {void}
+   * @private
+   */
+  populateStatusSection() {
+    const statusSection = document.getElementById('status-settings');
+    if (!statusSection) return;
+
+    // Create status form
     const addStatusContainer = document.createElement('div');
     addStatusContainer.className = 'add-status';
 
@@ -130,116 +183,112 @@ export class OptionsInterface {
 
     addStatusContainer.appendChild(statusListContainer);
 
-    const statusCard = UIComponents.createCard(
-      '🏷️ Custom Status Types',
-      addStatusContainer,
-      '',
-      'status-card'
-    );
-    mainContainer.appendChild(statusCard);
+    // Clear existing content and add the status container
+    const existingContent = statusSection.querySelector('.add-status');
+    if (existingContent) {
+      existingContent.remove();
+    }
+    statusSection.appendChild(addStatusContainer);
+  }
 
-    // Create data management card
+  /**
+   * Populate the data settings section with data management actions
+   * @description Creates and adds data management UI to the static data section
+   * @returns {void}
+   * @private
+   */
+  populateDataSection() {
+    const dataSection = document.getElementById('data-settings');
+    if (!dataSection) return;
+
+    // Create data management actions
+    const dataActionsContainer = document.createElement('div');
+    dataActionsContainer.className = 'data-actions';
+
     const dataActions = [
       {
         text: 'Export All Data',
         onClick: () => this.dataManager.exportData(),
-        className: 'secondary',
+        className: 'secondary export-data-btn',
+        id: 'export-data-btn'
       },
       {
         text: 'Import Data',
         onClick: () => this.importData(),
-        className: 'secondary',
+        className: 'secondary import-data-btn',
+        id: 'import-data-btn'
       },
       {
         text: 'Clear All Data',
         onClick: () => this.dataManager.clearData(),
-        className: 'contrast',
+        className: 'contrast clear-data-btn',
+        id: 'clear-data-btn'
       },
     ];
 
-    const dataCard = UIComponents.createCardWithActions(
-      '💾 Data Management',
-      '<p>Export your bookmarks to JSON format, import data from a backup, or clear all stored data.</p>',
-      dataActions,
-      'data-card'
-    );
-    mainContainer.appendChild(dataCard);
+    dataActions.forEach(action => {
+      const button = UIComponents.createButton(
+        action.text,
+        action.onClick,
+        action.className.includes('contrast') ? 'contrast' : 'secondary',
+        {
+          id: action.id
+        }
+      );
+      dataActionsContainer.appendChild(button);
+    });
 
-    // Create bookmark management card
-    const manageBookmarksBtn = UIComponents.createButton(
-      '📚 Manage Bookmarks',
-      () => this.openBookmarkManagement(),
-      'secondary',
-      {
-        id: 'manage-bookmarks-btn',
-        title: 'Open bookmark management interface',
-      }
-    );
+    // Add hidden file input for import
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.id = 'import-file';
+    fileInput.accept = '.json';
+    fileInput.style.display = 'none';
+    fileInput.addEventListener('change', (e) => this.dataManager.importData(e));
+    dataActionsContainer.appendChild(fileInput);
 
-    const bookmarkCard = UIComponents.createCard(
-      '📚 Bookmark Management',
-      '<p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>',
-      manageBookmarksBtn.outerHTML,
-      'bookmark-card'
-    );
-    mainContainer.appendChild(bookmarkCard);
-
-    // Assemble the interface
-    this.appContainer.innerHTML = '';
-    this.appContainer.appendChild(mainContainer);
-
-    // Show configuration status
-    const configStatusContainer = document.getElementById(
-      'config-status-container'
-    );
-    if (configStatusContainer) {
-      this.configUI.showConfigStatus(configStatusContainer);
+    // Clear existing content and add the data container
+    const existingContent = dataSection.querySelector('.data-actions');
+    if (existingContent) {
+      existingContent.remove();
     }
+    dataSection.appendChild(dataActionsContainer);
   }
 
   /**
-   * Bind event listeners to DOM elements
-   * @description Sets up click and keyboard event handlers
+   * Add bookmark management link to settings interface
+   * @description Adds a bookmark management button to the interface
+   * @returns {void}
+   * @private
    */
-  bindEvents() {
-    // Form submission is already handled by the form's onSubmit callback
-    // No need for additional event bindings for the status form
+  addBookmarkManagementLink() {
+    const settingsInterface = document.getElementById('settings-interface');
+    if (!settingsInterface) return;
 
-    const exportDataBtn = UIComponents.DOM.getElement('export-data-btn');
-    if (exportDataBtn) {
-      exportDataBtn.addEventListener('click', () =>
-        this.dataManager.exportData()
-      );
+    // Create bookmark management section
+    const bookmarkSection = document.createElement('section');
+    bookmarkSection.innerHTML = `
+      <h3>Bookmark Management</h3>
+      <p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>
+      <button id="manage-bookmarks-btn" class="secondary" title="Open bookmark management interface">
+        📚 Manage Bookmarks
+      </button>
+    `;
+
+    const manageBtn = bookmarkSection.querySelector('#manage-bookmarks-btn');
+    if (manageBtn) {
+      manageBtn.addEventListener('click', () => this.openBookmarkManagement());
     }
 
-    const importDataBtn = UIComponents.DOM.getElement('import-data-btn');
-    if (importDataBtn) {
-      importDataBtn.addEventListener('click', () => {
-        const importFileEl = UIComponents.DOM.getElement('import-file');
-        if (importFileEl) {
-          importFileEl.click();
-        }
-      });
-    }
-
-    const importFile = UIComponents.DOM.getElement('import-file');
-    if (importFile) {
-      importFile.addEventListener('change', e =>
-        this.dataManager.importData(e)
-      );
-    }
-
-    const clearDataBtn = UIComponents.DOM.getElement('clear-data-btn');
-    if (clearDataBtn) {
-      clearDataBtn.addEventListener('click', () =>
-        this.dataManager.clearData()
-      );
-    }
+    settingsInterface.appendChild(bookmarkSection);
   }
+
 
   /**
    * Import data action
-   * @description Triggers file input for data import
+   * @description Triggers the hidden file input element to allow user to select import file
+   * @returns {void}
+   * @private
    */
   importData() {
     const importFileEl = UIComponents.DOM.getElement('import-file');
@@ -248,9 +297,11 @@ export class OptionsInterface {
     }
   }
 
+
   /**
    * Open bookmark management interface in a new tab
-   * @description Opens the bookmark management interface in a new tab for better usability
+   * @description Creates a new browser tab with the bookmark management interface
+   * @returns {void}
    */
   openBookmarkManagement() {
     // Open bookmark management page in a new tab

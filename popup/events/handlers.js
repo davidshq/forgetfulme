@@ -1,5 +1,4 @@
 // Event handlers for popup
-export function bindEvents(_ctx) {}
 export async function markAsRead(ctx) {
   try {
     // Validate context

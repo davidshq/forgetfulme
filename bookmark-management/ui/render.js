@@ -128,12 +128,6 @@ export function displayBookmarks({
   onDelete,
   onOpen,
 }) {
-  console.log('displayBookmarks called with:', {
-    bookmarksCount: bookmarks?.length,
-    hasOnEdit: !!onEdit,
-    hasOnDelete: !!onDelete,
-    hasOnOpen: !!onOpen,
-  });
   const bookmarksList = document.getElementById('bookmarks-list');
   if (!bookmarksList) return;
   bookmarksList.innerHTML = '';
@@ -240,7 +234,6 @@ export function createBookmarkListItem({
   editBtn.setAttribute('title', 'Edit bookmark');
   if (onEdit) {
     editBtn.addEventListener('click', () => {
-      console.log('Edit button clicked for:', bookmark);
       onEdit(bookmark);
     });
   } else {
@@ -254,7 +247,6 @@ export function createBookmarkListItem({
   deleteBtn.setAttribute('title', 'Delete bookmark');
   if (onDelete) {
     deleteBtn.addEventListener('click', () => {
-      console.log('Delete button clicked for:', bookmark.id, bookmark.title);
       onDelete(bookmark.id, bookmark.title);
     });
   } else {
@@ -268,7 +260,6 @@ export function createBookmarkListItem({
   openBtn.setAttribute('title', 'Open bookmark in new tab');
   if (onOpen) {
     openBtn.addEventListener('click', () => {
-      console.log('Open button clicked for:', bookmark.url);
       onOpen(bookmark.url);
     });
   } else {

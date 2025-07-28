@@ -1,7 +1,12 @@
 /**
- * @fileoverview Main options page entry point
- * @module options
- * @description Orchestrates all options page modules and provides main entry point
+ * @fileoverview Main options page entry point for ForgetfulMe extension
+ * @module options/index
+ * @description Orchestrates all options page modules, manages dependencies, and provides the main entry point
+ * @since 1.0.0
+ * @requires options/modules/initialization/options-initializer
+ * @requires options/modules/auth/auth-state-manager
+ * @requires options/modules/data/data-manager
+ * @requires options/modules/ui/options-interface
  */
 
 import { OptionsInitializer } from './modules/initialization/options-initializer.js';
@@ -15,7 +20,6 @@ import SupabaseService from '../supabase-service.js';
 import AuthUI from '../auth-ui.js';
 import BaseAuthStateManager from '../utils/auth-state-manager.js';
 import ConfigUI from '../config-ui.js';
-import UIMessages from '../utils/ui-messages.js';
 import UIComponents from '../utils/ui-components.js';
 
 // Make UIComponents globally available for UIMessages
@@ -58,7 +62,9 @@ class ForgetfulMeOptions {
 
   /**
    * Initialize all modules with their dependencies
-   * @description Sets up all modules with proper dependency injection
+   * @description Sets up all modules with proper dependency injection for loose coupling
+   * @returns {void}
+   * @private
    */
   initializeModules() {
     // Initialize the options initializer
@@ -92,7 +98,9 @@ class ForgetfulMeOptions {
 
   /**
    * Initialize the options page asynchronously
-   * @description Sets up DOM elements, app initialization, and auth state
+   * @description Sets up DOM elements, initializes the application, and configures auth state listeners
+   * @returns {Promise<void>}
+   * @async
    */
   async initializeAsync() {
     try {
@@ -123,7 +131,10 @@ class ForgetfulMeOptions {
 
   /**
    * Show the appropriate interface based on initialization result
-   * @param {string} interfaceType - Type of interface to show (config, auth, main)
+   * @param {'config'|'auth'|'main'} interfaceType - Type of interface to show
+   * @description Routes to the appropriate interface based on app state
+   * @returns {void}
+   * @private
    */
   showInterface(interfaceType) {
     switch (interfaceType) {
@@ -144,7 +155,10 @@ class ForgetfulMeOptions {
 
   /**
    * Handle authentication state changes
-   * @param {Object|null} session - Current session object or null
+   * @param {Object|null} session - Current session object or null if not authenticated
+   * @description Responds to authentication state changes by updating the UI
+   * @returns {void}
+   * @private
    */
   handleAuthStateChange(session) {
     this.authManager.handleAuthStateChange(
@@ -156,15 +170,31 @@ class ForgetfulMeOptions {
 
   /**
    * Show configuration interface
-   * @description Displays Supabase configuration form
+   * @description Hides other interfaces and displays the Supabase configuration form
+   * @returns {void}
    */
   showConfigInterface() {
-    this.configUI.showConfigForm(this.appContainer);
+    // Hide other interfaces
+    const authInterface = document.getElementById('auth-interface');
+    const settingsInterface = document.getElementById('settings-interface');
+    const errorInterface = document.getElementById('error-interface');
+    
+    if (authInterface) authInterface.hidden = true;
+    if (settingsInterface) settingsInterface.hidden = true;
+    if (errorInterface) errorInterface.hidden = true;
+    
+    // Show config interface
+    const configInterface = document.getElementById('config-interface');
+    if (configInterface) {
+      configInterface.hidden = false;
+      this.configUI.showConfigForm(configInterface);
+    }
   }
 
   /**
    * Show authentication interface
-   * @description Displays login form for user authentication
+   * @description Delegates to auth manager to display the login form
+   * @returns {void}
    */
   showAuthInterface() {
     this.authManager.showAuthInterface();
@@ -172,16 +202,18 @@ class ForgetfulMeOptions {
 
   /**
    * Show main application interface
-   * @description Creates and displays the main options interface
+   * @description Displays the main options interface with all cards and binds events
+   * @returns {void}
    */
   showMainInterface() {
     this.optionsInterface.showMainInterface();
-    this.optionsInterface.bindEvents();
   }
 
   /**
    * Handle successful authentication
-   * @description Updates auth state and shows main interface
+   * @description Callback for successful authentication that updates state and UI
+   * @returns {void}
+   * @private
    */
   onAuthSuccess() {
     this.authManager.onAuthSuccess(
@@ -192,33 +224,15 @@ class ForgetfulMeOptions {
 
   /**
    * Load and display application data
-   * @description Fetches bookmarks and status types, updates UI
+   * @description Delegates to data manager to fetch and display bookmarks and status types
+   * @returns {Promise<void>}
+   * @async
    */
   async loadData() {
     await this.dataManager.loadData();
   }
 
-  /**
-   * Open bookmark management interface in a new tab
-   * @description Opens the bookmark management interface in a new tab for better usability
-   */
-  openBookmarkManagement() {
-    // Open bookmark management page in a new tab
-    chrome.tabs.create({
-      url: chrome.runtime.getURL('bookmark-management.html'),
-    });
-  }
 
-  /**
-   * Show message to user
-   * @param {string} message - Message to display
-   * @param {string} type - Message type (success, error, info, loading)
-   * @description Shows user feedback messages using centralized UIMessages system
-   */
-  showMessage(message, type) {
-    // Use the centralized UIMessages system
-    UIMessages.show(message, type, this.appContainer);
-  }
 }
 
 // Initialize options page immediately (DOM ready is handled in constructor)

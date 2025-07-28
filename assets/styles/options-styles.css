@@ -70,15 +70,41 @@ article.bookmark-card {
   margin-bottom: 1rem;
 }
 
+
 .config-status {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
 }
 
-.config-status-icon {
-  font-size: 1.5rem;
+.config-status h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
 }
+
+.config-status .status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--fm-border-color);
+}
+
+.config-status .status-item:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.config-status .status-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.config-status .status-actions button {
+  flex: 1;
+}
+
 
 .config-status.connected {
   background: var(--fm-success-bg);
@@ -200,20 +226,6 @@ article.bookmark-card {
   background: var(--pico-secondary-background);
 }
 
-.status-item-info {
-  flex: 1;
-}
-
-.status-item-name {
-  font-weight: 600;
-  color: var(--fm-text-color);
-  margin-bottom: 0.25rem;
-}
-
-.status-item-description {
-  font-size: 0.875rem;
-  color: var(--fm-muted-color);
-}
 
 .status-item-actions {
   display: flex;
@@ -225,30 +237,16 @@ article.bookmark-card {
   padding: 0.375rem 0.75rem;
 }
 
-/* Data management card styles */
-.data-card header {
-  background: var(--fm-warning-color);
-  color: white;
-  padding: 1rem 1.5rem;
-  margin: -1rem -1.5rem 1rem;
-  border-radius: var(--pico-border-radius) var(--pico-border-radius) 0 0;
-}
-
-.data-card header h3 {
-  margin: 0;
-  color: white;
-}
-
-.data-card footer {
+/* Data management section styles */
+.data-actions {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
-  justify-content: center;
-  padding-top: 1rem;
-  border-top: var(--pico-border-width) solid var(--fm-border-color);
+  justify-content: flex-start;
+  margin-top: 1rem;
 }
 
-.data-card footer button {
+.data-actions button {
   flex: 1;
   min-width: 120px;
 }

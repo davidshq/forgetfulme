@@ -1,24 +1,27 @@
 /**
- * @fileoverview Authentication state management module for options page
- * @module auth-state-manager
- * @description Handles authentication state management and UI updates
+ * @fileoverview Authentication state management module for ForgetfulMe options page
+ * @module options/modules/auth/auth-state-manager
+ * @description Manages authentication state transitions and coordinates UI updates based on auth status
+ * @since 1.0.0
+ * @requires utils/error-handler
  */
 
 import ErrorHandler from '../../../utils/error-handler.js';
 
 /**
  * Authentication state manager for options page
- * @class AuthStateManager
- * @description Manages authentication state and UI updates
+ * @class AuthStateManager  
+ * @description Coordinates authentication state changes between the auth UI and main interface
+ * @since 1.0.0
  */
 export class AuthStateManager {
   /**
    * Initialize the auth state manager
    * @constructor
-   * @param {Object} dependencies - Required dependencies
-   * @param {Object} dependencies.authStateManager - Auth state manager instance
-   * @param {Object} dependencies.authUI - Auth UI manager
-   * @param {Object} dependencies.configUI - Config UI manager
+   * @param {Object} dependencies - Required dependencies for auth management
+   * @param {BaseAuthStateManager} dependencies.authStateManager - Base auth state manager instance
+   * @param {AuthUI} dependencies.authUI - Authentication UI manager
+   * @param {ConfigUI} dependencies.configUI - Configuration UI manager
    */
   constructor(dependencies) {
     this.authStateManager = dependencies.authStateManager;
@@ -29,10 +32,11 @@ export class AuthStateManager {
 
   /**
    * Handle authentication state changes
-   * @param {Object|null} session - Current session object or null
-   * @param {Function} showMainInterface - Callback to show main interface
-   * @param {Function} loadData - Callback to load data
-   * @description Updates UI based on authentication state
+   * @param {Object|null} session - Current session object or null if not authenticated
+   * @param {Function} showMainInterface - Callback to display the main interface
+   * @param {Function} loadData - Callback to load application data
+   * @description Determines which interface to show based on authentication status
+   * @returns {void}
    */
   handleAuthStateChange(session, showMainInterface, loadData) {
     // Auth state changed - update UI accordingly
@@ -50,17 +54,34 @@ export class AuthStateManager {
 
   /**
    * Show authentication interface
-   * @description Displays login form for user authentication
+   * @description Hides all other interfaces and displays the authentication login form
+   * @returns {void}
    */
   showAuthInterface() {
-    this.authUI.showLoginForm(this.appContainer);
+    // Hide other interfaces
+    const configInterface = document.getElementById('config-interface');
+    const settingsInterface = document.getElementById('settings-interface');
+    const errorInterface = document.getElementById('error-interface');
+    
+    if (configInterface) configInterface.hidden = true;
+    if (settingsInterface) settingsInterface.hidden = true;
+    if (errorInterface) errorInterface.hidden = true;
+    
+    // Show auth interface
+    const authInterface = document.getElementById('auth-interface');
+    if (authInterface) {
+      authInterface.hidden = false;
+      // Use auth interface as container for auth UI
+      this.authUI.showLoginForm(authInterface);
+    }
   }
 
   /**
    * Handle successful authentication
-   * @param {Function} showMainInterface - Callback to show main interface
-   * @param {Function} loadData - Callback to load data
-   * @description Updates auth state and shows main interface
+   * @param {Function} showMainInterface - Callback to display the main interface
+   * @param {Function} loadData - Callback to load application data
+   * @description Updates auth state in the manager and transitions to main interface
+   * @returns {void}
    */
   onAuthSuccess(showMainInterface, loadData) {
     // Update auth state in the manager
@@ -73,6 +94,8 @@ export class AuthStateManager {
   /**
    * Set the app container reference
    * @param {HTMLElement} appContainer - The main app container element
+   * @description Updates the app container reference for auth UI operations
+   * @returns {void}
    */
   setAppContainer(appContainer) {
     this.appContainer = appContainer;

@@ -141,7 +141,7 @@ forgetfulme/
 ├── popup.js              # Popup functionality
 ├── background.js          # Background service worker
 ├── options.html          # Settings page
-├── options.js            # Settings functionality
+├── options/              # Modular settings functionality
 ├── supabase-client.js    # Local Supabase client (CSP compliant)
 ├── supabase-config.js    # Supabase configuration (secure)
 ├── supabase-service.js   # Supabase service layer

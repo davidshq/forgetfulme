@@ -34,165 +34,145 @@ class ConfigUI {
 
   /**
    * Display the configuration form
-   * @param {HTMLElement} container - Container element to render the form
-   * @description Shows the Supabase configuration form using static HTML
+   * @param {HTMLElement} [container] - Optional container element (for backward compatibility)
+   * @description Shows the Supabase configuration form using static HTML elements
+   * @returns {void}
+   * @since 1.0.0
    */
   showConfigForm(container) {
-    // Validate container parameter
-    if (!container) {
-      const error = ErrorHandler.createError(
-        'Container element is required for config form',
-        'config-ui.showConfigForm'
-      );
-      ErrorHandler.handle(error, 'config-ui.showConfigForm');
-      return;
-    }
+    // Get the main config interface section
+    const configInterface = document.getElementById('config-interface');
+    if (!configInterface) return;
 
-    // Show config form container, hide status container
-    const formContainer = container.querySelector('#config-form-container');
-    const statusContainer = container.querySelector('#config-status-container');
-    const loadingContainer = container.querySelector('#config-loading');
+    // Show form container, hide status container
+    const formContainer = document.getElementById('config-form-container');
+    const statusContainer = document.getElementById('config-status-container');
+    const loadingContainer = document.getElementById('config-loading');
 
     if (formContainer) formContainer.hidden = false;
     if (statusContainer) statusContainer.hidden = true;
     if (loadingContainer) loadingContainer.hidden = true;
 
     // Clear any existing messages
-    const messageContainer = container.querySelector('#configMessage');
+    const messageContainer = document.getElementById('configMessage');
     if (messageContainer) messageContainer.innerHTML = '';
 
     // Bind form submission
-    const configForm = container.querySelector('#configForm');
+    const configForm = document.getElementById('configForm');
     if (configForm) {
       configForm.onsubmit = e => {
         e.preventDefault();
-        this.handleConfigSubmit(container);
+        this.handleConfigSubmit();
       };
     }
 
-    this.bindConfigEvents(container);
-    this.loadCurrentConfig(container);
+    this.bindConfigEvents();
+    this.loadCurrentConfig();
   }
 
   /**
    * Bind configuration form events
-   * @param {HTMLElement} container - Container element
    * @description Sets up event listeners for configuration form interactions
+   * @returns {void}
+   * @private
    */
-  bindConfigEvents(_container) {
-    // Form event is handled by createForm, no additional binding needed
+  bindConfigEvents() {
+    // Form event is already bound in showConfigForm
   }
 
   /**
    * Load and display current configuration
-   * @param {HTMLElement} container - Container element
-   * @description Populates form fields with existing configuration values
+   * @description Populates form fields with existing configuration values from storage
+   * @returns {Promise<void>}
+   * @async
+   * @private
    */
-  async loadCurrentConfig(container) {
+  async loadCurrentConfig() {
     try {
-      // Validate container parameter
-      if (!container) {
-        const error = ErrorHandler.createError(
-          'Container element is required to load config',
-          'config-ui.loadCurrentConfig'
-        );
-        ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
-          silent: true,
-        });
-        return;
-      }
-
       const currentConfig = await this.config.getConfiguration();
 
       if (currentConfig) {
-        const urlInput = container.querySelector('#supabaseUrl');
-        const keyInput = container.querySelector('#supabaseAnonKey');
+        const urlInput = document.getElementById('supabaseUrl');
+        const keyInput = document.getElementById('supabaseAnonKey');
 
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
 
-        this.showConfigMessage(
-          container,
-          'Current configuration loaded',
-          'info'
-        );
+        this.showConfigMessage('Current configuration loaded', 'info');
       }
     } catch (error) {
       ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
         silent: true,
       });
-      // Don't show user for this error as it's not critical
     }
   }
 
   /**
    * Handle configuration form submission
-   * @param {HTMLElement} container - Container element
-   * @description Validates and saves configuration, then tests the connection
+   * @description Validates form inputs, saves configuration to storage, and tests the connection
+   * @returns {Promise<void>}
+   * @async
+   * @fires ConfigUI#configSaved
+   * @fires ConfigUI#configError
    */
-  async handleConfigSubmit(container) {
-    const urlInput = container.querySelector('#supabaseUrl');
-    const keyInput = container.querySelector('#supabaseAnonKey');
+  async handleConfigSubmit() {
+    const urlInput = document.getElementById('supabaseUrl');
+    const keyInput = document.getElementById('supabaseAnonKey');
 
     const url = urlInput ? urlInput.value.trim() : '';
     const anonKey = keyInput ? keyInput.value.trim() : '';
 
     if (!url || !anonKey) {
-      this.showConfigMessage(container, 'Please fill in all fields', 'error');
+      this.showConfigMessage('Please fill in all fields', 'error');
       return;
     }
 
     try {
-      this.showConfigMessage(container, 'Saving configuration...', 'loading');
+      this.showConfigMessage('Saving configuration...', 'loading');
 
       const result = await this.config.setConfiguration(url, anonKey);
 
       if (result.success) {
-        this.showConfigMessage(
-          container,
-          'Configuration saved successfully!',
-          'success'
-        );
+        this.showConfigMessage('Configuration saved successfully!', 'success');
 
         // Test the configuration
         setTimeout(async () => {
           try {
             await this.config.initialize();
             this.showConfigMessage(
-              container,
               'Configuration test successful! You can now use the extension.',
               'success'
             );
           } catch (error) {
             ErrorHandler.handle(error, 'config-ui.testConfiguration');
             this.showConfigMessage(
-              container,
               'Configuration saved but test failed. Please check your credentials.',
               'error'
             );
           }
         }, 1000);
       } else {
-        this.showConfigMessage(container, `Error: ${result.message}`, 'error');
+        this.showConfigMessage(`Error: ${result.message}`, 'error');
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(
         error,
         'config-ui.handleConfigSubmit'
       );
-      this.showConfigMessage(container, errorResult.userMessage, 'error');
+      this.showConfigMessage(errorResult.userMessage, 'error');
     }
   }
 
   /**
    * Display configuration message
-   * @param {HTMLElement} container - Container element
-   * @param {string} message - Message to display
-   * @param {string} type - Message type (success, error, info, loading)
-   * @description Shows user feedback messages in static HTML message container
+   * @param {string} message - Message to display to the user
+   * @param {'success'|'error'|'info'|'loading'} type - Message type for styling
+   * @description Shows user feedback messages in the static HTML message container
+   * @returns {void}
+   * @private
    */
-  showConfigMessage(container, message, type) {
-    const messageContainer = container.querySelector('#configMessage');
+  showConfigMessage(message, type) {
+    const messageContainer = document.getElementById('configMessage');
 
     if (messageContainer) {
       messageContainer.className = `config-message ${type}`;
@@ -203,45 +183,37 @@ class ConfigUI {
 
   /**
    * Display configuration status
-   * @param {HTMLElement} container - Container element
-   * @description Shows current configuration status using static HTML
+   * @param {HTMLElement} [container] - Optional container element (for backward compatibility)
+   * @description Shows current configuration status by revealing static HTML elements and loading current values
+   * @returns {void}
+   * @since 1.0.0
    */
   showConfigStatus(container) {
-    // Validate container parameter
-    if (!container) {
-      const error = ErrorHandler.createError(
-        'Container element is required for config status',
-        'config-ui.showConfigStatus'
-      );
-      ErrorHandler.handle(error, 'config-ui.showConfigStatus');
-      return;
-    }
-
     // Show status container, hide form container
-    const formContainer = container.querySelector('#config-form-container');
-    const statusContainer = container.querySelector('#config-status-container');
-    const loadingContainer = container.querySelector('#config-loading');
-
+    const formContainer = document.getElementById('config-form-container');
+    const statusContainer = document.getElementById('config-status-container');
+    
     if (formContainer) formContainer.hidden = true;
     if (statusContainer) statusContainer.hidden = false;
-    if (loadingContainer) loadingContainer.hidden = true;
 
-    this.loadConfigStatus(container);
-    this.bindStatusEvents(container);
+    this.loadConfigStatus();
+    this.bindStatusEvents();
   }
 
   /**
    * Load and display configuration status
-   * @param {HTMLElement} container - Container element
-   * @description Updates status display with current configuration values
+   * @description Fetches current configuration from storage and updates the status display
+   * @returns {Promise<void>}
+   * @async
+   * @private
    */
-  async loadConfigStatus(container) {
+  async loadConfigStatus() {
     try {
       const config = await this.config.getConfiguration();
 
       if (config) {
-        const urlEl = container.querySelector('#statusUrl');
-        const keyEl = container.querySelector('#statusKey');
+        const urlEl = document.getElementById('statusUrl');
+        const keyEl = document.getElementById('statusKey');
 
         if (urlEl) urlEl.textContent = config.url || 'Not set';
         if (keyEl)
@@ -250,11 +222,11 @@ class ConfigUI {
             : 'Not set';
 
         // Test connection
-        await this.testConnection(container);
+        await this.testConnection();
       } else {
-        const urlEl = container.querySelector('#statusUrl');
-        const keyEl = container.querySelector('#statusKey');
-        const connectionEl = container.querySelector('#statusConnection');
+        const urlEl = document.getElementById('statusUrl');
+        const keyEl = document.getElementById('statusKey');
+        const connectionEl = document.getElementById('statusConnection');
 
         if (urlEl) urlEl.textContent = 'Not configured';
         if (keyEl) keyEl.textContent = 'Not configured';
@@ -264,17 +236,17 @@ class ConfigUI {
       ErrorHandler.handle(error, 'config-ui.loadConfigStatus', {
         silent: true,
       });
-      // Don't show user for this error as it's not critical
     }
   }
 
   /**
    * Test Supabase connection
-   * @param {HTMLElement} container - Container element
-   * @description Attempts to connect to Supabase and updates connection status
+   * @description Attempts to initialize Supabase client and updates connection status display
+   * @returns {Promise<void>}
+   * @async
    */
-  async testConnection(container) {
-    const connectionEl = container.querySelector('#statusConnection');
+  async testConnection() {
+    const connectionEl = document.getElementById('statusConnection');
 
     try {
       await this.config.initialize();
@@ -292,22 +264,27 @@ class ConfigUI {
 
   /**
    * Bind status page events
-   * @param {HTMLElement} container - Container element
-   * @description Sets up event listeners for test connection and edit configuration buttons
+   * @description Sets up click event listeners for test connection and edit configuration buttons
+   * @returns {void}
+   * @private
    */
-  bindStatusEvents(container) {
-    const testBtn = container.querySelector('#testConnectionBtn');
-    const editBtn = container.querySelector('#editConfigBtn');
+  bindStatusEvents() {
+    const testBtn = document.getElementById('testConnectionBtn');
+    const editBtn = document.getElementById('editConfigBtn');
 
     if (testBtn) {
       testBtn.onclick = async () => {
-        await this.testConnection(container);
+        testBtn.disabled = true;
+        testBtn.textContent = 'Testing...';
+        await this.testConnection();
+        testBtn.disabled = false;
+        testBtn.textContent = 'Test Connection';
       };
     }
 
     if (editBtn) {
       editBtn.onclick = () => {
-        this.showConfigForm(container);
+        this.showConfigForm();
       };
     }
   }

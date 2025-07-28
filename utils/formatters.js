@@ -1,7 +1,9 @@
 /**
- * Shared formatting utilities for the ForgetfulMe extension
+ * @fileoverview Shared formatting utilities for the ForgetfulMe extension
  * @module utils/formatters
- * @description Centralized formatting functions used across the extension
+ * @description Centralized formatting functions for status display and time formatting
+ * @since 1.0.0
+ * @author ForgetfulMe Team
  */
 
 /**
