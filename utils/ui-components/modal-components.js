@@ -269,10 +269,10 @@ export class ModalComponents {
       if (!modal.parentNode || modal.parentNode !== document.body) {
         document.body.appendChild(modal);
       }
-      
+
       // Add Pico CSS modal class to body
       document.body.classList.add('modal-is-open');
-      
+
       // Try to use native dialog API, fallback for JSDOM/testing
       try {
         if (modal.showModal) {

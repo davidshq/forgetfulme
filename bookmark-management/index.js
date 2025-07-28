@@ -16,6 +16,9 @@ import SupabaseConfig from '../supabase-config.js';
 import SupabaseService from '../supabase-service.js';
 import { formatStatus, formatTime } from '../utils/formatters.js';
 
+// Make UIComponents globally available for UIMessages
+window.UIComponents = UIComponents;
+
 // App state
 const authStateManager = new AuthStateManager();
 const supabaseConfig = new SupabaseConfig();

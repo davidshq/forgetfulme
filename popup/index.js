@@ -14,6 +14,9 @@ import BookmarkTransformer from '../utils/bookmark-transformer.js';
 import SupabaseService from '../supabase-service.js';
 import SupabaseConfig from '../supabase-config.js';
 
+// Make UIComponents globally available for UIMessages
+window.UIComponents = UIComponents;
+
 // Context object to share state/services between modules
 const ctx = {
   UIComponents,
