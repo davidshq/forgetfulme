@@ -481,7 +481,7 @@ class ForgetfulMeOptions {
             {
               text: 'Remove',
               onClick: () => this.removeStatusType(status),
-              className: 'ui-btn-danger ui-btn-small',
+              className: 'contrast',
             },
           ],
         },

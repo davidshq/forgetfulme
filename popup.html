@@ -40,8 +40,8 @@
             <p>Access your bookmarks across all devices</p>
           </header>
           
-          <form id="loginForm" class="auth-form">
-            <div class="form-group">
+          <form id="loginForm">
+            <fieldset>
               <label for="loginEmail">Email</label>
               <input 
                 type="email" 
@@ -52,9 +52,9 @@
                 aria-describedby="loginEmail-error"
               />
               <small id="loginEmail-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <div class="form-group">
+            <fieldset>
               <label for="loginPassword">Password</label>
               <input 
                 type="password" 
@@ -65,9 +65,9 @@
                 aria-describedby="loginPassword-error"
               />
               <small id="loginPassword-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <button type="submit" class="auth-btn primary">Sign In</button>
+            <button type="submit">Sign In</button>
           </form>
           
           <div class="auth-footer">
@@ -84,8 +84,8 @@
             <p>Start organizing your bookmarks with ForgetfulMe</p>
           </header>
           
-          <form id="signupForm" class="auth-form">
-            <div class="form-group">
+          <form id="signupForm">
+            <fieldset>
               <label for="signupEmail">Email</label>
               <input 
                 type="email" 
@@ -96,9 +96,9 @@
                 aria-describedby="signupEmail-error"
               />
               <small id="signupEmail-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <div class="form-group">
+            <fieldset>
               <label for="signupPassword">Password</label>
               <input 
                 type="password" 
@@ -110,9 +110,9 @@
               />
               <small id="signupPassword-help" class="help-text">Password must be at least 6 characters</small>
               <small id="signupPassword-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <div class="form-group">
+            <fieldset>
               <label for="confirmPassword">Confirm Password</label>
               <input 
                 type="password" 
@@ -123,9 +123,9 @@
                 aria-describedby="confirmPassword-error"
               />
               <small id="confirmPassword-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <button type="submit" class="auth-btn primary">Create Account</button>
+            <button type="submit">Create Account</button>
           </form>
           
           <div class="auth-footer">
@@ -144,7 +144,7 @@
             </div>
             
             <div class="profile-actions">
-              <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
+              <button id="signOutBtn" class="secondary">Sign Out</button>
             </div>
           </div>
         </div>

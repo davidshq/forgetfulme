@@ -345,13 +345,13 @@ class UIMessages {
             }
             retryFunction();
           },
-          { className: 'message-retry-btn' }
+          { className: 'secondary' }
         );
         messageEl.appendChild(retryBtn);
       } else {
         const retryBtn = document.createElement('button');
         retryBtn.textContent = 'Retry';
-        retryBtn.className = 'message-retry-btn';
+        retryBtn.className = 'secondary';
         retryBtn.addEventListener('click', () => {
           if (messageEl.parentNode) {
             messageEl.parentNode.removeChild(messageEl);
@@ -417,7 +417,7 @@ class UIMessages {
 
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = options.confirmText || 'Confirm';
-    confirmBtn.className = 'ui-confirm-btn ui-confirm-btn-primary';
+    confirmBtn.className = '';
     confirmBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
         confirmEl.parentNode.removeChild(confirmEl);
@@ -427,7 +427,7 @@ class UIMessages {
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = options.cancelText || 'Cancel';
-    cancelBtn.className = 'ui-confirm-btn ui-confirm-btn-secondary';
+    cancelBtn.className = 'secondary';
     cancelBtn.addEventListener('click', () => {
       if (confirmEl.parentNode) {
         confirmEl.parentNode.removeChild(confirmEl);

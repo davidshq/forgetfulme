@@ -30,8 +30,8 @@
             <p>Enter your Supabase project credentials to enable cloud sync</p>
           </header>
           
-          <form id="configForm" class="config-form">
-            <div class="form-group">
+          <form id="configForm">
+            <fieldset>
               <label for="supabaseUrl">Project URL</label>
               <input 
                 type="url" 
@@ -43,9 +43,9 @@
               />
               <small id="supabaseUrl-help" class="help-text">Your Supabase project URL (found in Settings > API)</small>
               <small id="supabaseUrl-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <div class="form-group">
+            <fieldset>
               <label for="supabaseAnonKey">Anon Public Key</label>
               <input 
                 type="text" 
@@ -57,9 +57,9 @@
               />
               <small id="supabaseAnonKey-help" class="help-text">Your anon public key (found in Settings > API)</small>
               <small id="supabaseAnonKey-error" class="error-text" role="alert"></small>
-            </div>
+            </fieldset>
             
-            <button type="submit" class="config-btn primary">Save Configuration</button>
+            <button type="submit">Save Configuration</button>
           </form>
           
           <div class="config-help">
@@ -98,8 +98,8 @@
             </div>
             
             <div class="status-actions">
-              <button id="testConnectionBtn" class="config-btn secondary">Test Connection</button>
-              <button id="editConfigBtn" class="config-btn secondary">Edit Configuration</button>
+              <button id="testConnectionBtn" class="secondary">Test Connection</button>
+              <button id="editConfigBtn" class="secondary">Edit Configuration</button>
             </div>
           </div>
         </div>

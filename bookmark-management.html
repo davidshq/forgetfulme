@@ -30,8 +30,8 @@
           <section id="search-interface" aria-labelledby="search-heading" class="search-card">
             <h2 id="search-heading">Search & Filter</h2>
             
-            <form id="search-form" class="search-form">
-              <div class="form-group">
+            <form id="search-form">
+              <fieldset>
                 <label for="search-query">Search Bookmarks:</label>
                 <input 
                   type="text" 
@@ -41,9 +41,9 @@
                   aria-describedby="search-query-help"
                 />
                 <small id="search-query-help" class="help-text">Search through your bookmarks</small>
-              </div>
+              </fieldset>
               
-              <div class="form-group">
+              <fieldset>
                 <label for="status-filter">Filter by Status:</label>
                 <select 
                   id="status-filter" 
@@ -57,9 +57,9 @@
                   <option value="revisit-later">Revisit Later</option>
                 </select>
                 <small id="status-filter-help" class="help-text">Filter bookmarks by their status</small>
-              </div>
+              </fieldset>
               
-              <button type="submit" class="search-btn primary">Search</button>
+              <button type="submit">Search</button>
             </form>
           </section>
           
@@ -69,9 +69,9 @@
             <p>Select multiple bookmarks to perform bulk operations like deletion or export.</p>
             
             <div class="bulk-actions-buttons">
-              <button id="select-all-btn" class="bulk-btn secondary">Select All</button>
-              <button id="delete-selected-btn" class="bulk-btn contrast">Delete Selected</button>
-              <button id="export-selected-btn" class="bulk-btn secondary">Export Selected</button>
+              <button id="select-all-btn" class="secondary">Select All</button>
+              <button id="delete-selected-btn" class="contrast">Delete Selected</button>
+              <button id="export-selected-btn" class="secondary">Export Selected</button>
             </div>
           </section>
         </aside>

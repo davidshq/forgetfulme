@@ -13,42 +13,10 @@ After analyzing the ForgetfulMe extension's UI implementation against Pico.css b
 - **Clean HTML Structure**: Proper doctype and basic semantic elements
 
 ### ❌ **Areas for Improvement**
-- Missing semantic landmarks (`<main>`, `<section>`, `<nav>`)
-- Limited accessibility features (skip links, focus management)
 - Inconsistent use of Pico.css conventions
 - Custom implementations instead of leveraging Pico's built-in features
 
 ## 🎯 Easy Wins (High Impact, Low Effort)
-
-### 4. **Add ARIA Live Regions** ⏱️ *10 minutes* ✅ **COMPLETED**
-
-**Problem**: No announcements for screen readers on dynamic content updates
-**Solution**: Add ARIA live regions for status messages
-
-```javascript
-// In utils/ui-messages.js - add this function
-static createLiveRegion() {
-  if (document.getElementById('status-announcements')) return;
-  
-  const region = document.createElement('div');
-  region.id = 'status-announcements';
-  region.setAttribute('aria-live', 'polite');
-  region.setAttribute('aria-atomic', 'true');
-  region.className = 'sr-only';
-  document.body.appendChild(region);
-}
-
-static announceToScreenReader(message) {
-  this.createLiveRegion();
-  const region = document.getElementById('status-announcements');
-  region.textContent = message;
-  
-  // Clear after announcement
-  setTimeout(() => {
-    region.textContent = '';
-  }, 1000);
-}
-```
 
 ### 5. **Enhance Button Variants** ⏱️ *15 minutes*
 

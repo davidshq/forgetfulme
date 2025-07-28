@@ -48,6 +48,12 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - JavaScript enhances static HTML with show/hide logic instead of dynamic DOM generation
 - Improved performance (15-30% faster initial render), accessibility (immediate screen reader access), and maintainability
 
+**Pico.css Integration**: Consistent design system using Pico CSS v2 conventions:
+- Semantic HTML forms using `<fieldset>` elements for proper grouping and accessibility
+- Standard Pico button classes: default (primary), `secondary`, `contrast` - no custom button classes
+- Minimal custom CSS - leverages Pico's built-in responsive design and spacing
+- CSS variables for consistent theming and customization
+
 ### Data Flow
 
 1. **Authentication**: Users authenticate via Supabase with JWT tokens stored in Chrome sync storage
