@@ -87,16 +87,10 @@ export function showMainInterface({
   if (emptyState) emptyState.hidden = true;
   if (errorInterface) errorInterface.hidden = true;
 
-  // Add back button to navigation
+  // Clear navigation (no back button needed)
   const navigation = appContainer.querySelector('#bookmark-navigation');
   if (navigation) {
-    navigation.innerHTML = `
-      <button class="nav-btn secondary" onclick="window.close()" 
-              title="Close bookmark management and return to extension"
-              aria-label="Close bookmark management and return to extension">
-        ← Back to Extension
-      </button>
-    `;
+    navigation.innerHTML = '';
   }
 
   // Bind search form
