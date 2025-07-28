@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "ForgetfulMe",
+  "version": "1.0.0",
+  "description": "Track websites you've read with cross-device sync",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "src/main/background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/ui/popup.html",
+    "default_title": "ForgetfulMe",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "src/ui/options.html",
+  "commands": {
+    "mark_as_read": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+R",
+        "mac": "Command+Shift+R"
+      },
+      "description": "Mark current page as read"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

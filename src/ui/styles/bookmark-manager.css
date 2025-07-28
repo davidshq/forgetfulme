@@ -1,0 +1,642 @@
+/**
+ * Bookmark manager styles for the ForgetfulMe extension
+ */
+
+/* Layout */
+.container-fluid {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+/* Header */
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--muted-border-color);
+}
+
+.header-content h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.header-stats {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--muted-color);
+}
+
+.bookmark-count {
+  font-weight: 600;
+  color: var(--color);
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.header-actions button {
+  margin: 0;
+}
+
+/* Search Section */
+.search-section {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--card-background-color);
+  border: 1px solid var(--muted-border-color);
+  border-radius: var(--border-radius);
+}
+
+.search-form {
+  margin: 0;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.search-grid label {
+  margin: 0;
+}
+
+.search-grid input,
+.search-grid select {
+  margin: 0;
+}
+
+.search-grid small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-color);
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-actions button {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--muted-background-color);
+  border-radius: var(--border-radius);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toolbar-left label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color);
+}
+
+.toolbar-left input[type='checkbox'] {
+  margin: 0;
+}
+
+.selected-count {
+  font-size: 0.875rem;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.toolbar-center label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color);
+}
+
+.toolbar-center select {
+  margin: 0;
+  min-width: 120px;
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bulk-actions select,
+.bulk-actions button {
+  margin: 0;
+}
+
+/* Bookmark List */
+.bookmark-list-container {
+  margin-bottom: 2rem;
+}
+
+.bookmark-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.bookmark-list.compact {
+  gap: 0.5rem;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1.5rem;
+  background-color: var(--card-background-color);
+  border: 1px solid var(--muted-border-color);
+  border-radius: var(--border-radius);
+  transition: all 0.2s ease;
+}
+
+.bookmark-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bookmark-item.compact {
+  padding: 1rem;
+}
+
+.bookmark-item.selected {
+  border-color: var(--primary);
+  background-color: var(--primary-background-color);
+}
+
+.bookmark-checkbox {
+  margin: 0 1rem 0 0;
+  flex-shrink: 0;
+}
+
+.bookmark-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.bookmark-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.bookmark-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.bookmark-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bookmark-title a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.bookmark-status {
+  flex-shrink: 0;
+}
+
+.bookmark-url {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--muted-color);
+  word-break: break-all;
+  line-height: 1.3;
+}
+
+.bookmark-url a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bookmark-url a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.bookmark-notes {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--color);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.bookmark-tags {
+  margin-bottom: 0.75rem;
+}
+
+.bookmark-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--muted-color);
+  gap: 1rem;
+}
+
+.bookmark-dates {
+  display: flex;
+  gap: 1rem;
+}
+
+.bookmark-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.bookmark-actions button {
+  margin: 0;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Compact View */
+.bookmark-item.compact .bookmark-title {
+  font-size: 1rem;
+}
+
+.bookmark-item.compact .bookmark-header {
+  margin-bottom: 0.25rem;
+}
+
+.bookmark-item.compact .bookmark-notes {
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.bookmark-item.compact .bookmark-tags {
+  margin-bottom: 0.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--muted-color);
+}
+
+.empty-state h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  color: var(--color);
+}
+
+.empty-state p {
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+/* Pagination */
+.pagination-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--muted-background-color);
+  border-radius: var(--border-radius);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  font-size: 0.875rem;
+  color: var(--muted-color);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-controls button {
+  margin: 0;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color);
+  background: none;
+  border: 1px solid var(--muted-border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-number:hover {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.page-number.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.page-number.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-size label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color);
+}
+
+.pagination-size select {
+  margin: 0;
+}
+
+/* Modals */
+.edit-modal article,
+.delete-modal article {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+.edit-modal header,
+.delete-modal header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.edit-modal h3,
+.delete-modal h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--color);
+}
+
+.edit-form label {
+  margin-bottom: 1rem;
+}
+
+.edit-form input,
+.edit-form select,
+.edit-form textarea {
+  margin-bottom: 0;
+}
+
+/* Message Area */
+.message-area {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 1500;
+  max-width: 400px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .search-grid {
+    grid-template-columns: 2fr 1fr 1fr auto;
+  }
+
+  .search-grid .date-inputs {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 0.5rem;
+  }
+
+  .manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-actions {
+    justify-content: stretch;
+  }
+
+  .search-actions button {
+    flex: 1;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-left,
+  .toolbar-center,
+  .toolbar-right {
+    justify-content: space-between;
+  }
+
+  .bookmark-item {
+    padding: 1rem;
+  }
+
+  .bookmark-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .bookmark-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .bookmark-dates {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .bookmark-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .pagination-nav {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pagination-controls {
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+
+  .bookmark-item {
+    padding: 0.75rem;
+  }
+
+  .bookmark-title {
+    font-size: 1rem;
+  }
+
+  .bookmark-actions button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .page-numbers {
+    flex-wrap: wrap;
+  }
+
+  .search-section,
+  .toolbar {
+    padding: 1rem;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .bookmark-item:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  }
+
+  .search-section,
+  .toolbar,
+  .pagination-nav {
+    background-color: var(--card-background-color);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .bookmark-item {
+    border-width: 2px;
+  }
+
+  .bookmark-item.selected {
+    border-width: 3px;
+  }
+
+  .page-number {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bookmark-item,
+  .page-number {
+    transition: none;
+  }
+
+  .bookmark-item:hover {
+    box-shadow: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .header-actions,
+  .search-section,
+  .toolbar,
+  .pagination-nav,
+  .bookmark-actions,
+  .bookmark-checkbox,
+  .message-area {
+    display: none !important;
+  }
+
+  .bookmark-item {
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+
+  .bookmark-title a,
+  .bookmark-url a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  .bookmark-url::after {
+    content: ' (' attr(href) ')';
+    font-style: italic;
+  }
+}

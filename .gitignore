@@ -1,1 +1,25 @@
+node_modules/
+dist/
+coverage/
+.nyc_output/
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local configuration - NEVER COMMIT
+supabase-config.local.js
+.env.local
+
+# Test results
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Build artifacts
+*.zip
+*.crx
+*.pem
+
 .claude

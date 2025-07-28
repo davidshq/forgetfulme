@@ -1,0 +1,38 @@
+{
+  "name": "forgetfulme",
+  "version": "1.0.0",
+  "description": "Chrome extension to track websites you've read",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "test:unit:ui": "vitest --ui",
+    "test:unit:coverage": "vitest --coverage",
+    "test:playwright": "playwright test",
+    "test:playwright:headed": "playwright test --headed",
+    "test:playwright:debug": "playwright test --debug",
+    "test:playwright:ui": "playwright test --ui",
+    "test:visual": "playwright test --grep=\"visual\"",
+    "test:visual:update": "playwright test --grep=\"visual\" --update-snapshots",
+    "test:all": "npm test && npm run test:playwright && npm run test:visual",
+    "install-browsers": "playwright install chromium",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write src/**/*.{js,html,css,json}",
+    "format:check": "prettier --check src/**/*.{js,html,css,json}",
+    "check": "npm run lint && npm run format:check"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "vitest": "^1.6.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/ui": "^1.6.0",
+    "jsdom": "^24.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "ForgetfulMe Team",
+  "license": "MIT"
+}

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgetfulMe</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="styles/shared.css" />
+    <link rel="stylesheet" href="styles/popup.css" />
+  </head>
+  <body>
+    <div class="container" data-testid="popup-container">
+      <!-- Authentication Section -->
+      <section id="auth-section" class="auth-section hidden" data-testid="auth-section">
+        <header class="popup-header">
+          <h1>ForgetfulMe</h1>
+          <p>Track websites you've read</p>
+        </header>
+
+        <div id="auth-tabs" class="auth-tabs" data-testid="auth-tabs">
+          <button type="button" id="signin-tab" class="tab-button active" data-testid="signin-tab">
+            Sign In
+          </button>
+          <button type="button" id="signup-tab" class="tab-button" data-testid="signup-tab">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- Sign In Form -->
+        <form id="signin-form" class="auth-form" data-testid="signin-form">
+          <fieldset>
+            <legend>Sign In</legend>
+            <label for="signin-email">
+              Email
+              <input
+                type="email"
+                id="signin-email"
+                name="email"
+                required
+                placeholder="your@email.com"
+                data-testid="signin-email"
+              />
+            </label>
+            <label for="signin-password">
+              Password
+              <input
+                type="password"
+                id="signin-password"
+                name="password"
+                required
+                placeholder="Password"
+                data-testid="signin-password"
+              />
+            </label>
+            <button type="submit" id="signin-submit" data-testid="signin-submit">Sign In</button>
+            <button
+              type="button"
+              id="forgot-password"
+              class="secondary"
+              data-testid="forgot-password"
+            >
+              Forgot Password?
+            </button>
+          </fieldset>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form id="signup-form" class="auth-form hidden" data-testid="signup-form">
+          <fieldset>
+            <legend>Create Account</legend>
+            <label for="signup-email">
+              Email
+              <input
+                type="email"
+                id="signup-email"
+                name="email"
+                required
+                placeholder="your@email.com"
+                data-testid="signup-email"
+              />
+            </label>
+            <label for="signup-password">
+              Password
+              <input
+                type="password"
+                id="signup-password"
+                name="password"
+                required
+                placeholder="Password (8+ characters)"
+                minlength="8"
+                data-testid="signup-password"
+              />
+            </label>
+            <label for="signup-confirm">
+              Confirm Password
+              <input
+                type="password"
+                id="signup-confirm"
+                name="confirm"
+                required
+                placeholder="Confirm password"
+                data-testid="signup-confirm"
+              />
+            </label>
+            <button type="submit" id="signup-submit" data-testid="signup-submit">
+              Create Account
+            </button>
+          </fieldset>
+        </form>
+
+        <!-- Configuration Required -->
+        <div id="config-required" class="config-required hidden" data-testid="config-required">
+          <h3>Setup Required</h3>
+          <p>Please configure your Supabase connection in the extension options.</p>
+          <button type="button" id="open-options" data-testid="open-options">Open Options</button>
+        </div>
+      </section>
+
+      <!-- Main Content Section -->
+      <section id="main-section" class="main-section hidden" data-testid="main-section">
+        <header class="popup-header">
+          <div class="user-info">
+            <span id="user-email" class="user-email" data-testid="user-email"></span>
+            <button
+              type="button"
+              id="signout-btn"
+              class="secondary outline small"
+              data-testid="signout-btn"
+            >
+              Sign Out
+            </button>
+          </div>
+        </header>
+
+        <!-- Current Page Info -->
+        <div id="current-page" class="current-page" data-testid="current-page">
+          <div class="page-info">
+            <h3 id="page-title" class="page-title" data-testid="page-title">Loading...</h3>
+            <p id="page-url" class="page-url" data-testid="page-url"></p>
+          </div>
+          <div id="page-status" class="page-status" data-testid="page-status">
+            <span id="bookmark-status" class="bookmark-status" data-testid="bookmark-status"></span>
+          </div>
+        </div>
+
+        <!-- Bookmark Form -->
+        <form id="bookmark-form" class="bookmark-form" data-testid="bookmark-form">
+          <fieldset>
+            <legend>Mark Page</legend>
+
+            <label for="bookmark-status-select">
+              Status
+              <select
+                id="bookmark-status-select"
+                name="status"
+                required
+                data-testid="bookmark-status-select"
+              >
+                <option value="">Select status...</option>
+              </select>
+            </label>
+
+            <label for="bookmark-tags">
+              Tags (optional)
+              <input
+                type="text"
+                id="bookmark-tags"
+                name="tags"
+                placeholder="research, important, later"
+                data-testid="bookmark-tags"
+              />
+              <small>Separate multiple tags with commas</small>
+            </label>
+
+            <label for="bookmark-notes">
+              Notes (optional)
+              <textarea
+                id="bookmark-notes"
+                name="notes"
+                placeholder="Add notes about this page..."
+                rows="3"
+                data-testid="bookmark-notes"
+              ></textarea>
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" id="save-bookmark" data-testid="save-bookmark">
+                Save Bookmark
+              </button>
+              <button
+                type="button"
+                id="delete-bookmark"
+                class="secondary outline hidden"
+                data-testid="delete-bookmark"
+              >
+                Delete
+              </button>
+            </div>
+          </fieldset>
+        </form>
+
+        <!-- Recent Bookmarks -->
+        <div id="recent-bookmarks" class="recent-bookmarks" data-testid="recent-bookmarks">
+          <h4>Recent Bookmarks</h4>
+          <ul id="recent-list" class="recent-list" data-testid="recent-list">
+            <li class="loading">Loading recent bookmarks...</li>
+          </ul>
+          <div class="recent-actions">
+            <button type="button" id="view-all" class="secondary outline" data-testid="view-all">
+              View All Bookmarks
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Loading State -->
+      <div id="loading-section" class="loading-section" data-testid="loading-section">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+      </div>
+
+      <!-- Messages -->
+      <div id="message-area" class="message-area" data-testid="message-area"></div>
+    </div>
+
+    <script type="module" src="../main/popup.js"></script>
+  </body>
+</html>

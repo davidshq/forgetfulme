@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgetfulMe - Bookmark Manager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="styles/shared.css" />
+    <link rel="stylesheet" href="styles/bookmark-manager.css" />
+  </head>
+  <body>
+    <div class="container-fluid" data-testid="bookmark-manager-container">
+      <header class="manager-header">
+        <div class="header-content">
+          <h1>Bookmark Manager</h1>
+          <div class="header-stats">
+            <span id="bookmark-count" class="bookmark-count" data-testid="bookmark-count"
+              >0 bookmarks</span
+            >
+            <span id="user-info" class="user-info" data-testid="user-info"></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button
+            type="button"
+            id="refresh-bookmarks"
+            class="secondary outline"
+            data-testid="refresh-bookmarks"
+          >
+            Refresh
+          </button>
+          <button type="button" id="open-options" class="secondary" data-testid="open-options">
+            Settings
+          </button>
+        </div>
+      </header>
+
+      <!-- Search and Filters -->
+      <section class="search-section" data-testid="search-section">
+        <form id="search-form" class="search-form" data-testid="search-form">
+          <div class="search-grid">
+            <label for="search-query">
+              Search
+              <input
+                type="search"
+                id="search-query"
+                name="query"
+                placeholder="Search bookmarks..."
+                data-testid="search-query"
+              />
+            </label>
+
+            <label for="status-filter">
+              Status
+              <select id="status-filter" name="statusFilter" multiple data-testid="status-filter">
+                <option value="">All Statuses</option>
+                <!-- Options populated by JavaScript -->
+              </select>
+            </label>
+
+            <label for="tag-filter">
+              Tags
+              <input
+                type="text"
+                id="tag-filter"
+                name="tagFilter"
+                placeholder="Filter by tags..."
+                data-testid="tag-filter"
+              />
+              <small>Separate multiple tags with commas</small>
+            </label>
+
+            <label for="date-from">
+              From Date
+              <input type="date" id="date-from" name="dateFrom" data-testid="date-from" />
+            </label>
+
+            <label for="date-to">
+              To Date
+              <input type="date" id="date-to" name="dateTo" data-testid="date-to" />
+            </label>
+
+            <div class="search-actions">
+              <button type="submit" id="search-bookmarks" data-testid="search-bookmarks">
+                Search
+              </button>
+              <button
+                type="button"
+                id="clear-search"
+                class="secondary outline"
+                data-testid="clear-search"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Toolbar -->
+      <section class="toolbar" data-testid="toolbar">
+        <div class="toolbar-left">
+          <label for="bulk-select-all">
+            <input type="checkbox" id="bulk-select-all" data-testid="bulk-select-all" />
+            Select All
+          </label>
+          <span id="selected-count" class="selected-count hidden" data-testid="selected-count"
+            >0 selected</span
+          >
+        </div>
+
+        <div class="toolbar-center">
+          <label for="sort-by">
+            Sort by:
+            <select id="sort-by" name="sortBy" data-testid="sort-by">
+              <option value="created_at">Date Created</option>
+              <option value="updated_at">Date Modified</option>
+              <option value="title">Title</option>
+              <option value="url">URL</option>
+            </select>
+          </label>
+          <label for="sort-order">
+            <select id="sort-order" name="sortOrder" data-testid="sort-order">
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar-right">
+          <button
+            type="button"
+            id="view-toggle"
+            class="secondary outline"
+            data-testid="view-toggle"
+          >
+            Compact View
+          </button>
+          <div class="bulk-actions hidden" id="bulk-actions" data-testid="bulk-actions">
+            <select id="bulk-status-update" data-testid="bulk-status-update">
+              <option value="">Change Status...</option>
+              <!-- Options populated by JavaScript -->
+            </select>
+            <button
+              type="button"
+              id="bulk-delete"
+              class="secondary outline"
+              data-testid="bulk-delete"
+            >
+              Delete Selected
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bookmark List -->
+      <main class="bookmark-list-container" data-testid="bookmark-list-container">
+        <div id="bookmark-list" class="bookmark-list" data-testid="bookmark-list">
+          <!-- Bookmarks will be populated by JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state hidden" data-testid="empty-state">
+          <h3>No bookmarks found</h3>
+          <p>Start bookmarking pages to see them here.</p>
+          <button type="button" id="clear-filters" class="secondary" data-testid="clear-filters">
+            Clear Filters
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="loading-state" data-testid="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading bookmarks...</p>
+        </div>
+      </main>
+
+      <!-- Pagination -->
+      <nav class="pagination-nav" id="pagination-nav" data-testid="pagination-nav">
+        <div class="pagination-info">
+          <span id="pagination-info" data-testid="pagination-info">Showing 0 - 0 of 0</span>
+        </div>
+        <div class="pagination-controls">
+          <button
+            type="button"
+            id="prev-page"
+            class="secondary outline"
+            disabled
+            data-testid="prev-page"
+          >
+            &larr; Previous
+          </button>
+          <span id="page-numbers" class="page-numbers" data-testid="page-numbers">
+            <!-- Page numbers will be populated by JavaScript -->
+          </span>
+          <button
+            type="button"
+            id="next-page"
+            class="secondary outline"
+            disabled
+            data-testid="next-page"
+          >
+            Next &rarr;
+          </button>
+        </div>
+        <div class="pagination-size">
+          <label for="page-size">
+            Per page:
+            <select id="page-size" name="pageSize" data-testid="page-size">
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+        </div>
+      </nav>
+
+      <!-- Messages -->
+      <div id="message-area" class="message-area" data-testid="message-area"></div>
+    </div>
+
+    <!-- Edit Bookmark Modal -->
+    <dialog id="edit-modal" class="edit-modal" data-testid="edit-modal">
+      <article>
+        <header>
+          <h3>Edit Bookmark</h3>
+          <button
+            type="button"
+            id="close-modal"
+            class="close-button"
+            aria-label="Close"
+            data-testid="close-modal"
+          >
+            &times;
+          </button>
+        </header>
+
+        <form id="edit-form" class="edit-form" data-testid="edit-form">
+          <input type="hidden" id="edit-bookmark-id" name="id" />
+
+          <label for="edit-title">
+            Title
+            <input type="text" id="edit-title" name="title" data-testid="edit-title" />
+          </label>
+
+          <label for="edit-url">
+            URL
+            <input type="url" id="edit-url" name="url" required data-testid="edit-url" />
+          </label>
+
+          <label for="edit-status">
+            Status
+            <select id="edit-status" name="status" required data-testid="edit-status">
+              <!-- Options populated by JavaScript -->
+            </select>
+          </label>
+
+          <label for="edit-tags">
+            Tags
+            <input
+              type="text"
+              id="edit-tags"
+              name="tags"
+              placeholder="Separate with commas"
+              data-testid="edit-tags"
+            />
+          </label>
+
+          <label for="edit-notes">
+            Notes
+            <textarea id="edit-notes" name="notes" rows="4" data-testid="edit-notes"></textarea>
+          </label>
+
+          <footer class="modal-actions">
+            <button
+              type="button"
+              id="cancel-edit"
+              class="secondary outline"
+              data-testid="cancel-edit"
+            >
+              Cancel
+            </button>
+            <button type="submit" id="save-edit" data-testid="save-edit">Save Changes</button>
+          </footer>
+        </form>
+      </article>
+    </dialog>
+
+    <!-- Confirm Delete Modal -->
+    <dialog id="delete-modal" class="delete-modal" data-testid="delete-modal">
+      <article>
+        <header>
+          <h3>Confirm Delete</h3>
+        </header>
+
+        <p id="delete-message" data-testid="delete-message">
+          Are you sure you want to delete this bookmark?
+        </p>
+
+        <footer class="modal-actions">
+          <button
+            type="button"
+            id="cancel-delete"
+            class="secondary outline"
+            data-testid="cancel-delete"
+          >
+            Cancel
+          </button>
+          <button type="button" id="confirm-delete" class="contrast" data-testid="confirm-delete">
+            Delete
+          </button>
+        </footer>
+      </article>
+    </dialog>
+
+    <script type="module" src="../main/bookmark-manager.js"></script>
+  </body>
+</html>

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgetfulMe Options</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="styles/shared.css" />
+    <link rel="stylesheet" href="styles/options.css" />
+  </head>
+  <body>
+    <div class="container" data-testid="options-container">
+      <header class="options-header">
+        <h1>ForgetfulMe Settings</h1>
+        <p>Configure your bookmark tracking preferences</p>
+      </header>
+
+      <nav class="options-nav" data-testid="options-nav">
+        <button
+          type="button"
+          id="nav-database"
+          class="nav-button active"
+          data-testid="nav-database"
+        >
+          Database
+        </button>
+        <button
+          type="button"
+          id="nav-status-types"
+          class="nav-button"
+          data-testid="nav-status-types"
+        >
+          Status Types
+        </button>
+        <button type="button" id="nav-preferences" class="nav-button" data-testid="nav-preferences">
+          Preferences
+        </button>
+        <button
+          type="button"
+          id="nav-import-export"
+          class="nav-button"
+          data-testid="nav-import-export"
+        >
+          Import/Export
+        </button>
+      </nav>
+
+      <!-- Database Configuration -->
+      <section id="database-section" class="options-section" data-testid="database-section">
+        <h2>Database Configuration</h2>
+        <p>Connect to your Supabase database to sync bookmarks across devices.</p>
+
+        <form id="database-form" class="database-form" data-testid="database-form">
+          <fieldset>
+            <legend>Supabase Settings</legend>
+
+            <label for="supabase-url">
+              Supabase URL
+              <input
+                type="url"
+                id="supabase-url"
+                name="supabaseUrl"
+                required
+                placeholder="https://your-project.supabase.co"
+                data-testid="supabase-url"
+              />
+              <small>Your Supabase project URL</small>
+            </label>
+
+            <label for="supabase-key">
+              Anonymous Key
+              <input
+                type="password"
+                id="supabase-key"
+                name="supabaseAnonKey"
+                required
+                placeholder="Your anonymous key"
+                data-testid="supabase-key"
+              />
+              <small>Your Supabase anonymous/public key (not the service role key)</small>
+            </label>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                id="test-connection"
+                class="secondary"
+                data-testid="test-connection"
+              >
+                Test Connection
+              </button>
+              <button type="submit" id="save-database" data-testid="save-database">
+                Save Configuration
+              </button>
+            </div>
+          </fieldset>
+        </form>
+
+        <div
+          id="connection-status"
+          class="connection-status hidden"
+          data-testid="connection-status"
+        >
+          <div
+            id="connection-result"
+            class="connection-result"
+            data-testid="connection-result"
+          ></div>
+        </div>
+      </section>
+
+      <!-- Status Types Configuration -->
+      <section
+        id="status-types-section"
+        class="options-section hidden"
+        data-testid="status-types-section"
+      >
+        <h2>Status Types</h2>
+        <p>Customize the status types available when marking pages.</p>
+
+        <div id="status-types-list" class="status-types-list" data-testid="status-types-list">
+          <!-- Status types will be populated by JavaScript -->
+        </div>
+
+        <form id="add-status-form" class="add-status-form" data-testid="add-status-form">
+          <fieldset>
+            <legend>Add New Status Type</legend>
+
+            <div class="form-grid">
+              <label for="status-id">
+                ID
+                <input
+                  type="text"
+                  id="status-id"
+                  name="id"
+                  required
+                  pattern="[a-z0-9_-]+"
+                  placeholder="my-status"
+                  data-testid="status-id"
+                />
+                <small>Lowercase letters, numbers, dashes, underscores only</small>
+              </label>
+
+              <label for="status-name">
+                Display Name
+                <input
+                  type="text"
+                  id="status-name"
+                  name="name"
+                  required
+                  placeholder="My Status"
+                  data-testid="status-name"
+                />
+              </label>
+
+              <label for="status-color">
+                Color
+                <input
+                  type="color"
+                  id="status-color"
+                  name="color"
+                  value="#22c55e"
+                  data-testid="status-color"
+                />
+              </label>
+
+              <label for="status-icon">
+                Icon
+                <select id="status-icon" name="icon" required data-testid="status-icon">
+                  <option value="check">Check</option>
+                  <option value="circle">Circle</option>
+                  <option value="book-open">Book Open</option>
+                  <option value="star">Star</option>
+                  <option value="bookmark">Bookmark</option>
+                  <option value="heart">Heart</option>
+                  <option value="thumbs-up">Thumbs Up</option>
+                  <option value="eye">Eye</option>
+                </select>
+              </label>
+            </div>
+
+            <button type="submit" id="add-status" data-testid="add-status">Add Status Type</button>
+          </fieldset>
+        </form>
+
+        <div class="status-actions">
+          <button
+            type="button"
+            id="reset-status-types"
+            class="secondary outline"
+            data-testid="reset-status-types"
+          >
+            Reset to Defaults
+          </button>
+        </div>
+      </section>
+
+      <!-- User Preferences -->
+      <section
+        id="preferences-section"
+        class="options-section hidden"
+        data-testid="preferences-section"
+      >
+        <h2>Preferences</h2>
+        <p>Customize your bookmark tracking experience.</p>
+
+        <form id="preferences-form" class="preferences-form" data-testid="preferences-form">
+          <fieldset>
+            <legend>General Settings</legend>
+
+            <label for="default-status">
+              Default Status
+              <select id="default-status" name="defaultStatus" data-testid="default-status">
+                <!-- Options populated by JavaScript -->
+              </select>
+              <small>Default status for new bookmarks</small>
+            </label>
+
+            <label for="items-per-page">
+              Items Per Page
+              <input
+                type="number"
+                id="items-per-page"
+                name="itemsPerPage"
+                min="10"
+                max="100"
+                value="25"
+                data-testid="items-per-page"
+              />
+              <small>Number of bookmarks to show per page</small>
+            </label>
+
+            <label for="sort-by">
+              Default Sort
+              <select id="sort-by" name="sortBy" data-testid="sort-by">
+                <option value="created_at">Date Created</option>
+                <option value="updated_at">Date Modified</option>
+                <option value="title">Title</option>
+                <option value="url">URL</option>
+              </select>
+            </label>
+
+            <label for="sort-order">
+              Sort Order
+              <select id="sort-order" name="sortOrder" data-testid="sort-order">
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Sync & Notifications</legend>
+
+            <label>
+              <input type="checkbox" id="auto-sync" name="autoSync" data-testid="auto-sync" />
+              Enable automatic sync
+            </label>
+
+            <label for="sync-interval">
+              Sync Interval
+              <select id="sync-interval" name="syncInterval" data-testid="sync-interval">
+                <option value="fast">Fast (30 seconds)</option>
+                <option value="normal">Normal (5 minutes)</option>
+                <option value="slow">Slow (30 minutes)</option>
+              </select>
+            </label>
+
+            <label>
+              <input
+                type="checkbox"
+                id="show-notifications"
+                name="showNotifications"
+                data-testid="show-notifications"
+              />
+              Show notifications
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Display Options</legend>
+
+            <label>
+              <input
+                type="checkbox"
+                id="compact-view"
+                name="compactView"
+                data-testid="compact-view"
+              />
+              Use compact view in bookmark manager
+            </label>
+
+            <label for="theme">
+              Theme
+              <select id="theme" name="theme" data-testid="theme">
+                <option value="system">System Default</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </fieldset>
+
+          <button type="submit" id="save-preferences" data-testid="save-preferences">
+            Save Preferences
+          </button>
+        </form>
+
+        <div class="preferences-actions">
+          <button
+            type="button"
+            id="reset-preferences"
+            class="secondary outline"
+            data-testid="reset-preferences"
+          >
+            Reset to Defaults
+          </button>
+        </div>
+      </section>
+
+      <!-- Import/Export -->
+      <section
+        id="import-export-section"
+        class="options-section hidden"
+        data-testid="import-export-section"
+      >
+        <h2>Import & Export</h2>
+        <p>Backup your bookmarks or import from other sources.</p>
+
+        <div class="import-export-grid">
+          <!-- Export -->
+          <div class="export-section">
+            <h3>Export Bookmarks</h3>
+            <p>Download your bookmarks as JSON for backup or migration.</p>
+
+            <form id="export-form" class="export-form" data-testid="export-form">
+              <fieldset>
+                <legend>Export Options</legend>
+
+                <label for="export-status-filter">
+                  Status Filter (optional)
+                  <select
+                    id="export-status-filter"
+                    name="statusFilter"
+                    multiple
+                    data-testid="export-status-filter"
+                  >
+                    <!-- Options populated by JavaScript -->
+                  </select>
+                  <small>Hold Ctrl/Cmd to select multiple statuses</small>
+                </label>
+
+                <label for="export-date-from">
+                  From Date (optional)
+                  <input
+                    type="date"
+                    id="export-date-from"
+                    name="dateFrom"
+                    data-testid="export-date-from"
+                  />
+                </label>
+
+                <label for="export-date-to">
+                  To Date (optional)
+                  <input
+                    type="date"
+                    id="export-date-to"
+                    name="dateTo"
+                    data-testid="export-date-to"
+                  />
+                </label>
+
+                <button type="submit" id="export-bookmarks" data-testid="export-bookmarks">
+                  Export Bookmarks
+                </button>
+              </fieldset>
+            </form>
+          </div>
+
+          <!-- Import -->
+          <div class="import-section">
+            <h3>Import Bookmarks</h3>
+            <p>Import bookmarks from a JSON file.</p>
+
+            <form id="import-form" class="import-form" data-testid="import-form">
+              <fieldset>
+                <legend>Import Options</legend>
+
+                <label for="import-file">
+                  Select File
+                  <input
+                    type="file"
+                    id="import-file"
+                    name="file"
+                    accept=".json"
+                    required
+                    data-testid="import-file"
+                  />
+                  <small>Select a JSON file exported from ForgetfulMe</small>
+                </label>
+
+                <button type="submit" id="import-bookmarks" data-testid="import-bookmarks">
+                  Import Bookmarks
+                </button>
+              </fieldset>
+            </form>
+
+            <div id="import-results" class="import-results hidden" data-testid="import-results">
+              <!-- Import results will be displayed here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Storage Usage -->
+        <div class="storage-usage">
+          <h3>Storage Usage</h3>
+          <div id="storage-info" class="storage-info" data-testid="storage-info">
+            <p>Loading storage information...</p>
+          </div>
+          <button
+            type="button"
+            id="clear-cache"
+            class="secondary outline"
+            data-testid="clear-cache"
+          >
+            Clear Cache
+          </button>
+        </div>
+      </section>
+
+      <!-- Messages -->
+      <div id="message-area" class="message-area" data-testid="message-area"></div>
+
+      <!-- Loading Overlay -->
+      <div id="loading-overlay" class="loading-overlay hidden" data-testid="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner"></div>
+          <p id="loading-message">Processing...</p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="../main/options.js"></script>
+  </body>
+</html>
