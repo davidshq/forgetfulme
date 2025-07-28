@@ -132,15 +132,10 @@ export class OptionsInterface {
 
     const statusCard = UIComponents.createCard(
       '🏷️ Custom Status Types',
-      '',
+      addStatusContainer,
       '',
       'status-card'
     );
-    // Append the actual elements, not their HTML copies
-    const cardContent = statusCard.querySelector('div');
-    if (cardContent) {
-      cardContent.appendChild(addStatusContainer);
-    }
     mainContainer.appendChild(statusCard);
 
     // Create data management card

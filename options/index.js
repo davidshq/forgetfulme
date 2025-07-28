@@ -16,6 +16,10 @@ import AuthUI from '../auth-ui.js';
 import BaseAuthStateManager from '../utils/auth-state-manager.js';
 import ConfigUI from '../config-ui.js';
 import UIMessages from '../utils/ui-messages.js';
+import UIComponents from '../utils/ui-components.js';
+
+// Make UIComponents globally available for UIMessages
+window.UIComponents = UIComponents;
 
 /**
  * Main options page class for ForgetfulMe extension

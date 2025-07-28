@@ -229,6 +229,7 @@ export class ModalComponents {
     // Clean up modal state
     modal.style.display = 'none';
     modal.classList.remove('modal-open');
+    document.body.classList.remove('modal-is-open');
     document.body.style.overflow = '';
 
     // Clean up escape key listener
@@ -264,6 +265,14 @@ export class ModalComponents {
     modal._previousFocus = document.activeElement;
 
     if (modal.tagName === 'DIALOG') {
+      // Ensure dialog is in body, not nested in page content
+      if (!modal.parentNode || modal.parentNode !== document.body) {
+        document.body.appendChild(modal);
+      }
+      
+      // Add Pico CSS modal class to body
+      document.body.classList.add('modal-is-open');
+      
       // Try to use native dialog API, fallback for JSDOM/testing
       try {
         if (modal.showModal) {
@@ -272,13 +281,11 @@ export class ModalComponents {
           // Fallback for JSDOM - simulate modal display
           modal.style.display = 'block';
           modal.classList.add('modal-open');
-          document.body.style.overflow = 'hidden';
         }
       } catch (error) {
         // Fallback for environments without showModal support
         modal.style.display = 'block';
         modal.classList.add('modal-open');
-        document.body.style.overflow = 'hidden';
       }
     } else {
       if (!modal.parentNode) {
@@ -286,7 +293,7 @@ export class ModalComponents {
       }
       modal.style.display = 'block';
       modal.classList.add('modal-open');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-is-open');
     }
 
     // Add escape key listener
