@@ -89,7 +89,7 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
     expect(setupContainer).toBeTruthy();
 
     const welcomeText = await extensionHelper.getElementText(
-      '.ui-container-header h2'
+      'header h2'
     );
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
@@ -160,7 +160,7 @@ test.describe('ForgetfulMe Bookmark Management Setup Tests', () => {
     await page.waitForTimeout(2000);
 
     // Check that the container has proper styling
-    const container = await page.locator('.ui-container');
+    const container = await page.locator('.container');
     expect(await container.isVisible()).toBeTruthy();
 
     // Check that sections are properly styled

@@ -11,10 +11,62 @@
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <main id="main-content" class="container">
-      <!-- Content will be dynamically loaded by JavaScript -->
+      <!-- Static semantic structure for accessibility -->
+      <header>
+        <h1 id="page-title">Bookmark Management</h1>
+        <p id="page-description">View, edit, and organize your saved bookmarks.</p>
+        <nav aria-label="Bookmark actions" id="bookmark-navigation">
+          <!-- Navigation will be enhanced by JS -->
+        </nav>
+      </header>
+      
+      <section id="search-interface" aria-labelledby="search-heading">
+        <h2 id="search-heading" class="sr-only">Search and Filter</h2>
+        <!-- Search and filter content loads here -->
+        <div id="search-loading" aria-live="polite">
+          <progress>Loading search interface...</progress>
+        </div>
+      </section>
+      
+      <section id="bookmark-list" aria-labelledby="list-heading">
+        <h2 id="list-heading" class="sr-only">Bookmark List</h2>
+        <!-- Bookmark list content loads here -->
+        <div id="list-loading" aria-live="polite">
+          <progress>Loading bookmarks...</progress>
+          <p>Fetching your saved bookmarks...</p>
+        </div>
+      </section>
+      
+      <section id="setup-interface" aria-labelledby="setup-heading" hidden>
+        <h2 id="setup-heading">Setup Required</h2>
+        <p>Please configure ForgetfulMe in the settings before managing bookmarks.</p>
+        <p><a href="options.html">Go to Settings</a></p>
+        <!-- Setup content loads here -->
+      </section>
+      
+      <section id="auth-interface" aria-labelledby="auth-heading" hidden>
+        <h2 id="auth-heading">Authentication Required</h2>
+        <p>Please sign in to view and manage your bookmarks.</p>
+        <!-- Auth content loads here -->
+      </section>
+      
+      <section id="empty-state" aria-labelledby="empty-heading" hidden>
+        <h2 id="empty-heading">No Bookmarks Found</h2>
+        <p>You haven't saved any bookmarks yet. Start browsing and use the ForgetfulMe popup to mark pages as read.</p>
+      </section>
+      
+      <section id="error-interface" aria-labelledby="error-heading" hidden>
+        <h2 id="error-heading">Error Loading Bookmarks</h2>
+        <p id="error-message">Unable to load your bookmarks. Please try refreshing the page.</p>
+        <!-- Error content loads here -->
+      </section>
     </main>
 
+    <!-- ARIA live region for announcements -->
+    <div id="status-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    
     <!-- Load Supabase library -->
     <script src="supabase-js.min.js"></script>
     <!-- Load main bookmark management script (modular version) -->

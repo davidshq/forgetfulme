@@ -1,6 +1,14 @@
 // UI rendering logic for popup
 export function showMainInterface(ctx) {
-  // Create header with Pico navigation
+  // Hide loading indicator and show main interface
+  const loadingIndicator = document.getElementById('loading-indicator');
+  const mainInterface = document.getElementById('main-interface');
+  const appNavigation = document.getElementById('app-navigation');
+  
+  if (loadingIndicator) loadingIndicator.hidden = true;
+  if (mainInterface) mainInterface.hidden = false;
+
+  // Create navigation items for existing navigation element
   const navItems = [
     {
       text: '⚙️ Settings',
@@ -18,15 +26,25 @@ export function showMainInterface(ctx) {
     },
   ];
 
-  const header = ctx.UIComponents.createHeaderWithNav('ForgetfulMe', navItems, {
-    titleId: 'popup-title',
-    navAriaLabel: 'Extension actions',
-    navClassName: 'header-nav',
-  });
+  // Enhanced navigation in existing element
+  if (appNavigation) {
+    appNavigation.innerHTML = '';
+    navItems.forEach(item => {
+      const button = ctx.UIComponents.createButton(
+        item.text, 
+        item.onClick, 
+        item.className, 
+        {
+          title: item.title,
+          'aria-label': item['aria-label']
+        }
+      );
+      appNavigation.appendChild(button);
+    });
+  }
 
-  // Create main content container
-  const mainContent = document.createElement('div');
-  mainContent.setAttribute('role', 'main');
+  // Get main interface container for content
+  const mainContent = mainInterface || document.createElement('div');
 
   // Create form card using UIComponents for better Pico integration
   const formCard = ctx.UIComponents.createFormCard(
@@ -89,21 +107,43 @@ export function showMainInterface(ctx) {
 
   mainContent.appendChild(recentCard);
 
-  // Assemble the interface
-  ctx.appContainer.innerHTML = '';
-  ctx.appContainer.appendChild(header);
-  ctx.appContainer.appendChild(mainContent);
+  // Clear existing dynamic content and add form to main interface
+  if (mainContent) {
+    // Clear any existing dynamic content but keep static structure
+    const existingContent = mainContent.querySelector('.dynamic-content');
+    if (existingContent) {
+      existingContent.remove();
+    }
+    
+    // Create container for dynamic content
+    const dynamicContainer = document.createElement('div');
+    dynamicContainer.className = 'dynamic-content';
+    dynamicContainer.appendChild(formCard);
+    
+    // Add to main interface section
+    mainContent.appendChild(dynamicContainer);
+  }
 
   // Load recent entries
   ctx.state.loadRecentEntries(ctx);
 }
 export function showSetupInterface(ctx) {
-  // Create main container
-  const container = ctx.UIComponents.createContainer(
-    'Welcome to ForgetfulMe!',
-    'This extension helps you mark websites as read for research purposes.',
-    'setup-container'
-  );
+  // Hide other interfaces and show setup
+  const interfaces = ['main-interface', 'auth-interface', 'error-interface'];
+  interfaces.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.hidden = true;
+  });
+  
+  const setupInterface = document.getElementById('setup-interface');
+  if (setupInterface) {
+    setupInterface.hidden = false;
+    
+    // Clear existing content
+    const existingContent = setupInterface.querySelector('.dynamic-content');
+    if (existingContent) {
+      existingContent.remove();
+    }
 
   // Create setup section
   const setupSection = ctx.UIComponents.createSection(
@@ -140,13 +180,43 @@ export function showSetupInterface(ctx) {
       <li>View your recent entries in the popup</li>
     </ul>
   `;
-  container.appendChild(howItWorksSection);
-
-  ctx.appContainer.innerHTML = '';
-  ctx.appContainer.appendChild(container);
+  
+    // Create dynamic content container
+    const dynamicContainer = document.createElement('div');
+    dynamicContainer.className = 'dynamic-content';
+    dynamicContainer.appendChild(setupSection);
+    dynamicContainer.appendChild(howItWorksSection);
+    
+    // Add to setup interface
+    setupInterface.appendChild(dynamicContainer);
+  }
 }
 export function showAuthInterface(ctx) {
-  ctx.authUI.showLoginForm(ctx.appContainer);
+  // Hide other interfaces and show auth
+  const interfaces = ['main-interface', 'setup-interface', 'error-interface'];
+  interfaces.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.hidden = true;
+  });
+  
+  const authInterface = document.getElementById('auth-interface');
+  if (authInterface) {
+    authInterface.hidden = false;
+    
+    // Clear existing content
+    const existingContent = authInterface.querySelector('.dynamic-content');
+    if (existingContent) {
+      existingContent.remove();
+    }
+    
+    // Create dynamic content container for auth form
+    const dynamicContainer = document.createElement('div');
+    dynamicContainer.className = 'dynamic-content';
+    
+    // Add auth form to dynamic container
+    ctx.authUI.showLoginForm(dynamicContainer);
+    authInterface.appendChild(dynamicContainer);
+  }
 }
 export function showEditInterface(ctx, existingBookmark) {
   ctx.currentBookmarkUrl = existingBookmark.url;

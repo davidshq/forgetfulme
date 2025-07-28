@@ -99,7 +99,7 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     expect(setupContainer).toBeTruthy();
 
     const welcomeText = await extensionHelper.getElementText(
-      '.ui-container-header h2'
+      'header h2'
     );
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
@@ -170,7 +170,7 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     await page.waitForTimeout(2000);
 
     // Check that the container has proper styling
-    const container = await page.locator('.ui-container');
+    const container = await page.locator('.container');
     expect(await container.isVisible()).toBeTruthy();
 
     // Check that sections are properly styled
@@ -283,13 +283,13 @@ test.describe('ForgetfulMe Bookmark Management Tests', () => {
     expect(await appContainer.isVisible()).toBeTruthy();
 
     // Check for welcome message
-    const welcomeTitle = await page.locator('.ui-container-header h2');
+    const welcomeTitle = await page.locator('header h2');
     expect(await welcomeTitle.isVisible()).toBeTruthy();
     const titleText = await welcomeTitle.textContent();
     expect(titleText).toBeTruthy();
 
     // Check for description
-    const description = await page.locator('.ui-container-header p');
+    const description = await page.locator('header p');
     expect(await description.isVisible()).toBeTruthy();
     const descText = await description.textContent();
     expect(descText).toBeTruthy();

@@ -36,12 +36,11 @@ export class ContainerComponents {
    */
   static createContainer(title, subtitle = '', className = '') {
     const container = document.createElement('div');
-    container.className = `ui-container ${className}`.trim();
+    container.className = `container ${className}`.trim();
 
     if (title) {
-      const header = document.createElement('div');
-      header.className = 'ui-container-header';
-
+      const header = document.createElement('header');
+      
       const titleEl = document.createElement('h2');
       titleEl.textContent = title;
       header.appendChild(titleEl);
@@ -347,7 +346,7 @@ export class ContainerComponents {
    */
   static createLayoutContainer(className = '') {
     const container = document.createElement('div');
-    container.className = `layout-container ${className}`.trim();
+    container.className = `container ${className}`.trim();
     return container;
   }
 

@@ -11,10 +11,47 @@
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <main id="main-content" class="container">
-      <!-- Content will be dynamically loaded by JavaScript -->
+      <!-- Static semantic structure for accessibility -->
+      <header>
+        <h1 id="app-title">ForgetfulMe</h1>
+        <nav aria-label="Extension actions" id="app-navigation">
+          <!-- Navigation will be enhanced by JS -->
+        </nav>
+      </header>
+      
+      <section id="main-interface" aria-labelledby="main-heading">
+        <h2 id="main-heading" class="sr-only">Main Interface</h2>
+        <!-- Dynamic content loads here -->
+        <div id="loading-indicator" aria-live="polite">
+          <progress>Loading...</progress>
+          <p>Loading ForgetfulMe...</p>
+        </div>
+      </section>
+      
+      <section id="auth-interface" aria-labelledby="auth-heading" hidden>
+        <h2 id="auth-heading">Authentication Required</h2>
+        <p>Please sign in to continue using ForgetfulMe.</p>
+        <!-- Auth content loads here -->
+      </section>
+      
+      <section id="setup-interface" aria-labelledby="setup-heading" hidden>
+        <h2 id="setup-heading">Setup Required</h2>
+        <p>Configuration needed to connect to your data storage.</p>
+        <!-- Setup content loads here -->
+      </section>
+      
+      <section id="error-interface" aria-labelledby="error-heading" hidden>
+        <h2 id="error-heading">Error</h2>
+        <p id="error-message">An unexpected error occurred. Please try again.</p>
+        <!-- Error content loads here -->
+      </section>
     </main>
 
+    <!-- ARIA live region for announcements -->
+    <div id="status-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+    
     <!-- Load Supabase library -->
     <script src="supabase-js.min.js"></script>
     <!-- Load main popup script -->

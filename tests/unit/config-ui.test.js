@@ -54,7 +54,7 @@ describe('ConfigUI', () => {
     it('should create and display configuration form', async () => {
       // Mock UIComponents methods to return actual DOM elements
       const mockContainerEl = document.createElement('div');
-      mockContainerEl.className = 'ui-container';
+      mockContainerEl.className = 'container';
 
       const mockForm = document.createElement('form');
       const urlInput = document.createElement('input');
@@ -78,7 +78,7 @@ describe('ConfigUI', () => {
       configUI.showConfigForm(container);
 
       // Verify actual DOM elements were created
-      expect(container.querySelector('.ui-container')).toBeTruthy();
+      expect(container.querySelector('.container')).toBeTruthy();
       expect(container.querySelector('form')).toBeTruthy();
       expect(container.querySelector('#supabaseUrl')).toBeTruthy();
       expect(container.querySelector('#supabaseAnonKey')).toBeTruthy();

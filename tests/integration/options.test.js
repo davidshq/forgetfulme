@@ -71,7 +71,7 @@ test.describe('ForgetfulMe Options Tests', () => {
 
   test('should have proper styling and layout', async ({ page }) => {
     // Check that the container has proper styling
-    const container = await page.locator('.ui-container');
+    const container = await page.locator('.container');
     expect(await container.isVisible()).toBeTruthy();
 
     // Check that form elements are properly styled

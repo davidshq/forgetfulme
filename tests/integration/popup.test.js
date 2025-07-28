@@ -120,7 +120,6 @@ test.describe('ForgetfulMe Popup Tests', () => {
     const hasLayoutElements = await page.evaluate(() => {
       const layoutSelectors = [
         '.container',
-        '.ui-container',
         'main',
         '[role="main"]',
         'header',

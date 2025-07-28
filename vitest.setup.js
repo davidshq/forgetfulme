@@ -804,12 +804,12 @@ global.fetch = vi.fn();
 global.UIComponents = {
   createContainer: vi.fn((title, subtitle, className) => {
     const container = global.document.createElement('div');
-    container.className = `ui-container ${className}`.trim();
+    container.className = `container ${className}`.trim();
     container.innerHTML = `
-      <div class="ui-container-header">
+      <header>
         <h2>${title}</h2>
         ${subtitle ? `<p>${subtitle}</p>` : ''}
-      </div>
+      </header>
     `;
     return container;
   }),

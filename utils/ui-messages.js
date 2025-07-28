@@ -43,6 +43,37 @@ class UIMessages {
   };
 
   /**
+   * Create ARIA live region for screen reader announcements
+   * @static
+   */
+  static createLiveRegion() {
+    if (document.getElementById('status-announcements')) return;
+    
+    const region = document.createElement('div');
+    region.id = 'status-announcements';
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'true');
+    region.className = 'sr-only';
+    document.body.appendChild(region);
+  }
+
+  /**
+   * Announce message to screen readers
+   * @static
+   * @param {string} message - Message to announce
+   */
+  static announceToScreenReader(message) {
+    this.createLiveRegion();
+    const region = document.getElementById('status-announcements');
+    region.textContent = message;
+    
+    // Clear after announcement
+    setTimeout(() => {
+      region.textContent = '';
+    }, 1000);
+  }
+
+  /**
    * Show a message in the UI
    * @param {string} message - Message text
    * @param {string} type - Message type (success, error, warning, info)
@@ -105,6 +136,9 @@ class UIMessages {
       }
 
       container.appendChild(messageEl);
+      
+      // Announce to screen readers
+      this.announceToScreenReader(message);
     } catch {
       // Error adding message to container
       return;
