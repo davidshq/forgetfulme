@@ -143,6 +143,21 @@ header h1 {
 .search-form input,
 .search-form select {
   margin-bottom: 1rem;
+  border: 2px solid var(--fm-border);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-form input:hover,
+.search-form select:hover {
+  border-color: #a8b3c1;
+}
+
+.search-form input:focus,
+.search-form select:focus {
+  border-color: var(--pico-primary);
+  box-shadow: 0 0 0 3px var(--pico-primary-focus);
 }
 
 /* Bulk actions card */

@@ -195,11 +195,27 @@ form textarea {
   margin-bottom: 0.5rem;
 }
 
+form input,
+form select,
+form textarea {
+  border: 2px solid var(--fm-border-color);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+form input:hover,
+form select:hover,
+form textarea:hover {
+  border-color: #a8b3c1;
+}
+
 form input:focus,
 form select:focus,
 form textarea:focus {
   outline: var(--pico-outline-width) solid var(--pico-primary-focus);
   outline-offset: 0;
+  border-color: var(--pico-primary);
 }
 
 form input[aria-invalid='true'],

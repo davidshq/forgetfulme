@@ -94,8 +94,8 @@ article.bookmark-card {
 
 .config-status.warning {
   background: var(--fm-warning-bg);
-  color: #92400e;
-  border: var(--pico-border-width) solid #fbbf24;
+  color: #713f12;
+  border: var(--pico-border-width) solid #d97706;
 }
 
 /* Statistics card styles */
@@ -316,8 +316,8 @@ article.bookmark-card {
 
 .message.warning {
   background: var(--fm-warning-bg);
-  color: #92400e;
-  border-color: #fbbf24;
+  color: #713f12;
+  border-color: #d97706;
 }
 
 .message.info {
@@ -439,8 +439,9 @@ article.bookmark-card {
 button:focus,
 input:focus,
 select:focus {
-  outline: 2px solid var(--pico-primary-focus);
+  outline: 2px solid var(--pico-primary);
   outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--pico-primary-focus);
 }
 
 /* Accessibility improvements */
