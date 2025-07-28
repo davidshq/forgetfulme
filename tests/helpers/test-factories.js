@@ -11,7 +11,6 @@
 import { vi } from 'vitest';
 import {
   setupTestWithMocks,
-  setupModuleMocks,
   createMockElement,
 } from './test-utils.js';
 

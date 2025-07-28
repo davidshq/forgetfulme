@@ -339,42 +339,6 @@ export class ContainerComponents {
     return article;
   }
 
-  /**
-   * Create a responsive layout container
-   * @param {string} className - Additional CSS classes
-   * @returns {HTMLElement}
-   */
-  static createLayoutContainer(className = '') {
-    const container = document.createElement('div');
-    container.className = `container ${className}`.trim();
-    return container;
-  }
-
-  /**
-   * Create a sidebar layout with main content area
-   * @param {HTMLElement} sidebar - Sidebar element
-   * @param {HTMLElement} main - Main content element
-   * @param {Object} options - Layout options
-   * @returns {HTMLElement}
-   */
-  static createSidebarLayout(sidebar, main, options = {}) {
-    const layout = document.createElement('div');
-    layout.className = `sidebar-layout ${options.className || ''}`.trim();
-
-    // Add sidebar
-    const sidebarContainer = document.createElement('aside');
-    sidebarContainer.className = 'sidebar';
-    sidebarContainer.appendChild(sidebar);
-    layout.appendChild(sidebarContainer);
-
-    // Add main content
-    const mainContainer = document.createElement('main');
-    mainContainer.className = 'main-content';
-    mainContainer.appendChild(main);
-    layout.appendChild(mainContainer);
-
-    return layout;
-  }
 
   /**
    * Create a responsive grid layout

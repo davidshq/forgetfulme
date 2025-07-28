@@ -14,7 +14,6 @@ import { ButtonComponents, BUTTON_STYLES } from './button-components.js';
 import { FormComponents, FIELD_TYPES } from './form-components.js';
 import { ContainerComponents } from './container-components.js';
 import { ModalComponents } from './modal-components.js';
-import { NavigationComponents } from './navigation-components.js';
 
 /**
  * Available component types for UI creation
@@ -87,8 +86,6 @@ export class UIComponents {
   static createCardWithActions = ContainerComponents.createCardWithActions;
   static createFormCard = ContainerComponents.createFormCard;
   static createListCard = ContainerComponents.createListCard;
-  static createLayoutContainer = ContainerComponents.createLayoutContainer;
-  static createSidebarLayout = ContainerComponents.createSidebarLayout;
   static createGrid = ContainerComponents.createGrid;
 
   // Re-export modal methods
@@ -96,21 +93,12 @@ export class UIComponents {
   static createModal = ModalComponents.createModal;
   static closeModal = ModalComponents.closeModal;
   static showModal = ModalComponents.showModal;
-  static createTooltip = ModalComponents.createTooltip;
-  static positionTooltip = ModalComponents.positionTooltip;
   static createProgressIndicator = ModalComponents.createProgressIndicator;
   static createProgressBar = ModalComponents.createProgressBar;
   static createLoadingState = ModalComponents.createLoadingState;
   static setBusyState = ModalComponents.setBusyState;
   static createStatusIndicator = ModalComponents.createStatusIndicator;
-  static createTabs = ModalComponents.createTabs;
-  static switchTab = ModalComponents.switchTab;
 
-  // Re-export navigation methods
-  static createNavigation = NavigationComponents.createNavigation;
-  static createBreadcrumb = NavigationComponents.createBreadcrumb;
-  static createNavMenu = NavigationComponents.createNavMenu;
-  static createHeaderWithNav = NavigationComponents.createHeaderWithNav;
 }
 
 // Export individual component classes for modular usage
@@ -119,7 +107,6 @@ export { ButtonComponents, BUTTON_STYLES } from './button-components.js';
 export { FormComponents, FIELD_TYPES } from './form-components.js';
 export { ContainerComponents } from './container-components.js';
 export { ModalComponents } from './modal-components.js';
-export { NavigationComponents } from './navigation-components.js';
 
 // Default export for backward compatibility
 export default UIComponents;
