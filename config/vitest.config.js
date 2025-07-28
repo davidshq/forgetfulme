@@ -31,7 +31,7 @@ export default defineConfig({
     ],
 
     // Setup files
-    setupFiles: ['./vitest.setup.js'],
+    setupFiles: ['./config/vitest.setup.js'],
 
     // Ensure JSDOM environment is properly configured
     environmentOptions: {
@@ -51,9 +51,9 @@ export default defineConfig({
         'tests/auth.test.js',
         'tests/helpers/**',
         'tests/unit/**/*.test.js',
-        'vitest.config.js',
-        'vitest.setup.js',
-        'playwright.config.js',
+        'config/vitest.config.js',
+        'config/vitest.setup.js',
+        'config/playwright.config.js',
       ],
       thresholds: {
         global: {

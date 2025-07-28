@@ -17,7 +17,7 @@ import path from 'path';
  * @description Enhanced configuration supporting both HTTP-based component tests and real Chrome extension E2E tests
  */
 export default defineConfig({
-  testDir: './tests',
+  testDir: '../tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -35,7 +35,7 @@ export default defineConfig({
   },
 
   // Playwright-specific setup (not Vitest)
-  globalSetup: './playwright.setup.js',
+  globalSetup: './config/playwright.setup.js',
 
   projects: [
     // Component Integration Tests (HTTP-based, faster feedback)
