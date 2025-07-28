@@ -340,45 +340,89 @@ export class ContainerComponents {
   }
 
   /**
-   * Create a responsive grid layout
+   * Create a responsive grid layout using Pico's native grid system
    * @param {Array} items - Array of items to display in grid (can be DOM nodes or text objects)
+   * @param {string|number} columns - Grid columns: 'auto', number, or responsive breakpoint
    * @param {Object} options - Grid options
    * @returns {HTMLElement}
    */
-  static createGrid(items, options = {}) {
+  static createGrid(items, columns = 'auto', options = {}) {
     const grid = document.createElement('div');
     grid.className = `grid ${options.className || ''}`.trim();
 
-    // Set grid columns if specified
-    if (options.columns) {
-      grid.style.gridTemplateColumns = `repeat(${options.columns}, 1fr)`;
+    // Use Pico's CSS custom properties for responsive grid
+    if (typeof columns === 'number') {
+      // Fixed number of columns
+      grid.style.setProperty('--pico-grid-spacing-vertical', options.verticalSpacing || '1rem');
+      grid.style.setProperty('--pico-grid-spacing-horizontal', options.horizontalSpacing || '1rem');
+      grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    } else if (columns === 'auto') {
+      // Responsive auto-fit columns with minimum width
+      const minWidth = options.minWidth || '200px';
+      grid.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minWidth}, 1fr))`;
+      grid.style.setProperty('--pico-grid-spacing-vertical', options.verticalSpacing || '1rem');
+      grid.style.setProperty('--pico-grid-spacing-horizontal', options.horizontalSpacing || '1rem');
+    } else if (typeof columns === 'object') {
+      // Responsive breakpoints
+      grid.style.setProperty('--pico-grid-spacing-vertical', options.verticalSpacing || '1rem');
+      grid.style.setProperty('--pico-grid-spacing-horizontal', options.horizontalSpacing || '1rem');
+      
+      // Default to single column
+      grid.style.gridTemplateColumns = '1fr';
+      
+      // Apply responsive columns via CSS custom properties
+      if (columns.mobile) grid.style.setProperty('--mobile-columns', columns.mobile);
+      if (columns.tablet) grid.style.setProperty('--tablet-columns', columns.tablet);
+      if (columns.desktop) grid.style.setProperty('--desktop-columns', columns.desktop);
     }
 
-    // Add grid items
+    // Set additional grid properties
+    if (options.gap) {
+      grid.style.gap = options.gap;
+    }
+    
+    if (options.alignItems) {
+      grid.style.alignItems = options.alignItems;
+    }
+    
+    if (options.justifyItems) {
+      grid.style.justifyItems = options.justifyItems;
+    }
+
+    // Add grid items (direct children, no wrapper divs for better Pico compatibility)
     items.forEach(item => {
-      const gridItem = document.createElement('div');
-      gridItem.className = 'grid-item';
+      let gridItem;
 
       // Handle different item types
       if (item instanceof Node) {
-        // If item is already a DOM node, append it directly
-        gridItem.appendChild(item);
+        // If item is already a DOM node, use it directly
+        gridItem = item;
       } else if (typeof item === 'object' && item.text) {
-        // If item is a text object, create a text node
-        const textNode = document.createElement('span');
-        textNode.textContent = item.text;
+        // If item is a text object, create appropriate element
+        const tagName = item.tag || 'div';
+        gridItem = document.createElement(tagName);
+        gridItem.textContent = item.text;
         if (item.className) {
-          textNode.className = item.className;
+          gridItem.className = item.className;
         }
-        gridItem.appendChild(textNode);
+        if (item.attributes) {
+          Object.entries(item.attributes).forEach(([key, value]) => {
+            gridItem.setAttribute(key, value);
+          });
+        }
       } else if (typeof item === 'string') {
-        // If item is a string, create a text node
-        const textNode = document.createTextNode(item);
-        gridItem.appendChild(textNode);
+        // If item is a string, create a div with the text
+        gridItem = document.createElement('div');
+        gridItem.textContent = item;
       } else {
         // Fallback: convert to string
-        const textNode = document.createTextNode(String(item));
-        gridItem.appendChild(textNode);
+        gridItem = document.createElement('div');
+        gridItem.textContent = String(item);
+      }
+
+      // Apply grid item specific styling if provided
+      if (options.itemClassName) {
+        gridItem.classList.add(options.itemClassName);
       }
 
       grid.appendChild(gridItem);

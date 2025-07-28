@@ -1148,5 +1148,101 @@ describe('UIComponents', () => {
         expect(indicator.querySelector('.status-icon').textContent).toBe('⚠');
       });
     });
+
+    describe('createGrid', () => {
+      test('should create grid with auto columns', () => {
+        const items = [
+          { text: 'Item 1', className: 'test-item' },
+          { text: 'Item 2', className: 'test-item' },
+          { text: 'Item 3', className: 'test-item' },
+        ];
+
+        const grid = UIComponents.createGrid(items, 'auto', {
+          className: 'test-grid',
+          minWidth: '150px',
+        });
+
+        expect(grid.tagName).toBe('DIV');
+        expect(grid.classList.contains('grid')).toBe(true);
+        expect(grid.classList.contains('test-grid')).toBe(true);
+        expect(grid.children.length).toBe(3);
+        expect(grid.style.gridTemplateColumns).toBe('repeat(auto-fit, minmax(150px, 1fr))');
+      });
+
+      test('should create grid with fixed columns', () => {
+        const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+
+        const grid = UIComponents.createGrid(items, 2, {
+          gap: '2rem',
+        });
+
+        expect(grid.tagName).toBe('DIV');
+        expect(grid.classList.contains('grid')).toBe(true);
+        expect(grid.children.length).toBe(4);
+        expect(grid.style.gridTemplateColumns).toBe('repeat(2, 1fr)');
+        expect(grid.style.gap).toBe('2rem');
+      });
+
+      test('should create grid with DOM node items', () => {
+        const div1 = document.createElement('div');
+        div1.textContent = 'DOM Node 1';
+        const div2 = document.createElement('div');
+        div2.textContent = 'DOM Node 2';
+
+        const grid = UIComponents.createGrid([div1, div2]);
+
+        expect(grid.children.length).toBe(2);
+        expect(grid.children[0]).toBe(div1);
+        expect(grid.children[1]).toBe(div2);
+      });
+
+      test('should create grid with responsive breakpoints', () => {
+        const items = ['Item 1', 'Item 2'];
+        const breakpoints = {
+          mobile: '1fr',
+          tablet: 'repeat(2, 1fr)',
+          desktop: 'repeat(3, 1fr)',
+        };
+
+        const grid = UIComponents.createGrid(items, breakpoints);
+
+        expect(grid.style.getPropertyValue('--mobile-columns')).toBe('1fr');
+        expect(grid.style.getPropertyValue('--tablet-columns')).toBe('repeat(2, 1fr)');
+        expect(grid.style.getPropertyValue('--desktop-columns')).toBe('repeat(3, 1fr)');
+      });
+
+      test('should handle mixed item types', () => {
+        const div = document.createElement('div');
+        div.textContent = 'DOM Element';
+        
+        const items = [
+          div,
+          'String item',
+          { text: 'Object item', className: 'obj-item' },
+          123, // Number should be converted to string
+        ];
+
+        const grid = UIComponents.createGrid(items);
+
+        expect(grid.children.length).toBe(4);
+        expect(grid.children[0]).toBe(div);
+        expect(grid.children[1].textContent).toBe('String item');
+        expect(grid.children[2].textContent).toBe('Object item');
+        expect(grid.children[2].classList.contains('obj-item')).toBe(true);
+        expect(grid.children[3].textContent).toBe('123');
+      });
+
+      test('should apply item className when provided', () => {
+        const items = ['Item 1', 'Item 2'];
+
+        const grid = UIComponents.createGrid(items, 'auto', {
+          itemClassName: 'grid-cell',
+        });
+
+        Array.from(grid.children).forEach(child => {
+          expect(child.classList.contains('grid-cell')).toBe(true);
+        });
+      });
+    });
   });
 });

@@ -291,11 +291,16 @@ class ForgetfulMeOptions {
         { text: 'Status Types:', className: 'stat-item' },
         { text: 'Most Used Status:', className: 'stat-item' },
       ],
-      { className: 'stats-grid' }
+      'auto',
+      { 
+        className: 'stats-grid',
+        minWidth: '200px',
+        gap: '1rem'
+      }
     );
 
-    // Add stat values safely
-    const statItems = statsGrid.querySelectorAll('.grid-item');
+    // Add stat values safely (direct children since no grid-item wrapper)
+    const statItems = statsGrid.children;
     if (statItems.length >= 3) {
       statItems[0].innerHTML =
         '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>';
