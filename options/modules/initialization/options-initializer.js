@@ -53,7 +53,7 @@ export class OptionsInitializer {
    */
   initializeElements() {
     // Initialize elements that exist in the initial HTML
-    this.appContainer = UIComponents.DOM.getElement('app');
+    this.appContainer = UIComponents.DOM.getElement('main-content');
 
     // Re-initialize dynamically created elements with safe access
     this.statusTypesList = UIComponents.DOM.getElement('status-types-list');

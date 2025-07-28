@@ -268,7 +268,7 @@ async function loadAllBookmarks() {
 
 // App initialization
 document.addEventListener('DOMContentLoaded', async () => {
-  appContainer = UIComponents.DOM.getElement('app');
+  appContainer = UIComponents.DOM.getElement('main-content');
   if (!appContainer) {
     throw ErrorHandler.createError(
       'App container not found',

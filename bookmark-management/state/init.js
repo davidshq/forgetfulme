@@ -37,7 +37,7 @@ export async function initializeAsync({
  * @returns {HTMLElement} The app container
  */
 export function initializeElements({ UIComponents, ErrorHandler }) {
-  const appContainer = UIComponents.DOM.getElement('app');
+  const appContainer = UIComponents.DOM.getElement('main-content');
   if (!appContainer) {
     throw ErrorHandler.createError(
       'App container not found',

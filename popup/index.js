@@ -38,7 +38,7 @@ const ctx = {
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Set up app container
-  ctx.appContainer = UIComponents.DOM.getElement('app');
+  ctx.appContainer = UIComponents.DOM.getElement('main-content');
   // Set up core services
   ctx.ConfigManager = new ConfigManager();
   ctx.supabaseConfig = new SupabaseConfig();
