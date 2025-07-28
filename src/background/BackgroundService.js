@@ -408,24 +408,24 @@ export class BackgroundService {
       console.log('Message received:', message.type);
 
       switch (message.type) {
-        case 'GET_CURRENT_TAB':
-          await this.handleGetCurrentTab(sendResponse);
-          break;
+      case 'GET_CURRENT_TAB':
+        await this.handleGetCurrentTab(sendResponse);
+        break;
 
-        case 'MARK_CURRENT_PAGE':
-          await this.handleMarkCurrentPage(message.data, sendResponse);
-          break;
+      case 'MARK_CURRENT_PAGE':
+        await this.handleMarkCurrentPage(message.data, sendResponse);
+        break;
 
-        case 'UPDATE_BADGE':
-          await this.handleUpdateBadge(message.data, sendResponse);
-          break;
+      case 'UPDATE_BADGE':
+        await this.handleUpdateBadge(message.data, sendResponse);
+        break;
 
-        case 'SHOW_NOTIFICATION':
-          await this.handleShowNotification(message.data, sendResponse);
-          break;
+      case 'SHOW_NOTIFICATION':
+        await this.handleShowNotification(message.data, sendResponse);
+        break;
 
-        default:
-          sendResponse({ error: 'Unknown message type' });
+      default:
+        sendResponse({ error: 'Unknown message type' });
       }
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'BackgroundService.handleMessage');

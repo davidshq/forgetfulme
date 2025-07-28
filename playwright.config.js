@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/integration',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -11,9 +11,18 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    baseURL: 'http://localhost:3000',
+    // No baseURL - we'll use file:// protocol directly
     trace: 'on-first-retry',
     screenshot: 'only-on-failure'
+  },
+
+  expect: {
+    // Configure visual comparison
+    threshold: 0.2,
+    toHaveScreenshot: {
+      mode: 'non-default',
+      threshold: 0.2
+    }
   },
 
   projects: [
@@ -21,11 +30,7 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
     }
-  ],
+  ]
 
-  webServer: process.env.CI ? undefined : {
-    command: 'python -m http.server 3000',
-    port: 3000,
-    reuseExistingServer: !process.env.CI
-  }
+  // No webServer needed for browser extension files
 });

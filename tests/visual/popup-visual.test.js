@@ -3,10 +3,16 @@
  */
 
 import { test, expect } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..', '..');
 
 test.describe('Popup Visual Regression', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('./src/ui/popup.html');
+    const filePath = `file://${path.join(projectRoot, 'src', 'ui', 'popup.html')}`;
+    await page.goto(filePath);
     await page.waitForLoadState('networkidle');
     
     // Set consistent viewport for screenshots

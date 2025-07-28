@@ -12,7 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:playwright:headed` - Run Playwright tests in headed mode
 - `npm run test:playwright:debug` - Debug Playwright tests
 - `npm run test:playwright:ui` - Run Playwright tests with UI mode
-- `npm run test:visual` - Run visual regression tests
+- `npm run test:visual` - Run visual regression tests  
+- `npm run test:visual:simple` - Run basic visual baseline tests
 - `npm run test:visual:update` - Update visual regression baselines
 - `npm run test:all` - Run all tests (unit + integration + visual)
 - `npm run install-browsers` - Install Playwright browsers (Chromium)
@@ -23,6 +24,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
 - `npm run check` - Run both linting and format checking
+
+**Note**: Console statements show as warnings (not errors) and should be left in place unless explicitly requested to remove them for debugging purposes.
 
 ## Development Philosophy
 
@@ -172,6 +175,10 @@ src/
 - **Secure credential storage** in Chrome sync storage
 - **JWT token** based authentication with automatic refresh
 
+### Console Statement Policy
+
+Console statements are intentionally kept in the codebase for debugging purposes and should not be removed unless explicitly requested. The ESLint configuration treats `console` statements as warnings (not errors) to allow for debugging output while still being visible during linting.
+
 ### Common Development Patterns
 
 **Error Handling**: Always use the centralized ErrorService:
@@ -245,6 +252,23 @@ npm run test:all              # All tests including visual
 npm run test:all              # Complete test suite (REQUIRED)
 ```
 
+### **Automatic Visual Regression Testing Protocol**
+
+**Claude Code MUST automatically run visual tests in these scenarios:**
+
+1. **Before making any UI/CSS changes**: Run `npm run test:visual:simple` to establish current baseline
+2. **After making UI/CSS changes**: Run `npm run test:visual:simple` to detect visual changes
+3. **When adding new UI components**: Create corresponding visual tests immediately
+4. **When modifying existing components**: Update visual tests to cover new states/variations
+5. **Before completing any styling task**: Run full visual regression suite to ensure no regressions
+
+**Test Coverage Requirements:**
+- **Every UI state must have a visual test**: loading, error, success, empty, populated
+- **Responsive breakpoints**: mobile, tablet, desktop views for each component
+- **Theme variations**: light mode, dark mode, high contrast
+- **Interactive states**: hover, focus, active, disabled states
+- **Form states**: empty, filled, validation errors, success messages
+
 ### **Visual Regression Testing is CRITICAL**
 
 - **ALWAYS run visual tests** when changing CSS, HTML, or UI JavaScript
@@ -285,3 +309,57 @@ If tests fail:
 - **Use centralized error handling** - never throw raw errors to users
 - **Maintain CSP compliance** - no external scripts or eval()
 - **Test behavior, not implementation** - focus on user workflows
+
+---
+
+## **Automated Testing Protocol for Claude Code**
+
+### **MANDATORY: Claude Code Automation Requirements**
+
+**Claude Code MUST automatically perform these actions:**
+
+1. **Before making any UI/CSS changes:**
+   ```bash
+   npm run test:visual:simple  # Establish baseline
+   ```
+
+2. **After making any UI/CSS changes:**
+   ```bash
+   npm run test:visual:simple  # Detect visual changes
+   ```
+
+3. **After any code changes:**
+   ```bash
+   npm run check              # Lint + format check
+   ```
+
+4. **When adding new UI components:**
+   - Create corresponding visual tests immediately
+   - Cover all states: default, loading, error, success, empty, populated
+   - Include responsive breakpoints and theme variations
+
+5. **When modifying existing components:**
+   - Update visual tests to cover new states/variations
+   - Ensure no regression in existing functionality
+
+6. **Test Coverage Requirements:**
+   - Every UI state must have a visual test
+   - Responsive breakpoints: mobile (320px), tablet (768px), desktop (1200px+)
+   - Theme variations: light mode, dark mode
+   - Interactive states: hover, focus, active, disabled
+   - Form states: empty, filled, validation errors, success messages
+   - Loading states, error states, empty states, populated states
+
+7. **Before completing any task involving UI changes:**
+   ```bash
+   npm run test:all           # Full test suite
+   ```
+
+### **Visual Test Organization**
+
+- **`tests/visual/simple-visual.test.js`**: Quick baseline tests for development
+- **`tests/visual/popup-visual.test.js`**: Comprehensive popup UI states
+- **`tests/visual/options-visual.test.js`**: Options page scenarios
+- **`tests/visual/bookmark-manager-visual.test.js`**: Bookmark manager states
+
+**Claude Code must maintain and expand these test suites as the UI evolves.**
