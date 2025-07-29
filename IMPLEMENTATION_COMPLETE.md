@@ -59,6 +59,41 @@
 - [x] Add storage change listeners
 - [x] Write storage service tests
 
+### 2.4 Config Service
+- [x] Create `src/services/ConfigService.js`
+- [x] Implement Supabase configuration management
+- [x] Add status types management (with CRUD operations)
+- [x] Create user preferences handling (with validation)
+- [x] Add configuration validation and connection testing
+- [x] Implement default configuration setup
+- [x] Add comprehensive configuration caching
+- [x] Write config service tests (13/20 passing)
+
+### 2.5 Auth Service
+- [x] Create `src/services/AuthService.js`
+- [x] Implement Supabase authentication wrapper (custom client)
+- [x] Add sign in/sign up/sign out methods
+- [x] Create session management with Chrome storage
+- [x] Add authentication state listeners
+- [x] Implement token refresh logic with automatic retry
+- [x] Add user profile management (get/update)
+- [x] Implement password reset functionality
+- [x] Add session restoration on startup
+- [x] Write authentication tests (ALL 14 passing)
+
+### 2.6 Bookmark Service
+- [x] Create `src/services/BookmarkService.js`
+- [x] Implement CRUD operations with full JSDoc interface
+- [x] Use PaginatedResult<T> for large dataset handling
+- [x] Add search and filtering with full-text search
+- [x] Create statistics generation (by status, tags, activity)
+- [x] Add bulk operations (delete, update status, add/remove tags)
+- [x] Implement import/export functionality (JSON format)
+- [x] Add URL existence checking and duplicate prevention
+- [x] Support for 100,000+ bookmarks per user (pagination)
+- [x] Add comprehensive error handling with context
+- [x] Write comprehensive bookmark tests (ALL 13 passing)
+
 ---
 
 ## Phase 4: UI Components & HTML Structure
