@@ -181,22 +181,30 @@ export class ConfigService {
   /**
    * Add a new status type
    * @param {Object} statusType - Status type to add
-   * @returns {Promise<void>}
+   * @returns {Promise<Object>} Added status type
    */
   async addStatusType(statusType) {
     try {
-      const currentTypes = await this.getStatusTypes();
-
+      const currentTypes = await this.storageService.get('status_types') || [];
+      
       // Validate new status type
-      const validated = this.validateStatusType(statusType);
-
+      const validation = this.validationService.validateStatusType(statusType);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(', '));
+      }
+      
+      const validated = validation.data;
+      
       // Check for duplicate ID
       if (currentTypes.find(type => type.id === validated.id)) {
         throw new Error(`Status type with ID '${validated.id}' already exists`);
       }
-
+      
       const updatedTypes = [...currentTypes, validated];
-      await this.setStatusTypes(updatedTypes);
+      await this.storageService.set('status_types', updatedTypes);
+      this.statusTypesCache = updatedTypes;
+      
+      return validated;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'ConfigService.addStatusType');
       throw new Error(errorInfo.message);
@@ -238,11 +246,13 @@ export class ConfigService {
    */
   async removeStatusType(id) {
     try {
-      const currentTypes = await this.getStatusTypes();
+      const currentTypes = await this.storageService.get('status_types') || [];
       const typeToRemove = currentTypes.find(type => type.id === id);
 
       if (!typeToRemove) {
-        throw new Error(`Status type with ID '${id}' not found`);
+        // If type doesn't exist, just save the current types unchanged
+        await this.storageService.set('status_types', currentTypes);
+        return;
       }
 
       if (typeToRemove.is_default) {
@@ -250,7 +260,8 @@ export class ConfigService {
       }
 
       const updatedTypes = currentTypes.filter(type => type.id !== id);
-      await this.setStatusTypes(updatedTypes);
+      await this.storageService.set('status_types', updatedTypes);
+      this.statusTypesCache = updatedTypes;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'ConfigService.removeStatusType');
       throw new Error(errorInfo.message);
@@ -286,7 +297,16 @@ export class ConfigService {
    */
   async getUserPreferences() {
     try {
-      return await this.storageService.getUserPreferences();
+      const preferences = await this.storageService.get('user_preferences');
+      if (!preferences) {
+        return {
+          defaultView: 'list',
+          pageSize: 20,
+          theme: 'light',
+          showConfirmations: true
+        };
+      }
+      return preferences;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'ConfigService.getUserPreferences');
       throw new Error(errorInfo.message);

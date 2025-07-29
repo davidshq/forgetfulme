@@ -68,10 +68,10 @@ export const PAGINATION = {
 export const VALIDATION_RULES = {
   URL_MAX_LENGTH: 2048,
   TITLE_MAX_LENGTH: 500,
-  NOTES_MAX_LENGTH: 2000,
+  NOTES_MAX_LENGTH: 5000,
   TAG_MAX_LENGTH: 50,
   MAX_TAGS_PER_BOOKMARK: 10,
-  EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  EMAIL_REGEX: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 };
 
 export const CACHE_DURATION = {

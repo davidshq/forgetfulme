@@ -11,19 +11,22 @@ export class ValidationService {
   /**
    * Validate URL format and accessibility
    * @param {string} url - URL to validate
+   * @param {Object} [options] - Validation options
+   * @param {boolean} [options.autoProtocol] - Auto-prepend https:// if missing
+   * @param {string[]} [options.allowedProtocols] - List of allowed protocols
    * @returns {ValidationResult<string>} Validation result with normalized URL
    */
-  validateUrl(url) {
+  validateUrl(url, options = {}) {
     const errors = [];
 
     if (!url || typeof url !== 'string') {
-      errors.push('URL is required');
+      errors.push('Please enter a valid URL');
       return { isValid: false, data: null, errors };
     }
 
     const trimmed = url.trim();
     if (!trimmed) {
-      errors.push('URL cannot be empty');
+      errors.push('Please enter a valid URL');
       return { isValid: false, data: null, errors };
     }
 
@@ -33,29 +36,37 @@ export class ValidationService {
     }
 
     try {
-      // Add protocol if missing
+      // Add protocol if missing and autoProtocol is true
       let normalizedUrl = trimmed;
-      if (!/^https?:\/\//i.test(normalizedUrl)) {
+      if (options.autoProtocol && !/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//i.test(normalizedUrl)) {
         normalizedUrl = 'https://' + normalizedUrl;
       }
 
       const urlObj = new URL(normalizedUrl);
 
-      // Check for valid protocols
-      if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        errors.push('Only HTTP and HTTPS URLs are supported');
-        return { isValid: false, data: null, errors };
+      // Check for allowed protocols if specified
+      if (options.allowedProtocols) {
+        if (!options.allowedProtocols.includes(urlObj.protocol)) {
+          errors.push(`URL protocol must be one of: ${options.allowedProtocols.join(', ')}`);
+          return { isValid: false, data: null, errors };
+        }
+      } else {
+        // Default protocol check
+        if (!['http:', 'https:', 'ftp:'].includes(urlObj.protocol)) {
+          errors.push('Please enter a valid URL');
+          return { isValid: false, data: null, errors };
+        }
       }
 
       // Check for valid hostname
       if (!urlObj.hostname || urlObj.hostname.length < 1) {
-        errors.push('Invalid URL format');
+        errors.push('Please enter a valid URL');
         return { isValid: false, data: null, errors };
       }
 
       return { isValid: true, data: normalizedUrl, errors: [] };
     } catch (error) {
-      errors.push('Invalid URL format');
+      errors.push('Please enter a valid URL');
       return { isValid: false, data: null, errors };
     }
   }
@@ -68,19 +79,15 @@ export class ValidationService {
   validateEmail(email) {
     const errors = [];
 
-    if (!email || typeof email !== 'string') {
-      errors.push('Email is required');
+    if (!email || typeof email !== 'string' || !email.trim()) {
+      errors.push('Please enter a valid email address');
       return { isValid: false, data: null, errors };
     }
 
     const trimmed = email.trim().toLowerCase();
-    if (!trimmed) {
-      errors.push('Email cannot be empty');
-      return { isValid: false, data: null, errors };
-    }
 
-    if (!VALIDATION_RULES.EMAIL_REGEX.test(trimmed)) {
-      errors.push('Invalid email format');
+    if (!VALIDATION_RULES.EMAIL_REGEX.test(trimmed) || trimmed.includes('..')) {
+      errors.push('Please enter a valid email address');
       return { isValid: false, data: null, errors };
     }
 
@@ -107,6 +114,46 @@ export class ValidationService {
     }
 
     return { isValid: true, data: sanitized, errors: [] };
+  }
+
+  /**
+   * Validate password strength
+   * @param {string} password - Password to validate
+   * @returns {ValidationResult<string>} Validation result
+   */
+  validatePassword(password) {
+    const errors = [];
+
+    if (!password || typeof password !== 'string') {
+      errors.push('Password is required');
+      return { isValid: false, data: null, errors };
+    }
+
+    if (password.length < 8) {
+      errors.push('Password must be at least 8 characters long');
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push('Password must contain at least one number');
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push('Password must contain at least one special character');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      data: errors.length === 0 ? password : null,
+      errors
+    };
   }
 
   /**
@@ -172,6 +219,12 @@ export class ValidationService {
         continue;
       }
 
+      // Validate tag format
+      if (!this.isValidTag(sanitized)) {
+        errors.push(`Tag "${tag}" contains invalid characters. Use only letters, numbers, and hyphens.`);
+        continue;
+      }
+
       // Remove duplicates (case-insensitive)
       if (!seenTags.has(sanitized)) {
         seenTags.add(sanitized);
@@ -222,11 +275,15 @@ export class ValidationService {
     }
 
     // Validate URL (required)
-    const urlResult = this.validateUrl(bookmarkData.url);
-    if (!urlResult.isValid) {
-      errors.push(...urlResult.errors);
+    if (!bookmarkData.url) {
+      errors.push('URL is required');
     } else {
-      validatedData.url = urlResult.data;
+      const urlResult = this.validateUrl(bookmarkData.url);
+      if (!urlResult.isValid) {
+        errors.push(...urlResult.errors);
+      } else {
+        validatedData.url = urlResult.data;
+      }
     }
 
     // Validate title (optional)
@@ -234,7 +291,7 @@ export class ValidationService {
     if (!titleResult.isValid) {
       errors.push(...titleResult.errors);
     } else {
-      validatedData.title = titleResult.data;
+      validatedData.title = titleResult.data || 'Untitled';
     }
 
     // Validate notes (optional)
@@ -246,16 +303,24 @@ export class ValidationService {
     }
 
     // Validate tags (optional)
-    const tagsResult = this.validateTags(bookmarkData.tags);
-    if (!tagsResult.isValid) {
-      errors.push(...tagsResult.errors);
+    if (bookmarkData.tags !== undefined) {
+      if (!Array.isArray(bookmarkData.tags)) {
+        errors.push('Tags must be an array');
+      } else {
+        const tagsResult = this.validateTags(bookmarkData.tags);
+        if (!tagsResult.isValid) {
+          errors.push(...tagsResult.errors);
+        } else {
+          validatedData.tags = tagsResult.data;
+        }
+      }
     } else {
-      validatedData.tags = tagsResult.data;
+      validatedData.tags = [];
     }
 
     // Validate status (optional, defaults to 'unread')
     if (bookmarkData.status) {
-      const statusResult = this.validateStatus(bookmarkData.status, validStatuses);
+      const statusResult = this.validateStatus(bookmarkData.status, validStatuses || ['unread', 'reading', 'read', 'archived']);
       if (!statusResult.isValid) {
         errors.push(...statusResult.errors);
       } else {
@@ -310,9 +375,15 @@ export class ValidationService {
         errors.push('Statuses filter must be an array');
       } else {
         const validStatuses = [];
+        const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
         for (const status of searchOptions.statuses) {
           if (typeof status === 'string') {
-            validStatuses.push(status.trim().toLowerCase());
+            const normalized = status.trim().toLowerCase();
+            if (!allowedStatuses.includes(normalized)) {
+              errors.push(`Invalid status: ${status}`);
+            } else {
+              validStatuses.push(normalized);
+            }
           }
         }
         validatedOptions.statuses = validStatuses;
@@ -331,11 +402,16 @@ export class ValidationService {
       }
     });
 
+    // Validate date range
+    if (validatedOptions.dateFrom && validatedOptions.dateTo && validatedOptions.dateFrom > validatedOptions.dateTo) {
+      errors.push('Date from cannot be after date to');
+    }
+
     // Validate pagination
     if (searchOptions.page !== undefined) {
       const page = parseInt(searchOptions.page, 10);
       if (isNaN(page) || page < 1) {
-        errors.push('Page must be a positive integer');
+        errors.push('Page must be at least 1');
       } else {
         validatedOptions.page = page;
       }
@@ -344,7 +420,7 @@ export class ValidationService {
     if (searchOptions.pageSize !== undefined) {
       const pageSize = parseInt(searchOptions.pageSize, 10);
       if (isNaN(pageSize) || pageSize < 1 || pageSize > 100) {
-        errors.push('Page size must be between 1 and 100');
+        errors.push('Page size cannot exceed 100');
       } else {
         validatedOptions.pageSize = pageSize;
       }
@@ -392,6 +468,24 @@ export class ValidationService {
   }
 
   /**
+   * Sanitize input - alias for sanitizeString for backward compatibility
+   * @param {*} input - Input to sanitize
+   * @returns {string} Sanitized string
+   */
+  sanitizeInput(input) {
+    if (input === null || input === undefined) {
+      return '';
+    }
+    if (typeof input !== 'string') {
+      return String(input);
+    }
+    // Remove HTML tags completely including script content, then trim
+    return input.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                .replace(/<[^>]*>/g, '')
+                .trim();
+  }
+
+  /**
    * Validate configuration object
    * @param {Object} config - Configuration to validate
    * @returns {ValidationResult<Object>} Validation result
@@ -429,5 +523,123 @@ export class ValidationService {
       data: errors.length === 0 ? validatedConfig : null,
       errors
     };
+  }
+
+  /**
+   * Validate status type object
+   * @param {Object} statusType - Status type to validate
+   * @returns {ValidationResult<Object>} Validation result
+   */
+  validateStatusType(statusType) {
+    const errors = [];
+    const validatedType = {};
+
+    if (!statusType || typeof statusType !== 'object') {
+      errors.push('Status type must be an object');
+      return { isValid: false, data: null, errors };
+    }
+
+    // Validate ID
+    if (!statusType.id || typeof statusType.id !== 'string' || !statusType.id.trim()) {
+      errors.push('Status type ID is required');
+    } else {
+      validatedType.id = statusType.id.trim().toLowerCase();
+    }
+
+    // Validate name
+    if (!statusType.name || typeof statusType.name !== 'string' || !statusType.name.trim()) {
+      errors.push('Status type name is required');
+    } else {
+      validatedType.name = this.sanitizeString(statusType.name);
+    }
+
+    // Validate color
+    if (!statusType.color || typeof statusType.color !== 'string') {
+      errors.push('Status type color is required');
+    } else if (!/^#[0-9A-Fa-f]{6}$/.test(statusType.color)) {
+      errors.push('Status type color must be a valid hex color');
+    } else {
+      validatedType.color = statusType.color.toLowerCase();
+    }
+
+    // Validate icon (optional)
+    if (statusType.icon && typeof statusType.icon !== 'string') {
+      errors.push('Status type icon must be a string');
+    } else if (!statusType.icon) {
+      errors.push('Status type icon is required');
+    } else {
+      validatedType.icon = statusType.icon.trim();
+    }
+
+    return {
+      isValid: errors.length === 0,
+      data: errors.length === 0 ? validatedType : null,
+      errors
+    };
+  }
+
+  /**
+   * Add alias method for backward compatibility
+   * @param {Object} bookmarkData - Bookmark data to validate
+   * @param {string[]} [validStatuses] - Valid status values
+   * @returns {ValidationResult<Object>} Validation result with sanitized data
+   */
+  validateBookmarkData(bookmarkData, validStatuses) {
+    return this.validateBookmark(bookmarkData, validStatuses);
+  }
+
+  /**
+   * Check if a tag format is valid
+   * @param {string} tag - Tag to validate
+   * @returns {boolean} True if valid
+   */
+  isValidTag(tag) {
+    if (!tag || typeof tag !== 'string') {
+      return false;
+    }
+    // Tags must be lowercase, alphanumeric with hyphens only
+    return /^[a-z0-9-]+$/.test(tag);
+  }
+
+  /**
+   * Normalize URL for consistent comparison
+   * @param {string} url - URL to normalize
+   * @returns {string} Normalized URL
+   */
+  normalizeUrl(url) {
+    if (!url || typeof url !== 'string') {
+      throw new Error('Invalid URL');
+    }
+
+    try {
+      const urlObj = new URL(url);
+      
+      // Convert protocol and hostname to lowercase
+      urlObj.protocol = urlObj.protocol.toLowerCase();
+      urlObj.hostname = urlObj.hostname.toLowerCase();
+      
+      // Remove default ports
+      if ((urlObj.protocol === 'https:' && urlObj.port === '443') ||
+          (urlObj.protocol === 'http:' && urlObj.port === '80')) {
+        urlObj.port = '';
+      }
+      
+      // Remove trailing slash from pathname
+      if (urlObj.pathname.endsWith('/') && urlObj.pathname !== '/') {
+        urlObj.pathname = urlObj.pathname.slice(0, -1);
+      }
+      
+      // Sort query parameters
+      const params = new URLSearchParams(urlObj.search);
+      const sortedParams = new URLSearchParams();
+      [...params.keys()].sort().forEach(key => {
+        sortedParams.append(key, params.get(key));
+      });
+      urlObj.search = sortedParams.toString();
+      
+      return urlObj.toString();
+    } catch (error) {
+      throw new Error('Invalid URL format');
+    }
   }
 }
