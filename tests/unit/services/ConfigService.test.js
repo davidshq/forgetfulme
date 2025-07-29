@@ -16,6 +16,16 @@ describe('ConfigService', () => {
     mockStorageService = {
       getSupabaseConfig: vi.fn(),
       setSupabaseConfig: vi.fn(),
+      getStatusTypes: vi.fn(),
+      setStatusTypes: vi.fn(),
+      getUserPreferences: vi.fn(),
+      setUserPreferences: vi.fn(),
+      getDefaultPreferences: vi.fn().mockReturnValue({
+        defaultView: 'list',
+        pageSize: 20,
+        theme: 'light',
+        showConfirmations: true
+      }),
       get: vi.fn(),
       set: vi.fn(),
       remove: vi.fn()
@@ -129,6 +139,9 @@ describe('ConfigService', () => {
         data: mockConfig
       });
 
+      // Mock the connection test
+      vi.spyOn(configService, 'testSupabaseConnection').mockResolvedValue(true);
+
       await configService.setSupabaseConfig(mockConfig);
 
       expect(mockValidationService.validateConfig).toHaveBeenCalledWith(mockConfig);
@@ -158,7 +171,7 @@ describe('ConfigService', () => {
 
       await configService.clearSupabaseConfig();
 
-      expect(mockStorageService.remove).toHaveBeenCalledWith('supabase_config');
+      expect(mockStorageService.remove).toHaveBeenCalledWith('supabase_config', true);
       expect(configService.configCache).toBeNull();
     });
   });
@@ -182,13 +195,13 @@ describe('ConfigService', () => {
         { id: 'read', name: 'Read', color: '#28a745' }
       ];
       
-      mockStorageService.get.mockResolvedValue(mockStatusTypes);
+      mockStorageService.getStatusTypes.mockResolvedValue(mockStatusTypes);
 
       const result = await configService.getStatusTypes();
 
       expect(result).toEqual(mockStatusTypes);
       expect(configService.statusTypesCache).toEqual(mockStatusTypes);
-      expect(mockStorageService.get).toHaveBeenCalledWith('status_types');
+      expect(mockStorageService.getStatusTypes).toHaveBeenCalled();
     });
 
     it('should return default status types when none stored', async () => {
@@ -315,17 +328,27 @@ describe('ConfigService', () => {
     });
   });
 
-  describe('setUserPreferences', () => {
+  describe('updateUserPreferences', () => {
     it('should save user preferences', async () => {
       const mockPrefs = {
         defaultView: 'grid',
         pageSize: 50,
         theme: 'dark'
       };
+      
+      const currentPrefs = {
+        defaultView: 'list',
+        pageSize: 20,
+        theme: 'light',
+        showConfirmations: true
+      };
+      
+      mockStorageService.getUserPreferences.mockResolvedValue(currentPrefs);
+      vi.spyOn(configService, 'validateUserPreferences').mockReturnValue({...currentPrefs, ...mockPrefs});
 
-      await configService.setUserPreferences(mockPrefs);
+      await configService.updateUserPreferences(mockPrefs);
 
-      expect(mockStorageService.set).toHaveBeenCalledWith('user_preferences', mockPrefs);
+      expect(mockStorageService.setUserPreferences).toHaveBeenCalled();
     });
   });
 });

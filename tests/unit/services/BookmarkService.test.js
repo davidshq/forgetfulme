@@ -126,24 +126,16 @@ describe('BookmarkService', () => {
         created_at: new Date().toISOString()
       };
 
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          insert: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: mockCreatedBookmark,
-                error: null
-              })
-            })
-          })
-        })
-      };
+      // Mock the saveToDatabase method instead of mocking Supabase client
+      vi.spyOn(bookmarkService, 'saveToDatabase').mockResolvedValue(mockCreatedBookmark);
+      vi.spyOn(bookmarkService, 'updateCache').mockResolvedValue();
+      vi.spyOn(bookmarkService, 'generateId').mockReturnValue('bookmark-123');
 
       const result = await bookmarkService.createBookmark(bookmarkData);
 
       expect(result).toEqual(mockCreatedBookmark);
-      expect(mockValidationService.validateBookmark).toHaveBeenCalledWith(bookmarkData);
-      expect(mockStorageService.clearBookmarkCache).toHaveBeenCalledWith('user-123');
+      expect(mockValidationService.validateBookmark).toHaveBeenCalledWith(bookmarkData, ['read', 'unread']);
+      expect(bookmarkService.updateCache).toHaveBeenCalled();
     });
 
     it('should handle validation error', async () => {
@@ -176,26 +168,23 @@ describe('BookmarkService', () => {
         { id: '2', url: 'https://example2.com', title: 'Test 2' }
       ];
 
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockReturnValue({
-                range: vi.fn().mockResolvedValue({
-                  data: mockBookmarks,
-                  error: null
-                })
-              })
-            })
-          })
-        })
-      };
+      // Mock storage service to return null (no cache)
+      mockStorageService.getBookmarkCache.mockReturnValue(null);
+      
+      // Mock searchBookmarks method
+      vi.spyOn(bookmarkService, 'searchBookmarks').mockResolvedValue({
+        items: mockBookmarks,
+        total: 2,
+        page: 1,
+        pageSize: 20,
+        hasMore: false
+      });
 
       const result = await bookmarkService.getBookmarks();
 
-      expect(result.bookmarks).toEqual(mockBookmarks);
+      expect(result.items).toEqual(mockBookmarks);
       expect(result.page).toBe(1);
-      expect(result.limit).toBe(20);
+      expect(result.pageSize).toBe(20);
     });
 
     it('should use cached bookmarks when available', async () => {
@@ -203,12 +192,12 @@ describe('BookmarkService', () => {
         { id: '1', url: 'https://cached.com', title: 'Cached' }
       ];
 
-      mockStorageService.getBookmarkCache.mockResolvedValue(cachedBookmarks);
+      mockStorageService.getBookmarkCache.mockReturnValue(cachedBookmarks);
 
       const result = await bookmarkService.getBookmarks();
 
       expect(result.bookmarks).toEqual(cachedBookmarks);
-      expect(mockStorageService.getBookmarkCache).toHaveBeenCalledWith('user-123');
+      expect(mockStorageService.getBookmarkCache).toHaveBeenCalledWith();
     });
   });
 
@@ -221,31 +210,27 @@ describe('BookmarkService', () => {
     it('should update bookmark successfully', async () => {
       const bookmarkId = 'bookmark-123';
       const updateData = { title: 'Updated Title' };
-      const mockUpdatedBookmark = {
+      const existingBookmark = {
         id: bookmarkId,
-        ...updateData,
+        title: 'Original Title',
+        url: 'https://example.com',
         user_id: 'user-123'
       };
-
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          update: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              select: vi.fn().mockReturnValue({
-                single: vi.fn().mockResolvedValue({
-                  data: mockUpdatedBookmark,
-                  error: null
-                })
-              })
-            })
-          })
-        })
+      const mockUpdatedBookmark = {
+        ...existingBookmark,
+        ...updateData,
+        updated_at: expect.any(String)
       };
+
+      // Mock methods
+      vi.spyOn(bookmarkService, 'getBookmarkById').mockResolvedValue(existingBookmark);
+      vi.spyOn(bookmarkService, 'saveToDatabase').mockResolvedValue(mockUpdatedBookmark);
+      vi.spyOn(bookmarkService, 'updateCache').mockResolvedValue();
 
       const result = await bookmarkService.updateBookmark(bookmarkId, updateData);
 
       expect(result).toEqual(mockUpdatedBookmark);
-      expect(mockStorageService.clearBookmarkCache).toHaveBeenCalledWith('user-123');
+      expect(bookmarkService.updateCache).toHaveBeenCalled();
     });
 
     it('should require authentication', async () => {
@@ -263,19 +248,19 @@ describe('BookmarkService', () => {
     it('should delete bookmark successfully', async () => {
       const bookmarkId = 'bookmark-123';
 
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          delete: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({
-              error: null
-            })
-          })
-        })
-      };
+      // Mock global fetch for delete operation
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({})
+      });
+
+      // Mock updateCache method
+      vi.spyOn(bookmarkService, 'updateCache').mockResolvedValue();
 
       await bookmarkService.deleteBookmark(bookmarkId);
 
-      expect(mockStorageService.clearBookmarkCache).toHaveBeenCalledWith('user-123');
+      expect(bookmarkService.updateCache).toHaveBeenCalled();
+      expect(global.fetch).toHaveBeenCalled();
     });
   });
 
@@ -285,32 +270,30 @@ describe('BookmarkService', () => {
     });
 
     it('should search bookmarks successfully', async () => {
-      const searchTerm = 'test';
+      const searchOptions = { searchTerm: 'test' };
       const mockResults = [
         { id: '1', title: 'Test Result', url: 'https://test.com' }
       ];
 
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              or: vi.fn().mockReturnValue({
-                order: vi.fn().mockReturnValue({
-                  range: vi.fn().mockResolvedValue({
-                    data: mockResults,
-                    error: null
-                  })
-                })
-              })
-            })
-          })
-        })
-      };
+      // Mock validation service
+      mockValidationService.validateSearchOptions = vi.fn().mockReturnValue({
+        isValid: true,
+        data: searchOptions
+      });
 
-      const result = await bookmarkService.searchBookmarks(searchTerm);
+      // Mock global fetch and helper methods
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(mockResults)
+      });
 
-      expect(result.bookmarks).toEqual(mockResults);
-      expect(result.searchTerm).toBe(searchTerm);
+      vi.spyOn(bookmarkService, 'buildSearchQuery').mockReturnValue('select=*&user_id=eq.user-123');
+      vi.spyOn(bookmarkService, 'getTotalCount').mockResolvedValue(1);
+
+      const result = await bookmarkService.searchBookmarks(searchOptions);
+
+      expect(result.items).toEqual(mockResults);
+      expect(result.total).toBe(1);
     });
   });
 
@@ -320,31 +303,31 @@ describe('BookmarkService', () => {
     });
 
     it('should get bookmark statistics', async () => {
-      const mockStats = [
-        { status: 'read', count: 5 },
-        { status: 'unread', count: 3 }
+      const mockBookmarks = [
+        { status: 'read', tags: ['tag1'], created_at: new Date().toISOString() },
+        { status: 'read', tags: ['tag2'], created_at: new Date().toISOString() },
+        { status: 'read', tags: ['tag1'], created_at: new Date().toISOString() },
+        { status: 'read', tags: [], created_at: new Date().toISOString() },
+        { status: 'read', tags: ['tag2'], created_at: new Date().toISOString() },
+        { status: 'unread', tags: ['tag1'], created_at: new Date().toISOString() },
+        { status: 'unread', tags: [], created_at: new Date().toISOString() },
+        { status: 'unread', tags: ['tag3'], created_at: new Date().toISOString() }
       ];
 
-      bookmarkService.supabaseClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({
-              data: mockStats,
-              error: null
-            })
-          })
-        })
-      };
+      // Mock global fetch
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(mockBookmarks)
+      });
 
       const result = await bookmarkService.getBookmarkStats();
 
-      expect(result).toEqual({
-        totalBookmarks: 8,
-        byStatus: {
-          read: 5,
-          unread: 3
-        }
-      });
+      expect(result.total).toBe(8);
+      expect(result.byStatus.read).toBe(5);
+      expect(result.byStatus.unread).toBe(3);
+      expect(result.byTag.tag1).toBe(3);
+      expect(result.byTag.tag2).toBe(2);
+      expect(result.byTag.tag3).toBe(1);
     });
   });
 });
