@@ -22,7 +22,10 @@ export class ConfigService {
   }
 
   /**
-   * Get Supabase configuration
+   * Get Supabase configuration with priority:
+   * 1. Options page configuration (Chrome storage) - highest priority
+   * 2. Environment variables (development fallback)
+   * 3. Null (configuration required)
    * @returns {Promise<Object|null>} Supabase configuration or null if not set
    */
   async getSupabaseConfig() {
@@ -31,25 +34,67 @@ export class ConfigService {
         return this.configCache;
       }
 
-      const config = await this.storageService.getSupabaseConfig();
+      // Priority 1: Check Chrome storage (options page configuration)
+      const storageConfig = await this.storageService.getSupabaseConfig();
 
-      if (config) {
+      if (storageConfig) {
         // Validate stored config
-        const validation = this.validationService.validateConfig(config);
+        const validation = this.validationService.validateConfig(storageConfig);
         if (validation.isValid) {
           this.configCache = validation.data;
+          console.log('[ConfigService] Using options page configuration');
           return this.configCache;
         } else {
           // Invalid config, clear it
           await this.clearSupabaseConfig();
-          return null;
+        }
+      }
+
+      // Priority 2: Check environment variables (development fallback)
+      const envConfig = await this.getEnvironmentConfig();
+      if (envConfig) {
+        const validation = this.validationService.validateConfig(envConfig);
+        if (validation.isValid) {
+          this.configCache = validation.data;
+          console.log('[ConfigService] Using environment variable configuration');
+          return this.configCache;
+        }
+      }
+
+      // Priority 3: No configuration found
+      return null;
+    } catch (error) {
+      const errorInfo = this.errorService.handle(error, 'ConfigService.getSupabaseConfig');
+      throw new Error(errorInfo.message);
+    }
+  }
+
+  /**
+   * Get configuration from environment variables (development only)
+   * @returns {Promise<Object|null>} Environment configuration or null
+   * @private
+   */
+  async getEnvironmentConfig() {
+    try {
+      // Try to load the local config file
+      const { SUPABASE_CONFIG } = await import('../../supabase-config.local.js');
+      
+      if (SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+        // Check if it's been configured (not placeholder values)
+        if (SUPABASE_CONFIG.url !== 'https://your-project-id.supabase.co' &&
+            SUPABASE_CONFIG.anonKey !== 'your-anon-key-here') {
+          return {
+            supabaseUrl: SUPABASE_CONFIG.url,
+            supabaseAnonKey: SUPABASE_CONFIG.anonKey
+          };
         }
       }
 
       return null;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'ConfigService.getSupabaseConfig');
-      throw new Error(errorInfo.message);
+      // Config file doesn't exist or has errors - this is fine
+      console.log('[ConfigService] Environment config not available:', error.message);
+      return null;
     }
   }
 
@@ -146,8 +191,9 @@ export class ConfigService {
 
       let statusTypes = await this.storageService.getStatusTypes();
 
-      if (!statusTypes || statusTypes.length === 0) {
+      if (!statusTypes || !Array.isArray(statusTypes) || statusTypes.length === 0) {
         // Initialize with defaults
+        console.log('[ConfigService] Initializing with default status types');
         statusTypes = [...DEFAULT_STATUS_TYPES];
         await this.setStatusTypes(statusTypes);
       }
@@ -156,7 +202,9 @@ export class ConfigService {
       return statusTypes;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'ConfigService.getStatusTypes');
-      throw new Error(errorInfo.message);
+      // Return defaults as fallback to avoid breaking the UI
+      console.warn('[ConfigService] Failed to get status types, using defaults');
+      return [...DEFAULT_STATUS_TYPES];
     }
   }
 

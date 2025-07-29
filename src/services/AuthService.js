@@ -2,7 +2,7 @@
  * @fileoverview Authentication service for the ForgetfulMe extension
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '../lib/supabase.js';
 
 /**
  * Service for managing user authentication with Supabase
@@ -20,28 +20,51 @@ export class AuthService {
     this.currentUser = null;
     this.authChangeListeners = new Set();
     this.supabaseClient = null;
+    this.isInitialized = false;
   }
 
   /**
    * Initialize Supabase client
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>} True if initialized successfully, false if config missing
    */
   async initialize() {
     try {
       const config = await this.configService.getSupabaseConfig();
       if (!config) {
-        throw new Error('Supabase configuration not found');
+        console.log('[AuthService] No configuration found - configuration required');
+        this.supabaseClient = null;
+        this.isInitialized = false;
+        return false;
       }
 
       // Create official Supabase client
       this.supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+      this.isInitialized = true;
 
-      // Restore session from storage
-      await this.restoreSession();
+      // Restore session from storage (don't let this fail initialization)
+      try {
+        await this.restoreSession();
+      } catch (sessionError) {
+        // Session restoration failure is normal - just log it and continue
+        console.log('[AuthService] No valid session to restore (normal for first-time users)');
+      }
+      
+      return true;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'AuthService.initialize');
-      throw new Error(errorInfo.message);
+      console.error('[AuthService] Initialization failed:', errorInfo.message);
+      this.supabaseClient = null;
+      this.isInitialized = false;
+      return false;
     }
+  }
+
+  /**
+   * Check if the AuthService is properly configured and initialized
+   * @returns {boolean} True if ready to use
+   */
+  isConfigured() {
+    return this.isInitialized && this.supabaseClient !== null;
   }
 
   /**
@@ -52,8 +75,11 @@ export class AuthService {
    */
   async signIn(email, password) {
     try {
-      if (!this.supabaseClient) {
-        await this.initialize();
+      if (!this.isConfigured()) {
+        const initialized = await this.initialize();
+        if (!initialized) {
+          throw new Error('Supabase configuration is required. Please configure the extension in Options.');
+        }
       }
 
       const response = await this.supabaseClient.auth.signInWithPassword({
@@ -214,7 +240,10 @@ export class AuthService {
 
       return null;
     } catch (error) {
-      this.errorService.handle(error, 'AuthService.refreshSession');
+      // Don't log "Auth session missing" as an error - it's normal when no user is signed in
+      if (!error.message?.includes('Auth session missing')) {
+        this.errorService.handle(error, 'AuthService.refreshSession');
+      }
       await this.handleAuthSignOut();
       return null;
     }
@@ -390,6 +419,10 @@ export class AuthService {
       await this.refreshSession();
     } catch (error) {
       // If restoration fails, clear the stored session
+      // Don't log "Auth session missing" as an error - it's normal
+      if (!error.message?.includes('Auth session missing')) {
+        console.log('[AuthService] Session restoration failed:', error.message);
+      }
       await this.handleAuthSignOut();
     }
   }

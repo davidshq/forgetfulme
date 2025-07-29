@@ -499,8 +499,10 @@ export class ValidationService {
       return { isValid: false, data: null, errors };
     }
 
-    // Validate Supabase URL
-    if (config.supabaseUrl) {
+    // Validate Supabase URL (required)
+    if (!config.supabaseUrl) {
+      errors.push('Supabase URL is required');
+    } else {
       const urlResult = this.validateUrl(config.supabaseUrl);
       if (!urlResult.isValid) {
         errors.push('Invalid Supabase URL');
@@ -509,8 +511,10 @@ export class ValidationService {
       }
     }
 
-    // Validate API key (basic format check)
-    if (config.supabaseAnonKey) {
+    // Validate API key (required)
+    if (!config.supabaseAnonKey) {
+      errors.push('Supabase API key is required');
+    } else {
       if (typeof config.supabaseAnonKey !== 'string' || config.supabaseAnonKey.length < 20) {
         errors.push('Invalid Supabase API key format');
       } else {

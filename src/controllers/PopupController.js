@@ -43,7 +43,13 @@ export class PopupController extends BaseController {
       }
 
       // Initialize auth service
-      await this.authService.initialize();
+      const isAuthInitialized = await this.authService.initialize();
+      
+      if (!isAuthInitialized) {
+        // Configuration is missing or invalid
+        this.showConfigRequired();
+        return;
+      }
 
       // Set up authentication state listener
       const authCleanup = this.authService.addAuthChangeListener(user => {
@@ -352,6 +358,12 @@ export class PopupController extends BaseController {
   async loadStatusTypes() {
     try {
       this.statusTypes = await this.configService.getStatusTypes();
+
+      // Ensure statusTypes is an array
+      if (!Array.isArray(this.statusTypes)) {
+        console.warn('[PopupController] statusTypes is not an array:', typeof this.statusTypes, this.statusTypes);
+        this.statusTypes = [];
+      }
 
       const select = $('#bookmark-status-select');
       if (select) {

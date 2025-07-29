@@ -7,11 +7,9 @@ import { ErrorService } from '../services/ErrorService.js';
 import { ValidationService } from '../services/ValidationService.js';
 import { StorageService } from '../services/StorageService.js';
 import { ConfigService } from '../services/ConfigService.js';
-import { AuthService } from '../services/AuthService.js';
-import { BookmarkService } from '../services/BookmarkService.js';
 import { BackgroundService } from '../background/BackgroundService.js';
 
-// Register services in dependency injection container
+// Register core services for background context
 container.register('errorService', () => new ErrorService());
 
 container.register('validationService', () => new ValidationService());
@@ -23,29 +21,13 @@ container.register(
   c => new ConfigService(c.get('storageService'), c.get('validationService'), c.get('errorService'))
 );
 
-container.register(
-  'authService',
-  c => new AuthService(c.get('configService'), c.get('storageService'), c.get('errorService'))
-);
-
-container.register(
-  'bookmarkService',
-  c =>
-    new BookmarkService(
-      c.get('authService'),
-      c.get('storageService'),
-      c.get('configService'),
-      c.get('validationService'),
-      c.get('errorService')
-    )
-);
-
+// Background service with minimal dependencies (no Supabase services)
 container.register(
   'backgroundService',
   c =>
     new BackgroundService(
-      c.get('authService'),
-      c.get('bookmarkService'),
+      null, // authService - not needed in service worker
+      null, // bookmarkService - not needed in service worker
       c.get('configService'),
       c.get('storageService'),
       c.get('errorService')

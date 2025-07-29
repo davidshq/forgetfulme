@@ -2,7 +2,7 @@
  * @fileoverview Bookmark management service for the ForgetfulMe extension
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '../lib/supabase.js';
 import { PAGINATION } from '../utils/constants.js';
 
 /**

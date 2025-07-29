@@ -363,3 +363,76 @@ If tests fail:
 - **`tests/visual/bookmark-manager-visual.test.js`**: Bookmark manager states
 
 **Claude Code must maintain and expand these test suites as the UI evolves.**
+
+---
+
+## **Lessons Learned from Chrome Extension Development**
+
+### **Service Worker & Manifest V3 Constraints**
+
+**Chrome extension service workers have significant limitations:**
+- **No `window` object** - UMD bundles that rely on `window` won't work
+- **No dynamic imports** - `import()` is disallowed by HTML specification
+- **No npm modules** - Must use bundled or script-tag loaded libraries
+- **Isolated context** - Services can't share Supabase clients between contexts
+
+**Solutions:**
+- Load libraries via `<script>` tags in HTML pages, export globally
+- Keep service workers minimal - handle only Chrome APIs and messaging
+- Initialize Supabase clients in UI contexts (popup, options) not service worker
+- Use messaging between contexts instead of shared service instances
+
+### **Configuration Management Best Practices**
+
+**Multi-tier configuration with proper precedence:**
+1. **UI configuration** (Chrome sync storage) - highest priority
+2. **Local development files** (git-ignored) - fallback for developers  
+3. **Graceful degradation** - show setup UI when no config exists
+
+**Security patterns:**
+- Never commit credentials to source control
+- Use template files + git-ignored actual credentials
+- Store sensitive config in Chrome sync storage (encrypted by browser)
+- Validate configuration thoroughly before use
+
+### **Error Handling for Chrome Extensions**
+
+**Context-aware error handling:**
+- **Normal conditions aren't errors** - "Auth session missing" is expected for logged-out users
+- **Service worker errors are common** - handle gracefully, don't crash
+- **Defensive programming** - always validate data types (arrays, objects) before use
+- **Fallback values** - provide defaults when operations fail
+
+**Error classification:**
+- **User errors** - show friendly messages, provide next steps
+- **System errors** - log for debugging, show generic "try again" message
+- **Expected conditions** - don't log as errors (session missing, etc.)
+
+### **Chrome Extension Architecture Patterns**
+
+**Separation of concerns:**
+- **Service workers** - Chrome APIs, notifications, messaging only
+- **UI contexts** - Supabase clients, business logic, user interactions
+- **Shared services** - Use dependency injection, but instantiate per context
+
+**Data flow:**
+- **Popup → Service Worker** - messaging for Chrome API operations  
+- **Options → Storage** - direct configuration management
+- **Background → UI** - notifications and badge updates only
+
+### **Development Workflow Improvements**
+
+**Configuration testing:**
+- Test both UI config and local file config paths
+- Validate configuration priority order works correctly
+- Ensure graceful fallback when config is missing
+
+**Library integration:**
+- Always test library loading in actual Chrome extension context
+- UMD bundles need special handling in service workers
+- ES6 modules work in UI contexts but not service workers
+
+**Debugging strategies:**
+- Add extensive logging for configuration loading
+- Distinguish between errors and expected conditions
+- Use console.warn/log appropriately, reserve console.error for real issues

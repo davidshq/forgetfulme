@@ -7,8 +7,8 @@
  */
 export class BackgroundService {
   /**
-   * @param {AuthService} authService - Authentication service
-   * @param {BookmarkService} bookmarkService - Bookmark service
+   * @param {AuthService|null} authService - Authentication service (null in service worker)
+   * @param {BookmarkService|null} bookmarkService - Bookmark service (null in service worker)
    * @param {ConfigService} configService - Configuration service
    * @param {StorageService} storageService - Storage service
    * @param {ErrorService} errorService - Error handling service
@@ -61,18 +61,12 @@ export class BackgroundService {
    */
   async initializeServices() {
     try {
-      // Initialize auth service
-      await this.authService.initialize();
-
-      // Initialize bookmark service if authenticated
-      if (this.authService.isAuthenticated()) {
-        await this.bookmarkService.initialize();
-      }
-
-      // Set up authentication state listener
-      this.authService.addAuthChangeListener(user => {
-        this.handleAuthStateChange(user);
-      });
+      // Skip Supabase initialization in service worker context
+      // Services will be initialized when needed by UI components
+      console.log('[BackgroundService] Services initialized (lazy loading enabled)');
+      
+      // Note: Auth and bookmark services will be initialized on-demand
+      // when popup or options pages interact with them
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'BackgroundService.initializeServices');
       console.error('Failed to initialize services:', errorInfo);
@@ -268,7 +262,7 @@ export class BackgroundService {
         return;
       }
 
-      if (!this.authService.isAuthenticated()) {
+      if (!this.authService || !this.authService.isAuthenticated()) {
         this.showNotification({
           type: 'basic',
           iconUrl: 'icons/icon48.png',
@@ -278,40 +272,15 @@ export class BackgroundService {
         return;
       }
 
-      // Check if page is already bookmarked
-      const existingBookmark = await this.bookmarkService.findBookmarkByUrl(tab.url);
-
-      if (existingBookmark) {
-        // Update existing bookmark to 'read'
-        await this.bookmarkService.updateBookmark(existingBookmark.id, { status: 'read' });
-
-        this.showNotification({
-          type: 'basic',
-          iconUrl: 'icons/icon48.png',
-          title: 'Page Marked as Read',
-          message: `Updated: ${tab.title || 'Untitled'}`
-        });
-      } else {
-        // Create new bookmark with 'read' status
-        const bookmarkData = {
-          url: tab.url,
-          title: tab.title || '',
-          status: 'read',
-          tags: [],
-          notes: ''
-        };
-
-        await this.bookmarkService.createBookmark(bookmarkData);
-
-        this.showNotification({
-          type: 'basic',
-          iconUrl: 'icons/icon48.png',
-          title: 'Page Marked as Read',
-          message: `Saved: ${tab.title || 'Untitled'}`
-        });
-      }
-
-      // Update badge
+      // Service worker can't access Supabase directly - redirect to popup
+      this.showNotification({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Use Extension Popup',
+        message: 'Click the ForgetfulMe icon to mark this page as read'
+      });
+      
+      // Update badge to show action is available
       this.updateBadge();
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'BackgroundService.markCurrentPageAsRead');
@@ -366,7 +335,7 @@ export class BackgroundService {
    */
   async updateTabContext(tabId) {
     try {
-      if (!this.authService.isAuthenticated()) return;
+      if (!this.authService || !this.authService.isAuthenticated()) return;
 
       const tab = await chrome.tabs.get(tabId);
       if (!tab || !tab.url) return;
@@ -600,7 +569,7 @@ export class BackgroundService {
       id: chrome.runtime.id,
       version: chrome.runtime.getManifest().version,
       isInitialized: this.isInitialized,
-      isAuthenticated: this.authService.isAuthenticated(),
+      isAuthenticated: this.authService ? this.authService.isAuthenticated() : false,
       isConfigured: this.configService.isSupabaseConfigured()
     };
   }

@@ -26,6 +26,7 @@
     "@playwright/test": "^1.45.0",
     "@vitest/coverage-v8": "^1.6.0",
     "@vitest/ui": "^1.6.0",
+    "dotenv": "^17.2.1",
     "eslint": "^8.57.0",
     "jsdom": "^24.1.0",
     "prettier": "^3.3.0",
