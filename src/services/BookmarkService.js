@@ -70,7 +70,6 @@ export class BookmarkService {
       // Prepare bookmark for database
       const bookmark = {
         ...validatedData,
-        id: this.generateId(),
         user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -669,7 +668,8 @@ export class BookmarkService {
         }
       );
     } else {
-      // Create new bookmark
+      // Create new bookmark - don't include id field
+      const { id, ...bookmarkData } = bookmark;
       response = await fetch(`${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks`, {
         method: 'POST',
         headers: {
@@ -678,7 +678,7 @@ export class BookmarkService {
           'Content-Type': 'application/json',
           Prefer: 'return=representation'
         },
-        body: JSON.stringify(bookmark)
+        body: JSON.stringify(bookmarkData)
       });
     }
 
@@ -815,12 +815,4 @@ export class BookmarkService {
   }
 
 
-  /**
-   * Generate unique ID for bookmark
-   * @returns {string} Unique ID
-   * @private
-   */
-  generateId() {
-    return 'bm_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
-  }
 }

@@ -421,7 +421,7 @@ export class PopupController extends BaseController {
           setFormData(form, {
             status: this.currentBookmark.status,
             tags: this.currentBookmark.tags ? this.currentBookmark.tags.join(', ') : '',
-            notes: this.currentBookmark.notes || ''
+            notes: this.currentBookmark.description || ''
           });
         }
 
@@ -472,7 +472,7 @@ export class PopupController extends BaseController {
           .map(t => t.trim())
           .filter(t => t)
         : [],
-      notes: formData.notes || ''
+      description: formData.notes || ''
     };
 
     await this.safeExecute(

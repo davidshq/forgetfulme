@@ -294,12 +294,12 @@ export class ValidationService {
       validatedData.title = titleResult.data || 'Untitled';
     }
 
-    // Validate notes (optional)
-    const notesResult = this.validateNotes(bookmarkData.notes);
-    if (!notesResult.isValid) {
-      errors.push(...notesResult.errors);
+    // Validate description (optional) - maps from notes field in UI
+    const descriptionResult = this.validateNotes(bookmarkData.description || bookmarkData.notes);
+    if (!descriptionResult.isValid) {
+      errors.push(...descriptionResult.errors);
     } else {
-      validatedData.notes = notesResult.data;
+      validatedData.description = descriptionResult.data;
     }
 
     // Validate tags (optional)

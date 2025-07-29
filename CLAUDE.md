@@ -18,6 +18,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run test:all` - Run all tests (unit + integration + visual)
 - `npm run install-browsers` - Install Playwright browsers (Chromium)
 
+**Testing Strategy:**
+- **Run targeted tests during development**: Use `npm test -- tests/unit/services/SpecificService.test.js` to run only relevant tests when debugging specific issues
+- **Run full test suite only when complete**: Use `npm run test:all` only when features are implemented and ready for comprehensive validation
+- **Reason**: ErrorService and other components log extensively for debugging, making full test suite output very verbose
+
 ### Code Quality
 - `npm run lint` - Lint code with ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
