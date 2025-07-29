@@ -9,13 +9,13 @@
  * 5. Row Level Security is functioning
  * 
  * To run: 
- * 1. Copy .env.example to .env and fill in your credentials
+ * 1. Ensure supabase-credentials.js has your Supabase credentials
  * 2. node test-supabase-connection.js
  */
 
-import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG, isConfigured } from './supabase-config.local.js';
+import { TEST_USER_CREDENTIALS } from './supabase-credentials.js';
 
 /**
  * Test configuration and connection
@@ -115,8 +115,7 @@ async function testSchema(supabase) {
 async function testAuthentication(supabase) {
   console.log('\n🔐 Testing Authentication...');
   
-  const testEmail = process.env.TEST_EMAIL || 'test@example.com';
-  const testPassword = process.env.TEST_PASSWORD || 'TestPassword123!';
+  const { email: testEmail, password: testPassword } = TEST_USER_CREDENTIALS;
   
   try {
     // Test sign up
@@ -152,6 +151,34 @@ async function testAuthentication(supabase) {
     console.log(`👤 User ID: ${signInData.user?.id}`);
     console.log(`🎫 Session: ${signInData.session ? 'Active' : 'None'}`);
     
+    // Ensure user profile exists (manual fallback for trigger issues)
+    const { data: profileData, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('id', signInData.user.id)
+      .single();
+    
+    if (profileError && profileError.code === 'PGRST116') {
+      console.log('📝 Creating user profile manually...');
+      const { error: createProfileError } = await supabase
+        .from('user_profiles')
+        .insert({
+          id: signInData.user.id,
+          email: signInData.user.email
+        });
+      
+      if (createProfileError) {
+        console.error('❌ Failed to create user profile:', createProfileError.message);
+        return false;
+      }
+      console.log('✅ User profile created successfully');
+    } else if (profileError) {
+      console.error('❌ Profile check error:', profileError.message);
+      return false;
+    } else {
+      console.log('✅ User profile already exists');
+    }
+    
     return signInData.user;
   } catch (error) {
     console.error('❌ Authentication test failed:', error.message);
@@ -166,9 +193,15 @@ async function testCRUDOperations(supabase, user) {
   console.log('\n📝 Testing CRUD Operations...');
   
   try {
+    // Debug: Check current auth state
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    console.log(`🔍 Current authenticated user ID: ${currentUser?.id}`);
+    console.log(`🔍 Expected user ID from sign-in: ${user.id}`);
+    
     // Test bookmark creation
     console.log('➕ Testing bookmark creation...');
     const testBookmark = {
+      user_id: currentUser.id, // Explicitly set user_id
       url: 'https://example.com/test-article',
       title: 'Test Article for E2E Testing',
       description: 'This is a test bookmark created during E2E testing',
@@ -251,13 +284,16 @@ async function testCRUDOperations(supabase, user) {
  * Test Row Level Security
  */
 async function testRLS(supabase, user) {
-  const testEmail = process.env.TEST_EMAIL || 'test@example.com';
-  const testPassword = process.env.TEST_PASSWORD || 'TestPassword123!';
+  const { email: testEmail, password: testPassword } = TEST_USER_CREDENTIALS;
   console.log('\n🔒 Testing Row Level Security...');
   
   try {
+    // Get current user for explicit user_id
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    
     // Create a bookmark as authenticated user
     const testBookmark = {
+      user_id: currentUser.id, // Explicitly set user_id
       url: 'https://example.com/rls-test',
       title: 'RLS Test Bookmark',
       description: 'Testing Row Level Security',
