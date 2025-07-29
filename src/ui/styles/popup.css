@@ -56,31 +56,18 @@
 
 .auth-tabs {
   display: flex;
-  border-bottom: 1px solid var(--muted-border-color);
+  gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .tab-button {
   flex: 1;
-  background: none;
-  border: none;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
+  margin: 0;
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  color: var(--muted-color);
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
 }
 
-.tab-button:hover {
-  color: var(--color);
-  background-color: var(--muted-background-color);
-}
-
-.tab-button.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
+/* Remove custom tab styling - let Pico handle it */
 
 .auth-form {
   margin-bottom: 1rem;
@@ -361,18 +348,7 @@
     align-items: flex-start;
   }
 
-  .auth-tabs {
-    flex-direction: column;
-  }
-
-  .tab-button {
-    border-bottom: 1px solid var(--muted-border-color);
-    border-right: none;
-  }
-
-  .tab-button.active {
-    border-bottom-color: var(--primary);
-  }
+  /* Keep tabs side by side even on mobile */
 }
 
 /* Dark mode specific adjustments */
@@ -387,6 +363,12 @@
 
   .recent-list li:hover {
     background-color: var(--card-sectionning-background-color);
+  }
+
+  /* Ensure tab visibility in dark mode */
+  .tab-button:not(.active) {
+    background-color: var(--card-background-color);
+    color: var(--color);
   }
 }
 

@@ -1,0 +1,2 @@
+- On the login screen the Sign In and Sign up may not be buttons, or if they are buttons they appear the same color as the background.
+    - Maybe these should be tabs instead? Switching between them switches the UI

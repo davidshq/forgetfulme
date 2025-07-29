@@ -44,6 +44,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### UI Philosophy
 - **Pico.css framework**: Use simple, semantic HTML-first styling
+- **Work WITH the framework**: Use Pico.css built-in classes (`secondary`, `contrast`, etc.) rather than creating custom CSS that fights against the framework. This ensures proper styling in both light and dark modes.
 - **Alternative libraries**: May recommend better fit if justified
 - **Progressive enhancement**: Static HTML foundation enhanced with JavaScript
 
@@ -436,3 +437,21 @@ If tests fail:
 - Add extensive logging for configuration loading
 - Distinguish between errors and expected conditions
 - Use console.warn/log appropriately, reserve console.error for real issues
+
+### **Pico.css Integration Lessons**
+
+**Work WITH the framework, not against it:**
+- **Use built-in classes**: Leverage Pico's `secondary`, `contrast`, `outline` classes instead of custom CSS
+- **Dark mode compatibility**: Pico's built-in classes automatically handle light/dark mode - custom CSS often breaks this
+- **Debugging approach**: When styling doesn't work, first check if you're using proper Pico classes before adding custom CSS
+- **JavaScript integration**: Use class toggling (`classList.add('secondary')`) to change button states rather than custom CSS
+
+**Example - Tab Button Implementation:**
+```javascript
+// Correct approach - use Pico classes
+activeTab.classList.remove('secondary');    // Primary styling
+inactiveTab.classList.add('secondary');     // Secondary styling
+
+// Wrong approach - custom CSS that breaks in dark mode
+// Custom CSS: .tab-button { background: #fff; color: #000; }
+```

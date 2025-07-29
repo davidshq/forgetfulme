@@ -219,13 +219,21 @@ export class PopupController extends BaseController {
     const signupForm = $('#signup-form');
 
     if (tab === 'signin') {
+      // Active tab gets primary styling
       signinTab?.classList.add('active');
+      signinTab?.classList.remove('secondary');
+      // Inactive tab gets secondary styling  
       signupTab?.classList.remove('active');
+      signupTab?.classList.add('secondary');
       show(signinForm);
       hide(signupForm);
     } else {
+      // Active tab gets primary styling
       signupTab?.classList.add('active');
+      signupTab?.classList.remove('secondary');
+      // Inactive tab gets secondary styling
       signinTab?.classList.remove('active');
+      signinTab?.classList.add('secondary');
       show(signupForm);
       hide(signinForm);
     }
