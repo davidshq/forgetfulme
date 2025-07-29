@@ -2,6 +2,8 @@
  * @fileoverview Authentication service for the ForgetfulMe extension
  */
 
+import { createClient } from '@supabase/supabase-js';
+
 /**
  * Service for managing user authentication with Supabase
  */
@@ -31,8 +33,8 @@ export class AuthService {
         throw new Error('Supabase configuration not found');
       }
 
-      // Create a minimal Supabase client for auth only
-      this.supabaseClient = this.createSupabaseClient(config);
+      // Create official Supabase client
+      this.supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
       // Restore session from storage
       await this.restoreSession();
@@ -94,12 +96,31 @@ export class AuthService {
       });
 
       if (response.error) {
-        throw new Error(response.error.message);
+        const error = new Error(response.error.message);
+        error.status = response.error.status;
+        throw error;
       }
 
+      // Log response for debugging
+      console.log('SignUp response:', {
+        hasSession: !!response.data.session,
+        hasUser: !!response.data.user,
+        userEmailConfirmed: response.data.user?.email_confirmed_at,
+        user: JSON.stringify(response.data.user, null, 2),
+        session: JSON.stringify(response.data.session, null, 2)
+      });
+
       // Handle email confirmation requirement
-      if (!response.data.session && response.data.user && !response.data.user.email_confirmed_at) {
+      // Check both possible fields for email verification status
+      const emailNotConfirmed = response.data.user && (
+        response.data.user.email_confirmed_at === null ||
+        response.data.user.email_confirmed_at === undefined ||
+        (response.data.user.user_metadata && response.data.user.user_metadata.email_verified === false)
+      );
+
+      if (!response.data.session && response.data.user && emailNotConfirmed) {
         // Email confirmation required - handle through extension UI
+        console.log('Email confirmation required for:', response.data.user.email);
         return {
           requiresConfirmation: true,
           email: response.data.user.email
@@ -223,23 +244,16 @@ export class AuthService {
         return null;
       }
 
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/user_profiles?select=*&id=eq.${this.currentUser.id}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${this.currentUser.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const { data, error } = await this.supabaseClient
+        .from('user_profiles')
+        .select('*')
+        .eq('id', this.currentUser.id);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const profiles = await response.json();
-      return profiles.length > 0 ? profiles[0] : null;
+      return data.length > 0 ? data[0] : null;
     } catch (error) {
       this.errorService.handle(error, 'AuthService.getUserProfile');
       return null;
@@ -257,26 +271,17 @@ export class AuthService {
         throw new Error('User not authenticated');
       }
 
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/user_profiles?id=eq.${this.currentUser.id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${this.currentUser.access_token}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=representation'
-          },
-          body: JSON.stringify(profileData)
-        }
-      );
+      const { data, error } = await this.supabaseClient
+        .from('user_profiles')
+        .update(profileData)
+        .eq('id', this.currentUser.id)
+        .select();
 
-      if (!response.ok) {
-        throw new Error('Failed to update user profile');
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const profiles = await response.json();
-      return profiles[0];
+      return data[0];
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'AuthService.updateUserProfile');
       throw new Error(errorInfo.message);
@@ -371,6 +376,14 @@ export class AuthService {
         return;
       }
 
+      // Restore session in Supabase client
+      if (this.supabaseClient && storedSession.access_token) {
+        await this.supabaseClient.auth.setSession({
+          access_token: storedSession.access_token,
+          refresh_token: storedSession.refresh_token
+        });
+      }
+
       this.currentUser = storedSession;
 
       // Try to refresh the session
@@ -379,118 +392,6 @@ export class AuthService {
       // If restoration fails, clear the stored session
       await this.handleAuthSignOut();
     }
-  }
-
-  /**
-   * Create minimal Supabase client
-   * @param {Object} config - Supabase configuration
-   * @returns {Object} Supabase client-like object
-   * @private
-   */
-  createSupabaseClient(config) {
-    return {
-      supabaseUrl: config.supabaseUrl,
-      supabaseKey: config.supabaseAnonKey,
-      auth: {
-        signInWithPassword: async ({ email, password }) => {
-          const response = await fetch(`${config.supabaseUrl}/auth/v1/token?grant_type=password`, {
-            method: 'POST',
-            headers: {
-              apikey: config.supabaseAnonKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            return { error: data.error || { message: 'Sign in failed' } };
-          }
-
-          return { data: { session: data } };
-        },
-
-        signUp: async ({ email, password }) => {
-          const response = await fetch(`${config.supabaseUrl}/auth/v1/signup`, {
-            method: 'POST',
-            headers: {
-              apikey: config.supabaseAnonKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            return { error: data.error || { message: 'Sign up failed' } };
-          }
-
-          return { data };
-        },
-
-        signOut: async () => {
-          if (this.currentUser) {
-            await fetch(`${config.supabaseUrl}/auth/v1/logout`, {
-              method: 'POST',
-              headers: {
-                apikey: config.supabaseAnonKey,
-                Authorization: `Bearer ${this.currentUser.access_token}`
-              }
-            });
-          }
-        },
-
-        getSession: async () => {
-          return { data: { session: this.currentUser } };
-        },
-
-        refreshSession: async () => {
-          if (!this.currentUser?.refresh_token) {
-            return { error: { message: 'No refresh token' } };
-          }
-
-          const response = await fetch(
-            `${config.supabaseUrl}/auth/v1/token?grant_type=refresh_token`,
-            {
-              method: 'POST',
-              headers: {
-                apikey: config.supabaseAnonKey,
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ refresh_token: this.currentUser.refresh_token })
-            }
-          );
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            return { error: data.error || { message: 'Refresh failed' } };
-          }
-
-          return { data: { session: data } };
-        },
-
-        resetPasswordForEmail: async email => {
-          const response = await fetch(`${config.supabaseUrl}/auth/v1/recover`, {
-            method: 'POST',
-            headers: {
-              apikey: config.supabaseAnonKey,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email })
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            return { error: data.error || { message: 'Reset password failed' } };
-          }
-
-          return { error: null };
-        }
-      }
-    };
   }
 
   /**

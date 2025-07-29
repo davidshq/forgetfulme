@@ -35,6 +35,41 @@ export class ErrorService {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorCode = this.generateErrorCode(error, context);
 
+    // Check for specific error types based on context and content
+    // Config errors take priority if they contain config-related terms
+    if (this.isConfigError(error, errorMessage)) {
+      return {
+        category: ERROR_CATEGORIES.CONFIG,
+        severity: ERROR_SEVERITY.CRITICAL,
+        message: 'Configuration error. Please check your settings.',
+        code: errorCode,
+        retryable: false,
+        actions: [
+          'Go to Options and verify settings',
+          'Check Supabase URL and API key',
+          'Contact support if needed'
+        ]
+      };
+    }
+
+    // Check database context - if context suggests database operation, prioritize database categorization
+    if (context && (context.includes('BookmarkService') || context.includes('database') || context.includes('Database'))) {
+      if (this.isDatabaseError(error, errorMessage) || (errorMessage.toLowerCase().includes('timeout') && !this.isConfigError(error, errorMessage)) || (errorMessage.toLowerCase().includes('connection') && !this.isConfigError(error, errorMessage))) {
+        return {
+          category: ERROR_CATEGORIES.DATABASE,
+          severity: ERROR_SEVERITY.HIGH,
+          message: 'Database error occurred. Please try again.',
+          code: errorCode,
+          retryable: true,
+          actions: [
+            'Try again in a few moments',
+            'Check your connection',
+            'Contact support if error persists'
+          ]
+        };
+      }
+    }
+
     // Network errors
     if (this.isNetworkError(error, errorMessage)) {
       return {
@@ -47,6 +82,22 @@ export class ErrorService {
           'Check internet connection',
           'Try again in a few moments',
           'Contact support if problem persists'
+        ]
+      };
+    }
+
+    // Rate limiting errors (429)
+    if (this.isRateLimitError(error, errorMessage)) {
+      return {
+        category: ERROR_CATEGORIES.NETWORK,
+        severity: ERROR_SEVERITY.MEDIUM,
+        message: 'Too many requests. Please wait a moment before trying again.',
+        code: errorCode,
+        retryable: true,
+        actions: [
+          'Wait 30 seconds and try again',
+          'Reduce the frequency of requests',
+          'Contact support if this persists'
         ]
       };
     }
@@ -99,21 +150,6 @@ export class ErrorService {
       };
     }
 
-    // Configuration errors
-    if (this.isConfigError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.CONFIG,
-        severity: ERROR_SEVERITY.CRITICAL,
-        message: 'Configuration error. Please check your settings.',
-        code: errorCode,
-        retryable: false,
-        actions: [
-          'Go to Options and verify settings',
-          'Test your Supabase connection',
-          'Reset to default configuration'
-        ]
-      };
-    }
 
     // Storage errors
     if (this.isStorageError(error, errorMessage)) {
@@ -150,7 +186,7 @@ export class ErrorService {
       message: 'An unexpected error occurred. Please try again.',
       code: errorCode,
       retryable: true,
-      actions: ['Try again', 'Reload the page', 'Contact support with error code']
+      actions: ['Try again', 'Try refreshing the page', 'Reload the page', 'Contact support with error code']
     };
   }
 
@@ -190,16 +226,40 @@ export class ErrorService {
       'unauthorized',
       'authentication',
       'invalid token',
+      'jwt token',
+      'jwt',
+      'token',
       'expired token',
       'access denied',
       'forbidden',
       'login required',
+      'auth failed',
       '401',
       '403'
     ];
 
     const lowerMessage = message.toLowerCase();
     return authIndicators.some(indicator => lowerMessage.includes(indicator));
+  }
+
+  /**
+   * Check if error is rate limit-related
+   * @param {Error|string} error - Error to check
+   * @param {string} message - Error message
+   * @returns {boolean} Whether error is rate limit-related
+   */
+  isRateLimitError(error, message) {
+    const rateLimitIndicators = [
+      'rate limit',
+      'too many requests',
+      'quota exceeded',
+      'throttled',
+      '429'
+    ];
+
+    const lowerMessage = message.toLowerCase();
+    return rateLimitIndicators.some(indicator => lowerMessage.includes(indicator)) ||
+           (error && error.status === 429);
   }
 
   /**
@@ -212,10 +272,12 @@ export class ErrorService {
     const validationIndicators = [
       'validation',
       'invalid input',
+      'invalid email',
+      'invalid format',
       'required field',
       'bad request',
       'malformed',
-      'invalid format',
+      'validation failed',
       '400'
     ];
 
@@ -257,6 +319,8 @@ export class ErrorService {
       'missing config',
       'invalid config',
       'supabase url',
+      'missing supabase',
+      'supabase',
       'api key',
       'not configured'
     ];
@@ -275,9 +339,12 @@ export class ErrorService {
     const storageIndicators = [
       'storage',
       'quota exceeded',
+      'storage quota',
       'disk full',
       'save failed',
-      'local storage'
+      'local storage',
+      'cache full',
+      'storage error'
     ];
 
     const lowerMessage = message.toLowerCase();
@@ -311,13 +378,14 @@ export class ErrorService {
    */
   generateErrorCode(error, context) {
     const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 6);
     const contextCode = context
       .replace(/[^a-zA-Z0-9]/g, '')
       .toUpperCase()
       .substring(0, 3);
     const errorHash = this.simpleHash(error instanceof Error ? error.message : String(error));
 
-    return `${contextCode}-${errorHash}-${timestamp}`;
+    return `${contextCode}-${errorHash}-${timestamp}${random}`;
   }
 
   /**
@@ -363,10 +431,9 @@ export class ErrorService {
       this.errorLog.shift();
     }
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`[${errorInfo.code}] ${errorInfo.message}`, originalError);
-    }
+    // Log to console in development (browser environment doesn't have process.env)
+    // Always log in browser environment for debugging
+    console.error(`[${errorInfo.code}] ${errorInfo.message}`, originalError);
   }
 
   /**
@@ -376,6 +443,25 @@ export class ErrorService {
    */
   getRecentErrors(limit = 10) {
     return this.errorLog.slice(-limit);
+  }
+
+  /**
+   * Get error log entries with optional filtering
+   * @param {string} [category] - Filter by category
+   * @returns {Array} Error log entries
+   */
+  getErrorLog(category) {
+    if (category) {
+      return this.errorLog.filter(entry => entry.category === category);
+    }
+    return [...this.errorLog];
+  }
+
+  /**
+   * Clear error log entries
+   */
+  clearErrorLog() {
+    this.errorLog = [];
   }
 
   /**

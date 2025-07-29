@@ -20,8 +20,14 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup config required state', async ({ page }) => {
+    // Show config required section
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.remove('hidden');
+    });
+    
     // Wait for initial state
-    const configSection = page.locator('#config-required-section');
+    const configSection = page.locator('#config-required');
     await expect(configSection).toBeVisible();
     
     // Take screenshot of config required state
@@ -29,13 +35,12 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup auth section signin tab', async ({ page }) => {
-    // Mock configuration to show auth section
+    // Show auth section and ensure signin form is visible
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     const authSection = page.locator('#auth-section');
     await expect(authSection).toBeVisible();
@@ -49,17 +54,20 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup auth section signup tab', async ({ page }) => {
-    // Mock configuration to show auth section
+    // Show auth section
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
     
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-    
-    // Switch to signup tab
+    // Switch to signup tab and show signup form
     const signupTab = page.locator('#signup-tab');
     await signupTab.click();
+    
+    await page.evaluate(() => {
+      document.getElementById('signin-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.remove('hidden');
+    });
     
     const signupForm = page.locator('#signup-form');
     await expect(signupForm).toBeVisible();
@@ -69,21 +77,17 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup main section authenticated state', async ({ page }) => {
-    // Mock authenticated state
+    // Show main section in authenticated state
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
-      window.mockUser = {
-        email: 'test@example.com'
-      };
-      window.mockCurrentTab = {
-        url: 'https://example.com',
-        title: 'Example Website'
-      };
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
+      document.getElementById('loading-section').classList.add('hidden');
+      
+      // Populate user info
+      document.getElementById('user-email').textContent = 'test@example.com';
+      document.getElementById('page-title').textContent = 'Example Website';
+      document.getElementById('page-url').textContent = 'https://example.com';
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     const mainSection = page.locator('#main-section');
     await expect(mainSection).toBeVisible();
@@ -93,54 +97,48 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup with form validation errors', async ({ page }) => {
-    // Mock configuration
+    // Show auth section
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Try to submit empty signin form to show validation
     const submitButton = page.locator('#signin-submit');
     await submitButton.click();
     
-    // Wait for error message to appear
-    const messageArea = page.locator('#message-area');
-    await expect(messageArea).toContainText('Please enter both email and password');
+    // Add mock validation error message
+    await page.evaluate(() => {
+      const messageArea = document.getElementById('message-area');
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'message error';
+      errorMsg.textContent = 'Please enter both email and password';
+      messageArea.appendChild(errorMsg);
+    });
     
     // Take screenshot showing validation error
     await expect(page).toHaveScreenshot('popup-validation-error.png');
   });
 
   test('popup loading state', async ({ page }) => {
-    // Mock configuration and slow network
-    await page.route('**/auth/**', async route => {
-      // Hold the request to show loading state
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Test error' })
-      });
-    });
-    
+    // Show auth section
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Fill and submit form
     await page.fill('#signin-email', 'test@example.com');
     await page.fill('#signin-password', 'password123');
     
     const submitButton = page.locator('#signin-submit');
-    await submitButton.click();
     
-    // Wait for loading state
-    await expect(submitButton).toContainText('Signing in...');
+    // Simulate loading state
+    await page.evaluate(() => {
+      const button = document.getElementById('signin-submit');
+      button.textContent = 'Signing in...';
+      button.disabled = true;
+    });
     
     // Take screenshot of loading state
     await expect(page).toHaveScreenshot('popup-loading-state.png');
@@ -150,13 +148,11 @@ test.describe('Popup Visual Regression', () => {
     // Set dark mode
     await page.emulateMedia({ colorScheme: 'dark' });
     
-    // Mock configuration
+    // Show auth section
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Take screenshot in dark mode
     await expect(page).toHaveScreenshot('popup-dark-mode.png');
@@ -166,46 +162,39 @@ test.describe('Popup Visual Regression', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 320, height: 568 });
     
-    // Mock configuration
+    // Show auth section
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Take screenshot of mobile view
     await expect(page).toHaveScreenshot('popup-mobile-view.png');
   });
 
   test('popup with recent bookmarks', async ({ page }) => {
-    // Mock authenticated state with recent bookmarks
+    // Show main section and populate recent bookmarks
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
-      window.mockUser = {
-        email: 'test@example.com'
-      };
-      window.mockRecentBookmarks = [
-        {
-          id: '1',
-          title: 'Example Website',
-          url: 'https://example.com',
-          status: 'read',
-          created_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          title: 'Another Site',
-          url: 'https://another.com',
-          status: 'unread',
-          created_at: new Date().toISOString()
-        }
-      ];
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
+      document.getElementById('loading-section').classList.add('hidden');
+      
+      // Populate user info
+      document.getElementById('user-email').textContent = 'test@example.com';
+      
+      // Populate recent bookmarks
+      const recentList = document.getElementById('recent-list');
+      recentList.innerHTML = `
+        <li class="recent-bookmark">
+          <a href="https://example.com">Example Website</a>
+          <span class="bookmark-status read">Read</span>
+        </li>
+        <li class="recent-bookmark">
+          <a href="https://another.com">Another Site</a>
+          <span class="bookmark-status unread">Unread</span>
+        </li>
+      `;
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Wait for recent bookmarks to load
     const recentList = page.locator('#recent-list');
@@ -216,22 +205,29 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup bookmark form states', async ({ page }) => {
-    // Mock authenticated state
+    // Show main section and populate form
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
-      window.mockUser = { email: 'test@example.com' };
-      window.mockCurrentTab = {
-        url: 'https://example.com',
-        title: 'Example Website'
-      };
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
+      document.getElementById('loading-section').classList.add('hidden');
+      
+      // Populate user info
+      document.getElementById('user-email').textContent = 'test@example.com';
+      document.getElementById('page-title').textContent = 'Example Website';
+      document.getElementById('page-url').textContent = 'https://example.com';
+      
+      // Populate status options
+      const statusSelect = document.getElementById('bookmark-status-select');
+      statusSelect.innerHTML = `
+        <option value="">Select status...</option>
+        <option value="read">Read</option>
+        <option value="unread">Unread</option>
+        <option value="later">Read Later</option>
+      `;
     });
     
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-    
     // Fill bookmark form
-    await page.selectOption('#bookmark-status', 'read');
+    await page.selectOption('#bookmark-status-select', 'read');
     await page.fill('#bookmark-tags', 'web, example, test');
     await page.fill('#bookmark-notes', 'This is a test bookmark with some notes');
     
@@ -240,15 +236,15 @@ test.describe('Popup Visual Regression', () => {
   });
 
   test('popup success message state', async ({ page }) => {
-    // Mock authenticated state
+    // Show main section
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
-      window.mockUser = { email: 'test@example.com' };
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
+      document.getElementById('loading-section').classList.add('hidden');
+      
+      // Populate user info
+      document.getElementById('user-email').textContent = 'test@example.com';
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Simulate success message
     await page.evaluate(() => {

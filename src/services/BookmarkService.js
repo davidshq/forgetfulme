@@ -2,6 +2,7 @@
  * @fileoverview Bookmark management service for the ForgetfulMe extension
  */
 
+import { createClient } from '@supabase/supabase-js';
 import { PAGINATION } from '../utils/constants.js';
 
 /**
@@ -35,7 +36,7 @@ export class BookmarkService {
         throw new Error('Supabase configuration not found');
       }
 
-      this.supabaseClient = this.createSupabaseClient(config);
+      this.supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'BookmarkService.initialize');
       throw new Error(errorInfo.message);
@@ -183,6 +184,45 @@ export class BookmarkService {
       await this.updateCache();
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'BookmarkService.deleteBookmark');
+      throw new Error(errorInfo.message);
+    }
+  }
+
+  /**
+   * Get bookmarks with pagination
+   * @param {Object} options - Query options
+   * @returns {Promise<Object>} Paginated bookmarks result
+   */
+  async getBookmarks(options = {}) {
+    try {
+      if (!this.authService.isAuthenticated()) {
+        throw new Error('User not authenticated');
+      }
+
+      const user = this.authService.getCurrentUser();
+      const page = options.page || 1;
+      const limit = options.limit || PAGINATION.DEFAULT_PAGE_SIZE;
+
+      // Check cache first
+      const cachedBookmarks = await this.storageService.getBookmarkCache();
+      if (cachedBookmarks && !options.forceRefresh) {
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedBookmarks = cachedBookmarks.slice(startIndex, endIndex);
+        
+        return {
+          bookmarks: paginatedBookmarks,
+          page,
+          limit,
+          total: cachedBookmarks.length,
+          totalPages: Math.ceil(cachedBookmarks.length / limit)
+        };
+      }
+
+      // Fetch from database if not cached
+      return await this.searchBookmarks({ page, limit, userId: user.id });
+    } catch (error) {
+      const errorInfo = this.errorService.handle(error, 'BookmarkService.getBookmarks');
       throw new Error(errorInfo.message);
     }
   }
@@ -774,18 +814,6 @@ export class BookmarkService {
     }
   }
 
-  /**
-   * Create minimal Supabase client
-   * @param {Object} config - Supabase configuration
-   * @returns {Object} Client configuration
-   * @private
-   */
-  createSupabaseClient(config) {
-    return {
-      supabaseUrl: config.supabaseUrl,
-      supabaseKey: config.supabaseAnonKey
-    };
-  }
 
   /**
    * Generate unique ID for bookmark

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ForgetfulMe - Email Confirmation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <link rel="stylesheet" href="styles/shared.css" />
+    <style>
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      .confirmation-container {
+        text-align: center;
+        max-width: 500px;
+        padding: 2rem;
+      }
+      .loading-spinner {
+        margin: 2rem auto;
+      }
+      .success-icon {
+        font-size: 4rem;
+        color: var(--pico-color-green-500);
+        margin-bottom: 1rem;
+      }
+      .error-icon {
+        font-size: 4rem;
+        color: var(--pico-color-red-500);
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container confirmation-container">
+      <div id="loading-state">
+        <h1>Confirming Email</h1>
+        <div class="loading-spinner"></div>
+        <p>Please wait while we confirm your email address...</p>
+      </div>
+
+      <div id="success-state" class="hidden">
+        <div class="success-icon">✓</div>
+        <h1>Email Confirmed!</h1>
+        <p>Your email has been successfully confirmed and you're now signed in.</p>
+        
+        <div style="margin: 2rem 0; padding: 1rem; background: var(--pico-background-color); border-radius: var(--pico-border-radius);">
+          <h3 style="margin-top: 0;">How to use ForgetfulMe:</h3>
+          <ol style="text-align: left; margin: 1rem 0;">
+            <li>Look for the <strong>ForgetfulMe icon</strong> in your browser toolbar (top right)</li>
+            <li>Click the icon to open the extension</li>
+            <li>You'll be signed in and ready to start bookmarking!</li>
+          </ol>
+          <p style="margin-bottom: 0;"><small>💡 Tip: If you don't see the icon, click the puzzle piece icon in your toolbar and pin ForgetfulMe.</small></p>
+        </div>
+        
+        <button id="close-tab" class="primary">Close This Tab</button>
+      </div>
+
+      <div id="error-state" class="hidden">
+        <div class="error-icon">✗</div>
+        <h1>Confirmation Failed</h1>
+        <p id="error-message">There was an error confirming your email.</p>
+        <button id="try-again" class="primary">Try Again</button>
+      </div>
+    </div>
+
+    <script src="../main/confirm-simple.js"></script>
+  </body>
+</html>
