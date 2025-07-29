@@ -70,6 +70,22 @@ export class ErrorService {
       }
     }
 
+    // Storage errors (check before network to avoid confusion)
+    if (this.isStorageError(error, errorMessage) || (context && context.includes('StorageService'))) {
+      return {
+        category: ERROR_CATEGORIES.STORAGE,
+        severity: ERROR_SEVERITY.MEDIUM,
+        message: 'Storage error occurred. Please free up space and try again.',
+        code: errorCode,
+        retryable: true,
+        actions: [
+          'Clear browser data or cache',
+          'Try again',
+          'Free up storage space'
+        ]
+      };
+    }
+
     // Network errors
     if (this.isNetworkError(error, errorMessage)) {
       return {
@@ -151,18 +167,6 @@ export class ErrorService {
     }
 
 
-    // Storage errors
-    if (this.isStorageError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.STORAGE,
-        severity: ERROR_SEVERITY.MEDIUM,
-        message: 'Storage error occurred. Some data may not be saved.',
-        code: errorCode,
-        retryable: true,
-        actions: ['Try again', 'Check available storage space', 'Clear extension data if needed']
-      };
-    }
-
     // Permission errors
     if (this.isPermissionError(error, errorMessage)) {
       return {
@@ -225,13 +229,12 @@ export class ErrorService {
     const authIndicators = [
       'unauthorized',
       'authentication',
+      'auth error',
       'invalid token',
       'jwt token',
       'jwt',
       'token',
       'expired token',
-      'access denied',
-      'forbidden',
       'login required',
       'auth failed',
       '401',
@@ -297,6 +300,9 @@ export class ErrorService {
       'postgresql',
       'supabase',
       'query failed',
+      'query error',
+      'connection failed',
+      'database timeout',
       'constraint violation',
       'duplicate key',
       'foreign key',
@@ -318,6 +324,7 @@ export class ErrorService {
       'configuration',
       'missing config',
       'invalid config',
+      'invalid url',
       'supabase url',
       'missing supabase',
       'supabase',
@@ -359,7 +366,9 @@ export class ErrorService {
    */
   isPermissionError(error, message) {
     const permissionIndicators = [
-      'permission',
+      'permission denied',
+      'access denied',
+      'forbidden',
       'not allowed',
       'blocked',
       'extension disabled',

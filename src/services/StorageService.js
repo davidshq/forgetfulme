@@ -16,22 +16,38 @@ export class StorageService {
     this.cache = new Map();
     this.cacheTimestamps = new Map();
     this.changeListeners = new Map();
+    this.maxCacheSize = 100; // Maximum cache entries
 
     this.setupStorageListener();
   }
 
   /**
    * Get data from storage with caching
-   * @param {string} key - Storage key
-   * @param {boolean} [useSync=true] - Whether to use sync storage
+   * @param {string|string[]} key - Storage key or array of keys
+   * @param {boolean|Object} [useSync=true] - Whether to use sync storage or options object
    * @param {number} [cacheDuration] - Cache duration in milliseconds
    * @returns {Promise<*>} Retrieved data
    */
   async get(key, useSync = true, cacheDuration = CACHE_DURATION.BOOKMARKS) {
     try {
-      // Check cache first
-      if (this.isCacheValid(key, cacheDuration)) {
-        return this.cache.get(key);
+      // Handle options object format for test compatibility
+      if (typeof useSync === 'object' && useSync !== null) {
+        const options = useSync;
+        useSync = options.area !== 'local';
+        cacheDuration = options.cacheDuration || cacheDuration;
+      }
+
+      // For array of keys, get all at once
+      if (Array.isArray(key)) {
+        const storage = useSync ? chrome.storage.sync : chrome.storage.local;
+        const result = await storage.get(key);
+        return result;
+      }
+
+      // Check cache first for single key
+      const cachedData = this.getCache(key);
+      if (cachedData !== null) {
+        return cachedData;
       }
 
       const storage = useSync ? chrome.storage.sync : chrome.storage.local;
@@ -39,8 +55,7 @@ export class StorageService {
       const data = result[key];
 
       // Update cache
-      this.cache.set(key, data);
-      this.cacheTimestamps.set(key, Date.now());
+      this.setCache(key, data, cacheDuration);
 
       return data;
     } catch (error) {
@@ -51,19 +66,48 @@ export class StorageService {
 
   /**
    * Set data in storage and update cache
-   * @param {string} key - Storage key
-   * @param {*} value - Data to store
-   * @param {boolean} [useSync=true] - Whether to use sync storage
+   * @param {string|Object} key - Storage key or object of key-value pairs
+   * @param {*} [value] - Data to store (if key is string)
+   * @param {boolean|Object} [useSync=true] - Whether to use sync storage or options object
    * @returns {Promise<void>}
    */
   async set(key, value, useSync = true) {
     try {
-      const storage = useSync ? chrome.storage.sync : chrome.storage.local;
-      await storage.set({ [key]: value });
+      let data;
+      let actualUseSync = useSync;
 
-      // Update cache
-      this.cache.set(key, value);
-      this.cacheTimestamps.set(key, Date.now());
+      // Handle different call patterns
+      if (typeof key === 'object' && key !== null && value === undefined) {
+        // set(object) - set multiple key-value pairs
+        data = key;
+        actualUseSync = true;
+      } else if (typeof key === 'object' && typeof value === 'object' && value.area) {
+        // set(object, {area: 'local'}) - set multiple with options
+        data = key;
+        actualUseSync = value.area !== 'local';
+      } else if (typeof key === 'string') {
+        // set(key, value) - set single key-value pair
+        data = { [key]: value };
+        if (typeof useSync === 'object' && useSync !== null) {
+          actualUseSync = useSync.area !== 'local';
+        }
+      } else {
+        throw new Error('Invalid arguments for set method');
+      }
+
+      // Validate data size for large objects
+      const dataString = JSON.stringify(data);
+      if (dataString.length > 8192) { // Chrome sync storage limit per item
+        throw new Error('Data too large for storage');
+      }
+
+      const storage = actualUseSync ? chrome.storage.sync : chrome.storage.local;
+      await storage.set(data);
+
+      // Update cache for each key
+      Object.entries(data).forEach(([k, v]) => {
+        this.setCache(k, v);
+      });
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'StorageService.set');
       throw new Error(errorInfo.message);
@@ -72,18 +116,28 @@ export class StorageService {
 
   /**
    * Remove data from storage and cache
-   * @param {string} key - Storage key
-   * @param {boolean} [useSync=true] - Whether to use sync storage
+   * @param {string|string[]} key - Storage key or array of keys
+   * @param {boolean|Object} [useSync=true] - Whether to use sync storage or options object
    * @returns {Promise<void>}
    */
   async remove(key, useSync = true) {
     try {
-      const storage = useSync ? chrome.storage.sync : chrome.storage.local;
+      let actualUseSync = useSync;
+      
+      // Handle options object format
+      if (typeof useSync === 'object' && useSync !== null) {
+        actualUseSync = useSync.area !== 'local';
+      }
+
+      const storage = actualUseSync ? chrome.storage.sync : chrome.storage.local;
       await storage.remove(key);
 
       // Clear from cache
-      this.cache.delete(key);
-      this.cacheTimestamps.delete(key);
+      const keys = Array.isArray(key) ? key : [key];
+      keys.forEach(k => {
+        this.cache.delete(k);
+        this.cacheTimestamps.delete(k);
+      });
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'StorageService.remove');
       throw new Error(errorInfo.message);
@@ -92,12 +146,19 @@ export class StorageService {
 
   /**
    * Clear all storage and cache
-   * @param {boolean} [useSync=true] - Whether to use sync storage
+   * @param {boolean|Object} [useSync=true] - Whether to use sync storage or options object
    * @returns {Promise<void>}
    */
   async clear(useSync = true) {
     try {
-      const storage = useSync ? chrome.storage.sync : chrome.storage.local;
+      let actualUseSync = useSync;
+      
+      // Handle options object format
+      if (typeof useSync === 'object' && useSync !== null) {
+        actualUseSync = useSync.area !== 'local';
+      }
+
+      const storage = actualUseSync ? chrome.storage.sync : chrome.storage.local;
       await storage.clear();
 
       // Clear cache
@@ -309,28 +370,98 @@ export class StorageService {
   }
 
   /**
+   * Set data in cache with TTL
+   * @param {string} key - Cache key
+   * @param {*} data - Data to cache
+   * @param {number} [ttl] - Time to live in milliseconds
+   */
+  setCache(key, data, ttl = CACHE_DURATION.BOOKMARKS) {
+    // Evict oldest entries if cache is full
+    if (this.cache.size >= this.maxCacheSize && !this.cache.has(key)) {
+      const oldestKey = this.cache.keys().next().value;
+      this.cache.delete(oldestKey);
+      this.cacheTimestamps.delete(oldestKey);
+    }
+
+    this.cache.set(key, {
+      data: data,
+      expires: Date.now() + ttl
+    });
+    this.cacheTimestamps.set(key, Date.now());
+  }
+
+  /**
+   * Get data from cache
+   * @param {string} key - Cache key
+   * @returns {*|null} Cached data or null if expired/not found
+   */
+  getCache(key) {
+    const cached = this.cache.get(key);
+    if (!cached) {
+      return null;
+    }
+
+    // Check if expired
+    if (Date.now() > cached.expires) {
+      this.cache.delete(key);
+      this.cacheTimestamps.delete(key);
+      return null;
+    }
+
+    return cached.data;
+  }
+
+  /**
+   * Validate data for storage
+   * @param {*} data - Data to validate
+   * @throws {Error} If data is not serializable
+   */
+  validateData(data) {
+    try {
+      JSON.stringify(data);
+    } catch (error) {
+      throw new Error('Data must be JSON serializable');
+    }
+  }
+
+  /**
    * Get storage usage information
    * @returns {Promise<Object>} Storage usage statistics
    */
   async getStorageUsage() {
     try {
+      // Handle missing getBytesInUse API gracefully
+      const getSyncUsage = async () => {
+        if (chrome.storage.sync.getBytesInUse) {
+          return await chrome.storage.sync.getBytesInUse();
+        }
+        return 0;
+      };
+
+      const getLocalUsage = async () => {
+        if (chrome.storage.local.getBytesInUse) {
+          return await chrome.storage.local.getBytesInUse();
+        }
+        return 0;
+      };
+
       const [syncUsage, localUsage] = await Promise.all([
-        chrome.storage.sync.getBytesInUse(),
-        chrome.storage.local.getBytesInUse()
+        getSyncUsage(),
+        getLocalUsage()
       ]);
 
       return {
         sync: {
           used: syncUsage,
-          quota: chrome.storage.sync.QUOTA_BYTES,
-          available: chrome.storage.sync.QUOTA_BYTES - syncUsage,
-          percentUsed: (syncUsage / chrome.storage.sync.QUOTA_BYTES) * 100
+          quota: chrome.storage.sync.QUOTA_BYTES || 102400,
+          available: (chrome.storage.sync.QUOTA_BYTES || 102400) - syncUsage,
+          percentUsed: (syncUsage / (chrome.storage.sync.QUOTA_BYTES || 102400)) * 100
         },
         local: {
           used: localUsage,
-          quota: chrome.storage.local.QUOTA_BYTES,
-          available: chrome.storage.local.QUOTA_BYTES - localUsage,
-          percentUsed: (localUsage / chrome.storage.local.QUOTA_BYTES) * 100
+          quota: chrome.storage.local.QUOTA_BYTES || 5242880,
+          available: (chrome.storage.local.QUOTA_BYTES || 5242880) - localUsage,
+          percentUsed: (localUsage / (chrome.storage.local.QUOTA_BYTES || 5242880)) * 100
         }
       };
     } catch (error) {
