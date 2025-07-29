@@ -97,6 +97,17 @@
 ---
 ## Phase 3: Database & Backend Integration
 
+### 3.1 Database Schema
+- [x] Set up Supabase project
+- [x] **Choose schema approach**: Using `schema-simple.sql` for initial implementation
+- [x] Implement `schema-simple.sql` in Supabase SQL Editor
+- [x] Create user_profiles table with separate preference columns (not JSONB)
+- [x] Set up status_types table with default types and per-user customization
+- [x] Create bookmarks table with basic metadata and constraints
+- [x] Configure Row Level Security policies for data isolation
+- [x] Add essential indexes for performance (basic search, no full-text)
+- [x] Implement basic search function (ILIKE pattern matching, no advanced full-text)
+
 ### 3.2 Database Client Interface ✅ COMPLETE
 - [x] Create database client abstraction ✅ (Implemented in services)
 - [x] Implement Supabase client wrapper ✅ (AuthService with custom client)
@@ -182,6 +193,22 @@
 - [x] Implement sorting and view options
 - [x] Add statistics display and export functionality
 - [x] Write manager controller tests ✅
+
+---
+
+## Phase 6: Background Services
+
+### 6.1 Service Worker
+- [x] Create `src/background/BackgroundService.js`
+- [x] Implement extension lifecycle management (install, startup, update)
+- [x] Add message handling between contexts (popup, options, background)
+- [x] Create keyboard shortcut handling (Ctrl+Shift+R)
+- [x] Add notification management with auto-clear
+- [x] Implement badge updates based on page status
+- [x] Add tab context awareness and status tracking
+- [x] Implement current page bookmark marking
+- [x] Add extension info and status reporting
+- [x] Write background service tests
 
 ---
 
