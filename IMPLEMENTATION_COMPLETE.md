@@ -245,3 +245,38 @@
 - [x] Implement mock factories for Chrome APIs and services ✅
 - [x] Create test data factories for bookmarks and users ✅
 - [x] Set up code coverage reporting with Vitest ✅
+
+### 8.2 Integration Tests
+- [x] Set up basic Playwright integration testing framework
+- [x] Create popup integration test (basic UI interactions)
+
+### 8.3 E2E & Visual Regression Tests
+- [x] Set up Playwright E2E test suite with Chrome extension support
+- [x] Comprehensive visual regression testing (4 test suites, 42 baseline screenshots)**
+- [x] Create baseline screenshots for popup, options, bookmark manager (ALL UI STATES)
+- [x] Set up visual comparison and diff generation (100% WORKING)
+- [x] **Complete responsive design testing** (mobile, tablet, desktop)
+- [x] **Complete dark mode and accessibility state coverage**
+- [x] **Modal dialogs and error states coverage** (loading, error, success, empty states)
+- [x] Behavior-focused testing (test user workflows, not implementation)
+- [x] Use JSDOM for realistic DOM testing environment
+
+## Phase 9: Security & Configuration
+
+### 9.1 Security Implementation
+- [x] Implement Content Security Policy compliance (no external scripts)
+- [x] Add comprehensive input validation throughout (ValidationService)
+- [x] Create secure credential storage in Chrome sync storage
+- [x] Implement CSRF protection (Supabase handles this)
+- [x] Add SQL injection prevention (parameterized queries through Supabase)
+- [x] Implement Row Level Security ready data models
+
+### 9.2 Configuration Management
+- [x] Create UI-based Supabase configuration (primary method in options)
+- [x] Built-in connection testing feature with user feedback
+- [x] Add configuration validation before saving
+- [x] Implement secure credential handling in Chrome sync storage
+- [x] Create supabase-config.local.js template for development
+- [x] Configuration caching and invalidation system
+- [x] Configuration backup/restore through import/export
+- [x] Never commit local configuration files (in .gitignore)
