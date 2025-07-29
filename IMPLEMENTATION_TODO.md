@@ -29,17 +29,21 @@ ForgetfulMe is a Chrome extension (Manifest V3) that helps researchers track web
 ## Phase 3: Database & Backend Integration
 
 ### 3.1 Database Schema
-- [ ] Set up Supabase project
-- [ ] Implement database schema from `DATABASE_SCHEMA.md`
-- [ ] Create user_profiles table with JSONB preferences
-- [ ] Set up status_types table with default types
-- [ ] Create bookmarks table with all metadata and constraints
-- [ ] Configure Row Level Security policies for data isolation
-- [ ] Add database indexes for performance (GIN, full-text search)
-- [ ] Implement stored functions (search_bookmarks, bulk_update_bookmarks)
-- [ ] Create views (bookmark_stats_view, tag_stats_view)
-- [ ] Set up partitioning strategy for large datasets (100,000+ bookmarks)
-- [ ] Add data migration functions for version upgrades
+- [x] Set up Supabase project ✅
+- [x] **Choose schema approach**: Using `schema-simple.sql` for initial implementation ✅
+- [x] Implement `schema-simple.sql` in Supabase SQL Editor ✅
+- [x] Create user_profiles table with separate preference columns (not JSONB) ✅
+- [x] Set up status_types table with default types and per-user customization ✅
+- [x] Create bookmarks table with basic metadata and constraints ✅
+- [x] Configure Row Level Security policies for data isolation ✅
+- [x] Add essential indexes for performance (basic search, no full-text) ✅
+- [x] Implement basic search function (ILIKE pattern matching, no advanced full-text) ✅
+- [ ] **Future consideration**: Upgrade to `schema-full.sql` when advanced features needed:
+  - Full-text search with ts_rank scoring
+  - JSONB preferences for flexibility
+  - Bulk operations function
+  - Statistics views
+  - Advanced indexes and partitioning
 
 ### 3.2 Database Client Interface
 - [ ] Create database client abstraction
