@@ -495,3 +495,162 @@ inactiveTab.classList.add('secondary');     // Secondary styling
 // Wrong approach - custom CSS that breaks in dark mode
 // Custom CSS: .tab-button { background: #fff; color: #000; }
 ```
+
+---
+
+## **CRITICAL: Improved UI Development Protocol for Claude Code**
+
+### **Common UI Issues and Solutions**
+
+**The Problem:** Claude Code has been making simple UI mistakes despite having visual regression tests - components not sizing correctly, layout issues even when specifically instructed.
+
+**Root Cause Analysis:**
+1. **Not using visual tests effectively** - Running tests but not reviewing the diff reports
+2. **Missing component measurement** - Assuming CSS will work without checking actual rendered dimensions
+3. **Not leveraging Playwright's debugging capabilities** - Missing before/after visual comparisons
+
+### **MANDATORY: Step-by-Step UI Development Process**
+
+**Before ANY UI change:**
+```bash
+npm run test:visual:simple  # Capture current baseline state
+```
+
+**During UI development - REQUIRED debugging steps:**
+1. **Measure actual dimensions** using Playwright:
+   ```javascript
+   const box = await element.boundingBox();
+   console.log(`Element: ${box.width}x${box.height}`);
+   ```
+
+2. **Check computed styles** in browser:
+   ```javascript
+   const styles = await page.evaluate((el) => {
+     const computed = getComputedStyle(el);
+     return {
+       width: computed.width,
+       height: computed.height,
+       display: computed.display,
+       flex: computed.flex
+     };
+   }, element);
+   ```
+
+3. **Test responsive breakpoints explicitly:**
+   - Mobile: 320px width
+   - Tablet: 768px width  
+   - Desktop: 1200px+ width
+
+4. **Take intermediate screenshots** for debugging:
+   ```javascript
+   await page.screenshot({ path: 'debug-step1.png' });
+   ```
+
+**After UI changes:**
+```bash
+npm run test:visual:simple  # Generate visual diff
+```
+
+**CRITICAL: Review visual changes:**
+1. **Always open** `playwright-report/index.html` 
+2. **Review before/after comparisons** for each test
+3. **Verify changes match intent** - if not, fix immediately
+4. **Only proceed** if visual changes are correct
+
+### **UI Sizing and Layout Debugging Commands**
+
+**For flex/grid layout issues:**
+```javascript
+// Check flex properties
+await page.evaluate(() => {
+  const parent = document.querySelector('.container');
+  const styles = getComputedStyle(parent);
+  console.log('Container:', {
+    display: styles.display,
+    flexDirection: styles.flexDirection,
+    justifyContent: styles.justifyContent,
+    alignItems: styles.alignItems
+  });
+});
+```
+
+**For component sizing issues:**
+```javascript
+// Compare container vs content dimensions
+const container = await page.locator('.container').boundingBox();
+const content = await page.locator('.content').boundingBox();
+console.log('Container vs Content:', {
+  container: `${container.width}x${container.height}`,
+  content: `${content.width}x${content.height}`,
+  overflow: content.width > container.width
+});
+```
+
+**For responsive design verification:**
+```javascript
+// Test multiple breakpoints
+const breakpoints = [320, 768, 1200];
+for (const width of breakpoints) {
+  await page.setViewportSize({ width, height: 800 });
+  await page.screenshot({ path: `debug-${width}px.png` });
+  const box = await element.boundingBox();
+  console.log(`${width}px: ${box.width}x${box.height}`);
+}
+```
+
+### **Visual Testing Debugging Protocol**
+
+**When visual tests fail:**
+1. **DON'T immediately update baselines** - investigate first
+2. **Open the HTML report** to see visual diffs
+3. **Zoom into differences** - often reveals subtle issues
+4. **Check multiple browser sizes** - responsive issues are common
+5. **Verify changes are intentional** before updating baselines
+
+**When layout doesn't match expectations:**
+1. **Inspect actual element hierarchy** in browser dev tools
+2. **Check computed styles** vs CSS declarations
+3. **Verify Pico.css classes** are applied correctly
+4. **Test with minimal reproduction** case
+
+### **Systematic Approach to Component Sizing**
+
+**For any sizing task:**
+1. **Identify target dimensions** from requirements
+2. **Measure current state** using boundingBox()
+3. **Apply CSS changes** incrementally
+4. **Re-measure after each change** to verify progress
+5. **Test responsive behavior** at different breakpoints
+6. **Capture screenshots** before committing
+
+**Example systematic sizing fix:**
+```javascript
+// 1. Measure current state
+const before = await element.boundingBox();
+console.log('Before:', before);
+
+// 2. Apply changes
+await page.evaluate(() => {
+  element.style.width = '300px';
+});
+
+// 3. Measure result
+const after = await element.boundingBox();
+console.log('After:', after);
+
+// 4. Verify expectation
+const isCorrect = after.width === 300;
+console.log('Sizing correct:', isCorrect);
+```
+
+### **Integration with Existing Testing**
+
+**Visual tests complement, don't replace:**
+- **Unit tests** - verify logic and behavior
+- **Integration tests** - verify cross-component workflows
+- **Visual tests** - verify appearance and layout
+- **Manual testing** - verify user experience
+
+**All must pass before considering UI work complete.**
+
+This systematic approach should eliminate the sizing and layout issues that have been occurring. The key is measuring actual results, not assuming CSS will work as expected.
