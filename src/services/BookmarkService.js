@@ -208,7 +208,7 @@ export class BookmarkService {
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedBookmarks = cachedBookmarks.slice(startIndex, endIndex);
-        
+
         return {
           bookmarks: paginatedBookmarks,
           page,
@@ -813,6 +813,5 @@ export class BookmarkService {
       console.warn('Failed to update bookmark cache:', error);
     }
   }
-
 
 }

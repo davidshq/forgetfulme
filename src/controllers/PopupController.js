@@ -44,7 +44,7 @@ export class PopupController extends BaseController {
 
       // Initialize auth service
       const isAuthInitialized = await this.authService.initialize();
-      
+
       if (!isAuthInitialized) {
         // Configuration is missing or invalid
         this.showConfigRequired();
@@ -222,7 +222,7 @@ export class PopupController extends BaseController {
       // Active tab gets primary styling
       signinTab?.classList.add('active');
       signinTab?.classList.remove('secondary');
-      // Inactive tab gets secondary styling  
+      // Inactive tab gets secondary styling
       signupTab?.classList.remove('active');
       signupTab?.classList.add('secondary');
       show(signinForm);

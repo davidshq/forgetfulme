@@ -166,7 +166,6 @@ export class ErrorService {
       };
     }
 
-
     // Permission errors
     if (this.isPermissionError(error, errorMessage)) {
       return {

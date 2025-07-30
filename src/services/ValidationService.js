@@ -481,8 +481,8 @@ export class ValidationService {
     }
     // Remove HTML tags completely including script content, then trim
     return input.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-                .replace(/<[^>]*>/g, '')
-                .trim();
+      .replace(/<[^>]*>/g, '')
+      .trim();
   }
 
   /**
@@ -617,22 +617,22 @@ export class ValidationService {
 
     try {
       const urlObj = new URL(url);
-      
+
       // Convert protocol and hostname to lowercase
       urlObj.protocol = urlObj.protocol.toLowerCase();
       urlObj.hostname = urlObj.hostname.toLowerCase();
-      
+
       // Remove default ports
       if ((urlObj.protocol === 'https:' && urlObj.port === '443') ||
           (urlObj.protocol === 'http:' && urlObj.port === '80')) {
         urlObj.port = '';
       }
-      
+
       // Remove trailing slash from pathname
       if (urlObj.pathname.endsWith('/') && urlObj.pathname !== '/') {
         urlObj.pathname = urlObj.pathname.slice(0, -1);
       }
-      
+
       // Sort query parameters
       const params = new URLSearchParams(urlObj.search);
       const sortedParams = new URLSearchParams();
@@ -640,7 +640,7 @@ export class ValidationService {
         sortedParams.append(key, params.get(key));
       });
       urlObj.search = sortedParams.toString();
-      
+
       return urlObj.toString();
     } catch (error) {
       throw new Error('Invalid URL format');

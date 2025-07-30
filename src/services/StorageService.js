@@ -31,7 +31,7 @@ export class StorageService {
   async get(key, useSync = true, cacheDuration = CACHE_DURATION.BOOKMARKS) {
     try {
       let defaultValue = undefined;
-      
+
       // Handle options object format for test compatibility
       if (typeof useSync === 'object' && useSync !== null) {
         const options = useSync;
@@ -56,14 +56,14 @@ export class StorageService {
       const cachedData = this.getCache(key);
       if (cachedData !== null) {
         // For test compatibility, return the whole result object for single keys
-        return typeof cachedData === 'object' && cachedData !== null && !Array.isArray(cachedData) 
-          ? cachedData 
+        return typeof cachedData === 'object' && cachedData !== null && !Array.isArray(cachedData)
+          ? cachedData
           : { [key]: cachedData };
       }
 
       const storage = useSync ? chrome.storage.sync : chrome.storage.local;
       const result = await storage.get(key);
-      
+
       // Handle default value if key not found
       if (result[key] === undefined && defaultValue !== undefined) {
         return defaultValue;
@@ -120,7 +120,7 @@ export class StorageService {
 
       // Validate data first
       this.validateData(data);
-      
+
       // Check data size
       const dataString = JSON.stringify(data);
       if (dataString.length > 8192) { // Chrome sync storage limit per item
@@ -136,7 +136,7 @@ export class StorageService {
       });
     } catch (error) {
       // For specific Chrome storage API errors, pass through for test compatibility
-      if (error.message === 'QUOTA_EXCEEDED' || error.message === 'Data too large for storage' || 
+      if (error.message === 'QUOTA_EXCEEDED' || error.message === 'Data too large for storage' ||
           error.message === 'Cannot store circular references') {
         throw error;
       }
@@ -154,7 +154,7 @@ export class StorageService {
   async remove(key, useSync = true) {
     try {
       let actualUseSync = useSync;
-      
+
       // Handle options object format
       if (typeof useSync === 'object' && useSync !== null) {
         actualUseSync = useSync.area !== 'local';
@@ -183,7 +183,7 @@ export class StorageService {
   async clear(useSync = true) {
     try {
       let actualUseSync = useSync;
-      
+
       // Handle options object format
       if (typeof useSync === 'object' && useSync !== null) {
         actualUseSync = useSync.area !== 'local';

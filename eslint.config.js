@@ -1,6 +1,7 @@
 export default [
   {
     files: ["src/**/*.js"],
+    ignores: ["src/lib/supabase-js.min.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",

@@ -48,7 +48,7 @@ export class AuthService {
         // Session restoration failure is normal - just log it and continue
         console.log('[AuthService] No valid session to restore (normal for first-time users)');
       }
-      
+
       return true;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'AuthService.initialize');

@@ -64,7 +64,7 @@ export class BackgroundService {
       // Skip Supabase initialization in service worker context
       // Services will be initialized when needed by UI components
       console.log('[BackgroundService] Services initialized (lazy loading enabled)');
-      
+
       // Note: Auth and bookmark services will be initialized on-demand
       // when popup or options pages interact with them
     } catch (error) {
@@ -279,7 +279,7 @@ export class BackgroundService {
         title: 'Use Extension Popup',
         message: 'Click the ForgetfulMe icon to mark this page as read'
       });
-      
+
       // Update badge to show action is available
       this.updateBadge();
     } catch (error) {

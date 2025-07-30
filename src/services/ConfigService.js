@@ -78,7 +78,7 @@ export class ConfigService {
     try {
       // Try to load the local config file
       const { SUPABASE_CONFIG } = await import('../../supabase-config.local.js');
-      
+
       if (SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
         // Check if it's been configured (not placeholder values)
         if (SUPABASE_CONFIG.url !== 'https://your-project-id.supabase.co' &&
@@ -234,24 +234,24 @@ export class ConfigService {
   async addStatusType(statusType) {
     try {
       const currentTypes = await this.storageService.get('status_types') || [];
-      
+
       // Validate new status type
       const validation = this.validationService.validateStatusType(statusType);
       if (!validation.isValid) {
         throw new Error(validation.errors.join(', '));
       }
-      
+
       const validated = validation.data;
-      
+
       // Check for duplicate ID
       if (currentTypes.find(type => type.id === validated.id)) {
         throw new Error(`Status type with ID '${validated.id}' already exists`);
       }
-      
+
       const updatedTypes = [...currentTypes, validated];
       await this.storageService.set('status_types', updatedTypes);
       this.statusTypesCache = updatedTypes;
-      
+
       return validated;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'ConfigService.addStatusType');

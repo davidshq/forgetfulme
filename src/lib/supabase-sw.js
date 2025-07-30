@@ -1,6 +1,6 @@
 /**
  * Supabase client for service worker context
- * 
+ *
  * Service workers can't use window.supabase, so we need to load
  * the UMD bundle differently or import from node_modules.
  */
@@ -14,7 +14,7 @@ try {
   createClient = supabase.createClient;
 } catch (error) {
   console.error('[ServiceWorker] Could not load Supabase client:', error);
-  
+
   // Fallback: Create a stub that shows meaningful errors
   createClient = () => {
     throw new Error('Supabase client not available in service worker context. Please configure the extension through the Options page first.');
