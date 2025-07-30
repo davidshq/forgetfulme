@@ -30,8 +30,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format:check` - Check code formatting
 - `npm run check` - Run both linting and format checking
 
-**Note**: Console statements show as warnings (not errors) and should be left in place unless explicitly requested to remove them for debugging purposes.
-
 ## Development Philosophy
 
 ### Architecture Principles
@@ -100,8 +98,9 @@ The extension includes comprehensive visual regression testing using Playwright 
 1. **Authentication**: Users authenticate via Supabase with JWT tokens stored in Chrome sync storage
 2. **Configuration**: Secure config management prevents credentials from being committed to version control
 3. **Bookmarks**: CRUD operations flow through simplified service architecture with error handling
-4. **Real-time**: Supabase real-time subscriptions for cross-device sync
+4. **Real-time**: Supabase real-time subscriptions for cross-device sync (planned feature)
 5. **Error Handling**: Centralized system with user-friendly messages and retry logic
+6. **Email Confirmation**: Dedicated confirmation flow for new user email verification
 
 ### Key Technologies
 - **Manifest V3** Chrome extension with service workers
@@ -133,26 +132,36 @@ src/
 │   ├── ServiceContainer.js     // Dependency injection
 │   ├── dom.js                  // DOM helper functions
 │   ├── formatting.js           // Display formatting
-│   └── constants.js            // Application constants
+│   ├── constants.js            // Application constants
+│   └── setupDatabase.js        // Database initialization helper
+├── lib/
+│   ├── supabase.js             // Supabase client initialization
+│   ├── supabase-js.min.js     // Bundled Supabase library
+│   └── supabase-sw.js          // Service worker Supabase bridge
+├── types/
+│   └── jsdoc-types.js          // JSDoc type definitions
 ├── ui/
 │   ├── popup.html              // Main popup interface
 │   ├── options.html            // Settings page
 │   ├── bookmark-manager.html   // Bookmark management
+│   ├── confirm.html            // Email confirmation page
 │   └── styles/
 │       ├── shared.css          // Shared styles
 │       ├── popup.css           // Popup-specific styles
 │       ├── options.css         // Options-specific styles
 │       └── bookmark-manager.css // Bookmark manager styles
 ├── background/
-│   ├── BackgroundService.js    // Service worker main
-│   ├── SyncManager.js          // Cross-device sync
-│   └── ShortcutManager.js      // Keyboard shortcuts
+│   └── BackgroundService.js    // Service worker with sync/shortcut handling
 └── main/
     ├── popup.js                // Popup initialization
     ├── options.js              // Options initialization
     ├── bookmark-manager.js     // Bookmark manager initialization
-    └── background.js           // Background script initialization
+    ├── background.js           // Background script initialization
+    ├── confirm.js              // Email confirmation handler
+    └── confirm-simple.js       // Simplified confirmation handler
 ```
+
+**Note**: Cross-device sync and keyboard shortcuts are planned features (see IMPLEMENTATION_TODO.md) currently handled within BackgroundService.js.
 
 ### Testing Strategy
 
@@ -184,6 +193,16 @@ src/
 ### Console Statement Policy
 
 Console statements are intentionally kept in the codebase for debugging purposes and should not be removed unless explicitly requested. The ESLint configuration treats `console` statements as warnings (not errors) to allow for debugging output while still being visible during linting.
+
+### Email Confirmation System
+
+The extension includes a dedicated email confirmation flow for new user registration:
+- **confirm.html**: Main confirmation page with full UI/branding
+- **confirm.js**: Handles confirmation token processing and UI updates
+- **confirm-simple.js**: Simplified handler for basic confirmation scenarios
+- **URL Pattern**: `/src/ui/confirm.html#access_token=...&type=signup`
+
+The confirmation system automatically extracts tokens from Supabase email links and updates the user's verification status.
 
 ### Common Development Patterns
 
@@ -230,7 +249,7 @@ test('popup displays correctly', async ({ page }) => {
 
 ### Development Workflow
 
-1. **Setup**: Follow DEVELOPMENT_SETUP.md for quick start
+1. **Setup**: Follow dev-docs/DEVELOPMENT_SETUP.md for quick start
 2. **Testing**: Run `npm run test:all` before committing (includes visual regression)
 3. **Visual Changes**: Use `npm run test:visual:update` to update baselines when changes are intentional
 4. **Code Quality**: Run `npm run check` to ensure linting and formatting
