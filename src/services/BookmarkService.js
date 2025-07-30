@@ -813,5 +813,4 @@ export class BookmarkService {
       console.warn('Failed to update bookmark cache:', error);
     }
   }
-
 }

@@ -78,7 +78,9 @@ export class AuthService {
       if (!this.isConfigured()) {
         const initialized = await this.initialize();
         if (!initialized) {
-          throw new Error('Supabase configuration is required. Please configure the extension in Options.');
+          throw new Error(
+            'Supabase configuration is required. Please configure the extension in Options.'
+          );
         }
       }
 
@@ -138,11 +140,12 @@ export class AuthService {
 
       // Handle email confirmation requirement
       // Check both possible fields for email verification status
-      const emailNotConfirmed = response.data.user && (
-        response.data.user.email_confirmed_at === null ||
-        response.data.user.email_confirmed_at === undefined ||
-        (response.data.user.user_metadata && response.data.user.user_metadata.email_verified === false)
-      );
+      const emailNotConfirmed =
+        response.data.user &&
+        (response.data.user.email_confirmed_at === null ||
+          response.data.user.email_confirmed_at === undefined ||
+          (response.data.user.user_metadata &&
+            response.data.user.user_metadata.email_verified === false));
 
       if (!response.data.session && response.data.user && emailNotConfirmed) {
         // Email confirmation required - handle through extension UI
@@ -451,10 +454,10 @@ export class AuthService {
       isAuthenticated: this.isAuthenticated(),
       user: this.currentUser
         ? {
-          id: this.currentUser.id,
-          email: this.currentUser.email,
-          expires_at: this.currentUser.expires_at
-        }
+            id: this.currentUser.id,
+            email: this.currentUser.email,
+            expires_at: this.currentUser.expires_at
+          }
         : null,
       hasSupabaseConfig: this.supabaseClient !== null
     };

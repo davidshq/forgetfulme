@@ -369,7 +369,11 @@ export class PopupController extends BaseController {
 
       // Ensure statusTypes is an array
       if (!Array.isArray(this.statusTypes)) {
-        console.warn('[PopupController] statusTypes is not an array:', typeof this.statusTypes, this.statusTypes);
+        console.warn(
+          '[PopupController] statusTypes is not an array:',
+          typeof this.statusTypes,
+          this.statusTypes
+        );
         this.statusTypes = [];
       }
 
@@ -468,9 +472,9 @@ export class PopupController extends BaseController {
       status: formData.status,
       tags: formData.tags
         ? formData.tags
-          .split(',')
-          .map(t => t.trim())
-          .filter(t => t)
+            .split(',')
+            .map(t => t.trim())
+            .filter(t => t)
         : [],
       description: formData.notes || ''
     };

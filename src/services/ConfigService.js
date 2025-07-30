@@ -81,8 +81,10 @@ export class ConfigService {
 
       if (SUPABASE_CONFIG && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
         // Check if it's been configured (not placeholder values)
-        if (SUPABASE_CONFIG.url !== 'https://your-project-id.supabase.co' &&
-            SUPABASE_CONFIG.anonKey !== 'your-anon-key-here') {
+        if (
+          SUPABASE_CONFIG.url !== 'https://your-project-id.supabase.co' &&
+          SUPABASE_CONFIG.anonKey !== 'your-anon-key-here'
+        ) {
           return {
             supabaseUrl: SUPABASE_CONFIG.url,
             supabaseAnonKey: SUPABASE_CONFIG.anonKey
@@ -233,7 +235,7 @@ export class ConfigService {
    */
   async addStatusType(statusType) {
     try {
-      const currentTypes = await this.storageService.get('status_types') || [];
+      const currentTypes = (await this.storageService.get('status_types')) || [];
 
       // Validate new status type
       const validation = this.validationService.validateStatusType(statusType);
@@ -294,7 +296,7 @@ export class ConfigService {
    */
   async removeStatusType(id) {
     try {
-      const currentTypes = await this.storageService.get('status_types') || [];
+      const currentTypes = (await this.storageService.get('status_types')) || [];
       const typeToRemove = currentTypes.find(type => type.id === id);
 
       if (!typeToRemove) {

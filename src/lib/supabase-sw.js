@@ -17,7 +17,9 @@ try {
 
   // Fallback: Create a stub that shows meaningful errors
   createClient = () => {
-    throw new Error('Supabase client not available in service worker context. Please configure the extension through the Options page first.');
+    throw new Error(
+      'Supabase client not available in service worker context. Please configure the extension through the Options page first.'
+    );
   };
 }
 

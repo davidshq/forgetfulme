@@ -34,7 +34,10 @@ export async function setupDatabase() {
     }
 
     // Check if we have an authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser();
     if (authError || !user) {
       throw new Error('You must be signed in to setup the database');
     }
@@ -152,14 +155,13 @@ export async function setupDatabase() {
     // We need to check if tables exist and create them using the REST API
 
     // Check if bookmarks table exists by trying to query it
-    const { error: bookmarksError } = await supabase
-      .from('bookmarks')
-      .select('id')
-      .limit(1);
+    const { error: bookmarksError } = await supabase.from('bookmarks').select('id').limit(1);
 
     if (bookmarksError && bookmarksError.code === '42P01') {
       console.log('Bookmarks table does not exist');
-      throw new Error('Database tables do not exist. Please run the SQL schema in Supabase dashboard.');
+      throw new Error(
+        'Database tables do not exist. Please run the SQL schema in Supabase dashboard.'
+      );
     }
 
     // If we get here, tables exist - let's verify they're working
@@ -195,7 +197,6 @@ export async function setupDatabase() {
       statusTypes: statusTypes.length,
       message: 'Database is ready to use'
     };
-
   } catch (error) {
     console.error('Database setup error:', error);
     throw error;
@@ -221,13 +222,12 @@ export async function createTablesManually() {
 
     throw new Error(
       'Automatic table creation requires database admin access. ' +
-      'Please run the SQL schema in Supabase dashboard:\n\n' +
-      '1. Go to Supabase Dashboard\n' +
-      '2. Navigate to SQL Editor\n' +
-      '3. Copy the schema from database/schema.sql\n' +
-      '4. Run the SQL'
+        'Please run the SQL schema in Supabase dashboard:\n\n' +
+        '1. Go to Supabase Dashboard\n' +
+        '2. Navigate to SQL Editor\n' +
+        '3. Copy the schema from database/schema.sql\n' +
+        '4. Run the SQL'
     );
-
   } catch (error) {
     console.error('Manual table creation error:', error);
     throw error;

@@ -41,7 +41,11 @@ export class StorageService {
       }
 
       // Check for missing Chrome storage API (test scenario)
-      if (!chrome.storage || (useSync && !chrome.storage.sync) || (!useSync && !chrome.storage.local)) {
+      if (
+        !chrome.storage ||
+        (useSync && !chrome.storage.sync) ||
+        (!useSync && !chrome.storage.local)
+      ) {
         throw new Error('Chrome storage API not available');
       }
 
@@ -123,7 +127,8 @@ export class StorageService {
 
       // Check data size
       const dataString = JSON.stringify(data);
-      if (dataString.length > 8192) { // Chrome sync storage limit per item
+      if (dataString.length > 8192) {
+        // Chrome sync storage limit per item
         throw new Error('Data too large for storage');
       }
 
@@ -136,8 +141,11 @@ export class StorageService {
       });
     } catch (error) {
       // For specific Chrome storage API errors, pass through for test compatibility
-      if (error.message === 'QUOTA_EXCEEDED' || error.message === 'Data too large for storage' ||
-          error.message === 'Cannot store circular references') {
+      if (
+        error.message === 'QUOTA_EXCEEDED' ||
+        error.message === 'Data too large for storage' ||
+        error.message === 'Cannot store circular references'
+      ) {
         throw error;
       }
       const errorInfo = this.errorService.handle(error, 'StorageService.set');
@@ -544,10 +552,7 @@ export class StorageService {
         return 0;
       };
 
-      const [syncUsage, localUsage] = await Promise.all([
-        getSyncUsage(),
-        getLocalUsage()
-      ]);
+      const [syncUsage, localUsage] = await Promise.all([getSyncUsage(), getLocalUsage()]);
 
       return {
         sync: {

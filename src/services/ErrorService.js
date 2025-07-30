@@ -53,8 +53,19 @@ export class ErrorService {
     }
 
     // Check database context - if context suggests database operation, prioritize database categorization
-    if (context && (context.includes('BookmarkService') || context.includes('database') || context.includes('Database'))) {
-      if (this.isDatabaseError(error, errorMessage) || (errorMessage.toLowerCase().includes('timeout') && !this.isConfigError(error, errorMessage)) || (errorMessage.toLowerCase().includes('connection') && !this.isConfigError(error, errorMessage))) {
+    if (
+      context &&
+      (context.includes('BookmarkService') ||
+        context.includes('database') ||
+        context.includes('Database'))
+    ) {
+      if (
+        this.isDatabaseError(error, errorMessage) ||
+        (errorMessage.toLowerCase().includes('timeout') &&
+          !this.isConfigError(error, errorMessage)) ||
+        (errorMessage.toLowerCase().includes('connection') &&
+          !this.isConfigError(error, errorMessage))
+      ) {
         return {
           category: ERROR_CATEGORIES.DATABASE,
           severity: ERROR_SEVERITY.HIGH,
@@ -71,18 +82,17 @@ export class ErrorService {
     }
 
     // Storage errors (check before network to avoid confusion)
-    if (this.isStorageError(error, errorMessage) || (context && context.includes('StorageService'))) {
+    if (
+      this.isStorageError(error, errorMessage) ||
+      (context && context.includes('StorageService'))
+    ) {
       return {
         category: ERROR_CATEGORIES.STORAGE,
         severity: ERROR_SEVERITY.MEDIUM,
         message: 'Storage error occurred. Please free up space and try again.',
         code: errorCode,
         retryable: true,
-        actions: [
-          'Clear browser data or cache',
-          'Try again',
-          'Free up storage space'
-        ]
+        actions: ['Clear browser data or cache', 'Try again', 'Free up storage space']
       };
     }
 
@@ -189,7 +199,12 @@ export class ErrorService {
       message: 'An unexpected error occurred. Please try again.',
       code: errorCode,
       retryable: true,
-      actions: ['Try again', 'Try refreshing the page', 'Reload the page', 'Contact support with error code']
+      actions: [
+        'Try again',
+        'Try refreshing the page',
+        'Reload the page',
+        'Contact support with error code'
+      ]
     };
   }
 
@@ -260,8 +275,10 @@ export class ErrorService {
     ];
 
     const lowerMessage = message.toLowerCase();
-    return rateLimitIndicators.some(indicator => lowerMessage.includes(indicator)) ||
-           (error && error.status === 429);
+    return (
+      rateLimitIndicators.some(indicator => lowerMessage.includes(indicator)) ||
+      (error && error.status === 429)
+    );
   }
 
   /**
@@ -426,9 +443,9 @@ export class ErrorService {
       original:
         originalError instanceof Error
           ? {
-            message: originalError.message,
-            stack: originalError.stack
-          }
+              message: originalError.message,
+              stack: originalError.stack
+            }
           : { message: String(originalError) }
     };
 

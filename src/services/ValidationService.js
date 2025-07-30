@@ -221,7 +221,9 @@ export class ValidationService {
 
       // Validate tag format
       if (!this.isValidTag(sanitized)) {
-        errors.push(`Tag "${tag}" contains invalid characters. Use only letters, numbers, and hyphens.`);
+        errors.push(
+          `Tag "${tag}" contains invalid characters. Use only letters, numbers, and hyphens.`
+        );
         continue;
       }
 
@@ -320,7 +322,10 @@ export class ValidationService {
 
     // Validate status (optional, defaults to 'unread')
     if (bookmarkData.status) {
-      const statusResult = this.validateStatus(bookmarkData.status, validStatuses || ['unread', 'reading', 'read', 'archived']);
+      const statusResult = this.validateStatus(
+        bookmarkData.status,
+        validStatuses || ['unread', 'reading', 'read', 'archived']
+      );
       if (!statusResult.isValid) {
         errors.push(...statusResult.errors);
       } else {
@@ -403,7 +408,11 @@ export class ValidationService {
     });
 
     // Validate date range
-    if (validatedOptions.dateFrom && validatedOptions.dateTo && validatedOptions.dateFrom > validatedOptions.dateTo) {
+    if (
+      validatedOptions.dateFrom &&
+      validatedOptions.dateTo &&
+      validatedOptions.dateFrom > validatedOptions.dateTo
+    ) {
       errors.push('Date from cannot be after date to');
     }
 
@@ -480,7 +489,8 @@ export class ValidationService {
       return String(input);
     }
     // Remove HTML tags completely including script content, then trim
-    return input.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    return input
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<[^>]*>/g, '')
       .trim();
   }
@@ -623,8 +633,10 @@ export class ValidationService {
       urlObj.hostname = urlObj.hostname.toLowerCase();
 
       // Remove default ports
-      if ((urlObj.protocol === 'https:' && urlObj.port === '443') ||
-          (urlObj.protocol === 'http:' && urlObj.port === '80')) {
+      if (
+        (urlObj.protocol === 'https:' && urlObj.port === '443') ||
+        (urlObj.protocol === 'http:' && urlObj.port === '80')
+      ) {
         urlObj.port = '';
       }
 

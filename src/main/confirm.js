@@ -70,7 +70,10 @@ async function initializeConfirmation() {
     const supabaseClient = createSupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
 
     // Get user with the access token
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(accessToken);
+    const {
+      data: { user },
+      error: userError
+    } = await supabaseClient.auth.getUser(accessToken);
 
     if (userError || !user) {
       showError('Failed to get user details');
@@ -85,7 +88,6 @@ async function initializeConfirmation() {
 
     // Show success
     showState('success');
-
   } catch (error) {
     console.error('Confirmation error:', error);
     showError(error.message || 'An unexpected error occurred');
@@ -131,7 +133,9 @@ function setupEventListeners() {
     openPopupButton.addEventListener('click', () => {
       // Can't open popup programmatically from a web page
       // Instead, show instructions
-      alert('Email confirmed! Click the ForgetfulMe extension icon in your browser toolbar to sign in.');
+      alert(
+        'Email confirmed! Click the ForgetfulMe extension icon in your browser toolbar to sign in.'
+      );
       // Close this tab
       window.close();
     });

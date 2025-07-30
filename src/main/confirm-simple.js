@@ -62,7 +62,6 @@ async function initializeConfirmation() {
 
     console.log('Session stored successfully!');
     showSuccess();
-
   } catch (error) {
     console.error('Confirmation error:', error);
     showError(error.message || 'Failed to confirm email');
