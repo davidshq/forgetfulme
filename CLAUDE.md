@@ -4,25 +4,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-### Testing
-- `npm test` - Run unit tests with Vitest
-- `npm run test:unit:ui` - Run unit tests with Vitest UI
-- `npm run test:unit:coverage` - Run unit tests with coverage report
-- `npm run test:playwright` - Run integration tests with Playwright
-- `npm run test:playwright:headed` - Run Playwright tests in headed mode
-- `npm run test:playwright:debug` - Debug Playwright tests
-- `npm run test:playwright:ui` - Run Playwright tests with UI mode
-- `npm run test:visual` - Run visual regression tests  
-- `npm run test:visual:simple` - Run basic visual baseline tests
-- `npm run test:visual:update` - Update visual regression baselines
-- `npm run test:all` - Run all tests (unit + integration + visual)
-- `npm run install-browsers` - Install Playwright browsers (Chromium)
-
-**Testing Strategy:**
-- **Run targeted tests during development**: Use `npm test -- tests/unit/services/SpecificService.test.js` to run only relevant tests when debugging specific issues
-- **Run full test suite only when complete**: Use `npm run test:all` only when features are implemented and ready for comprehensive validation
-- **Reason**: ErrorService and other components log extensively for debugging, making full test suite output very verbose
-
 ### Code Quality
 - `npm run lint` - Lint code with ESLint
 - `npm run lint:fix` - Fix ESLint issues automatically
@@ -51,10 +32,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Alternative libraries**: May recommend better fit if justified
 - **Progressive enhancement**: Static HTML foundation enhanced with JavaScript
 
-### Testing Requirements
-- **Unit tests**: Create Vitest tests when adding functionality - tests must pass before task completion
-- **Integration tests**: Use Playwright for cross-component testing
-- **Visual regression tests**: Critical for AI to "see" changes and match intended styling/layout
+### Testing Approach
+See Comprehensive Testing Protocol section for all testing requirements and commands.
 
 ### Documentation Standards
 - **JSDoc comments**: Required for all functions, focus on what functions do rather than implementation details
@@ -85,13 +64,8 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - Minimal custom CSS - leverages Pico's built-in responsive design and spacing
 - CSS variables for consistent theming and customization
 
-### Visual Regression Testing
-
-The extension includes comprehensive visual regression testing using Playwright screenshots:
-- **Automated Screenshots**: Capture UI states during tests
-- **Visual Comparisons**: Pixel-perfect diff detection  
-- **Before/After Views**: See exactly what changed in test reports
-- **State Coverage**: Screenshots of loading, error, success states
+### Testing
+See Comprehensive Testing Protocol section for complete testing documentation.
 
 ### Data Flow
 
@@ -163,7 +137,43 @@ src/
 
 **Note**: Cross-device sync and keyboard shortcuts are planned features (see IMPLEMENTATION_TODO.md) currently handled within BackgroundService.js.
 
-### Testing Strategy
+## **Comprehensive Testing Protocol**
+
+### **Testing Commands**
+
+**Unit Testing:**
+- `npm test` - Run unit tests with Vitest
+- `npm run test:unit:ui` - Run unit tests with Vitest UI
+- `npm run test:unit:coverage` - Run unit tests with coverage report
+
+**Integration Testing:**
+- `npm run test:playwright` - Run integration tests with Playwright
+- `npm run test:playwright:headed` - Run Playwright tests in headed mode
+- `npm run test:playwright:debug` - Debug Playwright tests
+- `npm run test:playwright:ui` - Run Playwright tests with UI mode
+
+**Visual Regression Testing:**
+- `npm run test:visual` - Run visual regression tests  
+- `npm run test:visual:simple` - Run basic visual baseline tests
+- `npm run test:visual:update` - Update visual regression baselines
+
+**Combined Testing:**
+- `npm run test:all` - Run all tests (unit + integration + visual)
+- `npm run install-browsers` - Install Playwright browsers (Chromium)
+
+### **Testing Strategy**
+
+- **Run targeted tests during development**: Use `npm test -- tests/unit/services/SpecificService.test.js` to run only relevant tests when debugging specific issues
+- **Run full test suite only when complete**: Use `npm run test:all` only when features are implemented and ready for comprehensive validation
+- **Reason**: ErrorService and other components log extensively for debugging, making full test suite output very verbose
+
+### **Testing Requirements**
+
+- **Unit tests**: Create Vitest tests when adding functionality - tests must pass before task completion
+- **Integration tests**: Use Playwright for cross-component testing
+- **Visual regression tests**: Critical for AI to "see" changes and match intended styling/layout
+
+### **Testing Structure**
 
 **Behavior-Focused Unit Tests** (`tests/unit/`):
 - Test real user workflows and component behavior
@@ -178,9 +188,16 @@ src/
 
 **Visual Regression Tests** (`tests/visual/`):
 - Screenshot testing for all UI states
-- Automatic detection of visual changes
+- Automatic detection of visual changes with pixel-perfect diff detection
 - Before/after comparisons in test reports
 - Coverage of responsive design and error states
+- Screenshots of loading, error, success states
+
+**Test Organization:**
+- **`tests/visual/simple-visual.test.js`**: Quick baseline tests for development
+- **`tests/visual/popup-visual.test.js`**: Comprehensive popup UI states
+- **`tests/visual/options-visual.test.js`**: Options page scenarios
+- **`tests/visual/bookmark-manager-visual.test.js`**: Bookmark manager states
 
 ### Security Considerations
 
@@ -290,9 +307,7 @@ test('popup displays correctly', async ({ page }) => {
 ❌ Fix multiple UI issues and authentication problems
 ```
 
-## **CRITICAL: When to Run Tests**
-
-### **Always Run These Commands When Making Changes:**
+### **When to Run Tests - CRITICAL**
 
 **For ANY code changes:**
 ```bash
@@ -312,71 +327,9 @@ npm run test:all              # All tests including visual
 npm run test:all              # Complete test suite (REQUIRED)
 ```
 
-### **Automatic Visual Regression Testing Protocol**
+### **Claude Code Testing Automation Requirements**
 
-**Claude Code MUST automatically run visual tests in these scenarios:**
-
-1. **Before making any UI/CSS changes**: Run `npm run test:visual:simple` to establish current baseline
-2. **After making UI/CSS changes**: Run `npm run test:visual:simple` to detect visual changes
-3. **When adding new UI components**: Create corresponding visual tests immediately
-4. **When modifying existing components**: Update visual tests to cover new states/variations
-5. **Before completing any styling task**: Run full visual regression suite to ensure no regressions
-
-**Test Coverage Requirements:**
-- **Every UI state must have a visual test**: loading, error, success, empty, populated
-- **Responsive breakpoints**: mobile, tablet, desktop views for each component
-- **Theme variations**: light mode, dark mode, high contrast
-- **Interactive states**: hover, focus, active, disabled states
-- **Form states**: empty, filled, validation errors, success messages
-
-### **Visual Regression Testing is CRITICAL**
-
-- **ALWAYS run visual tests** when changing CSS, HTML, or UI JavaScript
-- **Review screenshot diffs carefully** in test reports before approving changes
-- **Update baselines intentionally** only when visual changes are desired:
-  ```bash
-  npm run test:visual:update    # Only after confirming changes are correct
-  ```
-- **Visual tests prevent UI regressions** that are hard to catch manually
-- **Check the HTML test report** to see before/after visual comparisons
-
-### **Test Failure Response Protocol**
-
-If tests fail:
-1. **DON'T ignore test failures** - they often catch real issues
-2. **For visual test failures**: 
-   - Open the HTML test report to see visual diffs
-   - Verify if changes are intentional or bugs
-   - Only update baselines if changes are correct
-3. **For unit test failures**: Fix the logic issue before proceeding
-4. **For lint failures**: Run `npm run lint:fix` to auto-fix, then review changes
-5. **For integration test failures**: Debug with `npm run test:playwright:debug`
-
-### **Before Making UI Changes**
-
-1. **Run baseline tests first**: `npm run test:visual` 
-2. **Make your changes**
-3. **Run visual tests again**: `npm run test:visual`
-4. **Review diffs in test report** (usually `playwright-report/index.html`)
-5. **If changes look correct**: `npm run test:visual:update`
-6. **If changes look wrong**: Fix the issue and repeat
-
-### Important Notes
-
-- **JSDoc is required** for all public APIs and service interfaces
-- **Visual regression tests must pass** - update baselines only when changes are intentional
-- **Follow dependency injection pattern** for all services
-- **Use centralized error handling** - never throw raw errors to users
-- **Maintain CSP compliance** - no external scripts or eval()
-- **Test behavior, not implementation** - focus on user workflows
-
----
-
-## **Automated Testing Protocol for Claude Code**
-
-### **MANDATORY: Claude Code Automation Requirements**
-
-**Claude Code MUST automatically perform these actions:**
+**MANDATORY actions Claude Code must perform:**
 
 1. **Before making any UI/CSS changes:**
    ```bash
@@ -402,27 +355,55 @@ If tests fail:
    - Update visual tests to cover new states/variations
    - Ensure no regression in existing functionality
 
-6. **Test Coverage Requirements:**
-   - Every UI state must have a visual test
-   - Responsive breakpoints: mobile (320px), tablet (768px), desktop (1200px+)
-   - Theme variations: light mode, dark mode
-   - Interactive states: hover, focus, active, disabled
-   - Form states: empty, filled, validation errors, success messages
-   - Loading states, error states, empty states, populated states
-
-7. **Before completing any task involving UI changes:**
+6. **Before completing any task involving UI changes:**
    ```bash
    npm run test:all           # Full test suite
    ```
 
-### **Visual Test Organization**
+### **Visual Test Coverage Requirements**
 
-- **`tests/visual/simple-visual.test.js`**: Quick baseline tests for development
-- **`tests/visual/popup-visual.test.js`**: Comprehensive popup UI states
-- **`tests/visual/options-visual.test.js`**: Options page scenarios
-- **`tests/visual/bookmark-manager-visual.test.js`**: Bookmark manager states
+- **Every UI state must have a visual test**: loading, error, success, empty, populated
+- **Responsive breakpoints**: mobile (320px), tablet (768px), desktop (1200px+)
+- **Theme variations**: light mode, dark mode
+- **Interactive states**: hover, focus, active, disabled
+- **Form states**: empty, filled, validation errors, success messages
+- **Loading states, error states, empty states, populated states**
 
-**Claude Code must maintain and expand these test suites as the UI evolves.**
+### **Test Failure Response Protocol**
+
+If tests fail:
+1. **DON'T ignore test failures** - they often catch real issues
+2. **For visual test failures**: 
+   - Open the HTML test report to see visual diffs
+   - Verify if changes are intentional or bugs
+   - Only update baselines if changes are correct
+3. **For unit test failures**: Fix the logic issue before proceeding
+4. **For lint failures**: Run `npm run lint:fix` to auto-fix, then review changes
+5. **For integration test failures**: Debug with `npm run test:playwright:debug`
+
+### **Visual Testing Workflow**
+
+1. **Run baseline tests first**: `npm run test:visual` 
+2. **Make your changes**
+3. **Run visual tests again**: `npm run test:visual`
+4. **Review diffs in test report** (usually `playwright-report/index.html`)
+5. **If changes look correct**: `npm run test:visual:update`
+6. **If changes look wrong**: Fix the issue and repeat
+
+**Key Points:**
+- **ALWAYS run visual tests** when changing CSS, HTML, or UI JavaScript
+- **Review screenshot diffs carefully** in test reports before approving changes
+- **Update baselines intentionally** only when visual changes are desired
+- **Visual tests prevent UI regressions** that are hard to catch manually
+
+### Important Notes
+
+- **JSDoc is required** for all public APIs and service interfaces
+- **Visual regression tests must pass** - update baselines only when changes are intentional
+- **Follow dependency injection pattern** for all services
+- **Use centralized error handling** - never throw raw errors to users
+- **Maintain CSP compliance** - no external scripts or eval()
+- **Test behavior, not implementation** - focus on user workflows
 
 ---
 
