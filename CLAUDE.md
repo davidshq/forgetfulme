@@ -236,6 +236,41 @@ test('popup displays correctly', async ({ page }) => {
 4. **Code Quality**: Run `npm run check` to ensure linting and formatting
 5. **Debugging**: Use `npm run test:playwright:debug` for integration test debugging
 
+### **CRITICAL: Work on One Problem at a Time**
+
+**Claude Code MUST follow this incremental development approach:**
+
+- **Work on ONE logical unit of work at a time** - complete each feature/fix fully before moving to the next
+- **Each unit of work should result in ONE git commit** - this makes the change history clear and allows for easy rollbacks
+- **Exception: Super simple bug fixes** - only combine multiple trivial fixes (like typos, formatting) into a single commit
+- **Never batch unrelated changes** - UI changes, logic fixes, and new features should be separate commits
+- **Complete the full cycle for each change**:
+  1. Make the change
+  2. Run tests (`npm run check`, visual tests if UI changes)
+  3. Verify the fix works
+  4. Commit the change with a descriptive message
+  5. THEN move to the next item
+
+**Benefits of this approach:**
+- **Clear change history** - easy to understand what each commit does
+- **Easy rollbacks** - can revert specific changes without affecting others
+- **Better testing** - each change is verified independently
+- **Reduced conflicts** - smaller, focused changes are less likely to cause issues
+- **Easier debugging** - problems can be traced to specific commits
+
+**Example of good commit sequence:**
+```
+✅ Fix authentication state persistence in bookmark manager
+✅ Update search bar layout proportions in bookmark manager  
+✅ Add expandable error messages for authentication
+✅ Replace forgot password prompt with popup window
+```
+
+**Example of bad approach:**
+```
+❌ Fix multiple UI issues and authentication problems
+```
+
 ## **CRITICAL: When to Run Tests**
 
 ### **Always Run These Commands When Making Changes:**
