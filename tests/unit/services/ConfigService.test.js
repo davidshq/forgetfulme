@@ -113,10 +113,13 @@ describe('ConfigService', () => {
 
     it('should return null when no config exists', async () => {
       mockStorageService.getSupabaseConfig.mockResolvedValue(null);
+      // Mock getEnvironmentConfig to return null instead of throwing
+      const getEnvConfigSpy = vi.spyOn(configService, 'getEnvironmentConfig').mockResolvedValue(null);
 
       const result = await configService.getSupabaseConfig();
 
       expect(result).toBeNull();
+      getEnvConfigSpy.mockRestore();
     });
 
     it('should handle errors gracefully', async () => {

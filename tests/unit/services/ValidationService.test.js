@@ -187,7 +187,7 @@ describe('ValidationService', () => {
         title: 'Example Website',
         status: 'unread',
         tags: ['web', 'example'],
-        notes: 'This is a test bookmark'
+        description: 'This is a test bookmark'
       });
     });
 

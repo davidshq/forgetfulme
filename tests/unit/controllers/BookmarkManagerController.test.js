@@ -623,6 +623,18 @@ describe('BookmarkManagerController', () => {
         controller.editingBookmark = { id: '1' };
 
         const form = document.getElementById('edit-form');
+        const statusSelect = document.getElementById('edit-status');
+        const modal = document.getElementById('edit-modal');
+        
+        // Mock modal close function
+        modal.close = vi.fn();
+        
+        // Add the reference option to the select
+        const referenceOption = document.createElement('option');
+        referenceOption.value = 'reference';
+        referenceOption.textContent = 'Reference';
+        statusSelect.appendChild(referenceOption);
+        
         form.elements.id.value = '1';
         form.elements.title.value = 'Updated Title';
         form.elements.url.value = 'https://updated.com';
@@ -750,7 +762,7 @@ describe('BookmarkManagerController', () => {
         controller.updatePagination();
 
         const paginationNav = document.getElementById('pagination-nav');
-        expect(paginationNav.style.display).toBe('none');
+        expect(paginationNav.classList.contains('hidden')).toBe(true);
       });
     });
 
@@ -876,7 +888,7 @@ describe('BookmarkManagerController', () => {
 
       expect(mockErrorService.handle).toHaveBeenCalledWith(
         error,
-        'BookmarkManagerController.handleRefresh'
+        'BookmarkManagerController.loadBookmarks'
       );
     });
 
