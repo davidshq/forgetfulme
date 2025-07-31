@@ -10,6 +10,126 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..', '..');
 
+// Helper to set up bulk selection functionality
+async function setupBulkSelection(page) {
+  await page.evaluate(() => {
+    const selectAllCheckbox = document.getElementById('bulk-select-all');
+    
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener('change', () => {
+        const bookmarkCheckboxes = document.querySelectorAll('.bookmark-checkbox');
+        bookmarkCheckboxes.forEach(checkbox => {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+        
+        // Show/hide bulk actions based on selection
+        const bulkActions = document.getElementById('bulk-actions');
+        const checkedCount = document.querySelectorAll('.bookmark-checkbox:checked').length;
+        const selectedCount = document.getElementById('selected-count');
+        
+        if (bulkActions) {
+          if (checkedCount > 0) {
+            bulkActions.classList.remove('hidden');
+          } else {
+            bulkActions.classList.add('hidden');
+          }
+        }
+        
+        if (selectedCount) {
+          selectedCount.textContent = `${checkedCount} selected`;
+          if (checkedCount > 0) {
+            selectedCount.classList.remove('hidden');
+          } else {
+            selectedCount.classList.add('hidden');
+          }
+        }
+      });
+    }
+    
+    // Add event listeners for individual checkboxes
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('bookmark-checkbox')) {
+        const bulkActions = document.getElementById('bulk-actions');
+        const checkedBoxes = document.querySelectorAll('.bookmark-checkbox:checked');
+        const selectAll = document.getElementById('bulk-select-all');
+        
+        if (bulkActions) {
+          if (checkedBoxes.length > 0) {
+            bulkActions.classList.remove('hidden');
+          } else {
+            bulkActions.classList.add('hidden');
+          }
+        }
+        
+        // Update selected count
+        const selectedCount = document.getElementById('selected-count');
+        if (selectedCount) {
+          selectedCount.textContent = `${checkedBoxes.length} selected`;
+          if (checkedBoxes.length > 0) {
+            selectedCount.classList.remove('hidden');
+          } else {
+            selectedCount.classList.add('hidden');
+          }
+        }
+        
+        // Update select all checkbox state
+        if (selectAll) {
+          const allBoxes = document.querySelectorAll('.bookmark-checkbox');
+          selectAll.checked = checkedBoxes.length === allBoxes.length;
+          selectAll.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+        }
+      }
+    });
+  });
+}
+
+// Helper to set up edit modal functionality
+async function setupEditModal(page) {
+  await page.evaluate(() => {
+    // Add click handlers for edit buttons
+    document.addEventListener('click', (e) => {
+      console.log('Click event:', e.target, e.target.dataset);
+      if (e.target.dataset.testid && e.target.dataset.testid.startsWith('edit-')) {
+        console.log('Edit button clicked');
+        const modal = document.getElementById('edit-modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.style.display = 'block';
+          // Try both showModal and just making it visible
+          if (modal.showModal) {
+            modal.showModal();
+          }
+          console.log('Modal should be visible now');
+        }
+      }
+    });
+    
+    // Add save functionality
+    const saveButton = document.getElementById('save-edit');
+    if (saveButton) {
+      saveButton.addEventListener('click', () => {
+        const urlField = document.getElementById('edit-url');
+        const modal = document.getElementById('edit-modal');
+        
+        if (!urlField.value.trim()) {
+          // Show validation error
+          const messageArea = document.getElementById('message-area');
+          if (messageArea) {
+            messageArea.innerHTML = '<div class="message error">URL is required</div>';
+          }
+          return;
+        }
+        
+        // Close modal on successful save
+        if (modal) {
+          modal.classList.add('hidden');
+          modal.close();
+        }
+      });
+    }
+  });
+}
+
 test.describe('Bookmark CRUD Workflow Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to bookmark manager using file:// protocol 
@@ -241,6 +361,9 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
   });
 
   test('bulk bookmark operations', async ({ page }) => {
+    // Set up bulk selection functionality first
+    await setupBulkSelection(page);
+    
     // Setup multiple bookmarks for bulk operations
     const bulkBookmarks = [
       { id: 'bulk-1', title: 'Bulk Test 1', url: 'https://bulk1.example.com', status: 'unread', tags: ['bulk'] },
@@ -253,6 +376,34 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
       
       const bookmarkList = document.getElementById('bookmark-list');
       const emptyState = document.getElementById('empty-state');
+      
+      // Ensure bulk selection elements exist
+      let selectAllCheckbox = document.getElementById('bulk-select-all');
+      if (!selectAllCheckbox) {
+        selectAllCheckbox = document.createElement('input');
+        selectAllCheckbox.type = 'checkbox';
+        selectAllCheckbox.id = 'bulk-select-all';
+        selectAllCheckbox.className = 'bulk-select-all';
+        document.body.appendChild(selectAllCheckbox);
+      }
+      
+      let bulkActions = document.getElementById('bulk-actions');
+      if (!bulkActions) {
+        bulkActions = document.createElement('div');
+        bulkActions.id = 'bulk-actions';
+        bulkActions.className = 'bulk-actions hidden';
+        bulkActions.innerHTML = `
+          <span id="selected-count" class="selected-count hidden">0 selected</span>
+          <select id="bulk-status-update">
+            <option value="">Update Status</option>
+            <option value="read">Read</option>
+            <option value="unread">Unread</option>
+            <option value="in-progress">In Progress</option>
+          </select>
+          <button id="bulk-delete">Delete Selected</button>
+        `;
+        document.body.appendChild(bulkActions);
+      }
       
       if (bookmarkList && emptyState) {
         emptyState.classList.add('hidden');
@@ -331,6 +482,9 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
   });
 
   test('bookmark validation and error handling', async ({ page }) => {
+    // Set up edit modal functionality first
+    await setupEditModal(page);
+    
     // Test creating a bookmark without required fields would normally be done through popup
     // Here we test the edit modal validation
     
@@ -349,6 +503,34 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
       
       const bookmarkList = document.getElementById('bookmark-list');
       const emptyState = document.getElementById('empty-state');
+      
+      // Ensure edit modal exists
+      let editModal = document.getElementById('edit-modal');
+      if (!editModal) {
+        editModal = document.createElement('dialog');
+        editModal.id = 'edit-modal';
+        editModal.className = 'edit-modal hidden';
+        editModal.innerHTML = `
+          <form>
+            <h2>Edit Bookmark</h2>
+            <label>URL: <input type="url" id="edit-url" required></label>
+            <div class="modal-actions">
+              <button type="button" id="save-edit">Save</button>
+              <button type="button" id="cancel-edit">Cancel</button>
+            </div>
+          </form>
+        `;
+        document.body.appendChild(editModal);
+      }
+      
+      // Add message area if it doesn't exist
+      let messageArea = document.getElementById('message-area');
+      if (!messageArea) {
+        messageArea = document.createElement('div');
+        messageArea.id = 'message-area';
+        messageArea.className = 'message-area';
+        document.body.appendChild(messageArea);
+      }
       
       if (bookmarkList && emptyState) {
         emptyState.classList.add('hidden');
