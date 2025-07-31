@@ -805,9 +805,9 @@ export class BookmarkManagerController extends BaseController {
           status: formData.status,
           tags: formData.tags
             ? formData.tags
-                .split(',')
-                .map(t => t.trim())
-                .filter(t => t)
+              .split(',')
+              .map(t => t.trim())
+              .filter(t => t)
             : [],
           notes: formData.notes
         };

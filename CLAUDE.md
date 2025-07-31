@@ -32,9 +32,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Alternative libraries**: May recommend better fit if justified
 - **Progressive enhancement**: Static HTML foundation enhanced with JavaScript
 
-### Testing Approach
-See Comprehensive Testing Protocol section for all testing requirements and commands.
-
 ### Documentation Standards
 - **JSDoc comments**: Required for all functions, focus on what functions do rather than implementation details
 - **Markdown planning**: Document architectural decisions and plans
@@ -63,9 +60,6 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - Standard Pico button classes: default (primary), `secondary`, `contrast` - no custom button classes
 - Minimal custom CSS - leverages Pico's built-in responsive design and spacing
 - CSS variables for consistent theming and customization
-
-### Testing
-See Comprehensive Testing Protocol section for complete testing documentation.
 
 ### Data Flow
 
@@ -138,6 +132,8 @@ src/
 **Note**: Cross-device sync and keyboard shortcuts are planned features (see IMPLEMENTATION_TODO.md) currently handled within BackgroundService.js.
 
 ## **Comprehensive Testing Protocol**
+
+*This is the main testing reference section. All testing commands, requirements, and workflows are documented here.*
 
 ### **Testing Commands**
 

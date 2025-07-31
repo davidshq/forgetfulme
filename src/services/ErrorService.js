@@ -443,9 +443,9 @@ export class ErrorService {
       original:
         originalError instanceof Error
           ? {
-              message: originalError.message,
-              stack: originalError.stack
-            }
+            message: originalError.message,
+            stack: originalError.stack
+          }
           : { message: String(originalError) }
     };
 

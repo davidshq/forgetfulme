@@ -669,7 +669,7 @@ export class BookmarkService {
       );
     } else {
       // Create new bookmark - don't include id field
-      const { id, ...bookmarkData } = bookmark;
+      const { id: _id, ...bookmarkData } = bookmark;
       response = await fetch(`${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks`, {
         method: 'POST',
         headers: {

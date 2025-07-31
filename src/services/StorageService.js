@@ -487,7 +487,7 @@ export class StorageService {
    */
   validateData(data) {
     try {
-      const jsonString = JSON.stringify(data);
+      JSON.stringify(data);
       // Check if any functions were silently ignored (JSON.stringify converts functions to undefined)
       if (this.containsFunctions(data)) {
         throw new Error('Data must be JSON serializable');

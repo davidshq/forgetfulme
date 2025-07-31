@@ -203,7 +203,7 @@ export class ConfigService {
       this.statusTypesCache = statusTypes;
       return statusTypes;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'ConfigService.getStatusTypes');
+      this.errorService.handle(error, 'ConfigService.getStatusTypes');
       // Return defaults as fallback to avoid breaking the UI
       console.warn('[ConfigService] Failed to get status types, using defaults');
       return [...DEFAULT_STATUS_TYPES];
