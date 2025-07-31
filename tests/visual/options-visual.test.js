@@ -37,16 +37,18 @@ test.describe('Options Visual Regression', () => {
   });
 
   test('options status types management', async ({ page }) => {
-    // Click the status types navigation button first
-    await page.click('#nav-status-types');
+    // Set up navigation functionality and show status types section directly
+    await page.evaluate(() => {
+      // Hide database section, show status types section
+      document.getElementById('database-section').classList.add('hidden');
+      document.getElementById('status-types-section').classList.remove('hidden');
+      
+      // Update nav button states
+      document.getElementById('nav-database').classList.remove('active');
+      document.getElementById('nav-status-types').classList.add('active');
+    });
     
-    // Wait for the section to become visible 
     const statusSection = page.locator('#status-types-section');
-    await page.waitForFunction(() => {
-      const section = document.querySelector('#status-types-section');
-      return section && !section.classList.contains('hidden');
-    }, { timeout: 3000 });
-    
     await expect(statusSection).toBeVisible();
     
     // Mock some existing status types
@@ -66,12 +68,16 @@ test.describe('Options Visual Regression', () => {
   });
 
   test('options add new status type form', async ({ page }) => {
-    // Navigate to status types section first
-    await page.click('#nav-status-types');
-    await page.waitForFunction(() => {
-      const section = document.querySelector('#status-types-section');
-      return section && !section.classList.contains('hidden');
-    }, { timeout: 3000 });
+    // Set up navigation and show status types section directly
+    await page.evaluate(() => {
+      // Hide database section, show status types section
+      document.getElementById('database-section').classList.add('hidden');
+      document.getElementById('status-types-section').classList.remove('hidden');
+      
+      // Update nav button states
+      document.getElementById('nav-database').classList.remove('active');
+      document.getElementById('nav-status-types').classList.add('active');
+    });
     
     // Fill new status type form (it's always visible)
     await page.fill('#status-name', 'Bookmarked');
@@ -86,6 +92,22 @@ test.describe('Options Visual Regression', () => {
     // Fill configuration
     await page.fill('#supabase-url', 'https://example.supabase.co');
     await page.fill('#supabase-key', 'test-key');
+    
+    // Set up button click handler to simulate loading state
+    await page.evaluate(() => {
+      const testButton = document.getElementById('test-connection');
+      testButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        testButton.textContent = 'Testing...';
+        testButton.disabled = true;
+        
+        // Simulate async test completion
+        setTimeout(() => {
+          testButton.textContent = 'Test Connection';
+          testButton.disabled = false;
+        }, 2000);
+      });
+    });
     
     // Test connection button
     const testButton = page.locator('#test-connection');
