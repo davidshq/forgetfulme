@@ -454,10 +454,10 @@ export class AuthService {
       isAuthenticated: this.isAuthenticated(),
       user: this.currentUser
         ? {
-          id: this.currentUser.id,
-          email: this.currentUser.email,
-          expires_at: this.currentUser.expires_at
-        }
+            id: this.currentUser.id,
+            email: this.currentUser.email,
+            expires_at: this.currentUser.expires_at
+          }
         : null,
       hasSupabaseConfig: this.supabaseClient !== null
     };
