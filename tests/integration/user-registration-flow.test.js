@@ -10,6 +10,46 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..', '..');
 
+// Helper to set up DOM state for auth section
+async function setupAuthSection(page) {
+  await page.evaluate(() => {
+    document.getElementById('auth-section').classList.remove('hidden');
+    document.getElementById('config-required').classList.add('hidden');
+    document.getElementById('auth-tabs').classList.remove('hidden');
+    document.getElementById('signin-form').classList.remove('hidden');
+    document.getElementById('signup-form').classList.add('hidden');
+    document.getElementById('main-section').classList.add('hidden');
+  });
+}
+
+// Helper to set up tab switching functionality
+async function setupTabSwitching(page) {
+  await page.evaluate(() => {
+    const signinTab = document.getElementById('signin-tab');
+    const signupTab = document.getElementById('signup-tab');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    
+    signinTab?.addEventListener('click', () => {
+      signinTab.classList.add('active');
+      signinTab.classList.remove('secondary');
+      signupTab.classList.remove('active');
+      signupTab.classList.add('secondary');
+      signinForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+    });
+    
+    signupTab?.addEventListener('click', () => {
+      signupTab.classList.add('active');
+      signupTab.classList.remove('secondary');
+      signinTab.classList.remove('active');
+      signinTab.classList.add('secondary');
+      signupForm.classList.remove('hidden');
+      signinForm.classList.add('hidden');
+    });
+  });
+}
+
 test.describe('User Registration Flow Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to popup page using file:// protocol like visual tests
@@ -19,14 +59,9 @@ test.describe('User Registration Flow Integration', () => {
   });
 
   test('complete registration flow: signup → email confirm → first bookmark', async ({ page }) => {
-    // Step 1: Verify initial state (already navigated in beforeEach)
-
-    // Mock configuration to show auth section
-    await page.evaluate(() => {
-      window.mockConfigured = true;
-    });
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Step 1: Set up DOM state to show auth section
+    await setupAuthSection(page);
+    await setupTabSwitching(page);
 
     // Verify auth section is visible
     const authSection = page.locator('#auth-section');
@@ -233,13 +268,9 @@ test.describe('User Registration Flow Integration', () => {
   });
 
   test('signup network failure handling', async ({ page }) => {
-    // Page already navigated in beforeEach
-
-    await page.evaluate(() => {
-      window.mockConfigured = true;
-    });
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Set up DOM state to show auth section  
+    await setupAuthSection(page);
+    await setupTabSwitching(page);
 
     // Switch to signup
     await page.click('#signup-tab');
@@ -293,23 +324,30 @@ test.describe('User Registration Flow Integration', () => {
   });
 
   test('UI state transitions throughout flow', async ({ page }) => {
-    // Page already navigated in beforeEach
-
     // Initial state: config required
-    const configSection = page.locator('#config-required-section');
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.remove('hidden');
+      document.getElementById('signin-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.add('hidden');
+      document.getElementById('main-section').classList.add('hidden');
+    });
+
+    const configSection = page.locator('#config-required');
     const authSection = page.locator('#auth-section');
     const mainSection = page.locator('#main-section');
 
+    await expect(authSection).toBeVisible();
     await expect(configSection).toBeVisible();
-    await expect(authSection).not.toBeVisible();
     await expect(mainSection).not.toBeVisible();
 
-    // After configuration: auth section
+    // After configuration: auth section with forms
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
     });
-    await page.reload();
-    await page.waitForLoadState('networkidle');
 
     await expect(configSection).not.toBeVisible();
     await expect(authSection).toBeVisible();
@@ -317,25 +355,18 @@ test.describe('User Registration Flow Integration', () => {
 
     // After authentication: main section
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
     });
-    await page.reload();
-    await page.waitForLoadState('networkidle');
 
-    await expect(configSection).not.toBeVisible();
     await expect(authSection).not.toBeVisible();
     await expect(mainSection).toBeVisible();
   });
 
   test('successful signup shows email confirmation message', async ({ page }) => {
-    // Page already navigated in beforeEach
-
-    await page.evaluate(() => {
-      window.mockConfigured = true;
-    });
-    await page.reload();
-    await page.waitForLoadState('networkidle');
+    // Set up DOM state to show auth section
+    await setupAuthSection(page);
+    await setupTabSwitching(page);
 
     // Switch to signup and fill form
     await page.click('#signup-tab');

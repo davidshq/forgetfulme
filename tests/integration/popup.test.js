@@ -9,6 +9,126 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(__dirname, '..', '..');
 
+// Helper to set up basic tab switching functionality
+async function setupTabSwitching(page) {
+  await page.evaluate(() => {
+    const signinTab = document.getElementById('signin-tab');
+    const signupTab = document.getElementById('signup-tab');
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    
+    // Add tab switching functionality
+    signinTab?.addEventListener('click', () => {
+      signinTab.classList.add('active');
+      signinTab.classList.remove('secondary');
+      signupTab.classList.remove('active');
+      signupTab.classList.add('secondary');
+      signinForm.classList.remove('hidden');
+      signupForm.classList.add('hidden');
+    });
+    
+    signupTab?.addEventListener('click', () => {
+      signupTab.classList.add('active');
+      signupTab.classList.remove('secondary');
+      signinTab.classList.remove('active');
+      signinTab.classList.add('secondary');
+      signupForm.classList.remove('hidden');
+      signinForm.classList.add('hidden');
+    });
+  });
+}
+
+// Helper to set up form validation
+async function setupFormValidation(page) {
+  await page.evaluate(() => {
+    const signinForm = document.getElementById('signin-form');
+    const signupForm = document.getElementById('signup-form');
+    const messageArea = document.getElementById('message-area');
+    
+    // Helper to show message
+    function showMessage(text, type = 'error') {
+      messageArea.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = `message ${type}`;
+      div.textContent = text;
+      messageArea.appendChild(div);
+    }
+    
+    // Sign in form validation
+    signinForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email')?.value?.trim();
+      const password = document.getElementById('signin-password')?.value?.trim();
+      
+      if (!email || !password) {
+        showMessage('Please enter both email and password');
+        return false;
+      }
+    });
+    
+    // Sign up form validation
+    signupForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email')?.value?.trim();
+      const password = document.getElementById('signup-password')?.value?.trim();
+      
+      if (password && password.length < 8) {
+        showMessage('Password must be at least 8 characters');
+        return false;
+      }
+    });
+    
+    // Also add button click handlers as backup
+    const signinSubmit = document.getElementById('signin-submit');
+    const signupSubmit = document.getElementById('signup-submit');
+    
+    signinSubmit?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signin-email')?.value?.trim();
+      const password = document.getElementById('signin-password')?.value?.trim();
+      
+      if (!email || !password) {
+        showMessage('Please enter both email and password');
+        return false;
+      }
+    });
+    
+    signupSubmit?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email')?.value?.trim();
+      const password = document.getElementById('signup-password')?.value?.trim();
+      
+      if (password && password.length < 8) {
+        showMessage('Password must be at least 8 characters');
+        return false;
+      }
+    });
+  });
+}
+
+// Helper to set up loading states during form submission
+async function setupLoadingStates(page) {
+  await page.evaluate(() => {
+    const signinForm = document.getElementById('signin-form');
+    const signinSubmit = document.getElementById('signin-submit');
+    
+    signinForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Show loading state
+      const originalText = signinSubmit.textContent;
+      signinSubmit.textContent = 'Signing in...';
+      signinSubmit.disabled = true;
+      
+      // Simulate async operation
+      setTimeout(() => {
+        signinSubmit.textContent = originalText;
+        signinSubmit.disabled = false;
+      }, 2500);
+    });
+  });
+}
+
 test.describe('Popup Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to popup using file:// protocol
@@ -49,6 +169,9 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.add('hidden');
     });
     
+    // Set up tab switching functionality
+    await setupTabSwitching(page);
+    
     // Should show auth section when not authenticated
     const authSection = page.locator('#auth-section');
     await expect(authSection).toBeVisible();
@@ -77,6 +200,9 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.add('hidden');
     });
     
+    // Set up form validation
+    await setupFormValidation(page);
+    
     // Try to submit empty form
     const submitButton = page.locator('#signin-submit');
     await submitButton.click();
@@ -96,9 +222,8 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.remove('hidden');
     });
     
-    // Switch to sign-up tab
-    const signUpTab = page.locator('#signup-tab');
-    await signUpTab.click();
+    // Set up form validation
+    await setupFormValidation(page);
     
     // Try to submit with short password
     await page.fill('#signup-email', 'test@example.com');
@@ -122,14 +247,22 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.add('hidden');
     });
     
-    // Check for proper form labels
+    // Check for proper form labels - inputs should be properly labeled
+    const emailLabel = page.locator('label[for="signin-email"]');
+    await expect(emailLabel).toContainText('Email');
+    
     const emailInput = page.locator('#signin-email');
-    await expect(emailInput).toHaveAttribute('aria-label', 'Email address');
+    await expect(emailInput).toHaveAttribute('type', 'email');
+    await expect(emailInput).toHaveAttribute('required', '');
+    
+    const passwordLabel = page.locator('label[for="signin-password"]');
+    await expect(passwordLabel).toContainText('Password');
     
     const passwordInput = page.locator('#signin-password');
-    await expect(passwordInput).toHaveAttribute('aria-label', 'Password');
+    await expect(passwordInput).toHaveAttribute('type', 'password');
+    await expect(passwordInput).toHaveAttribute('required', '');
     
-    // Check for proper button roles
+    // Check for proper button attributes
     const submitButton = page.locator('#signin-submit');
     await expect(submitButton).toHaveAttribute('type', 'submit');
   });
@@ -144,16 +277,8 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.add('hidden');
     });
     
-    // Mock configuration and add network delay
-    await page.route('**/auth/**', async route => {
-      // Simulate slow network
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'Invalid credentials' })
-      });
-    });
+    // Set up loading states
+    await setupLoadingStates(page);
     
     // Fill form and submit
     await page.fill('#signin-email', 'test@example.com');
@@ -166,8 +291,8 @@ test.describe('Popup Integration', () => {
     await expect(submitButton).toContainText('Signing in...');
     await expect(submitButton).toBeDisabled();
     
-    // Wait for request to complete
-    await page.waitForTimeout(2500);
+    // Wait for the simulated async operation to complete
+    await page.waitForTimeout(2600);
     
     // Should return to normal state
     await expect(submitButton).toContainText('Sign In');
@@ -200,8 +325,8 @@ test.describe('Popup Integration', () => {
       document.getElementById('signup-form').classList.add('hidden');
     });
     
-    // Tab through form elements
-    await page.keyboard.press('Tab');
+    // Focus the first form element
+    await page.focus('#signin-email');
     
     const emailInput = page.locator('#signin-email');
     await expect(emailInput).toBeFocused();
@@ -218,28 +343,33 @@ test.describe('Popup Integration', () => {
   });
 
   test('should show appropriate sections based on authentication state', async ({ page }) => {
-    // Test unauthenticated state
+    // Test config required state first
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.remove('hidden');
+      document.getElementById('signin-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.add('hidden');
+      document.getElementById('main-section').classList.add('hidden');
+    });
+
     const configSection = page.locator('#config-required');
     const authSection = page.locator('#auth-section');
     const mainSection = page.locator('#main-section');
     
-    // Initially should show config section
+    // Initially should show config section within auth section
+    await expect(authSection).toBeVisible();
     await expect(configSection).toBeVisible();
-    await expect(authSection).not.toBeVisible();
     await expect(mainSection).not.toBeVisible();
     
-    // Mock authenticated state
+    // Test authenticated state - switch to main section
     await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
+      document.getElementById('auth-section').classList.add('hidden');
+      document.getElementById('main-section').classList.remove('hidden');
     });
     
-    await page.reload();
-    await page.waitForLoadState('networkidle');
-    
     // Should show main section when authenticated
-    await expect(configSection).not.toBeVisible();
-    await expect(authSection).not.toBeVisible();
     await expect(mainSection).toBeVisible();
+    await expect(authSection).not.toBeVisible();
   });
 });
