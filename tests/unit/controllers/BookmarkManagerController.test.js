@@ -339,11 +339,11 @@ describe('BookmarkManagerController', () => {
   });
 
   describe('bookmark rendering', () => {
-    beforeEach() {
+    beforeEach(() => {
       controller.statusTypes = [
         { id: 'read', name: 'Read', color: '#4ade80' }
       ];
-    };
+    });
 
     describe('renderBookmarks', () => {
       it('should render bookmark items', () => {

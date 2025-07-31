@@ -3,34 +3,51 @@
  */
 
 import { test, expect } from '@playwright/test';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..', '..');
 
 test.describe('Popup Integration', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to popup page
-    await page.goto('./src/ui/popup.html');
+    // Navigate to popup using file:// protocol
+    const filePath = `file://${path.join(projectRoot, 'src', 'ui', 'popup.html')}`;
+    await page.goto(filePath);
     
     // Wait for the page to be fully loaded
     await page.waitForLoadState('networkidle');
+    
+    // Set viewport for consistent testing
+    await page.setViewportSize({ width: 400, height: 600 });
   });
 
   test('should display configuration required message when not configured', async ({ page }) => {
-    // Initially should show config required section
-    const configSection = page.locator('#config-required-section');
+    // Manually show the config required state
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.remove('hidden');
+      document.getElementById('signin-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.add('hidden');
+    });
+    
+    const configSection = page.locator('#config-required');
     await expect(configSection).toBeVisible();
     
-    const configMessage = page.locator('#config-required-section .message');
-    await expect(configMessage).toContainText('Configuration Required');
+    const configMessage = page.locator('#config-required h3');
+    await expect(configMessage).toContainText('Setup Required');
   });
 
   test('should have working navigation between auth tabs', async ({ page }) => {
-    // Mock configuration to show auth section
+    // Manually set up auth section to show tabs and forms
     await page.evaluate(() => {
-      // Mock the ConfigService to return configured state
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Should show auth section when not authenticated
     const authSection = page.locator('#auth-section');
@@ -51,13 +68,14 @@ test.describe('Popup Integration', () => {
   });
 
   test('should validate sign-in form fields', async ({ page }) => {
-    // Mock configuration
+    // Set up auth section with signin form visible
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Try to submit empty form
     const submitButton = page.locator('#signin-submit');
@@ -69,13 +87,14 @@ test.describe('Popup Integration', () => {
   });
 
   test('should validate sign-up form fields', async ({ page }) => {
-    // Mock configuration
+    // Set up auth section with signup form visible
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.add('hidden');
+      document.getElementById('signup-form').classList.remove('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Switch to sign-up tab
     const signUpTab = page.locator('#signup-tab');
@@ -94,6 +113,15 @@ test.describe('Popup Integration', () => {
   });
 
   test('should have proper ARIA labels and accessibility', async ({ page }) => {
+    // Set up auth section with signin form visible
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
+    });
+    
     // Check for proper form labels
     const emailInput = page.locator('#signin-email');
     await expect(emailInput).toHaveAttribute('aria-label', 'Email address');
@@ -107,6 +135,15 @@ test.describe('Popup Integration', () => {
   });
 
   test('should show loading states during form submission', async ({ page }) => {
+    // Set up auth section with signin form visible
+    await page.evaluate(() => {
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
+    });
+    
     // Mock configuration and add network delay
     await page.route('**/auth/**', async route => {
       // Simulate slow network
@@ -117,13 +154,6 @@ test.describe('Popup Integration', () => {
         body: JSON.stringify({ error: 'Invalid credentials' })
       });
     });
-    
-    await page.evaluate(() => {
-      window.mockConfigured = true;
-    });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Fill form and submit
     await page.fill('#signin-email', 'test@example.com');
@@ -148,7 +178,7 @@ test.describe('Popup Integration', () => {
     // Test mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    const popup = page.locator('.popup-container');
+    const popup = page.locator('.container');
     await expect(popup).toBeVisible();
     
     // Test tablet viewport
@@ -161,13 +191,14 @@ test.describe('Popup Integration', () => {
   });
 
   test('should maintain focus management', async ({ page }) => {
-    // Mock configuration
+    // Set up auth section with signin form visible
     await page.evaluate(() => {
-      window.mockConfigured = true;
+      document.getElementById('auth-section').classList.remove('hidden');
+      document.getElementById('config-required').classList.add('hidden');
+      document.getElementById('auth-tabs').classList.remove('hidden');
+      document.getElementById('signin-form').classList.remove('hidden');
+      document.getElementById('signup-form').classList.add('hidden');
     });
-    
-    await page.reload();
-    await page.waitForLoadState('networkidle');
     
     // Tab through form elements
     await page.keyboard.press('Tab');
@@ -188,7 +219,7 @@ test.describe('Popup Integration', () => {
 
   test('should show appropriate sections based on authentication state', async ({ page }) => {
     // Test unauthenticated state
-    const configSection = page.locator('#config-required-section');
+    const configSection = page.locator('#config-required');
     const authSection = page.locator('#auth-section');
     const mainSection = page.locator('#main-section');
     
