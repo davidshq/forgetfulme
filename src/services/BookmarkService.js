@@ -717,12 +717,18 @@ export class BookmarkService {
       params.set('status', `in.(${options.statuses.join(',')})`);
     }
 
-    // Date filters
+    // Date filters - use different parameter names to avoid overwriting
     if (options.dateFrom) {
       params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
     }
     if (options.dateTo) {
-      params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+      // Use 'and' parameter to combine with dateFrom filter
+      if (options.dateFrom) {
+        params.set('and', `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`);
+        params.delete('created_at'); // Remove single filter
+      } else {
+        params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+      }
     }
 
     // Sorting
@@ -769,11 +775,18 @@ export class BookmarkService {
         params.set('status', `in.(${options.statuses.join(',')})`);
       }
 
+      // Date filters - use different parameter names to avoid overwriting
       if (options.dateFrom) {
         params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
       }
       if (options.dateTo) {
-        params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+        // Use 'and' parameter to combine with dateFrom filter
+        if (options.dateFrom) {
+          params.set('and', `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`);
+          params.delete('created_at'); // Remove single filter
+        } else {
+          params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+        }
       }
 
       const user = this.authService.getCurrentUser();

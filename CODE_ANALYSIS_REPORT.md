@@ -19,50 +19,45 @@ This comprehensive code analysis examined the ForgetfulMe Chrome extension codeb
 - Unused `SYNC_INTERVALS` and `MESSAGES` constants
 - Consolidated `formatDate()` implementation
 
-**✅ Successfully Restored (Critical Functionality):**
-- `validateDataSize()` method with proper integration
-- SQL schema documentation in setupDatabase.js
-- `createTablesManually()` user guidance function
-
 ---
 
 ## 🐛 Remaining Bugs & Logic Errors
 
 ### High Priority Issues Still To Address
 
-#### 1. **Memory Leak in BaseController.js** `src/controllers/BaseController.js:85-89`
+#### 1. **Memory Leak in BaseController.js** ✅ **FIXED**
+
+#### 2. **Race Condition in AuthService.js** ✅ **FIXED**
 ```javascript
-// BUG: setTimeout not stored for cleanup
-showMessage(message, type = 'info', duration = 5000) {
-    // ... 
-    setTimeout(() => { /* cleanup */ }, duration); // Memory leak
+// FIXED: Now handles both seconds and milliseconds timestamp formats
+if (storedSession.expires_at) {
+    const currentTime = Date.now();
+    const expiryTime = storedSession.expires_at;
+    const isInSeconds = expiryTime < currentTime / 100; // Heuristic detection
+    const expiryTimeMs = isInSeconds ? expiryTime * 1000 : expiryTime;
+    if (currentTime > expiryTimeMs) { /* handle expiry */ }
 }
 ```
-**Impact**: Memory leaks in UI components, especially problematic in long-running popup sessions.
-**Status**: ⚠️ **Still needs fixing**
+**Impact**: Was causing unexpected logouts due to timestamp format assumptions.
+**Status**: ✅ **FIXED** - Now properly handles both seconds and milliseconds formats
 
-#### 2. **Race Condition in AuthService.js** `src/services/AuthService.js:406-408`
+#### 3. **Date Filter Bug in BookmarkService.js** ✅ **FIXED**
 ```javascript
-// BUG: Session expiry check assumes seconds but doesn't validate format
-if (session.expires_at < Date.now() / 1000) {
-    // Could fail if expires_at is in milliseconds
-}
-```
-**Impact**: Users could be unexpectedly logged out due to incorrect time comparison.
-**Status**: ⚠️ **Still needs fixing**
-
-#### 3. **Date Filter Bug in BookmarkService.js** `src/services/BookmarkService.js:722-726`
-```javascript
-// BUG: Both dateFrom and dateTo use same parameter name
+// FIXED: Now properly combines both date filters using 'and' parameter
 if (options.dateFrom) {
-    query = query.gte('created_at', options.dateFrom);
+    params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
 }
 if (options.dateTo) {
-    query = query.gte('created_at', options.dateTo); // Should be .lte()
+    if (options.dateFrom) {
+        params.set('and', `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`);
+        params.delete('created_at'); // Remove single filter
+    } else {
+        params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+    }
 }
 ```
-**Impact**: Date range filtering doesn't work correctly - only applies the last condition.
-**Status**: ⚠️ **Still needs fixing**
+**Impact**: Was preventing date range filtering from working - only last condition applied.
+**Status**: ✅ **FIXED** - Now uses 'and' parameter to combine both date filters properly
 
 #### 4. **Missing Import in confirm.js** `src/main/confirm.js:28`
 ```javascript
@@ -205,7 +200,7 @@ element.innerHTML = originalContent;
 
 ### Poor Error Handling
 
-#### 4. **Unhandled confirm() Calls**
+#### 6. **Unhandled confirm() Calls**
 **Files**: `BookmarkManagerController.js:710,730`
 ```javascript
 // BAD: confirm() can throw in some contexts
@@ -214,7 +209,7 @@ if (confirm('Delete bookmark?')) {
 }
 ```
 
-#### 5. **Using prompt() for Data Input** `src/controllers/OptionsController.js:471-476`
+#### 7. **Using prompt() for Data Input** `src/controllers/OptionsController.js:471-476`
 ```javascript
 // BAD UX: prompt() is poor user experience and can return null
 const newValue = prompt('Enter new value:');
@@ -222,7 +217,7 @@ const newValue = prompt('Enter new value:');
 
 ### Performance Issues
 
-#### 6. **Inefficient DOM Operations**
+#### 8. **Inefficient DOM Operations**
 Complex DOM creation in loops without document fragments
 - `BookmarkManagerController.js:367-475` - 108-line function creating DOM elements
 
@@ -273,9 +268,10 @@ setTimeout(callback, 5000); // Should be constant
 ### 🔥 **CRITICAL - Fix Immediately**
 
 1. **Fix broken import in confirm.js** - Email confirmation is completely broken
-2. **Fix date filter bug** - Users can't filter bookmarks by date range  
+2. ~~**Fix date filter bug**~~ ✅ **FIXED** - Date range filtering now works with proper 'and' parameter logic
 3. **Extract URL formatting function** - Critical duplication affecting maintainability
-4. **Fix memory leak in BaseController** - Affects popup performance
+4. ~~**Fix memory leak in BaseController**~~ ✅ **FIXED** - Timeout IDs now properly tracked and cleaned up
+5. ~~**Fix race condition in AuthService**~~ ✅ **FIXED** - Session expiry now handles both timestamp formats
 
 ### 🚨 **HIGH Priority**
 
@@ -316,13 +312,13 @@ setTimeout(callback, 5000); // Should be constant
 
 | Category | Count | Severity |
 |----------|-------|----------|
-| Critical Bugs | 4 | High |
+| Critical Bugs | 1 | High |
 | Logic Errors | 6 | Medium |
 | Security Issues | 3 | High |
 | Dead Code Items | 8 | Low |
 | Duplicate Patterns | 4 | Medium |
 | Code Smells | 12 | Low-Medium |
-| **Total Issues** | **37** | **Mixed** |
+| **Total Issues** | **34** | **Mixed** |
 
 **Lines of Code**: ~5,500  
 **Technical Debt Estimate**: 2-3 developer days to address high/medium priority issues
@@ -348,19 +344,23 @@ The codebase demonstrates several **excellent practices**:
 - ✅ **Restored database setup documentation** - essential for developers
 - ✅ **Consolidated formatDate implementation** - eliminates duplication
 - ✅ **Removed genuine dead code** - cleaner codebase
+- ✅ **Fixed memory leak in BaseController** - setTimeout IDs now properly tracked and cleaned up
+- ✅ **Fixed race condition in AuthService** - session expiry now handles both timestamp formats
+- ✅ **Fixed date filter bug in BookmarkService** - date range filtering now works with proper 'and' parameter logic
 
 ### **Next Priority Actions** ⚠️
 1. **Fix URL formatting duplication** - extract to existing `formatUrl` in formatting.js
-2. **Fix date filter bug** - use `.lte()` for dateTo parameter
-3. **Fix memory leak** - store setTimeout IDs for cleanup
-4. **Fix broken import** - correct confirm.js import path
+2. **Fix broken import** - correct confirm.js import path
+3. ~~**Fix date filter bug**~~ ✅ **FIXED** - Date range filtering now works properly
+4. ~~**Fix memory leak**~~ ✅ **FIXED** - setTimeout IDs now stored and cleaned up properly
+5. ~~**Fix race condition**~~ ✅ **FIXED** - Session expiry handles both timestamp formats
 
 ### **Impact Assessment**
 
 | Metric | Before | After | Improvement |
 |--------|--------|--------|-------------|
 | **Dead Code Lines** | ~150 lines | ~50 lines | **66% reduction** |
-| **Critical Bugs** | 4 | 4 | *Same (not addressed)* |
+| **Critical Bugs** | 4 | 1 | **3 critical bugs fixed** |
 | **Code Duplication** | Major | Reduced | **formatDate fixed** |
 | **Storage Safety** | ❌ Missing | ✅ **Restored** | **Critical fix** |
 | **Developer UX** | ❌ No docs | ✅ **Schema docs** | **Major improvement** |

@@ -402,10 +402,21 @@ export class AuthService {
         return;
       }
 
-      // Check if session is expired
-      if (storedSession.expires_at && Date.now() / 1000 > storedSession.expires_at) {
-        await this.handleAuthSignOut();
-        return;
+      // Check if session is expired - handle both seconds and milliseconds format
+      if (storedSession.expires_at) {
+        const currentTime = Date.now();
+        const expiryTime = storedSession.expires_at;
+
+        // Determine if expires_at is in seconds or milliseconds
+        // If expires_at is much smaller than current time, it's likely in seconds
+        const isInSeconds = expiryTime < currentTime / 100; // Simple heuristic
+
+        const expiryTimeMs = isInSeconds ? expiryTime * 1000 : expiryTime;
+
+        if (currentTime > expiryTimeMs) {
+          await this.handleAuthSignOut();
+          return;
+        }
       }
 
       // Restore session in Supabase client
