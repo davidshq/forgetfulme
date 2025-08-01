@@ -1,3 +1,5 @@
+import eslintConfigPrettier from 'eslint-config-prettier';
+
 export default [
   {
     files: ["src/**/*.js"],
@@ -45,18 +47,9 @@ export default [
       "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
       "no-undef": "error",
       "no-console": "warn",
-      "semi": ["error", "always"],
-      "quotes": ["error", "single", { "avoidEscape": true }],
-      "indent": ["error", 2],
-      "no-trailing-spaces": "error",
-      "eol-last": "error",
-      "no-multiple-empty-lines": ["error", { "max": 1 }],
       "prefer-const": "error",
       "no-var": "error",
       "arrow-spacing": "error",
-      "object-curly-spacing": ["error", "always"],
-      "array-bracket-spacing": ["error", "never"],
-      "comma-dangle": ["error", "never"],
       "no-debugger": "error"
     }
   },
@@ -78,5 +71,6 @@ export default [
         vitest: "readonly"
       }
     }
-  }
+  },
+  eslintConfigPrettier
 ];
