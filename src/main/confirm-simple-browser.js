@@ -1,16 +1,18 @@
 /**
- * @fileoverview Simple email confirmation handler for ForgetfulMe
- * Stores tokens directly without complex initialization
+ * @fileoverview Simple email confirmation handler - browser compatible
+ * No ES6 imports, works directly in browser
  */
 
-import { ErrorService } from '../services/ErrorService.js';
+// Debug: Add immediate console log to verify script loads
+console.log('confirm-simple-browser.js loaded!', {
+  readyState: document.readyState,
+  hash: window.location.hash
+});
 
 /**
  * Initialize confirmation handler
  */
 async function initializeConfirmation() {
-  const errorService = new ErrorService();
-
   try {
     console.log('Starting simple email confirmation...');
 
@@ -34,21 +36,15 @@ async function initializeConfirmation() {
 
     // Check for missing tokens - both are required for proper confirmation
     if (!accessToken || !refreshToken) {
-      const errorInfo = errorService.handle(
-        new Error('Invalid confirmation link - missing tokens'),
-        'ConfirmationSimple.tokenValidation'
-      );
-      showError(errorInfo.message);
+      console.log('Missing tokens detected, showing error');
+      showError('Invalid confirmation link - missing tokens');
       return;
     }
 
     // Validate token format before processing
     if (accessToken === 'invalid-token' || accessToken.includes('invalid')) {
-      const errorInfo = errorService.handle(
-        new Error('Invalid or expired confirmation token'),
-        'ConfirmationSimple.invalidToken'
-      );
-      showError(errorInfo.message);
+      console.log('Invalid token detected, showing error');
+      showError('Invalid or expired confirmation token');
       return;
     }
 
@@ -70,20 +66,19 @@ async function initializeConfirmation() {
     if (!tokenPayload) {
       // Check if this might be a network/API error
       if (accessToken.includes('invalid')) {
-        const errorInfo = errorService.handle(
-          new Error('Invalid or expired confirmation token'),
-          'ConfirmationSimple.invalidToken'
-        );
-        showError(errorInfo.message);
+        showError('Invalid or expired confirmation token');
         return;
       }
 
       // Generic token parsing error
-      const errorInfo = errorService.handle(
-        new Error('Invalid access token format'),
-        'ConfirmationSimple.tokenParsing'
-      );
-      showError(errorInfo.message);
+      showError('Invalid access token format');
+      return;
+    }
+
+    // Validate token expiry
+    const now = Math.floor(Date.now() / 1000);
+    if (tokenPayload.exp && tokenPayload.exp < now) {
+      showError('Confirmation token has expired. Please request a new confirmation email.');
       return;
     }
 
@@ -95,17 +90,6 @@ async function initializeConfirmation() {
       app_metadata: tokenPayload.app_metadata || {},
       user_metadata: tokenPayload.user_metadata || {}
     };
-
-    // Validate token expiry
-    const now = Math.floor(Date.now() / 1000);
-    if (tokenPayload.exp && tokenPayload.exp < now) {
-      const errorInfo = errorService.handle(
-        new Error('Confirmation token has expired. Please request a new confirmation email.'),
-        'ConfirmationSimple.tokenExpired'
-      );
-      showError(errorInfo.message);
-      return;
-    }
 
     // Create session object
     const session = {
@@ -152,24 +136,20 @@ async function initializeConfirmation() {
   } catch (error) {
     // Enhanced error handling with context
     let errorMessage = error.message;
-    let errorContext = 'ConfirmationSimple.initialize';
 
     // Categorize different types of errors
     if (error.message.includes('fetch') || error.message.includes('network')) {
       errorMessage =
         'Network error occurred while confirming your email. Please check your connection and try again.';
-      errorContext = 'ConfirmationSimple.networkError';
     } else if (error.message.includes('storage')) {
       errorMessage = 'Unable to save authentication data. Please try again.';
-      errorContext = 'ConfirmationSimple.storageError';
     } else if (error.message.includes('token') || error.message.includes('invalid')) {
       errorMessage =
         'Invalid or expired confirmation token. Please request a new confirmation email.';
-      errorContext = 'ConfirmationSimple.tokenError';
     }
 
-    const errorInfo = errorService.handle(new Error(errorMessage), errorContext);
-    showError(errorInfo.message, { retryable: error.message.includes('network') });
+    console.error('Confirmation error:', error);
+    showError(errorMessage);
   }
 }
 
@@ -179,8 +159,6 @@ async function initializeConfirmation() {
  * @returns {Object|null} Parsed payload or null if invalid
  */
 function parseJWT(token) {
-  const errorService = new ErrorService();
-
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
@@ -189,7 +167,7 @@ function parseJWT(token) {
     const decoded = globalThis.atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(decoded);
   } catch (error) {
-    errorService.handle(error, 'ConfirmationSimple.parseJWT');
+    console.error('JWT parsing error:', error);
     return null;
   }
 }
@@ -208,6 +186,7 @@ function showSuccess() {
  * @param {Object} _options - Additional options for error display
  */
 function showError(message, _options = {}) {
+  console.log('Showing error:', message);
   document.getElementById('loading-state').classList.add('hidden');
   document.getElementById('error-state').classList.remove('hidden');
 
@@ -287,12 +266,6 @@ function setupEventListeners() {
     });
   }
 }
-
-// Debug: Add immediate console log to verify script loads
-console.log('confirm-simple.js loaded!', {
-  readyState: document.readyState,
-  hash: window.location.hash
-});
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {

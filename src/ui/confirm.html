@@ -77,10 +77,29 @@
         <div class="error-icon">✗</div>
         <h1>Confirmation Failed</h1>
         <p id="error-message">There was an error confirming your email.</p>
-        <button id="try-again" class="primary">Try Again</button>
+
+        <div
+          id="error-guidance"
+          style="
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--pico-background-color);
+            border-radius: var(--pico-border-radius);
+          "
+        >
+          <h4 style="margin-top: 0">What you can do:</h4>
+          <ul style="text-align: left; margin: 0.5rem 0">
+            <li>Check if your confirmation link is complete</li>
+            <li>Request a new confirmation email if this one expired</li>
+            <li>Make sure you have a stable internet connection</li>
+            <li>Contact support if the problem persists</li>
+          </ul>
+        </div>
+
+        <button id="try-again" class="primary" title="Try to resolve this issue">Try Again</button>
       </div>
     </div>
 
-    <script src="../main/confirm-simple.js"></script>
+    <script src="../main/confirm-simple-browser.js"></script>
   </body>
 </html>
