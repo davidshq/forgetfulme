@@ -3,10 +3,14 @@
  * Stores tokens directly without complex initialization
  */
 
+import { ErrorService } from '../services/ErrorService.js';
+
 /**
  * Initialize confirmation handler
  */
 async function initializeConfirmation() {
+  const errorService = new ErrorService();
+
   try {
     console.log('Starting simple email confirmation...');
 
@@ -19,7 +23,11 @@ async function initializeConfirmation() {
     console.log('Confirmation type:', type);
 
     if (!accessToken || !refreshToken) {
-      showError('Invalid confirmation link - missing tokens');
+      const errorInfo = errorService.handle(
+        new Error('Invalid confirmation link - missing tokens'),
+        'ConfirmationSimple.tokenValidation'
+      );
+      showError(errorInfo.message);
       return;
     }
 
@@ -28,7 +36,11 @@ async function initializeConfirmation() {
     console.log('Token payload:', tokenPayload);
 
     if (!tokenPayload) {
-      showError('Invalid access token');
+      const errorInfo = errorService.handle(
+        new Error('Invalid access token'),
+        'ConfirmationSimple.tokenParsing'
+      );
+      showError(errorInfo.message);
       return;
     }
 
@@ -63,8 +75,8 @@ async function initializeConfirmation() {
     console.log('Session stored successfully!');
     showSuccess();
   } catch (error) {
-    console.error('Confirmation error:', error);
-    showError(error.message || 'Failed to confirm email');
+    const errorInfo = errorService.handle(error, 'ConfirmationSimple.initialize');
+    showError(errorInfo.message);
   }
 }
 
@@ -74,6 +86,8 @@ async function initializeConfirmation() {
  * @returns {Object|null} Parsed payload or null if invalid
  */
 function parseJWT(token) {
+  const errorService = new ErrorService();
+
   try {
     const parts = token.split('.');
     if (parts.length !== 3) return null;
@@ -82,7 +96,7 @@ function parseJWT(token) {
     const decoded = globalThis.atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(decoded);
   } catch (error) {
-    console.error('Failed to parse JWT:', error);
+    errorService.handle(error, 'ConfirmationSimple.parseJWT');
     return null;
   }
 }

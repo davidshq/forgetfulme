@@ -5,11 +5,14 @@
 
 import { ServiceContainer } from '../utils/ServiceContainer.js';
 import { createSupabaseClient } from '../lib/supabase-bundle.js';
+import { ErrorService } from '../services/ErrorService.js';
 
 /**
  * Initialize confirmation handler
  */
 async function initializeConfirmation() {
+  const errorService = new ErrorService();
+
   try {
     console.log('Starting email confirmation...');
     // Show loading state
@@ -31,13 +34,21 @@ async function initializeConfirmation() {
 
     // Check for errors
     if (error) {
-      showError(errorDescription || 'Email confirmation failed');
+      const errorInfo = errorService.handle(
+        new Error(errorDescription || 'Email confirmation failed'),
+        'Confirmation.urlParams'
+      );
+      showError(errorInfo.message);
       return;
     }
 
     // Check for tokens
     if (!accessToken || !refreshToken) {
-      showError('Invalid confirmation link');
+      const errorInfo = errorService.handle(
+        new Error('Invalid confirmation link'),
+        'Confirmation.tokenValidation'
+      );
+      showError(errorInfo.message);
       return;
     }
 
@@ -61,7 +72,11 @@ async function initializeConfirmation() {
     console.log('Getting config...');
     const config = await storageService.getConfig();
     if (!config) {
-      showError('Extension not configured. Please configure Supabase in the extension options.');
+      const errorInfo = errorService.handle(
+        new Error('Extension not configured. Please configure Supabase in the extension options.'),
+        'Confirmation.configMissing'
+      );
+      showError(errorInfo.message);
       return;
     }
     console.log('Config loaded');
@@ -76,7 +91,11 @@ async function initializeConfirmation() {
     } = await supabaseClient.auth.getUser(accessToken);
 
     if (userError || !user) {
-      showError('Failed to get user details');
+      const errorInfo = errorService.handle(
+        userError || new Error('Failed to get user details'),
+        'Confirmation.getUserDetails'
+      );
+      showError(errorInfo.message);
       return;
     }
 
@@ -89,8 +108,8 @@ async function initializeConfirmation() {
     // Show success
     showState('success');
   } catch (error) {
-    console.error('Confirmation error:', error);
-    showError(error.message || 'An unexpected error occurred');
+    const errorInfo = errorService.handle(error, 'Confirmation.initialize');
+    showError(errorInfo.message);
   }
 }
 
