@@ -53,7 +53,7 @@ const createMockConfigService = () => ({
 
 const createMockValidationService = () => ({
   validateBookmarkData: vi.fn().mockReturnValue(true),
-  validateUrl: vi.fn().mockReturnValue(true)
+  validateUrl: vi.fn().mockReturnValue({ isValid: true, data: 'https://updated.com', errors: [] })
 });
 
 const createMockErrorService = () => ({
@@ -677,6 +677,9 @@ describe('BookmarkManagerController', () => {
     describe('handleSaveEdit', () => {
       it('should save bookmark changes', async () => {
         controller.editingBookmark = { id: '1' };
+        controller.statusTypes = [
+          { id: 'reference', name: 'Reference', color: '#4ade80' }
+        ];
 
         const form = document.getElementById('edit-form');
         const statusSelect = document.getElementById('edit-status');

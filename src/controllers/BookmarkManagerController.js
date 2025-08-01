@@ -231,11 +231,11 @@ export class BookmarkManagerController extends BaseController {
    */
   setupModalEventListeners() {
     this.addEventListener($('#close-modal'), 'click', () => {
-      this.closeEditModal();
+      this.handleCancelEdit();
     });
 
     this.addEventListener($('#cancel-edit'), 'click', () => {
-      this.closeEditModal();
+      this.handleCancelEdit();
     });
 
     this.addEventListener($('#edit-form'), 'submit', e => {
@@ -254,7 +254,7 @@ export class BookmarkManagerController extends BaseController {
     // Close modals on backdrop click
     this.addEventListener($('#edit-modal'), 'click', e => {
       if (e.target === e.currentTarget) {
-        this.closeEditModal();
+        this.handleCancelEdit();
       }
     });
 
@@ -871,7 +871,7 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
-   * Show edit modal
+   * Show edit modal with enhanced form population and validation setup
    * @param {Object} bookmark - Bookmark to edit
    */
   showEditModal(bookmark) {
@@ -880,7 +880,10 @@ export class BookmarkManagerController extends BaseController {
 
     if (!modal || !form) return;
 
-    // Populate form
+    // Clear any previous validation errors
+    this.clearFormErrors(form);
+
+    // Populate form with bookmark data
     setFormData(form, {
       id: bookmark.id,
       title: bookmark.title || '',
@@ -890,23 +893,93 @@ export class BookmarkManagerController extends BaseController {
       notes: bookmark.notes || ''
     });
 
+    // Store reference to bookmark being edited
+    this.editingBookmark = bookmark;
+
     // Show modal
     modal.showModal();
+
+    // Focus on first input for better UX after modal is fully shown
+    const titleInput = $('#edit-title');
+    if (titleInput) {
+      // Use setTimeout for focus after modal rendering completes
+      setTimeout(() => titleInput.focus(), 100);
+    }
   }
 
   /**
-   * Close edit modal
+   * Enhanced openEditModal method for external use (alias to showEditModal)
+   * @param {Object} bookmark - Bookmark to edit
+   */
+  openEditModal(bookmark) {
+    this.showEditModal(bookmark);
+  }
+
+  /**
+   * Close edit modal with cleanup
    */
   closeEditModal() {
     const modal = $('#edit-modal');
+    const form = $('#edit-form');
+
     if (modal) {
       modal.close();
     }
+
+    if (form) {
+      // Clear form errors when closing
+      this.clearFormErrors(form);
+      // Reset form to prevent unsaved changes from persisting
+      this.resetForm(form);
+    }
+
     this.editingBookmark = null;
   }
 
   /**
-   * Handle save edit
+   * Handle cancel edit with confirmation if form has changes
+   */
+  handleCancelEdit() {
+    const form = $('#edit-form');
+    if (!form || !this.editingBookmark) {
+      this.closeEditModal();
+      return;
+    }
+
+    // Check if form has been modified
+    const formData = this.getFormData(form);
+    const hasChanges = this.hasFormChanges(formData, this.editingBookmark);
+
+    if (hasChanges) {
+      const confirmed = confirm('You have unsaved changes. Are you sure you want to cancel?');
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    this.closeEditModal();
+  }
+
+  /**
+   * Check if form has changes compared to original bookmark
+   * @param {Object} formData - Current form data
+   * @param {Object} originalBookmark - Original bookmark data
+   * @returns {boolean} True if form has changes
+   */
+  hasFormChanges(formData, originalBookmark) {
+    const originalTags = originalBookmark.tags ? originalBookmark.tags.join(', ') : '';
+
+    return (
+      formData.title?.trim() !== (originalBookmark.title || '') ||
+      formData.url?.trim() !== (originalBookmark.url || '') ||
+      formData.status !== originalBookmark.status ||
+      formData.tags?.trim() !== originalTags ||
+      formData.notes?.trim() !== (originalBookmark.notes || '')
+    );
+  }
+
+  /**
+   * Handle save edit with form validation
    */
   async handleSaveEdit() {
     if (!this.editingBookmark) return;
@@ -914,11 +987,21 @@ export class BookmarkManagerController extends BaseController {
     const form = $('#edit-form');
     const formData = this.getFormData(form);
 
+    // Clear previous errors
+    this.clearFormErrors(form);
+
+    // Validate form data
+    const validationResult = this.validateEditForm(formData);
+    if (!validationResult.isValid) {
+      this.displayFormErrors(form, validationResult.errors);
+      return;
+    }
+
     await this.safeExecute(
       async () => {
         const updates = {
-          title: formData.title,
-          url: formData.url,
+          title: formData.title?.trim() || null,
+          url: formData.url?.trim(),
           status: formData.status,
           tags: formData.tags
             ? formData.tags
@@ -926,7 +1009,7 @@ export class BookmarkManagerController extends BaseController {
                 .map(t => t.trim())
                 .filter(t => t)
             : [],
-          notes: formData.notes
+          notes: formData.notes?.trim() || null
         };
 
         await this.bookmarkService.updateBookmark(this.editingBookmark.id, updates);
@@ -939,6 +1022,118 @@ export class BookmarkManagerController extends BaseController {
       '#save-edit',
       'Saving...'
     );
+  }
+
+  /**
+   * Validate edit form data
+   * @param {Object} formData - Form data to validate
+   * @returns {Object} Validation result
+   */
+  validateEditForm(formData) {
+    const errors = {};
+
+    // Validate URL (required)
+    if (!formData.url?.trim()) {
+      errors.url = 'URL is required';
+    } else {
+      const urlValidation = this.validationService.validateUrl(formData.url.trim());
+      if (!urlValidation.isValid) {
+        errors.url = (urlValidation.errors && urlValidation.errors[0]) || 'Invalid URL';
+      }
+    }
+
+    // Validate status (required)
+    if (!formData.status) {
+      errors.status = 'Status is required';
+    } else if (!this.statusTypes.some(s => s.id === formData.status)) {
+      errors.status = 'Please select a valid status';
+    }
+
+    // Validate title (optional but with length limit)
+    if (formData.title?.trim() && this.validationService.validateTitle) {
+      const titleValidation = this.validationService.validateTitle(formData.title.trim());
+      if (!titleValidation.isValid) {
+        errors.title = (titleValidation.errors && titleValidation.errors[0]) || 'Invalid title';
+      }
+    }
+
+    // Validate tags (optional but with format validation)
+    if (formData.tags?.trim() && this.validationService.validateTags) {
+      const tagsValidation = this.validationService.validateTags(formData.tags.trim());
+      if (!tagsValidation.isValid) {
+        errors.tags = (tagsValidation.errors && tagsValidation.errors[0]) || 'Invalid tags';
+      }
+    }
+
+    // Validate notes (optional but with length limit)
+    if (formData.notes?.trim() && this.validationService.validateNotes) {
+      const notesValidation = this.validationService.validateNotes(formData.notes.trim());
+      if (!notesValidation.isValid) {
+        errors.notes = (notesValidation.errors && notesValidation.errors[0]) || 'Invalid notes';
+      }
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  }
+
+  /**
+   * Clear form validation errors
+   * @param {Element} form - Form element
+   */
+  clearFormErrors(form) {
+    // Clear form-wide errors
+    const formErrors = form.querySelector('#edit-form-errors');
+    if (formErrors) {
+      formErrors.classList.add('hidden');
+      formErrors.textContent = '';
+    }
+
+    // Clear field-specific errors
+    const fieldErrors = form.querySelectorAll('.field-error');
+    fieldErrors.forEach(errorElement => {
+      errorElement.classList.add('hidden');
+      errorElement.textContent = '';
+    });
+
+    // Remove error styling from inputs
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.classList.remove('error');
+    });
+  }
+
+  /**
+   * Display form validation errors
+   * @param {Element} form - Form element
+   * @param {Object} errors - Validation errors
+   */
+  displayFormErrors(form, errors) {
+    Object.entries(errors).forEach(([field, message]) => {
+      // Find the error element for this field
+      const errorElement = form.querySelector(`#edit-${field}-error`);
+      const inputElement = form.querySelector(`#edit-${field}`);
+
+      if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+      }
+
+      if (inputElement) {
+        inputElement.classList.add('error');
+      }
+    });
+
+    // Focus on first field with error
+    const firstErrorField = Object.keys(errors)[0];
+    if (firstErrorField) {
+      const firstErrorInput = form.querySelector(`#edit-${firstErrorField}`);
+      if (firstErrorInput) {
+        firstErrorInput.focus();
+      }
+    }
   }
 
   /**

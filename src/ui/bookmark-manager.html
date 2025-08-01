@@ -238,38 +238,99 @@
         <form id="edit-form" class="edit-form" data-testid="edit-form">
           <input type="hidden" id="edit-bookmark-id" name="id" />
 
-          <label for="edit-title">
-            Title
-            <input type="text" id="edit-title" name="title" data-testid="edit-title" />
-          </label>
+          <!-- Form-wide error display -->
+          <div
+            id="edit-form-errors"
+            class="form-errors hidden"
+            data-testid="edit-form-errors"
+          ></div>
 
-          <label for="edit-url">
-            URL
-            <input type="url" id="edit-url" name="url" required data-testid="edit-url" />
-          </label>
+          <fieldset>
+            <label for="edit-title">
+              Title
+              <input
+                type="text"
+                id="edit-title"
+                name="title"
+                data-testid="edit-title"
+                aria-describedby="edit-title-error"
+              />
+              <div
+                id="edit-title-error"
+                class="field-error hidden"
+                data-testid="edit-title-error"
+              ></div>
+            </label>
 
-          <label for="edit-status">
-            Status
-            <select id="edit-status" name="status" required data-testid="edit-status">
-              <!-- Options populated by JavaScript -->
-            </select>
-          </label>
+            <label for="edit-url">
+              URL
+              <input
+                type="url"
+                id="edit-url"
+                name="url"
+                required
+                data-testid="edit-url"
+                aria-describedby="edit-url-error"
+              />
+              <div
+                id="edit-url-error"
+                class="field-error hidden"
+                data-testid="edit-url-error"
+              ></div>
+            </label>
 
-          <label for="edit-tags">
-            Tags
-            <input
-              type="text"
-              id="edit-tags"
-              name="tags"
-              placeholder="Separate with commas"
-              data-testid="edit-tags"
-            />
-          </label>
+            <label for="edit-status">
+              Status
+              <select
+                id="edit-status"
+                name="status"
+                required
+                data-testid="edit-status"
+                aria-describedby="edit-status-error"
+              >
+                <!-- Options populated by JavaScript -->
+              </select>
+              <div
+                id="edit-status-error"
+                class="field-error hidden"
+                data-testid="edit-status-error"
+              ></div>
+            </label>
 
-          <label for="edit-notes">
-            Notes
-            <textarea id="edit-notes" name="notes" rows="4" data-testid="edit-notes"></textarea>
-          </label>
+            <label for="edit-tags">
+              Tags
+              <input
+                type="text"
+                id="edit-tags"
+                name="tags"
+                placeholder="Separate with commas"
+                data-testid="edit-tags"
+                aria-describedby="edit-tags-error edit-tags-help"
+              />
+              <small id="edit-tags-help">Separate multiple tags with commas</small>
+              <div
+                id="edit-tags-error"
+                class="field-error hidden"
+                data-testid="edit-tags-error"
+              ></div>
+            </label>
+
+            <label for="edit-notes">
+              Notes
+              <textarea
+                id="edit-notes"
+                name="notes"
+                rows="4"
+                data-testid="edit-notes"
+                aria-describedby="edit-notes-error"
+              ></textarea>
+              <div
+                id="edit-notes-error"
+                class="field-error hidden"
+                data-testid="edit-notes-error"
+              ></div>
+            </label>
+          </fieldset>
 
           <footer class="modal-actions">
             <button
