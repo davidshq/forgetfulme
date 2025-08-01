@@ -57,66 +57,6 @@ describe('ValidationService', () => {
     });
   });
 
-  describe('validatePassword', () => {
-    it('should validate strong passwords', () => {
-      const strongPasswords = [
-        'Password123!',
-        'ComplexP@ssw0rd',
-        'MySecure#Pass1',
-        '8CharP@ss'
-      ];
-
-      strongPasswords.forEach(password => {
-        const result = validationService.validatePassword(password);
-        expect(result.isValid).toBe(true);
-        expect(result.data).toBe(password);
-        expect(result.errors).toHaveLength(0);
-      });
-    });
-
-    it('should reject passwords that are too short', () => {
-      const shortPasswords = ['short', '1234567', 'Pass@1'];
-
-      shortPasswords.forEach(password => {
-        const result = validationService.validatePassword(password);
-        expect(result.isValid).toBe(false);
-        expect(result.errors).toContain('Password must be at least 8 characters long');
-      });
-    });
-
-    it('should reject passwords without uppercase letters', () => {
-      const result = validationService.validatePassword('password123!');
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least one uppercase letter');
-    });
-
-    it('should reject passwords without lowercase letters', () => {
-      const result = validationService.validatePassword('PASSWORD123!');
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least one lowercase letter');
-    });
-
-    it('should reject passwords without numbers', () => {
-      const result = validationService.validatePassword('Password!');
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least one number');
-    });
-
-    it('should reject passwords without special characters', () => {
-      const result = validationService.validatePassword('Password123');
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must contain at least one special character');
-    });
-
-    it('should accumulate multiple validation errors', () => {
-      const result = validationService.validatePassword('weak');
-      expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Password must be at least 8 characters long');
-      expect(result.errors).toContain('Password must contain at least one uppercase letter');
-      expect(result.errors).toContain('Password must contain at least one number');
-      expect(result.errors).toContain('Password must contain at least one special character');
-    });
-  });
 
   describe('validateUrl', () => {
     it('should validate correct URLs', () => {
@@ -344,29 +284,6 @@ describe('ValidationService', () => {
     });
   });
 
-  describe('sanitizeInput', () => {
-    it('should sanitize HTML input', () => {
-      const input = '<script>alert("xss")</script>Hello <b>World</b>';
-      const result = validationService.sanitizeInput(input);
-      expect(result).toBe('Hello World');
-    });
-
-    it('should trim whitespace', () => {
-      const input = '  hello world  ';
-      const result = validationService.sanitizeInput(input);
-      expect(result).toBe('hello world');
-    });
-
-    it('should handle null and undefined', () => {
-      expect(validationService.sanitizeInput(null)).toBe('');
-      expect(validationService.sanitizeInput(undefined)).toBe('');
-    });
-
-    it('should handle non-string input', () => {
-      expect(validationService.sanitizeInput(123)).toBe('123');
-      expect(validationService.sanitizeInput(true)).toBe('true');
-    });
-  });
 
   describe('isValidTag', () => {
     it('should validate correct tag formats', () => {
@@ -386,24 +303,4 @@ describe('ValidationService', () => {
     });
   });
 
-  describe('normalizeUrl', () => {
-    it('should normalize URLs correctly', () => {
-      const testCases = [
-        ['HTTPS://EXAMPLE.COM/PATH', 'https://example.com/PATH'],
-        ['https://example.com:443/path', 'https://example.com/path'],
-        ['http://example.com:80/path', 'http://example.com/path'],
-        ['https://example.com/path/', 'https://example.com/path'],
-        ['https://example.com/path?b=2&a=1', 'https://example.com/path?a=1&b=2']
-      ];
-
-      testCases.forEach(([input, expected]) => {
-        const result = validationService.normalizeUrl(input);
-        expect(result).toBe(expected);
-      });
-    });
-
-    it('should handle invalid URLs', () => {
-      expect(() => validationService.normalizeUrl('invalid-url')).toThrow();
-    });
-  });
 });

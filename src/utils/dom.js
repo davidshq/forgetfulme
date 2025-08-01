@@ -90,19 +90,6 @@ export function setText(element, text) {
 }
 
 /**
- * Escape HTML to prevent XSS attacks
- * @param {string} text - Text to escape
- * @returns {string} Escaped HTML
- */
-export function escapeHTML(text) {
-  if (!text) return '';
-
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-/**
  * Set HTML content safely by escaping user input
  * @param {Element} element - Target element
  * @param {string} html - HTML to set (will be escaped if not explicitly marked as safe)
@@ -161,17 +148,6 @@ export function toggleClass(element, className, condition) {
     element.classList.add(className);
   } else {
     element.classList.remove(className);
-  }
-}
-
-/**
- * Clear all child elements
- * @param {Element} element - Parent element
- */
-export function clearChildren(element) {
-  if (!element) return;
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
   }
 }
 

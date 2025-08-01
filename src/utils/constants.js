@@ -6,7 +6,6 @@ export const STORAGE_KEYS = {
   USER_SESSION: 'user_session',
   USER_PREFERENCES: 'user_preferences',
   SUPABASE_CONFIG: 'supabase_config',
-  BOOKMARK_CACHE: 'bookmark_cache',
   STATUS_TYPES: 'status_types',
   LAST_SYNC: 'last_sync'
 };
@@ -85,12 +84,7 @@ export const TIMEOUTS = {
   MESSAGE_SUCCESS: 3000, // 3 seconds
   MESSAGE_WARNING: 5000, // 5 seconds
   MESSAGE_INFO: 5000, // 5 seconds
-  BACKGROUND_BADGE_UPDATE: 5000, // 5 seconds
   AUTH_TOKEN_REFRESH: 10000, // 10 seconds
-  TEST_TIMEOUT: 10000, // 10 seconds
-  PERFORMANCE_RENDER_MAX: 1000, // 1 second
-  PERFORMANCE_SEARCH_MAX: 500, // 500ms
-  PERFORMANCE_BULK_MAX: 3000, // 3 seconds
   ERROR_RETRY_DELAY: 2500 // 2.5 seconds
 };
 
@@ -103,12 +97,4 @@ export const TIME_CALCULATIONS = {
   MILLISECONDS_PER_DAY: 24 * 60 * 60 * 1000,
   MILLISECONDS_PER_WEEK: 7 * 24 * 60 * 60 * 1000,
   MILLISECONDS_PER_MONTH: 30 * 24 * 60 * 60 * 1000
-};
-
-export const SERVER_CONFIG = {
-  DEV_PORT: 3000
-};
-
-export const HTTP_STATUS = {
-  INTERNAL_SERVER_ERROR: 500
 };

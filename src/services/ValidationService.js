@@ -117,46 +117,6 @@ export class ValidationService {
   }
 
   /**
-   * Validate password strength
-   * @param {string} password - Password to validate
-   * @returns {ValidationResult<string>} Validation result
-   */
-  validatePassword(password) {
-    const errors = [];
-
-    if (!password || typeof password !== 'string') {
-      errors.push('Password is required');
-      return { isValid: false, data: null, errors };
-    }
-
-    if (password.length < 8) {
-      errors.push('Password must be at least 8 characters long');
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      errors.push('Password must contain at least one uppercase letter');
-    }
-
-    if (!/[a-z]/.test(password)) {
-      errors.push('Password must contain at least one lowercase letter');
-    }
-
-    if (!/[0-9]/.test(password)) {
-      errors.push('Password must contain at least one number');
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      errors.push('Password must contain at least one special character');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      data: errors.length === 0 ? password : null,
-      errors
-    };
-  }
-
-  /**
    * Validate bookmark notes
    * @param {string} notes - Notes to validate
    * @returns {ValidationResult<string>} Validation result with sanitized notes
@@ -477,25 +437,6 @@ export class ValidationService {
   }
 
   /**
-   * Sanitize input - alias for sanitizeString for backward compatibility
-   * @param {*} input - Input to sanitize
-   * @returns {string} Sanitized string
-   */
-  sanitizeInput(input) {
-    if (input === null || input === undefined) {
-      return '';
-    }
-    if (typeof input !== 'string') {
-      return String(input);
-    }
-    // Remove HTML tags completely including script content, then trim
-    return input
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<[^>]*>/g, '')
-      .trim();
-  }
-
-  /**
    * Validate configuration object
    * @param {Object} config - Configuration to validate
    * @returns {ValidationResult<Object>} Validation result
@@ -613,49 +554,5 @@ export class ValidationService {
     }
     // Tags must be lowercase, alphanumeric with hyphens only
     return /^[a-z0-9-]+$/.test(tag);
-  }
-
-  /**
-   * Normalize URL for consistent comparison
-   * @param {string} url - URL to normalize
-   * @returns {string} Normalized URL
-   */
-  normalizeUrl(url) {
-    if (!url || typeof url !== 'string') {
-      throw new Error('Invalid URL');
-    }
-
-    try {
-      const urlObj = new URL(url);
-
-      // Convert protocol and hostname to lowercase
-      urlObj.protocol = urlObj.protocol.toLowerCase();
-      urlObj.hostname = urlObj.hostname.toLowerCase();
-
-      // Remove default ports
-      if (
-        (urlObj.protocol === 'https:' && urlObj.port === '443') ||
-        (urlObj.protocol === 'http:' && urlObj.port === '80')
-      ) {
-        urlObj.port = '';
-      }
-
-      // Remove trailing slash from pathname
-      if (urlObj.pathname.endsWith('/') && urlObj.pathname !== '/') {
-        urlObj.pathname = urlObj.pathname.slice(0, -1);
-      }
-
-      // Sort query parameters
-      const params = new URLSearchParams(urlObj.search);
-      const sortedParams = new URLSearchParams();
-      [...params.keys()].sort().forEach(key => {
-        sortedParams.append(key, params.get(key));
-      });
-      urlObj.search = sortedParams.toString();
-
-      return urlObj.toString();
-    } catch (error) {
-      throw new Error('Invalid URL format');
-    }
   }
 }
