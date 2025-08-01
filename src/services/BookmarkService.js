@@ -18,6 +18,7 @@ export class BookmarkService extends withServicePatterns(class {}) {
    * @param {ErrorService} errorService - Error handling service
    */
   constructor(authService, storageService, configService, validationService, errorService) {
+    super();
     this.authService = authService;
     this.storageService = storageService;
     this.configService = configService;

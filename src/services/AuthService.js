@@ -15,6 +15,7 @@ export class AuthService extends withServicePatterns(class {}) {
    * @param {ErrorService} errorService - Error handling service
    */
   constructor(configService, storageService, errorService) {
+    super();
     this.configService = configService;
     this.storageService = storageService;
     this.errorService = errorService;
