@@ -146,18 +146,34 @@ export class ValidationService {
   validateTags(tags) {
     const errors = [];
 
-    if (!tags) {
+    // Handle null/undefined safely
+    if (tags === null || tags === undefined) {
       return { isValid: true, data: [], errors: [] };
     }
 
     let tagArray;
     if (typeof tags === 'string') {
+      // Validate string is not empty after trim
+      const trimmed = tags.trim();
+      if (trimmed === '') {
+        return { isValid: true, data: [], errors: [] };
+      }
       // Split string by comma, semicolon, or space
-      tagArray = tags.split(/[,;\s]+/).filter(tag => tag.trim().length > 0);
+      tagArray = trimmed.split(/[,;\s]+/).filter(tag => tag.trim().length > 0);
     } else if (Array.isArray(tags)) {
-      tagArray = tags.filter(tag => tag && typeof tag === 'string');
+      // Type safety: filter out non-string elements and validate each element
+      tagArray = tags.filter(tag => {
+        if (tag === null || tag === undefined) {
+          return false; // Skip null/undefined elements
+        }
+        if (typeof tag !== 'string') {
+          errors.push(`Invalid tag type: expected string, got ${typeof tag}`);
+          return false;
+        }
+        return tag.trim().length > 0; // Keep non-empty strings
+      });
     } else {
-      errors.push('Tags must be a string or array');
+      errors.push(`Tags must be a string or array, got ${typeof tags}`);
       return { isValid: false, data: null, errors };
     }
 
@@ -418,23 +434,47 @@ export class ValidationService {
    * @param {string[]} errors - Errors array
    */
   validateStatusesFilter(statuses, validatedOptions, errors) {
-    if (!Array.isArray(statuses)) {
-      errors.push('Statuses filter must be an array');
-    } else {
-      const validStatuses = [];
-      const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
-      for (const status of statuses) {
-        if (typeof status === 'string') {
-          const normalized = status.trim().toLowerCase();
-          if (!allowedStatuses.includes(normalized)) {
-            errors.push(`Invalid status: ${status}`);
-          } else {
-            validStatuses.push(normalized);
-          }
-        }
-      }
-      validatedOptions.statuses = validStatuses;
+    // Type safety: handle null/undefined
+    if (statuses === null || statuses === undefined) {
+      validatedOptions.statuses = [];
+      return;
     }
+
+    if (!Array.isArray(statuses)) {
+      errors.push(`Statuses filter must be an array, got ${typeof statuses}`);
+      return;
+    }
+
+    const validStatuses = [];
+    const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
+    
+    for (const status of statuses) {
+      // Type safety: validate each status element
+      if (status === null || status === undefined) {
+        errors.push('Status array cannot contain null or undefined values');
+        continue;
+      }
+      
+      if (typeof status !== 'string') {
+        errors.push(`Each status must be a string, got ${typeof status} for value: ${status}`);
+        continue;
+      }
+
+      const trimmed = status.trim();
+      if (trimmed === '') {
+        errors.push('Status cannot be empty string');
+        continue;
+      }
+
+      const normalized = trimmed.toLowerCase();
+      if (!allowedStatuses.includes(normalized)) {
+        errors.push(`Invalid status: "${status}". Must be one of: ${allowedStatuses.join(', ')}`);
+      } else {
+        validStatuses.push(normalized);
+      }
+    }
+    
+    validatedOptions.statuses = validStatuses;
   }
 
   /**

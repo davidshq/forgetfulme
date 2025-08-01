@@ -201,13 +201,25 @@ export class BookmarkService extends withServicePatterns(class {}) {
         throw new Error('User not authenticated');
       }
 
+      // Type safety: validate options parameter
+      if (options !== null && options !== undefined && (typeof options !== 'object' || Array.isArray(options))) {
+        throw new Error('Options must be an object');
+      }
+
+      // Ensure options is an object (handle null/undefined)
+      const validOptions = options || {};
+
       const user = this.authService.getCurrentUser();
-      const page = options.page || 1;
-      const limit = options.limit || PAGINATION.DEFAULT_PAGE_SIZE;
+      if (!user || !user.id) {
+        throw new Error('Current user information not available');
+      }
+
+      const page = validOptions.page || 1;
+      const limit = validOptions.limit || PAGINATION.DEFAULT_PAGE_SIZE;
 
       // Check cache first
       const cachedBookmarks = await this.storageService.getBookmarkCache();
-      if (cachedBookmarks && !options.forceRefresh) {
+      if (cachedBookmarks && !validOptions.forceRefresh) {
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedBookmarks = cachedBookmarks.slice(startIndex, endIndex);
@@ -542,10 +554,41 @@ export class BookmarkService extends withServicePatterns(class {}) {
         throw new Error('User not authenticated');
       }
 
-      const data = JSON.parse(jsonData);
+      // Type safety: validate jsonData
+      if (jsonData === null || jsonData === undefined) {
+        throw new Error('JSON data cannot be null or undefined');
+      }
+
+      if (typeof jsonData !== 'string') {
+        throw new Error('JSON data must be a string');
+      }
+
+      if (jsonData.trim() === '') {
+        throw new Error('JSON data cannot be empty');
+      }
+
+      let data;
+      try {
+        data = JSON.parse(jsonData);
+      } catch (parseError) {
+        throw new Error(`Invalid JSON format: ${parseError.message}`);
+      }
+
+      // Type safety: validate parsed data structure
+      if (data === null || data === undefined) {
+        throw new Error('Parsed data cannot be null or undefined');
+      }
+
+      if (typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error('Import data must be an object');
+      }
 
       if (!data.bookmarks || !Array.isArray(data.bookmarks)) {
-        throw new Error('Invalid import data format');
+        throw new Error('Invalid import data format: missing bookmarks array');
+      }
+
+      if (data.bookmarks.length === 0) {
+        throw new Error('No bookmarks found in import data');
       }
 
       const results = {
@@ -556,6 +599,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       for (const bookmark of data.bookmarks) {
         try {
+          // Type safety: validate each bookmark
+          if (bookmark === null || bookmark === undefined) {
+            throw new Error('Bookmark cannot be null or undefined');
+          }
+
+          if (typeof bookmark !== 'object' || Array.isArray(bookmark)) {
+            throw new Error('Each bookmark must be an object');
+          }
+
           // Remove id to create new bookmark
           const {
             id: _id,
@@ -569,8 +621,10 @@ export class BookmarkService extends withServicePatterns(class {}) {
           results.imported++;
         } catch (error) {
           results.failed++;
+          // Safe property access with null checks
+          const bookmarkId = (bookmark && (bookmark.title || bookmark.url)) || 'Unknown bookmark';
           results.errors.push({
-            bookmark: bookmark.title || bookmark.url,
+            bookmark: bookmarkId,
             error: error.message
           });
         }

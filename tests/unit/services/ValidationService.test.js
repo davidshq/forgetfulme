@@ -257,7 +257,7 @@ describe('ValidationService', () => {
 
       const result = validationService.validateSearchOptions(searchOptions);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Invalid status: invalid-status');
+      expect(result.errors).toContain('Invalid status: "invalid-status". Must be one of: unread, reading, read, archived');
     });
 
     it('should validate date range', () => {

@@ -336,8 +336,26 @@ export class AuthService extends withServicePatterns(class {}) {
    */
   async updateUserProfile(profileData) {
     try {
+      // Type safety: validate profileData
+      if (profileData === null || profileData === undefined) {
+        throw new Error('Profile data cannot be null or undefined');
+      }
+
+      if (typeof profileData !== 'object' || Array.isArray(profileData)) {
+        throw new Error('Profile data must be an object');
+      }
+
+      if (Object.keys(profileData).length === 0) {
+        throw new Error('Profile data cannot be empty');
+      }
+
       if (!this.isAuthenticated() || !this.supabaseClient) {
         throw new Error('User not authenticated');
+      }
+
+      // Ensure currentUser exists before accessing its properties
+      if (!this.currentUser || !this.currentUser.id) {
+        throw new Error('Current user information not available');
       }
 
       const { data, error } = await this.supabaseClient

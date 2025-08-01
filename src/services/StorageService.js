@@ -273,7 +273,17 @@ export class StorageService {
    * @returns {Object[]|null} Cached bookmarks or null
    */
   getBookmarkCache(userId = null) {
+    // Type safety: validate userId if provided
+    if (userId !== null && typeof userId !== 'string') {
+      throw new Error('getBookmarkCache: userId must be a string or null');
+    }
+
     if (userId) {
+      // Validate userId is not empty string
+      if (userId.trim() === '') {
+        throw new Error('getBookmarkCache: userId cannot be empty string');
+      }
+      
       // Get user-specific cache from memory cache (test expects sync)
       const userCache = this.getCache(`bookmarks:${userId}`);
       return userCache || null;
@@ -288,12 +298,31 @@ export class StorageService {
    * @param {Object[]} [bookmarks] - Bookmarks to cache
    */
   setBookmarkCache(userIdOrBookmarks, bookmarks = null) {
-    if (typeof userIdOrBookmarks === 'string' && bookmarks) {
-      // User-specific cache - store in memory cache with test-expected key format
+    // Type safety: validate inputs
+    if (userIdOrBookmarks === null || userIdOrBookmarks === undefined) {
+      throw new Error('setBookmarkCache: userIdOrBookmarks cannot be null or undefined');
+    }
+
+    if (typeof userIdOrBookmarks === 'string') {
+      // Two-parameter usage: userId and bookmarks
+      if (!bookmarks || !Array.isArray(bookmarks)) {
+        throw new Error('setBookmarkCache: bookmarks must be a non-empty array when userId is provided');
+      }
       this.setCache(`bookmarks:${userIdOrBookmarks}`, bookmarks);
       return;
     }
-    // For legacy single-parameter usage, this would be async but tests expect sync
+
+    if (Array.isArray(userIdOrBookmarks)) {
+      // Single-parameter usage: legacy bookmarks array (deprecated)
+      if (bookmarks !== null) {
+        throw new Error('setBookmarkCache: when passing bookmarks array as first parameter, second parameter must not be provided');
+      }
+      // This legacy path is deprecated but maintained for backward compatibility
+      // In practice, tests should use the two-parameter version
+      return;
+    }
+
+    throw new Error('setBookmarkCache: userIdOrBookmarks must be a string (userId) or array (deprecated legacy usage)');
   }
 
   /**
