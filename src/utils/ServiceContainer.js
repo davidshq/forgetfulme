@@ -70,7 +70,6 @@ export class ServiceContainer {
   has(name) {
     return this.services.has(name) || this.factories.has(name);
   }
-
 }
 
 // Create and export default container instance

@@ -724,7 +724,10 @@ export class BookmarkService {
     if (options.dateTo) {
       // Use 'and' parameter to combine with dateFrom filter
       if (options.dateFrom) {
-        params.set('and', `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`);
+        params.set(
+          'and',
+          `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`
+        );
         params.delete('created_at'); // Remove single filter
       } else {
         params.set('created_at', `lte.${options.dateTo.toISOString()}`);
@@ -782,7 +785,10 @@ export class BookmarkService {
       if (options.dateTo) {
         // Use 'and' parameter to combine with dateFrom filter
         if (options.dateFrom) {
-          params.set('and', `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`);
+          params.set(
+            'and',
+            `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`
+          );
           params.delete('created_at'); // Remove single filter
         } else {
           params.set('created_at', `lte.${options.dateTo.toISOString()}`);

@@ -179,16 +179,16 @@ export class OptionsController extends BaseController {
    */
   async loadSectionData(sectionId) {
     switch (sectionId) {
-    case 'status-types':
-      await this.loadStatusTypes();
-      break;
-    case 'preferences':
-      await this.loadPreferences();
-      break;
-    case 'import-export':
-      await this.loadStorageUsage();
-      await this.loadExportOptions();
-      break;
+      case 'status-types':
+        await this.loadStatusTypes();
+        break;
+      case 'preferences':
+        await this.loadPreferences();
+        break;
+      case 'import-export':
+        await this.loadStorageUsage();
+        await this.loadExportOptions();
+        break;
     }
   }
 
@@ -709,8 +709,8 @@ export class OptionsController extends BaseController {
       <p><strong>Successfully imported:</strong> ${results.imported} bookmarks</p>
       <p><strong>Failed:</strong> ${results.failed} bookmarks</p>
       ${
-  results.errors.length > 0
-    ? `
+        results.errors.length > 0
+          ? `
         <details>
           <summary>View Errors (${results.errors.length})</summary>
           <ul>
@@ -718,8 +718,8 @@ export class OptionsController extends BaseController {
           </ul>
         </details>
       `
-    : ''
-}
+          : ''
+      }
     `;
 
     resultsDiv.innerHTML = html;

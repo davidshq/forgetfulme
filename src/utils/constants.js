@@ -79,4 +79,3 @@ export const CACHE_DURATION = {
   STATUS_TYPES: 60 * 60 * 1000, // 1 hour
   USER_PROFILE: 30 * 60 * 1000 // 30 minutes
 };
-
