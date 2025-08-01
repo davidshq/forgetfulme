@@ -223,11 +223,7 @@ export class BaseController {
    * @returns {Promise<*>} Operation result or fallback value
    */
   async safeAsync(operation, context, options = {}) {
-    const {
-      showError = true,
-      fallbackValue = null,
-      successMessage
-    } = options;
+    const { showError = true, fallbackValue = null, successMessage } = options;
 
     try {
       const result = await operation();
@@ -255,9 +251,10 @@ export class BaseController {
   handleValidationErrors(validationResult, context) {
     if (validationResult.isValid) return;
 
-    const message = validationResult.errors.length === 1
-      ? validationResult.errors[0]
-      : `Please fix the following issues:\n• ${validationResult.errors.join('\n• ')}`;
+    const message =
+      validationResult.errors.length === 1
+        ? validationResult.errors[0]
+        : `Please fix the following issues:\n• ${validationResult.errors.join('\n• ')}`;
 
     this.showError(message);
     console.warn(`[${context}] Validation failed:`, validationResult.errors);

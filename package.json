@@ -19,9 +19,15 @@
     "install-browsers": "playwright install chromium",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write src/**/*.{js,html,css,json}",
-    "format:check": "prettier --check src/**/*.{js,html,css,json}",
-    "check": "npm run lint && npm run format:check"
+    "format": "prettier --write \"src/**/*.{js,html,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,html,css,json}\"",
+    "check": "npm run lint && npm run format:check",
+    "check:all": "npm run lint && npm run format:check && npm test && npm run test:unit:coverage",
+    "quality": "npm run check:all && npm run test:playwright && npm run test:visual",
+    "audit:security": "npm audit --audit-level=moderate",
+    "audit:fix": "npm audit fix",
+    "validate": "npm run check && npm test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.0",
@@ -30,7 +36,9 @@
     "dotenv": "^17.2.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
     "jsdom": "^24.1.0",
+    "lint-staged": "^16.1.2",
     "prettier": "^3.3.0",
     "vitest": "^1.6.0"
   },
@@ -41,5 +49,16 @@
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0"
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "src/**/*.{html,css,json}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

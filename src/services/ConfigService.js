@@ -126,13 +126,19 @@ export class ConfigService extends withServicePatterns(class {}) {
       // Validate configuration
       const validation = this.validationService.validateConfig(config);
       if (!validation.isValid) {
-        this.handleAndThrow(new Error(`Invalid configuration: ${validation.errors.join(', ')}`), 'ConfigService.setSupabaseConfig');
+        this.handleAndThrow(
+          new Error(`Invalid configuration: ${validation.errors.join(', ')}`),
+          'ConfigService.setSupabaseConfig'
+        );
       }
 
       // Test connection before saving
       const isValid = await this.testSupabaseConnection(validation.data);
       if (!isValid) {
-        this.handleAndThrow(new Error('Could not connect to Supabase with provided configuration'), 'ConfigService.setSupabaseConfig');
+        this.handleAndThrow(
+          new Error('Could not connect to Supabase with provided configuration'),
+          'ConfigService.setSupabaseConfig'
+        );
       }
 
       // Save validated config
@@ -261,7 +267,10 @@ export class ConfigService extends withServicePatterns(class {}) {
 
       // Check for duplicate ID
       if (currentTypes.find(type => type.id === validated.id)) {
-        this.handleAndThrow(new Error(`Status type with ID '${validated.id}' already exists`), 'ConfigService.addStatusType');
+        this.handleAndThrow(
+          new Error(`Status type with ID '${validated.id}' already exists`),
+          'ConfigService.addStatusType'
+        );
       }
 
       const updatedTypes = [...currentTypes, validated];
@@ -287,7 +296,10 @@ export class ConfigService extends withServicePatterns(class {}) {
       const index = currentTypes.findIndex(type => type.id === id);
 
       if (index === -1) {
-        this.handleAndThrow(new Error(`Status type with ID '${id}' not found`), 'ConfigService.updateStatusType');
+        this.handleAndThrow(
+          new Error(`Status type with ID '${id}' not found`),
+          'ConfigService.updateStatusType'
+        );
       }
 
       const updatedType = { ...currentTypes[index], ...updates, id }; // Preserve ID
@@ -320,7 +332,10 @@ export class ConfigService extends withServicePatterns(class {}) {
       }
 
       if (typeToRemove.is_default) {
-        this.handleAndThrow(new Error('Cannot remove default status type'), 'ConfigService.removeStatusType');
+        this.handleAndThrow(
+          new Error('Cannot remove default status type'),
+          'ConfigService.removeStatusType'
+        );
       }
 
       const updatedTypes = currentTypes.filter(type => type.id !== id);
@@ -419,11 +434,17 @@ export class ConfigService extends withServicePatterns(class {}) {
    */
   validateStatusTypes(statusTypes) {
     if (!Array.isArray(statusTypes)) {
-      this.handleAndThrow(new Error('Status types must be an array'), 'ConfigService.validateStatusTypes');
+      this.handleAndThrow(
+        new Error('Status types must be an array'),
+        'ConfigService.validateStatusTypes'
+      );
     }
 
     if (statusTypes.length === 0) {
-      this.handleAndThrow(new Error('At least one status type is required'), 'ConfigService.validateStatusTypes');
+      this.handleAndThrow(
+        new Error('At least one status type is required'),
+        'ConfigService.validateStatusTypes'
+      );
     }
 
     const validatedTypes = statusTypes.map(type => this.validateStatusType(type));
@@ -443,7 +464,10 @@ export class ConfigService extends withServicePatterns(class {}) {
     const ids = validatedTypes.map(type => type.id);
     const uniqueIds = new Set(ids);
     if (ids.length !== uniqueIds.size) {
-      this.handleAndThrow(new Error('Status type IDs must be unique'), 'ConfigService.validateStatusTypes');
+      this.handleAndThrow(
+        new Error('Status type IDs must be unique'),
+        'ConfigService.validateStatusTypes'
+      );
     }
 
     return validatedTypes;
@@ -459,7 +483,10 @@ export class ConfigService extends withServicePatterns(class {}) {
     const result = this.validationService.validateStatusType(statusType);
 
     if (!result.isValid) {
-      this.handleAndThrow(new Error(result.errors?.[0] || 'Status type validation failed'), 'ConfigService.validateStatusType');
+      this.handleAndThrow(
+        new Error(result.errors?.[0] || 'Status type validation failed'),
+        'ConfigService.validateStatusType'
+      );
     }
 
     // Add is_default property for ConfigService compatibility

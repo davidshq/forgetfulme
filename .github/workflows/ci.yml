@@ -1,0 +1,121 @@
+name: CI/CD Quality Checks
+
+on:
+  push:
+    branches: [ main, develop, claude-rewrite-from-scratch ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run ESLint
+      run: npm run lint
+      
+    - name: Check Prettier formatting
+      run: npm run format:check
+      
+    - name: Run unit tests
+      run: npm test
+      
+    - name: Generate coverage report
+      run: npm run test:unit:coverage
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+        
+    - name: Install Playwright browsers
+      run: npm run install-browsers
+      
+    - name: Run integration tests
+      run: npm run test:playwright
+      
+    - name: Run visual regression tests
+      run: npm run test:visual
+      
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-node-${{ matrix.node-version }}
+        path: |
+          playwright-report/
+          test-results/
+          coverage/
+        retention-days: 7
+
+  security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      
+    - name: Check for dependency vulnerabilities
+      run: npm audit --audit-level=high --production
+
+  performance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install Playwright browsers
+      run: npm run install-browsers
+      
+    - name: Run performance tests
+      run: npm run test:playwright -- tests/integration/performance.test.js
+      
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-results
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
