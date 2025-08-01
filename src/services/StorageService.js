@@ -283,7 +283,7 @@ export class StorageService {
       if (userId.trim() === '') {
         throw new Error('getBookmarkCache: userId cannot be empty string');
       }
-      
+
       // Get user-specific cache from memory cache (test expects sync)
       const userCache = this.getCache(`bookmarks:${userId}`);
       return userCache || null;
@@ -306,7 +306,9 @@ export class StorageService {
     if (typeof userIdOrBookmarks === 'string') {
       // Two-parameter usage: userId and bookmarks
       if (!bookmarks || !Array.isArray(bookmarks)) {
-        throw new Error('setBookmarkCache: bookmarks must be a non-empty array when userId is provided');
+        throw new Error(
+          'setBookmarkCache: bookmarks must be a non-empty array when userId is provided'
+        );
       }
       this.setCache(`bookmarks:${userIdOrBookmarks}`, bookmarks);
       return;
@@ -315,14 +317,18 @@ export class StorageService {
     if (Array.isArray(userIdOrBookmarks)) {
       // Single-parameter usage: legacy bookmarks array (deprecated)
       if (bookmarks !== null) {
-        throw new Error('setBookmarkCache: when passing bookmarks array as first parameter, second parameter must not be provided');
+        throw new Error(
+          'setBookmarkCache: when passing bookmarks array as first parameter, second parameter must not be provided'
+        );
       }
       // This legacy path is deprecated but maintained for backward compatibility
       // In practice, tests should use the two-parameter version
       return;
     }
 
-    throw new Error('setBookmarkCache: userIdOrBookmarks must be a string (userId) or array (deprecated legacy usage)');
+    throw new Error(
+      'setBookmarkCache: userIdOrBookmarks must be a string (userId) or array (deprecated legacy usage)'
+    );
   }
 
   /**

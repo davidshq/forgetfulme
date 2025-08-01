@@ -50,7 +50,27 @@ export default [
       "prefer-const": "error",
       "no-var": "error",
       "arrow-spacing": "error",
-      "no-debugger": "error"
+      "no-debugger": "error",
+      // JSDoc type checking rules - focused on quality rather than strict coverage
+      "valid-jsdoc": ["warn", {
+        "requireReturn": false,
+        "requireReturnDescription": false,
+        "requireParamDescription": true,
+        "prefer": {
+          "return": "returns"
+        },
+        "requireReturnType": true,
+        "requireParamType": true
+      }],
+      "require-jsdoc": ["warn", {
+        "require": {
+          "FunctionDeclaration": false,
+          "MethodDefinition": false,
+          "ClassDeclaration": true,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        }
+      }]
     }
   },
   {

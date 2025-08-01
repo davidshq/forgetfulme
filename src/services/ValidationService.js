@@ -447,14 +447,14 @@ export class ValidationService {
 
     const validStatuses = [];
     const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
-    
+
     for (const status of statuses) {
       // Type safety: validate each status element
       if (status === null || status === undefined) {
         errors.push('Status array cannot contain null or undefined values');
         continue;
       }
-      
+
       if (typeof status !== 'string') {
         errors.push(`Each status must be a string, got ${typeof status} for value: ${status}`);
         continue;
@@ -473,7 +473,7 @@ export class ValidationService {
         validStatuses.push(normalized);
       }
     }
-    
+
     validatedOptions.statuses = validStatuses;
   }
 
