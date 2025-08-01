@@ -15,8 +15,9 @@ export default defineConfig({
         'src/types/'
       ]
     },
-    testTimeout: 10000,
-    hookTimeout: 10000
+    testTimeout: 5000,
+    hookTimeout: 5000,
+    bail: 1
   },
   resolve: {
     alias: {

@@ -4,9 +4,10 @@
   "description": "Chrome extension to track websites you've read",
   "type": "module",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --run",
+    "test:quick": "vitest --run --testTimeout=2000 --hookTimeout=2000 --bail=1",
     "test:unit:ui": "vitest --ui",
-    "test:unit:coverage": "vitest --coverage",
+    "test:unit:coverage": "vitest --run --coverage",
     "test:playwright": "playwright test",
     "test:playwright:headed": "playwright test --headed",
     "test:playwright:debug": "playwright test --debug",
