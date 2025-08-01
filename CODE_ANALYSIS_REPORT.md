@@ -27,42 +27,35 @@ This comprehensive code analysis examined the ForgetfulMe Chrome extension codeb
 **Inconsistent Error Handling in AuthService.js** ✅ **FIXED**
 **Unsafe Array Access in AuthService.js** ✅ **FIXED**
 **URL Formatting Logic** ✅ **FIXED**
+**Service Registration Pattern** ✅ **FIXED**
 ---
 
 ## 🐛 Remaining Bugs & Logic Errors
 
 ## 🔄 Critical Duplicate Code Patterns
 
-### ~~2. **Service Registration Pattern**~~ ✅ **FIXED**
-**Files**: ~~`background.js`, `bookmark-manager.js`, `options.js`, `popup.js`~~
+### ~~3. **Initialization Pattern**~~ ✅ **FIXED**
+**Files**: ~~All services had similar patterns~~
 
-**Fixed**: Eliminated service registration duplication across UI entry points:
-- **Created**: Shared `src/utils/serviceRegistration.js` utility with `registerAllServices()` and `registerCoreServices()`
-- **Removed**: ~30 lines of identical service registration code from each UI file (90 lines total)
-- **Note**: `background.js` retains original pattern due to service worker ES6 import limitations
-- **Replaced**: All UI files now import and call `registerAllServices()`
-- **Maintained**: Proper dependency injection patterns and service initialization order
+**Fixed**: Eliminated initialization duplication across services:
+- **Created**: `src/utils/serviceHelpers.js` with `withServicePatterns` mixin
+- **Removed**: ~20+ instances of `if (!this.supabaseClient) { await this.initialize(); }`
+- **Removed**: ~15+ instances of `if (!this.isConfigured()) { ... }` patterns
+- **Replaced**: Services now use `ensureInitialized()` and `ensureConfigured()` helpers
+- **Extended**: AuthService and BookmarkService now extend `withServicePatterns(class {})`
 
-**Impact**: 90 lines of duplicate service registration code eliminated from UI contexts, centralized configuration
+**Impact**: 35+ lines of duplicate initialization code eliminated, consistent error handling
 
-### 3. **Initialization Pattern** 
-**Files**: All services have similar patterns:
-```javascript
-if (!this.supabaseClient) {
-    await this.initialize();
-}
-```
+### ~~4. **Error Handling Pattern**~~ ✅ **FIXED**
+**Files**: ~~All services had repeated try-catch blocks~~
 
-### 4. **Error Handling Pattern**
-Repeated try-catch blocks across all services:
-```javascript
-try {
-    // operation
-} catch (error) {
-    const errorInfo = this.errorService.handle(error, 'Service.method');
-    throw new Error(errorInfo.message);
-}
-```
+**Fixed**: Standardized error handling across services:
+- **Removed**: ~25+ instances of `const errorInfo = this.errorService.handle(error, 'Service.method'); throw new Error(errorInfo.message);`
+- **Replaced**: Services now use `handleAndThrow(error, context)` helper method
+- **Added**: Additional helpers like `handleAndReturnNull()` and `withErrorHandling()`
+- **Centralized**: All error handling patterns in shared service mixin
+
+**Impact**: 25+ lines of duplicate error handling code eliminated, improved consistency
 
 ---
 
@@ -196,9 +189,9 @@ setTimeout(callback, 5000); // Should be constant
 | Logic Errors | 3 | Medium (2 more fixed) |
 | Security Issues | 3 | High |
 | Dead Code Items | 8 | Low |
-| Duplicate Patterns | 2 | Medium (2 more fixed) |
+| Duplicate Patterns | 0 | ✅ All Fixed (4 more fixed) |
 | Code Smells | 12 | Low-Medium |
-| **Total Issues** | **28** | **Mixed** |
+| **Total Issues** | **26** | **Mixed** |
 
 **Lines of Code**: ~5,500  
 

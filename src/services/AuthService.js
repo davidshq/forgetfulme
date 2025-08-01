@@ -3,11 +3,12 @@
  */
 
 import { createClient } from '../lib/supabase.js';
+import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
  * Service for managing user authentication with Supabase
  */
-export class AuthService {
+export class AuthService extends withServicePatterns(class {}) {
   /**
    * @param {ConfigService} configService - Configuration service
    * @param {StorageService} storageService - Storage service
@@ -75,14 +76,7 @@ export class AuthService {
    */
   async signIn(email, password) {
     try {
-      if (!this.isConfigured()) {
-        const initialized = await this.initialize();
-        if (!initialized) {
-          throw new Error(
-            'Supabase configuration is required. Please configure the extension in Options.'
-          );
-        }
-      }
+      await this.ensureConfigured();
 
       const response = await this.supabaseClient.auth.signInWithPassword({
         email,
@@ -101,8 +95,7 @@ export class AuthService {
       await this.handleAuthSuccess(session);
       return this.currentUser;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.signIn');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.signIn');
     }
   }
 
@@ -114,14 +107,7 @@ export class AuthService {
    */
   async signUp(email, password) {
     try {
-      if (!this.isConfigured()) {
-        const initialized = await this.initialize();
-        if (!initialized) {
-          throw new Error(
-            'Supabase configuration is required. Please configure the extension in Options.'
-          );
-        }
-      }
+      await this.ensureConfigured();
 
       const response = await this.supabaseClient.auth.signUp({
         email,
@@ -169,8 +155,7 @@ export class AuthService {
       await this.handleAuthSuccess(session);
       return this.currentUser;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.signUp');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.signUp');
     }
   }
 
@@ -186,8 +171,7 @@ export class AuthService {
 
       await this.handleAuthSignOut();
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.signOut');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.signOut');
     }
   }
 
@@ -213,11 +197,9 @@ export class AuthService {
    */
   async getSession() {
     try {
-      if (!this.isConfigured()) {
-        const initialized = await this.initialize();
-        if (!initialized) {
-          return null;
-        }
+      const configured = await this.ensureConfigured(false);
+      if (!configured) {
+        return null;
       }
 
       const { data } = await this.supabaseClient.auth.getSession();
@@ -234,11 +216,9 @@ export class AuthService {
    */
   async refreshSession() {
     try {
-      if (!this.isConfigured()) {
-        const initialized = await this.initialize();
-        if (!initialized) {
-          return null;
-        }
+      const configured = await this.ensureConfigured(false);
+      if (!configured) {
+        return null;
       }
 
       const { data, error } = await this.supabaseClient.auth.refreshSession();
@@ -326,8 +306,7 @@ export class AuthService {
 
       return Array.isArray(data) && data.length > 0 ? data[0] : null;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.updateUserProfile');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.updateUserProfile');
     }
   }
 
@@ -338,14 +317,7 @@ export class AuthService {
    */
   async resetPassword(email) {
     try {
-      if (!this.isConfigured()) {
-        const initialized = await this.initialize();
-        if (!initialized) {
-          throw new Error(
-            'Supabase configuration is required. Please configure the extension in Options.'
-          );
-        }
-      }
+      await this.ensureConfigured();
 
       const { error } = await this.supabaseClient.auth.resetPasswordForEmail(email);
 
@@ -353,8 +325,7 @@ export class AuthService {
         throw new Error(error.message);
       }
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.resetPassword');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.resetPassword');
     }
   }
 
@@ -379,8 +350,7 @@ export class AuthService {
       // Notify listeners
       this.notifyAuthChange(this.currentUser);
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.handleAuthSuccess');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.handleAuthSuccess');
     }
   }
 
@@ -401,8 +371,7 @@ export class AuthService {
       // Notify listeners
       this.notifyAuthChange(null);
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'AuthService.handleAuthSignOut');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'AuthService.handleAuthSignOut');
     }
   }
 

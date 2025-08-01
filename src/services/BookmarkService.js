@@ -4,11 +4,12 @@
 
 import { createClient } from '../lib/supabase.js';
 import { PAGINATION } from '../utils/constants.js';
+import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
  * Service for managing bookmarks with full CRUD operations
  */
-export class BookmarkService {
+export class BookmarkService extends withServicePatterns(class {}) {
   /**
    * @param {AuthService} authService - Authentication service
    * @param {StorageService} storageService - Storage service
@@ -38,8 +39,7 @@ export class BookmarkService {
 
       this.supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.initialize');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.initialize');
     }
   }
 
@@ -76,9 +76,7 @@ export class BookmarkService {
       };
 
       // Save to database
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       const savedBookmark = await this.saveToDatabase(bookmark);
 
@@ -87,8 +85,7 @@ export class BookmarkService {
 
       return savedBookmark;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.createBookmark');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.createBookmark');
     }
   }
 
@@ -140,8 +137,7 @@ export class BookmarkService {
 
       return saved;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.updateBookmark');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.updateBookmark');
     }
   }
 
@@ -158,9 +154,7 @@ export class BookmarkService {
 
       const user = this.authService.getCurrentUser();
 
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       // Delete from database
       const response = await fetch(
@@ -182,8 +176,7 @@ export class BookmarkService {
       // Update cache
       await this.updateCache();
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.deleteBookmark');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.deleteBookmark');
     }
   }
 
@@ -221,8 +214,7 @@ export class BookmarkService {
       // Fetch from database if not cached
       return await this.searchBookmarks({ page, limit, userId: user.id });
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.getBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.getBookmarks');
     }
   }
 
@@ -239,9 +231,7 @@ export class BookmarkService {
 
       const user = this.authService.getCurrentUser();
 
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       const response = await fetch(
         `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?select=*&id=eq.${bookmarkId}&user_id=eq.${user.id}`,
@@ -286,9 +276,7 @@ export class BookmarkService {
       const searchOptions = validation.data;
       const user = this.authService.getCurrentUser();
 
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       // Build query
       const query = this.buildSearchQuery(searchOptions, user.id);
@@ -325,8 +313,7 @@ export class BookmarkService {
         hasMore: page * pageSize < totalCount
       };
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.searchBookmarksDefault');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.searchBookmarksDefault');
     }
   }
 
@@ -347,8 +334,7 @@ export class BookmarkService {
       const result = await this.searchBookmarks(searchOptions);
       return result.items;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.getRecentBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.getRecentBookmarks');
     }
   }
 
@@ -364,9 +350,7 @@ export class BookmarkService {
 
       const user = this.authService.getCurrentUser();
 
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       // Get all bookmarks for statistics
       const response = await fetch(
@@ -422,8 +406,7 @@ export class BookmarkService {
 
       return stats;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.getBookmarkStats');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.getBookmarkStats');
     }
   }
 
@@ -462,8 +445,7 @@ export class BookmarkService {
 
       return results;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.bulkUpdateBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.bulkUpdateBookmarks');
     }
   }
 
@@ -497,8 +479,7 @@ export class BookmarkService {
         console.warn('Some bookmarks failed to delete:', errors);
       }
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.bulkDeleteBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.bulkDeleteBookmarks');
     }
   }
 
@@ -536,8 +517,7 @@ export class BookmarkService {
 
       return JSON.stringify(exportData, null, 2);
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.exportBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.exportBookmarks');
     }
   }
 
@@ -589,8 +569,7 @@ export class BookmarkService {
 
       return results;
     } catch (error) {
-      const errorInfo = this.errorService.handle(error, 'BookmarkService.importBookmarks');
-      throw new Error(errorInfo.message);
+      this.handleAndThrow(error, 'BookmarkService.importBookmarks');
     }
   }
 
@@ -614,9 +593,7 @@ export class BookmarkService {
       const normalizedUrl = validation.data;
       const user = this.authService.getCurrentUser();
 
-      if (!this.supabaseClient) {
-        await this.initialize();
-      }
+      await this.ensureInitialized();
 
       const response = await fetch(
         `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?select=*&url=eq.${encodeURIComponent(normalizedUrl)}&user_id=eq.${user.id}`,
