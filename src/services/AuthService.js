@@ -12,7 +12,7 @@ import { TIME_CALCULATIONS } from '../utils/constants.js';
 export class AuthService extends withServicePatterns(class {}) {
   // Static instance tracking for cleanup
   static currentInstance = null;
-  
+
   /**
    * @param {ConfigService} configService - Configuration service
    * @param {StorageService} storageService - Storage service
@@ -20,13 +20,13 @@ export class AuthService extends withServicePatterns(class {}) {
    */
   constructor(configService, storageService, errorService) {
     super();
-    
+
     // Clean up previous instance if exists
     if (AuthService.currentInstance) {
       AuthService.currentInstance.cleanup();
     }
     AuthService.currentInstance = this;
-    
+
     this.configService = configService;
     this.storageService = storageService;
     this.errorService = errorService;
@@ -539,7 +539,7 @@ export class AuthService extends withServicePatterns(class {}) {
       hasSupabaseConfig: this.supabaseClient !== null
     };
   }
-  
+
   /**
    * Cleanup service resources
    * @private
@@ -547,11 +547,11 @@ export class AuthService extends withServicePatterns(class {}) {
   cleanup() {
     // Clear all auth change listeners
     this.authChangeListeners.clear();
-    
+
     // NOTE: Supabase auth state cleanup is handled by service recreation
     // We cannot safely unsubscribe from auth state changes as the subscription
     // is managed by the Supabase client instance
-    
+
     // Clear references
     this.currentUser = null;
     this.supabaseClient = null;

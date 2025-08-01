@@ -25,7 +25,7 @@ export class BaseController {
     this.errorService = errorService;
     this.cleanupFunctions = [];
     this.messageTimeout = null;
-    
+
     // Ensure cleanup on page unload
     this._handleUnload = () => this.destroy();
     window.addEventListener('beforeunload', this._handleUnload);
@@ -49,7 +49,7 @@ export class BaseController {
       return;
     }
     this._destroyed = true;
-    
+
     // Clear all event listeners and timeouts
     this.cleanupFunctions.forEach(cleanup => {
       try {
@@ -64,7 +64,7 @@ export class BaseController {
       clearTimeout(this.messageTimeout);
       this.messageTimeout = null;
     }
-    
+
     // Remove unload listeners
     window.removeEventListener('beforeunload', this._handleUnload);
     window.removeEventListener('unload', this._handleUnload);

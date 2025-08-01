@@ -448,18 +448,18 @@ export class StorageService {
       // First, clean up expired entries
       const now = Date.now();
       const keysToDelete = [];
-      
+
       for (const [cacheKey, cacheEntry] of this.cache.entries()) {
         if (now > cacheEntry.expires) {
           keysToDelete.push(cacheKey);
         }
       }
-      
+
       keysToDelete.forEach(k => {
         this.cache.delete(k);
         this.cacheTimestamps.delete(k);
       });
-      
+
       // If still at capacity after cleanup, evict enough entries to make room
       if (this.cache.size >= this.maxCacheSize && !this.cache.has(key)) {
         // Calculate how many to evict (at least 1)
@@ -468,7 +468,7 @@ export class StorageService {
           .sort((a, b) => a[1] - b[1])
           .slice(0, entriesToEvict)
           .map(entry => entry[0]);
-          
+
         sortedKeys.forEach(k => {
           this.cache.delete(k);
           this.cacheTimestamps.delete(k);
@@ -479,7 +479,7 @@ export class StorageService {
       if (this.cache.has(key)) {
         this.cache.delete(key);
       }
-      
+
       this.cache.set(key, {
         data: data,
         expires: now + ttl
@@ -495,7 +495,7 @@ export class StorageService {
    */
   getCache(key) {
     let result = null;
-    
+
     this.executeAtomicCacheOperation(() => {
       const cached = this.cache.get(key);
       if (!cached) {
@@ -504,7 +504,7 @@ export class StorageService {
       }
 
       const now = Date.now();
-      
+
       // Check if expired
       if (now > cached.expires) {
         this.cache.delete(key);
@@ -515,14 +515,14 @@ export class StorageService {
 
       // Update access time for LRU
       this.cacheTimestamps.set(key, now);
-      
+
       // Move to end of Map for LRU (delete and re-add)
       this.cache.delete(key);
       this.cache.set(key, cached);
-      
+
       result = cached.data;
     });
-    
+
     return result;
   }
 
@@ -537,13 +537,13 @@ export class StorageService {
       this.cacheOperationQueue.push(operation);
       return;
     }
-    
+
     this.cacheOperationInProgress = true;
     try {
       operation();
     } finally {
       this.cacheOperationInProgress = false;
-      
+
       // Process queued operations
       while (this.cacheOperationQueue.length > 0) {
         const nextOperation = this.cacheOperationQueue.shift();

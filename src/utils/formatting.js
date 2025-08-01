@@ -76,16 +76,3 @@ export function formatUrl(url, maxLength = 50) {
     return url.length > maxLength ? url.substring(0, maxLength - 3) + '...' : url;
   }
 }
-
-/**
- * Truncate text with ellipsis
- * @param {string} text - Text to truncate
- * @param {number} maxLength - Maximum length
- * @param {string} [suffix='...'] - Suffix to add
- * @returns {string} Truncated text
- */
-export function truncate(text, maxLength, suffix = '...') {
-  if (!text || text.length <= maxLength) return text || '';
-
-  return text.substring(0, maxLength - suffix.length) + suffix;
-}
