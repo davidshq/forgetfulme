@@ -207,7 +207,8 @@ export class StorageService {
    * @returns {Promise<Object|null>} User session or null
    */
   async getUserSession() {
-    return await this.get(STORAGE_KEYS.USER_SESSION, true, CACHE_DURATION.USER_PROFILE);
+    const result = await this.get(STORAGE_KEYS.USER_SESSION, true, CACHE_DURATION.USER_PROFILE);
+    return result[STORAGE_KEYS.USER_SESSION] || null;
   }
 
   /**
@@ -232,11 +233,8 @@ export class StorageService {
    * @returns {Promise<Object>} User preferences
    */
   async getUserPreferences() {
-    const preferences = await this.get(
-      STORAGE_KEYS.USER_PREFERENCES,
-      true,
-      CACHE_DURATION.USER_PROFILE
-    );
+    const result = await this.get(STORAGE_KEYS.USER_PREFERENCES, true, CACHE_DURATION.USER_PROFILE);
+    const preferences = result[STORAGE_KEYS.USER_PREFERENCES];
     return preferences || this.getDefaultPreferences();
   }
 
@@ -254,7 +252,8 @@ export class StorageService {
    * @returns {Promise<Object|null>} Supabase config or null
    */
   async getSupabaseConfig() {
-    return await this.get(STORAGE_KEYS.SUPABASE_CONFIG, true, CACHE_DURATION.USER_PROFILE);
+    const result = await this.get(STORAGE_KEYS.SUPABASE_CONFIG, true, CACHE_DURATION.USER_PROFILE);
+    return result[STORAGE_KEYS.SUPABASE_CONFIG] || null;
   }
 
   /**
@@ -327,7 +326,8 @@ export class StorageService {
    * @returns {Promise<Object[]>} Status types
    */
   async getStatusTypes() {
-    return await this.get(STORAGE_KEYS.STATUS_TYPES, true, CACHE_DURATION.STATUS_TYPES);
+    const result = await this.get(STORAGE_KEYS.STATUS_TYPES, true, CACHE_DURATION.STATUS_TYPES);
+    return result[STORAGE_KEYS.STATUS_TYPES] || [];
   }
 
   /**
@@ -344,7 +344,8 @@ export class StorageService {
    * @returns {Promise<number|null>} Last sync timestamp
    */
   async getLastSync() {
-    return await this.get(STORAGE_KEYS.LAST_SYNC, false);
+    const result = await this.get(STORAGE_KEYS.LAST_SYNC, false);
+    return result[STORAGE_KEYS.LAST_SYNC] || null;
   }
 
   /**

@@ -24,8 +24,9 @@ container.register(
 );
 
 // Initialize options when DOM is ready
-ready().then(async () => {
+(async () => {
   try {
+    await ready();
     const optionsController = container.get('optionsController');
     await optionsController.initialize();
 
@@ -45,4 +46,4 @@ ready().then(async () => {
       messageArea.appendChild(errorDiv);
     }
   }
-});
+})();

@@ -22,8 +22,9 @@ container.register(
 );
 
 // Initialize popup when DOM is ready
-ready().then(async () => {
+(async () => {
   try {
+    await ready();
     const popupController = container.get('popupController');
     await popupController.initialize();
 
@@ -43,4 +44,4 @@ ready().then(async () => {
       messageArea.appendChild(errorDiv);
     }
   }
-});
+})();

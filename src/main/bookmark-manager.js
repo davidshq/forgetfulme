@@ -23,8 +23,9 @@ container.register(
 );
 
 // Initialize bookmark manager when DOM is ready
-ready().then(async () => {
+(async () => {
   try {
+    await ready();
     const bookmarkManagerController = container.get('bookmarkManagerController');
     await bookmarkManagerController.initialize();
 
@@ -44,4 +45,4 @@ ready().then(async () => {
       messageArea.appendChild(errorDiv);
     }
   }
-});
+})();

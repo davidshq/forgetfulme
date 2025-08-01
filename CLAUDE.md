@@ -35,6 +35,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **JSDoc comments**: Required for all functions, focus on what functions do rather than implementation details
 - **Markdown planning**: Document architectural decisions and plans
 
+## **🚨 MANDATORY: Self-Review Protocol for Code Changes**
+
+### **CRITICAL REQUIREMENT: Self-Review After Substantial Code Changes**
+
+**Claude Code MUST perform a comprehensive self-review after making substantial code changes** (refactoring, new features, complex bug fixes, architectural changes). This is not optional.
+
+### **Required Self-Review Process:**
+1. **Logic Review**: Examine conditional statements, loops, and error handling logic for correctness
+2. **API Compatibility**: Ensure no breaking changes to public interfaces
+3. **Performance Impact**: Consider if changes introduce performance regressions  
+4. **Error Handling**: Verify error paths are properly handled
+5. **Test Coverage**: Run tests to ensure changes don't break existing functionality
+6. **Memory Leaks**: Check for potential memory leaks or resource cleanup issues
+
+### **Common Issues to Check For:**
+- **Logic Errors**: Incorrect conditional operators (e.g., `||` vs `&&`)
+- **Type Mismatches**: Ensure consistent data types throughout call chains
+- **Null/Undefined Issues**: Check for proper null/undefined handling
+- **Async/Promise Issues**: Verify proper async/await usage and error propagation
+- **Event Listener Leaks**: Ensure event listeners are properly cleaned up
+- **Scope Issues**: Check variable scope and closure behavior
+
+### **Documentation of Issues Found:**
+- Always document any bugs found during self-review
+- Explain the fix and why it was necessary
+- Include the impact of the bug (potential user-facing issues)
+
+**Example Self-Review Finding:**
+```javascript
+// BUG FOUND: Logic error in database categorization
+// BEFORE (incorrect):
+if (!isDatabaseContext || !isDatabaseRelated) {
+  if (!this.isDatabaseError(error, errorMessage)) return null;
+}
+
+// AFTER (fixed):
+if (!isDatabaseContext && !isDatabaseRelated) {
+  return null;
+}
+
+// IMPACT: Could incorrectly categorize non-database errors as database errors
+// FIX: Changed OR to AND logic - must have context AND/OR patterns to be database error
+```
+
+This self-review process helps maintain code quality and prevents bugs from reaching production.
+
 ## Architecture Overview
 
 This is a Chrome extension built with Manifest V3 that helps users mark websites as "read" for research purposes, with Supabase backend integration.
@@ -157,12 +203,22 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - **Visual regression tests**: Critical for AI to "see" changes and match intended styling/layout
 
 **Claude Code Automation Requirements:**
-1. Before ANY significant changes: Run `npm run test:unit:coverage` to establish coverage baseline
-2. Before ANY UI/CSS changes: Run `npm run test:visual:simple` to establish visual baseline
-3. After ANY UI/CSS changes: Run `npm run test:visual:simple` to detect changes
-4. After any code changes: Run `npm run check` for lint + format check
-5. Before completing any task: Run `npm run test:unit:coverage` to verify no coverage regression
-6. Before completing any task with UI changes: Run `npm run test:all`
+1. **🚨 MANDATORY SELF-REVIEW**: Perform comprehensive self-review after substantial changes (see Self-Review Protocol above)
+2. Before ANY significant changes: Run `npm run test:unit:coverage` to establish coverage baseline
+3. Before ANY UI/CSS changes: Run `npm run test:visual:simple` to establish visual baseline
+4. After ANY UI/CSS changes: Run `npm run test:visual:simple` to detect changes
+5. After any code changes: Run `npm run check` for lint + format check
+6. Before completing any task: Run `npm run test:unit:coverage` to verify no coverage regression
+7. Before completing any task with UI changes: Run `npm run test:all`
+
+### **Self-Review Checklist for Testing**
+When performing mandatory self-review, verify:
+- ✅ **Logic correctness**: All conditional statements, loops, and error handling work as intended
+- ✅ **API compatibility**: No breaking changes to method signatures or return types
+- ✅ **Performance**: No unintended performance regressions introduced
+- ✅ **Memory management**: Event listeners cleaned up, no memory leaks
+- ✅ **Error handling**: All error paths properly handled with appropriate fallbacks
+- ✅ **Type safety**: Consistent data types and proper null/undefined handling
 
 **Visual Test Coverage Requirements:**
 - Every UI state must have a visual test (loading, error, success, empty, populated)
@@ -267,13 +323,16 @@ The confirmation system automatically extracts tokens from Supabase email links 
 **Complete Development Cycle for Each Change:**
 1. **Setup**: Follow dev-docs/DEVELOPMENT_SETUP.md for quick start (first time only)
 2. **Make the change**: Implement the specific feature/fix
-3. **Run tests**: `npm run check` + visual tests if UI changes (see Testing Commands section)
-4. **Verify the fix works**: Test the actual functionality
-5. **Visual Changes**: Use `npm run test:visual:update` to update baselines when changes are intentional
-6. **Final validation**: Run `npm run test:all` before committing (includes visual regression)
-7. **Commit**: Commit the change with a descriptive message
-8. **Debugging**: Use `npm run test:playwright:debug` for integration test debugging as needed
-9. **THEN move to the next item**
+3. **🚨 MANDATORY SELF-REVIEW**: Perform comprehensive self-review (see Self-Review Protocol section above)
+4. **Run tests**: `npm run check` + visual tests if UI changes (see Testing Commands section)
+5. **Verify the fix works**: Test the actual functionality
+6. **Visual Changes**: Use `npm run test:visual:update` to update baselines when changes are intentional
+7. **Final validation**: Run `npm run test:all` before committing (includes visual regression)
+8. **Commit**: Commit the change with a descriptive message
+9. **Debugging**: Use `npm run test:playwright:debug` for integration test debugging as needed
+10. **THEN move to the next item**
+
+**⚠️ IMPORTANT**: Steps 3 (Self-Review) and 4-7 (Testing) are mandatory for ALL substantial code changes. Skipping self-review can introduce bugs that are difficult to detect later.
 
 **Benefits**: Clear change history, easy rollbacks, better testing, reduced conflicts, easier debugging.
 
@@ -399,48 +458,3 @@ The confirmation system automatically extracts tokens from Supabase email links 
 
 ---
 
-## **Code Review Protocol**
-
-### **MANDATORY: Self-Review After Substantial Code Changes**
-
-After making substantial code changes (refactoring, new features, complex bug fixes), Claude Code MUST perform a self-review to identify potential bugs, mistakes, and bad practices.
-
-**Required Review Process:**
-1. **Logic Review**: Examine conditional statements, loops, and error handling logic for correctness
-2. **API Compatibility**: Ensure no breaking changes to public interfaces
-3. **Performance Impact**: Consider if changes introduce performance regressions  
-4. **Error Handling**: Verify error paths are properly handled
-5. **Test Coverage**: Run tests to ensure changes don't break existing functionality
-6. **Memory Leaks**: Check for potential memory leaks or resource cleanup issues
-
-**Common Issues to Check For:**
-- **Logic Errors**: Incorrect conditional operators (e.g., `||` vs `&&`)
-- **Type Mismatches**: Ensure consistent data types throughout call chains
-- **Null/Undefined Issues**: Check for proper null/undefined handling
-- **Async/Promise Issues**: Verify proper async/await usage and error propagation
-- **Event Listener Leaks**: Ensure event listeners are properly cleaned up
-- **Scope Issues**: Check variable scope and closure behavior
-
-**Documentation of Issues Found:**
-- Always document any bugs found during self-review
-- Explain the fix and why it was necessary
-- Include the impact of the bug (potential user-facing issues)
-
-**Example Self-Review Finding:**
-```javascript
-// BUG FOUND: Logic error in database categorization
-// BEFORE (incorrect):
-if (!isDatabaseContext || !isDatabaseRelated) {
-  if (!this.isDatabaseError(error, errorMessage)) return null;
-}
-
-// AFTER (fixed):
-if (!isDatabaseContext && !isDatabaseRelated) {
-  return null;
-}
-
-// IMPACT: Could incorrectly categorize non-database errors as database errors
-// FIX: Changed OR to AND logic - must have context AND/OR patterns to be database error
-```
-
-This self-review process helps maintain code quality and prevents bugs from reaching production.

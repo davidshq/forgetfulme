@@ -2,7 +2,15 @@
  * @fileoverview Base controller class with common functionality
  */
 
-import { show, hide, setText, createElement, clearElement, setTrustedHTML } from '../utils/dom.js';
+import {
+  $,
+  show,
+  hide,
+  setText,
+  createElement,
+  clearElement,
+  setTrustedHTML
+} from '../utils/dom.js';
 import { formatDate } from '../utils/formatting.js';
 import { TIMEOUTS } from '../utils/constants.js';
 
@@ -63,7 +71,7 @@ export class BaseController {
    */
   showMessage(text, type = 'info', duration = TIMEOUTS.MESSAGE_DEFAULT) {
     try {
-      const messageArea = document.getElementById('message-area');
+      const messageArea = $('#message-area');
       if (!messageArea) {
         console.warn('Message area not found');
         return;
@@ -197,7 +205,7 @@ export class BaseController {
    * @param {string} [message='Loading...'] - Loading message
    */
   showLoading(target, message = 'Loading...') {
-    const element = typeof target === 'string' ? document.querySelector(target) : target;
+    const element = typeof target === 'string' ? $(target) : target;
     if (!element) return;
 
     // Create loading content
@@ -223,7 +231,7 @@ export class BaseController {
    * @param {string|Element} target - Target element or selector
    */
   hideLoading(target) {
-    const element = typeof target === 'string' ? document.querySelector(target) : target;
+    const element = typeof target === 'string' ? $(target) : target;
     if (!element) return;
 
     // Restore original content
@@ -239,7 +247,7 @@ export class BaseController {
    * @param {boolean} condition - Whether to show or hide
    */
   toggleElement(element, condition) {
-    const el = typeof element === 'string' ? document.querySelector(element) : element;
+    const el = typeof element === 'string' ? $(element) : element;
     if (!el) return;
 
     if (condition) {
@@ -255,7 +263,7 @@ export class BaseController {
    * @param {string} text - Text to set
    */
   setText(element, text) {
-    const el = typeof element === 'string' ? document.querySelector(element) : element;
+    const el = typeof element === 'string' ? $(element) : element;
     if (el) {
       setText(el, text);
     }
