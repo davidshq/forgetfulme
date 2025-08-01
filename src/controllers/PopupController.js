@@ -4,6 +4,7 @@
 
 import { BaseController } from './BaseController.js';
 import { $, show, hide, setFormData } from '../utils/dom.js';
+import { formatUrl } from '../utils/formatting.js';
 
 /**
  * Controller for the extension popup
@@ -609,29 +610,12 @@ export class PopupController extends BaseController {
   }
 
   /**
-   * Format URL for display
+   * Format URL for display (uses shared utility)
    * @param {string} url - URL to format
    * @returns {string} Formatted URL
    */
   formatUrl(url) {
-    if (!url) return '';
-
-    try {
-      const urlObj = new URL(url);
-      let formatted = urlObj.hostname + urlObj.pathname;
-
-      // Remove www prefix
-      formatted = formatted.replace(/^www\./, '');
-
-      // Truncate if too long
-      if (formatted.length > 40) {
-        formatted = formatted.substring(0, 37) + '...';
-      }
-
-      return formatted;
-    } catch {
-      return url.length > 40 ? url.substring(0, 37) + '...' : url;
-    }
+    return formatUrl(url, 40);
   }
 
   /**

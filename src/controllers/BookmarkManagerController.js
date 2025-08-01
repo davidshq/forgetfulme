@@ -4,6 +4,7 @@
 
 import { BaseController } from './BaseController.js';
 import { $, $$, show, hide, setFormData, createElement } from '../utils/dom.js';
+import { formatUrl } from '../utils/formatting.js';
 
 /**
  * Controller for the bookmark manager page
@@ -976,29 +977,12 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
-   * Format URL for display
+   * Format URL for display (uses shared utility)
    * @param {string} url - URL to format
    * @returns {string} Formatted URL
    */
   formatUrl(url) {
-    if (!url) return '';
-
-    try {
-      const urlObj = new URL(url);
-      let formatted = urlObj.hostname + urlObj.pathname;
-
-      // Remove www prefix
-      formatted = formatted.replace(/^www\./, '');
-
-      // Truncate if too long
-      if (formatted.length > 60) {
-        formatted = formatted.substring(0, 57) + '...';
-      }
-
-      return formatted;
-    } catch {
-      return url.length > 60 ? url.substring(0, 57) + '...' : url;
-    }
+    return formatUrl(url, 60);
   }
 
   /**

@@ -23,59 +23,25 @@ This comprehensive code analysis examined the ForgetfulMe Chrome extension codeb
 **Race Condition in AuthService.js** ✅ **FIXED**
 **Date Filter Bug in BookmarkService.js** ✅ **FIXED**
 **Missing Import & Error Handling in confirm.js** ✅ **FIXED**
-**Missing Import in confirm.js**~~ ✅ **FIXED** 
+**Missing Import in confirm.js** ✅ **FIXED** 
+**Inconsistent Error Handling in AuthService.js** ✅ **FIXED**
+**Unsafe Array Access in AuthService.js**
 ---
 
 ## 🐛 Remaining Bugs & Logic Errors
 
-### ✅ **Recently Fixed Issues**
-
-#### ~~5. **Inconsistent Error Handling in AuthService.js**~~ ✅ **FIXED**
-- **Fixed**: Standardized all methods to use `isConfigured()` pattern
-- **Fixed**: Added proper configuration validation with meaningful error messages
-- **Methods updated**: `signUp`, `getSession`, `refreshSession`, `resetPassword`
-
-#### ~~6. **Unsafe Array Access in AuthService.js**~~ ✅ **FIXED**  
-- **Fixed**: Added `Array.isArray(data) &&` validation before accessing array elements
-- **Methods updated**: `getUserProfile` (line 288), `updateUserProfile` (line 316)
-- **Protection**: Now returns `null` safely when array is empty or undefined
-
-### Medium Priority Issues
-
-*All previously identified medium priority bugs have been resolved.*
-
----
-
-## ✅ Dead Code Successfully Removed
-
-### Still Present (Not Dead Code)
-
-#### ValidationService.js
-- **Lines 621-660**: URL normalization - **KEPT** (complex but used)
-
----
-
 ## 🔄 Critical Duplicate Code Patterns
 
-### 1. **URL Formatting Logic** ⚠️ **STILL NEEDS FIXING**
-**Files**: `PopupController.js:616-635`, `BookmarkManagerController.js:983-1002`
+### ~~1. **URL Formatting Logic**~~ ✅ **FIXED**
+**Files**: ~~`PopupController.js:616-635`, `BookmarkManagerController.js:983-1002`~~
 
-Identical 20-line URL formatting function still duplicated:
-```javascript
-// Exact duplicate in both files
-try {
-    const urlObj = new URL(url);
-    let formatted = urlObj.hostname + urlObj.pathname;
-    formatted = formatted.replace(/^www\./, '');
-    if (formatted.length > maxLength) {
-        formatted = formatted.substring(0, maxLength - 3) + '...';
-    }
-    return formatted;
-} catch {
-    return url.length > maxLength ? url.substring(0, maxLength - 3) + '...' : url;
-}
-```
-**Status**: ⚠️ **Not addressed yet** - Should extract to `src/utils/formatting.js` (existing `formatUrl` function)
+**Fixed**: Eliminated 20-line URL formatting function duplication:
+- **Removed**: Identical implementations from both controller files (40 lines total)
+- **Replaced**: Both now use shared `formatUrl()` from `src/utils/formatting.js`
+- **Preserved**: Different maxLength parameters (40 for popup, 60 for bookmark manager)
+- **Reduced**: Code duplication by consolidating logic into single, well-tested utility function
+
+**Impact**: 40 lines of duplicate code eliminated, improved maintainability
 
 ### 2. **Service Registration Pattern**
 **Files**: `background.js`, `bookmark-manager.js`, `options.js`, `popup.js`
@@ -239,9 +205,9 @@ setTimeout(callback, 5000); // Should be constant
 | Logic Errors | 3 | Medium (2 more fixed) |
 | Security Issues | 3 | High |
 | Dead Code Items | 8 | Low |
-| Duplicate Patterns | 4 | Medium |
+| Duplicate Patterns | 3 | Medium (1 more fixed) |
 | Code Smells | 12 | Low-Medium |
-| **Total Issues** | **30** | **Mixed** |
+| **Total Issues** | **29** | **Mixed** |
 
 **Lines of Code**: ~5,500  
 
