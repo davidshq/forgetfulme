@@ -114,8 +114,13 @@ export class AuthService {
    */
   async signUp(email, password) {
     try {
-      if (!this.supabaseClient) {
-        await this.initialize();
+      if (!this.isConfigured()) {
+        const initialized = await this.initialize();
+        if (!initialized) {
+          throw new Error(
+            'Supabase configuration is required. Please configure the extension in Options.'
+          );
+        }
       }
 
       const response = await this.supabaseClient.auth.signUp({
@@ -208,8 +213,11 @@ export class AuthService {
    */
   async getSession() {
     try {
-      if (!this.supabaseClient) {
-        await this.initialize();
+      if (!this.isConfigured()) {
+        const initialized = await this.initialize();
+        if (!initialized) {
+          return null;
+        }
       }
 
       const { data } = await this.supabaseClient.auth.getSession();
@@ -226,8 +234,11 @@ export class AuthService {
    */
   async refreshSession() {
     try {
-      if (!this.supabaseClient) {
-        await this.initialize();
+      if (!this.isConfigured()) {
+        const initialized = await this.initialize();
+        if (!initialized) {
+          return null;
+        }
       }
 
       const { data, error } = await this.supabaseClient.auth.refreshSession();
@@ -285,7 +296,7 @@ export class AuthService {
         throw new Error(error.message);
       }
 
-      return data.length > 0 ? data[0] : null;
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
     } catch (error) {
       this.errorService.handle(error, 'AuthService.getUserProfile');
       return null;
@@ -313,7 +324,7 @@ export class AuthService {
         throw new Error(error.message);
       }
 
-      return data[0];
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'AuthService.updateUserProfile');
       throw new Error(errorInfo.message);
@@ -327,8 +338,13 @@ export class AuthService {
    */
   async resetPassword(email) {
     try {
-      if (!this.supabaseClient) {
-        await this.initialize();
+      if (!this.isConfigured()) {
+        const initialized = await this.initialize();
+        if (!initialized) {
+          throw new Error(
+            'Supabase configuration is required. Please configure the extension in Options.'
+          );
+        }
       }
 
       const { error } = await this.supabaseClient.auth.resetPasswordForEmail(email);
