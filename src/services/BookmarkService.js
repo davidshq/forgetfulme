@@ -202,7 +202,11 @@ export class BookmarkService extends withServicePatterns(class {}) {
       }
 
       // Type safety: validate options parameter
-      if (options !== null && options !== undefined && (typeof options !== 'object' || Array.isArray(options))) {
+      if (
+        options !== null &&
+        options !== undefined &&
+        (typeof options !== 'object' || Array.isArray(options))
+      ) {
         throw new Error('Options must be an object');
       }
 
@@ -300,35 +304,17 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       await this.ensureInitialized();
 
-      // Build query
-      const query = this.buildSearchQuery(searchOptions, user.id);
-
-      // Execute search
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${query}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Search failed');
-      }
-
-      const bookmarks = await response.json();
-
-      // Get total count for pagination
-      const totalCount = await this.getTotalCount(searchOptions, user.id);
+      // Execute search and count queries in parallel for better performance
+      const [bookmarksResponse, totalCount] = await Promise.all([
+        this.executeSearchQuery(searchOptions, user),
+        this.getTotalCount(searchOptions, user.id)
+      ]);
 
       const page = searchOptions.page || 1;
       const pageSize = searchOptions.pageSize || PAGINATION.DEFAULT_PAGE_SIZE;
 
       return {
-        items: bookmarks,
+        items: bookmarksResponse,
         total: totalCount,
         page,
         pageSize,
@@ -337,6 +323,31 @@ export class BookmarkService extends withServicePatterns(class {}) {
     } catch (error) {
       this.handleAndThrow(error, 'BookmarkService.searchBookmarksDefault');
     }
+  }
+
+  /**
+   * Execute search query for bookmarks
+   * @param {Object} searchOptions - Search options
+   * @param {Object} user - Current user
+   * @returns {Promise<Object[]>} Bookmarks
+   * @private
+   */
+  async executeSearchQuery(searchOptions, user) {
+    const query = this.buildSearchQuery(searchOptions, user.id);
+
+    const response = await fetch(`${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${query}`, {
+      headers: {
+        apikey: this.supabaseClient.supabaseKey,
+        Authorization: `Bearer ${user.access_token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Search failed');
+    }
+
+    return await response.json();
   }
 
   /**
@@ -731,17 +742,16 @@ export class BookmarkService extends withServicePatterns(class {}) {
   }
 
   /**
-   * Build search query string
+   * Build base query parameters for search and count operations
    * @param {Object} options - Search options
    * @param {string} userId - User ID
-   * @returns {string} Query string
+   * @returns {URLSearchParams} Base query parameters
    * @private
    */
-  buildSearchQuery(options, userId) {
+  buildBaseQueryParams(options, userId) {
     const params = new URLSearchParams();
 
-    // Base selection and user filter
-    params.set('select', '*');
+    // User filter
     params.set('user_id', `eq.${userId}`);
 
     // Text search
@@ -774,6 +784,22 @@ export class BookmarkService extends withServicePatterns(class {}) {
       }
     }
 
+    return params;
+  }
+
+  /**
+   * Build search query string with pagination and sorting
+   * @param {Object} options - Search options
+   * @param {string} userId - User ID
+   * @returns {string} Query string
+   * @private
+   */
+  buildSearchQuery(options, userId) {
+    const params = this.buildBaseQueryParams(options, userId);
+
+    // Base selection
+    params.set('select', '*');
+
     // Sorting
     const sortBy = options.sortBy || 'created_at';
     const sortOrder = options.sortOrder || 'desc';
@@ -802,38 +828,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
    */
   async getTotalCount(options, userId) {
     try {
-      const params = new URLSearchParams();
+      const params = this.buildBaseQueryParams(options, userId);
       params.set('select', 'count');
-      params.set('user_id', `eq.${userId}`);
-
-      // Apply same filters as main query
-      if (options.query) {
-        params.set(
-          'or',
-          `title.ilike.%${options.query}%,url.ilike.%${options.query}%,notes.ilike.%${options.query}%`
-        );
-      }
-
-      if (options.statuses && options.statuses.length > 0) {
-        params.set('status', `in.(${options.statuses.join(',')})`);
-      }
-
-      // Date filters - use different parameter names to avoid overwriting
-      if (options.dateFrom) {
-        params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
-      }
-      if (options.dateTo) {
-        // Use 'and' parameter to combine with dateFrom filter
-        if (options.dateFrom) {
-          params.set(
-            'and',
-            `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`
-          );
-          params.delete('created_at'); // Remove single filter
-        } else {
-          params.set('created_at', `lte.${options.dateTo.toISOString()}`);
-        }
-      }
 
       const user = this.authService.getCurrentUser();
       const response = await fetch(
