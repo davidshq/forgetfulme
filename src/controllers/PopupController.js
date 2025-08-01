@@ -265,15 +265,16 @@ export class PopupController extends BaseController {
       return;
     }
 
-    await this.safeExecute(
+    // Use standardized BaseController method
+    await this.safeAsync(
       async () => {
-        const user = await this.authService.signIn(formData.email, formData.password);
-        this.showSuccess('Signed in successfully');
-        return user;
+        return await this.authService.signIn(formData.email, formData.password);
       },
       'PopupController.handleSignIn',
-      '#signin-submit',
-      'Signing in...'
+      {
+        successMessage: 'Signed in successfully',
+        showError: true
+      }
     );
   }
 

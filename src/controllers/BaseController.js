@@ -213,6 +213,57 @@ export class BaseController {
   }
 
   /**
+   * Standardized async operation wrapper with error handling
+   * @param {Function} operation - Async operation to execute
+   * @param {string} context - Context for error handling
+   * @param {Object} [options] - Options
+   * @param {boolean} [options.showError=true] - Whether to show error to user
+   * @param {*} [options.fallbackValue=null] - Value to return on error
+   * @param {string} [options.successMessage] - Success message to show
+   * @returns {Promise<*>} Operation result or fallback value
+   */
+  async safeAsync(operation, context, options = {}) {
+    const {
+      showError = true,
+      fallbackValue = null,
+      successMessage
+    } = options;
+
+    try {
+      const result = await operation();
+      if (successMessage) {
+        this.showSuccess(successMessage);
+      }
+      return result;
+    } catch (error) {
+      if (showError) {
+        this.handleError(error, context);
+      } else {
+        // Still log the error even if not showing to user
+        const errorInfo = this.errorService.handle(error, context);
+        console.error(`[${context}] ${errorInfo.code}:`, error);
+      }
+      return fallbackValue;
+    }
+  }
+
+  /**
+   * Handle validation errors with field-specific messages
+   * @param {Object} validationResult - Validation result with errors array
+   * @param {string} context - Context for error handling
+   */
+  handleValidationErrors(validationResult, context) {
+    if (validationResult.isValid) return;
+
+    const message = validationResult.errors.length === 1
+      ? validationResult.errors[0]
+      : `Please fix the following issues:\n• ${validationResult.errors.join('\n• ')}`;
+
+    this.showError(message);
+    console.warn(`[${context}] Validation failed:`, validationResult.errors);
+  }
+
+  /**
    * Show loading state
    * @param {string|Element} target - Target element or selector
    * @param {string} [message='Loading...'] - Loading message

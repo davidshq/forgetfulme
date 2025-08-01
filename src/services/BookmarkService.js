@@ -61,7 +61,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
   async createBookmark(bookmarkData) {
     try {
       if (!this.authService.isAuthenticated()) {
-        throw new Error('User not authenticated');
+        const errorInfo = this.errorService.handle(new Error('User not authenticated'), 'BookmarkService.createBookmark');
+        throw new Error(errorInfo.message);
       }
 
       // Get valid status types for validation
@@ -71,7 +72,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
       // Validate bookmark data
       const validation = this.validationService.validateBookmark(bookmarkData, validStatuses);
       if (!validation.isValid) {
-        throw new Error(`Invalid bookmark data: ${validation.errors.join(', ')}`);
+        const errorInfo = this.errorService.handle(new Error(`Invalid bookmark data: ${validation.errors.join(', ')}`), 'BookmarkService.createBookmark');
+        throw new Error(errorInfo.message);
       }
 
       const validatedData = validation.data;
@@ -108,13 +110,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
   async updateBookmark(bookmarkId, updates) {
     try {
       if (!this.authService.isAuthenticated()) {
-        throw new Error('User not authenticated');
+        const errorInfo = this.errorService.handle(new Error('User not authenticated'), 'BookmarkService.updateBookmark');
+        throw new Error(errorInfo.message);
       }
 
       // Get existing bookmark
       const existing = await this.getBookmarkById(bookmarkId);
       if (!existing) {
-        throw new Error('Bookmark not found');
+        const errorInfo = this.errorService.handle(new Error('Bookmark not found'), 'BookmarkService.updateBookmark');
+        throw new Error(errorInfo.message);
       }
 
       // Merge updates with existing data
@@ -127,7 +131,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
       // Validate updated data
       const validation = this.validationService.validateBookmark(mergedData, validStatuses);
       if (!validation.isValid) {
-        throw new Error(`Invalid bookmark data: ${validation.errors.join(', ')}`);
+        const errorInfo = this.errorService.handle(new Error(`Invalid bookmark data: ${validation.errors.join(', ')}`), 'BookmarkService.updateBookmark');
+        throw new Error(errorInfo.message);
       }
 
       const validatedData = validation.data;
@@ -159,7 +164,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
   async deleteBookmark(bookmarkId) {
     try {
       if (!this.authService.isAuthenticated()) {
-        throw new Error('User not authenticated');
+        const errorInfo = this.errorService.handle(new Error('User not authenticated'), 'BookmarkService.deleteBookmark');
+        throw new Error(errorInfo.message);
       }
 
       const user = this.authService.getCurrentUser();
@@ -180,7 +186,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to delete bookmark');
+        const errorInfo = this.errorService.handle(new Error('Failed to delete bookmark'), 'BookmarkService.deleteBookmark');
+        throw new Error(errorInfo.message);
       }
 
       // Update cache
@@ -197,18 +204,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
    */
   async getBookmarks(options = {}) {
     try {
-      if (!this.authService.isAuthenticated()) {
-        throw new Error('User not authenticated');
-      }
+      // Use standardized auth check
+      this.requireAuth('BookmarkService.getBookmarks');
 
-      // Type safety: validate options parameter
-      if (
-        options !== null &&
-        options !== undefined &&
-        (typeof options !== 'object' || Array.isArray(options))
-      ) {
-        throw new Error('Options must be an object');
-      }
+      // Use standardized validation
+      this.validateOrThrow(
+        options === null || options === undefined || (typeof options === 'object' && !Array.isArray(options)),
+        'Options must be an object',
+        'BookmarkService.getBookmarks'
+      );
 
       // Ensure options is an object (handle null/undefined)
       const validOptions = options || {};

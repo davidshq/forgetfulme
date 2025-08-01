@@ -31,15 +31,18 @@ export const DEFAULT_LOG_CONFIG = {
   persistDebounceMs: 1000 // Debounce time for storage persistence
 };
 
+import { withServicePatterns } from '../utils/serviceHelpers.js';
+
 /**
  * Configurable logging service with multiple output targets and filtering
  */
-export class LoggingService {
+export class LoggingService extends withServicePatterns(class {}) {
   /**
    * @param {StorageService} [storageService] - Optional storage service for log persistence
    * @param {ErrorService} [errorService] - Optional error service for integration
    */
   constructor(storageService = null, errorService = null) {
+    super();
     this.storageService = storageService;
     this.errorService = errorService;
     this.config = { ...DEFAULT_LOG_CONFIG };

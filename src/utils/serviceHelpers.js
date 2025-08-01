@@ -94,6 +94,46 @@ export function withErrorHandling(BaseClass) {
         }
       }
     }
+
+    /**
+     * Validate input and throw standardized error if invalid
+     * @param {boolean} condition - Condition to validate
+     * @param {string} message - Error message if validation fails
+     * @param {string} context - Context for error handling
+     * @throws {Error} Standardized error if validation fails
+     */
+    validateOrThrow(condition, message, context) {
+      if (!condition) {
+        this.handleAndThrow(new Error(message), context);
+      }
+    }
+
+    /**
+     * Check authentication and throw standardized error if not authenticated
+     * @param {string} context - Context for error handling
+     * @throws {Error} Standardized authentication error
+     */
+    requireAuth(context) {
+      if (!this.authService || !this.authService.isAuthenticated()) {
+        this.handleAndThrow(new Error('User not authenticated'), context);
+      }
+    }
+
+    /**
+     * Validate object using ValidationService and throw if invalid
+     * @param {*} data - Data to validate
+     * @param {Function} validator - Validation function
+     * @param {string} context - Context for error handling
+     * @returns {*} Validated data
+     * @throws {Error} Standardized validation error
+     */
+    validateAndThrow(data, validator, context) {
+      const result = validator(data);
+      if (!result.isValid) {
+        this.handleAndThrow(new Error(result.errors.join(', ')), context);
+      }
+      return result.data;
+    }
   };
 }
 

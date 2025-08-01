@@ -3,11 +3,19 @@
  */
 
 import { VALIDATION_RULES } from '../utils/constants.js';
+import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
  * Service for validating and sanitizing user input
  */
-export class ValidationService {
+export class ValidationService extends withServicePatterns(class {}) {
+  /**
+   * @param {ErrorService} [errorService] - Optional error handling service
+   */
+  constructor(errorService = null) {
+    super();
+    this.errorService = errorService;
+  }
   /**
    * Validate URL format and accessibility
    * @param {string} url - URL to validate

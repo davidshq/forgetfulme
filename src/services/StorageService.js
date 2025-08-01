@@ -3,15 +3,17 @@
  */
 
 import { STORAGE_KEYS, CACHE_DURATION } from '../utils/constants.js';
+import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
  * Service for managing Chrome storage (sync and local) with caching
  */
-export class StorageService {
+export class StorageService extends withServicePatterns(class {}) {
   /**
    * @param {ErrorService} errorService - Error handling service
    */
   constructor(errorService) {
+    super();
     this.errorService = errorService;
     this.cache = new Map();
     this.cacheTimestamps = new Map();
