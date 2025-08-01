@@ -95,7 +95,18 @@ export class BookmarkManagerController extends BaseController {
    * Set up all event listeners
    */
   setupEventListeners() {
-    // Header actions
+    this.setupHeaderEventListeners();
+    this.setupSearchEventListeners();
+    this.setupToolbarEventListeners();
+    this.setupBookmarkListEventListeners();
+    this.setupPaginationEventListeners();
+    this.setupModalEventListeners();
+  }
+
+  /**
+   * Set up header event listeners
+   */
+  setupHeaderEventListeners() {
     this.addEventListener($('#refresh-bookmarks'), 'click', () => {
       this.handleRefresh();
     });
@@ -103,8 +114,12 @@ export class BookmarkManagerController extends BaseController {
     this.addEventListener($('#open-options'), 'click', () => {
       this.openOptionsPage();
     });
+  }
 
-    // Search form
+  /**
+   * Set up search and filter event listeners
+   */
+  setupSearchEventListeners() {
     this.addEventListener($('#search-form'), 'submit', e => {
       e.preventDefault();
       this.handleSearch();
@@ -114,7 +129,15 @@ export class BookmarkManagerController extends BaseController {
       this.handleClearSearch();
     });
 
-    // Toolbar
+    this.addEventListener($('#clear-filters'), 'click', () => {
+      this.handleClearSearch();
+    });
+  }
+
+  /**
+   * Set up toolbar event listeners
+   */
+  setupToolbarEventListeners() {
     this.addEventListener($('#bulk-select-all'), 'change', e => {
       this.handleSelectAll(e.target.checked);
     });
@@ -141,8 +164,12 @@ export class BookmarkManagerController extends BaseController {
     this.addEventListener($('#bulk-delete'), 'click', () => {
       this.handleBulkDelete();
     });
+  }
 
-    // Bookmark list event delegation
+  /**
+   * Set up bookmark list event listeners using event delegation
+   */
+  setupBookmarkListEventListeners() {
     this.addEventListener($('#bookmark-list'), 'change', e => {
       if (e.target.matches('.bookmark-checkbox')) {
         this.handleBookmarkSelect(e.target);
@@ -158,13 +185,12 @@ export class BookmarkManagerController extends BaseController {
         this.handleDeleteBookmark(bookmarkId);
       }
     });
+  }
 
-    // Clear filters
-    this.addEventListener($('#clear-filters'), 'click', () => {
-      this.handleClearSearch();
-    });
-
-    // Pagination
+  /**
+   * Set up pagination event listeners
+   */
+  setupPaginationEventListeners() {
     this.addEventListener($('#prev-page'), 'click', () => {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -186,7 +212,6 @@ export class BookmarkManagerController extends BaseController {
       this.loadBookmarks();
     });
 
-    // Page number clicks (event delegation)
     this.addEventListener($('#page-numbers'), 'click', e => {
       if (e.target.matches('.page-number:not(.disabled)')) {
         const page = parseInt(e.target.dataset.page, 10);
@@ -196,8 +221,12 @@ export class BookmarkManagerController extends BaseController {
         }
       }
     });
+  }
 
-    // Modal events
+  /**
+   * Set up modal event listeners
+   */
+  setupModalEventListeners() {
     this.addEventListener($('#close-modal'), 'click', () => {
       this.closeEditModal();
     });
@@ -381,26 +410,71 @@ export class BookmarkManagerController extends BaseController {
    * @returns {Element} Bookmark item element
    */
   createBookmarkItem(bookmark) {
-    const statusType = this.statusTypes.find(s => s.id === bookmark.status);
-
     const item = createElement('div', {
       className: `bookmark-item${this.isCompactView ? ' compact' : ''}`,
       'data-bookmark-id': bookmark.id,
       'data-testid': 'bookmark-item'
     });
 
-    // Checkbox
-    const checkbox = createElement('input', {
+    const checkbox = this.createBookmarkCheckbox(bookmark.id);
+    const content = this.createBookmarkContent(bookmark);
+
+    item.appendChild(checkbox);
+    item.appendChild(content);
+
+    return item;
+  }
+
+  /**
+   * Create bookmark checkbox element
+   * @param {string} bookmarkId - Bookmark ID
+   * @returns {Element} Checkbox element
+   */
+  createBookmarkCheckbox(bookmarkId) {
+    return createElement('input', {
       type: 'checkbox',
       className: 'bookmark-checkbox',
-      'data-bookmark-id': bookmark.id
+      'data-bookmark-id': bookmarkId
     });
+  }
 
-    // Content
+  /**
+   * Create bookmark content element
+   * @param {Object} bookmark - Bookmark data
+   * @returns {Element} Content element
+   */
+  createBookmarkContent(bookmark) {
     const content = createElement('div', { className: 'bookmark-content' });
 
-    // Header
+    const header = this.createBookmarkHeader(bookmark);
+    const url = this.createBookmarkUrl(bookmark.url);
+    const meta = this.createBookmarkMeta(bookmark);
+
+    content.appendChild(header);
+    content.appendChild(url);
+
+    if (bookmark.notes) {
+      const notes = createElement('p', { className: 'bookmark-notes' }, bookmark.notes);
+      content.appendChild(notes);
+    }
+
+    if (bookmark.tags && bookmark.tags.length > 0) {
+      const tagsElement = this.createTagElements(bookmark.tags);
+      content.appendChild(tagsElement);
+    }
+
+    content.appendChild(meta);
+    return content;
+  }
+
+  /**
+   * Create bookmark header with title and status
+   * @param {Object} bookmark - Bookmark data
+   * @returns {Element} Header element
+   */
+  createBookmarkHeader(bookmark) {
     const header = createElement('div', { className: 'bookmark-header' });
+    const statusType = this.statusTypes.find(s => s.id === bookmark.status);
 
     const title = createElement('h3', { className: 'bookmark-title' }, [
       createElement(
@@ -421,50 +495,68 @@ export class BookmarkManagerController extends BaseController {
 
     header.appendChild(title);
     header.appendChild(statusElement);
+    return header;
+  }
 
-    // URL
-    const url = createElement('p', { className: 'bookmark-url' }, [
+  /**
+   * Create bookmark URL element
+   * @param {string} url - Bookmark URL
+   * @returns {Element} URL element
+   */
+  createBookmarkUrl(url) {
+    return createElement('p', { className: 'bookmark-url' }, [
       createElement(
         'a',
         {
-          href: bookmark.url,
+          href: url,
           target: '_blank',
           rel: 'noopener noreferrer'
         },
-        this.formatUrl(bookmark.url)
+        this.formatUrl(url)
       )
     ]);
+  }
 
-    content.appendChild(header);
-    content.appendChild(url);
-
-    // Notes
-    if (bookmark.notes) {
-      const notes = createElement('p', { className: 'bookmark-notes' }, bookmark.notes);
-      content.appendChild(notes);
-    }
-
-    // Tags
-    if (bookmark.tags && bookmark.tags.length > 0) {
-      const tagsElement = this.createTagElements(bookmark.tags);
-      content.appendChild(tagsElement);
-    }
-
-    // Meta
+  /**
+   * Create bookmark meta section with dates and actions
+   * @param {Object} bookmark - Bookmark data
+   * @returns {Element} Meta element
+   */
+  createBookmarkMeta(bookmark) {
     const meta = createElement('div', { className: 'bookmark-meta' });
+    const dates = this.createBookmarkDates(bookmark);
+    const actions = this.createBookmarkActions(bookmark.id);
 
-    const dates = createElement('div', { className: 'bookmark-dates' }, [
+    meta.appendChild(dates);
+    meta.appendChild(actions);
+    return meta;
+  }
+
+  /**
+   * Create bookmark dates display
+   * @param {Object} bookmark - Bookmark data
+   * @returns {Element} Dates element
+   */
+  createBookmarkDates(bookmark) {
+    return createElement('div', { className: 'bookmark-dates' }, [
       createElement('span', {}, `Created: ${this.formatDate(bookmark.created_at, 'short')}`),
       createElement('span', {}, `Updated: ${this.formatDate(bookmark.updated_at, 'short')}`)
     ]);
+  }
 
-    const actions = createElement('div', { className: 'bookmark-actions' }, [
+  /**
+   * Create bookmark action buttons
+   * @param {string} bookmarkId - Bookmark ID
+   * @returns {Element} Actions element
+   */
+  createBookmarkActions(bookmarkId) {
+    return createElement('div', { className: 'bookmark-actions' }, [
       createElement(
         'button',
         {
           type: 'button',
           className: 'secondary edit-bookmark',
-          'data-bookmark-id': bookmark.id
+          'data-bookmark-id': bookmarkId
         },
         'Edit'
       ),
@@ -473,21 +565,11 @@ export class BookmarkManagerController extends BaseController {
         {
           type: 'button',
           className: 'secondary outline delete-bookmark',
-          'data-bookmark-id': bookmark.id
+          'data-bookmark-id': bookmarkId
         },
         'Delete'
       )
     ]);
-
-    meta.appendChild(dates);
-    meta.appendChild(actions);
-
-    content.appendChild(meta);
-
-    item.appendChild(checkbox);
-    item.appendChild(content);
-
-    return item;
   }
 
   /**

@@ -35,164 +35,236 @@ export class ErrorService {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorCode = this.generateErrorCode(error, context);
 
-    // Check for specific error types based on context and content
-    // Config errors take priority if they contain config-related terms
-    if (this.isConfigError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.CONFIG,
-        severity: ERROR_SEVERITY.CRITICAL,
-        message: 'Configuration error. Please check your settings.',
-        code: errorCode,
-        retryable: false,
-        actions: [
-          'Go to Options and verify settings',
-          'Check Supabase URL and API key',
-          'Contact support if needed'
-        ]
-      };
-    }
+    // Try each categorization method in priority order
+    const category =
+      this.categorizeConfigError(error, errorMessage, errorCode) ||
+      this.categorizeDatabaseError(error, errorMessage, context, errorCode) ||
+      this.categorizeStorageError(error, errorMessage, context, errorCode) ||
+      this.categorizeNetworkError(error, errorMessage, errorCode) ||
+      this.categorizeRateLimitError(error, errorMessage, errorCode) ||
+      this.categorizeAuthError(error, errorMessage, errorCode) ||
+      this.categorizeValidationError(error, errorMessage, errorCode) ||
+      this.categorizePermissionError(error, errorMessage, errorCode) ||
+      this.categorizeUnknownError(errorCode);
 
-    // Check database context - if context suggests database operation, prioritize database categorization
-    if (
+    return category;
+  }
+
+  /**
+   * Categorize configuration errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a config error
+   */
+  categorizeConfigError(error, errorMessage, errorCode) {
+    if (!this.isConfigError(error, errorMessage)) return null;
+
+    return {
+      category: ERROR_CATEGORIES.CONFIG,
+      severity: ERROR_SEVERITY.CRITICAL,
+      message: 'Configuration error. Please check your settings.',
+      code: errorCode,
+      retryable: false,
+      actions: [
+        'Go to Options and verify settings',
+        'Check Supabase URL and API key',
+        'Contact support if needed'
+      ]
+    };
+  }
+
+  /**
+   * Categorize database errors with context awareness
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} context - Error context
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a database error
+   */
+  categorizeDatabaseError(error, errorMessage, context, errorCode) {
+    const isDatabaseContext =
       context &&
       (context.includes('BookmarkService') ||
         context.includes('database') ||
-        context.includes('Database'))
-    ) {
-      if (
-        this.isDatabaseError(error, errorMessage) ||
-        (errorMessage.toLowerCase().includes('timeout') &&
-          !this.isConfigError(error, errorMessage)) ||
-        (errorMessage.toLowerCase().includes('connection') &&
-          !this.isConfigError(error, errorMessage))
-      ) {
-        return {
-          category: ERROR_CATEGORIES.DATABASE,
-          severity: ERROR_SEVERITY.HIGH,
-          message: 'Database error occurred. Please try again.',
-          code: errorCode,
-          retryable: true,
-          actions: [
-            'Try again in a few moments',
-            'Check your connection',
-            'Contact support if error persists'
-          ]
-        };
-      }
+        context.includes('Database'));
+
+    const isDatabaseRelated =
+      this.isDatabaseError(error, errorMessage) ||
+      (errorMessage.toLowerCase().includes('timeout') &&
+        !this.isConfigError(error, errorMessage)) ||
+      (errorMessage.toLowerCase().includes('connection') &&
+        !this.isConfigError(error, errorMessage));
+
+    // Must have either database context OR database-related patterns
+    if (!isDatabaseContext && !isDatabaseRelated) {
+      return null;
     }
 
-    // Storage errors (check before network to avoid confusion)
-    if (
-      this.isStorageError(error, errorMessage) ||
-      (context && context.includes('StorageService'))
-    ) {
-      return {
-        category: ERROR_CATEGORIES.STORAGE,
-        severity: ERROR_SEVERITY.MEDIUM,
-        message: 'Storage error occurred. Please free up space and try again.',
-        code: errorCode,
-        retryable: true,
-        actions: ['Clear browser data or cache', 'Try again', 'Free up storage space']
-      };
-    }
+    return {
+      category: ERROR_CATEGORIES.DATABASE,
+      severity: ERROR_SEVERITY.HIGH,
+      message: 'Database error occurred. Please try again.',
+      code: errorCode,
+      retryable: true,
+      actions: [
+        'Try again in a few moments',
+        'Check your connection',
+        'Contact support if error persists'
+      ]
+    };
+  }
 
-    // Network errors
-    if (this.isNetworkError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.NETWORK,
-        severity: ERROR_SEVERITY.MEDIUM,
-        message: 'Unable to connect. Please check your internet connection and try again.',
-        code: errorCode,
-        retryable: true,
-        actions: [
-          'Check internet connection',
-          'Try again in a few moments',
-          'Contact support if problem persists'
-        ]
-      };
-    }
+  /**
+   * Categorize storage errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} context - Error context
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a storage error
+   */
+  categorizeStorageError(error, errorMessage, context, errorCode) {
+    const isStorageRelated =
+      this.isStorageError(error, errorMessage) || (context && context.includes('StorageService'));
 
-    // Rate limiting errors (429)
-    if (this.isRateLimitError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.NETWORK,
-        severity: ERROR_SEVERITY.MEDIUM,
-        message: 'Too many requests. Please wait a moment before trying again.',
-        code: errorCode,
-        retryable: true,
-        actions: [
-          'Wait 30 seconds and try again',
-          'Reduce the frequency of requests',
-          'Contact support if this persists'
-        ]
-      };
-    }
+    if (!isStorageRelated) return null;
 
-    // Authentication errors
-    if (this.isAuthError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.AUTH,
-        severity: ERROR_SEVERITY.HIGH,
-        message: 'Authentication failed. Please sign in again.',
-        code: errorCode,
-        retryable: true,
-        actions: [
-          'Sign out and sign in again',
-          'Check your credentials',
-          'Clear browser data if needed'
-        ]
-      };
-    }
+    return {
+      category: ERROR_CATEGORIES.STORAGE,
+      severity: ERROR_SEVERITY.MEDIUM,
+      message: 'Storage error occurred. Please free up space and try again.',
+      code: errorCode,
+      retryable: true,
+      actions: ['Clear browser data or cache', 'Try again', 'Free up storage space']
+    };
+  }
 
-    // Validation errors
-    if (this.isValidationError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.VALIDATION,
-        severity: ERROR_SEVERITY.LOW,
-        message: 'Please check your input and try again.',
-        code: errorCode,
-        retryable: false,
-        actions: [
-          'Review the form for errors',
-          'Ensure all required fields are filled',
-          'Check field formats'
-        ]
-      };
-    }
+  /**
+   * Categorize network errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a network error
+   */
+  categorizeNetworkError(error, errorMessage, errorCode) {
+    if (!this.isNetworkError(error, errorMessage)) return null;
 
-    // Database errors
-    if (this.isDatabaseError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.DATABASE,
-        severity: ERROR_SEVERITY.HIGH,
-        message: 'Database error occurred. Please try again.',
-        code: errorCode,
-        retryable: true,
-        actions: [
-          'Try again in a few moments',
-          'Check your connection',
-          'Contact support if problem persists'
-        ]
-      };
-    }
+    return {
+      category: ERROR_CATEGORIES.NETWORK,
+      severity: ERROR_SEVERITY.MEDIUM,
+      message: 'Unable to connect. Please check your internet connection and try again.',
+      code: errorCode,
+      retryable: true,
+      actions: [
+        'Check internet connection',
+        'Try again in a few moments',
+        'Contact support if problem persists'
+      ]
+    };
+  }
 
-    // Permission errors
-    if (this.isPermissionError(error, errorMessage)) {
-      return {
-        category: ERROR_CATEGORIES.PERMISSION,
-        severity: ERROR_SEVERITY.HIGH,
-        message: 'Permission denied. Please check extension permissions.',
-        code: errorCode,
-        retryable: false,
-        actions: [
-          'Check Chrome extension permissions',
-          'Reload the extension',
-          'Contact support if needed'
-        ]
-      };
-    }
+  /**
+   * Categorize rate limit errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a rate limit error
+   */
+  categorizeRateLimitError(error, errorMessage, errorCode) {
+    if (!this.isRateLimitError(error, errorMessage)) return null;
 
-    // Unknown errors
+    return {
+      category: ERROR_CATEGORIES.NETWORK,
+      severity: ERROR_SEVERITY.MEDIUM,
+      message: 'Too many requests. Please wait a moment before trying again.',
+      code: errorCode,
+      retryable: true,
+      actions: [
+        'Wait 30 seconds and try again',
+        'Reduce the frequency of requests',
+        'Contact support if this persists'
+      ]
+    };
+  }
+
+  /**
+   * Categorize authentication errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not an auth error
+   */
+  categorizeAuthError(error, errorMessage, errorCode) {
+    if (!this.isAuthError(error, errorMessage)) return null;
+
+    return {
+      category: ERROR_CATEGORIES.AUTH,
+      severity: ERROR_SEVERITY.HIGH,
+      message: 'Authentication failed. Please sign in again.',
+      code: errorCode,
+      retryable: true,
+      actions: [
+        'Sign out and sign in again',
+        'Check your credentials',
+        'Clear browser data if needed'
+      ]
+    };
+  }
+
+  /**
+   * Categorize validation errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a validation error
+   */
+  categorizeValidationError(error, errorMessage, errorCode) {
+    if (!this.isValidationError(error, errorMessage)) return null;
+
+    return {
+      category: ERROR_CATEGORIES.VALIDATION,
+      severity: ERROR_SEVERITY.LOW,
+      message: 'Please check your input and try again.',
+      code: errorCode,
+      retryable: false,
+      actions: [
+        'Review the form for errors',
+        'Ensure all required fields are filled',
+        'Check field formats'
+      ]
+    };
+  }
+
+  /**
+   * Categorize permission errors
+   * @param {Error|string} error - Error object or message
+   * @param {string} errorMessage - Error message string
+   * @param {string} errorCode - Generated error code
+   * @returns {Object|null} Error category or null if not a permission error
+   */
+  categorizePermissionError(error, errorMessage, errorCode) {
+    if (!this.isPermissionError(error, errorMessage)) return null;
+
+    return {
+      category: ERROR_CATEGORIES.PERMISSION,
+      severity: ERROR_SEVERITY.HIGH,
+      message: 'Permission denied. Please check extension permissions.',
+      code: errorCode,
+      retryable: false,
+      actions: [
+        'Check Chrome extension permissions',
+        'Reload the extension',
+        'Contact support if needed'
+      ]
+    };
+  }
+
+  /**
+   * Categorize unknown errors (fallback)
+   * @param {string} errorCode - Generated error code
+   * @returns {Object} Default error category
+   */
+  categorizeUnknownError(errorCode) {
     return {
       category: ERROR_CATEGORIES.UNKNOWN,
       severity: ERROR_SEVERITY.MEDIUM,

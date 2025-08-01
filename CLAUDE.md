@@ -112,6 +112,39 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - `npm run test:all` - Run all tests (unit + integration + visual)
 - `npm run install-browsers` - Install Playwright browsers (Chromium)
 
+### **Code Coverage Requirements**
+
+**MANDATORY: Always check code coverage after significant changes**
+
+**Coverage Commands:**
+- `npm run test:unit:coverage` - Generate code coverage report for unit tests
+- Coverage reports are generated in `coverage/` directory with HTML report at `coverage/index.html`
+
+**Current Coverage Baseline (as of August 1, 2025):**
+- **Overall Coverage: 68.61%** (Target: 75%+)
+- **Services Coverage: 68.01%** (Core business logic - Target: 80%+)
+- **Controllers Coverage: 87.85%** (UI Controllers - Target: 85%+)
+- **Background Service: 93.57%** (Extension lifecycle - Target: 90%+)
+
+**Coverage Requirements:**
+1. **Before committing significant changes**: Always run `npm run test:unit:coverage`
+2. **No coverage regression**: New changes should not decrease overall coverage
+3. **New code must be tested**: All new functions/methods require corresponding tests
+4. **Service coverage priority**: Focus on achieving 80%+ coverage for core services
+5. **Critical path coverage**: Authentication, bookmark CRUD, and error handling must have high coverage
+
+**Coverage Monitoring Workflow:**
+1. **Baseline check**: Run coverage before making changes to establish starting point
+2. **Development**: Write tests alongside new functionality
+3. **Pre-commit verification**: Run coverage and ensure no regression
+4. **Report review**: Open `coverage/index.html` to identify untested code paths
+5. **Action required**: Address coverage gaps for critical functionality
+
+**Coverage Exclusions (already configured):**
+- `node_modules/`, `tests/`, `*.config.js`, `src/types/` - excluded from coverage
+- `src/main/*.js` files (0% coverage expected - these are entry points)
+- `src/lib/*.js` files (0% coverage expected - external libraries)
+
 ### **Testing Strategy**
 
 - **Run targeted tests during development**: Use `npm test -- tests/unit/services/SpecificService.test.js` 
@@ -124,10 +157,12 @@ This is a Chrome extension built with Manifest V3 that helps users mark websites
 - **Visual regression tests**: Critical for AI to "see" changes and match intended styling/layout
 
 **Claude Code Automation Requirements:**
-1. Before ANY UI/CSS changes: Run `npm run test:visual:simple` to establish baseline
-2. After ANY UI/CSS changes: Run `npm run test:visual:simple` to detect changes
-3. After any code changes: Run `npm run check` for lint + format check
-4. Before completing any task with UI changes: Run `npm run test:all`
+1. Before ANY significant changes: Run `npm run test:unit:coverage` to establish coverage baseline
+2. Before ANY UI/CSS changes: Run `npm run test:visual:simple` to establish visual baseline
+3. After ANY UI/CSS changes: Run `npm run test:visual:simple` to detect changes
+4. After any code changes: Run `npm run check` for lint + format check
+5. Before completing any task: Run `npm run test:unit:coverage` to verify no coverage regression
+6. Before completing any task with UI changes: Run `npm run test:all`
 
 **Visual Test Coverage Requirements:**
 - Every UI state must have a visual test (loading, error, success, empty, populated)
@@ -361,3 +396,51 @@ The confirmation system automatically extracts tokens from Supabase email links 
 3. Verify Pico.css classes are applied correctly
 4. Test with minimal reproduction case
 5. Measure actual results, don't assume CSS behavior
+
+---
+
+## **Code Review Protocol**
+
+### **MANDATORY: Self-Review After Substantial Code Changes**
+
+After making substantial code changes (refactoring, new features, complex bug fixes), Claude Code MUST perform a self-review to identify potential bugs, mistakes, and bad practices.
+
+**Required Review Process:**
+1. **Logic Review**: Examine conditional statements, loops, and error handling logic for correctness
+2. **API Compatibility**: Ensure no breaking changes to public interfaces
+3. **Performance Impact**: Consider if changes introduce performance regressions  
+4. **Error Handling**: Verify error paths are properly handled
+5. **Test Coverage**: Run tests to ensure changes don't break existing functionality
+6. **Memory Leaks**: Check for potential memory leaks or resource cleanup issues
+
+**Common Issues to Check For:**
+- **Logic Errors**: Incorrect conditional operators (e.g., `||` vs `&&`)
+- **Type Mismatches**: Ensure consistent data types throughout call chains
+- **Null/Undefined Issues**: Check for proper null/undefined handling
+- **Async/Promise Issues**: Verify proper async/await usage and error propagation
+- **Event Listener Leaks**: Ensure event listeners are properly cleaned up
+- **Scope Issues**: Check variable scope and closure behavior
+
+**Documentation of Issues Found:**
+- Always document any bugs found during self-review
+- Explain the fix and why it was necessary
+- Include the impact of the bug (potential user-facing issues)
+
+**Example Self-Review Finding:**
+```javascript
+// BUG FOUND: Logic error in database categorization
+// BEFORE (incorrect):
+if (!isDatabaseContext || !isDatabaseRelated) {
+  if (!this.isDatabaseError(error, errorMessage)) return null;
+}
+
+// AFTER (fixed):
+if (!isDatabaseContext && !isDatabaseRelated) {
+  return null;
+}
+
+// IMPACT: Could incorrectly categorize non-database errors as database errors
+// FIX: Changed OR to AND logic - must have context AND/OR patterns to be database error
+```
+
+This self-review process helps maintain code quality and prevents bugs from reaching production.

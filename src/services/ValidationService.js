@@ -236,7 +236,27 @@ export class ValidationService {
       return { isValid: false, data: null, errors };
     }
 
-    // Validate URL (required)
+    // Validate required and optional fields
+    this.validateBookmarkUrl(bookmarkData, validatedData, errors);
+    this.validateBookmarkTitle(bookmarkData, validatedData, errors);
+    this.validateBookmarkDescription(bookmarkData, validatedData, errors);
+    this.validateBookmarkTags(bookmarkData, validatedData, errors);
+    this.validateBookmarkStatus(bookmarkData, validatedData, errors, validStatuses);
+
+    return {
+      isValid: errors.length === 0,
+      data: errors.length === 0 ? validatedData : null,
+      errors
+    };
+  }
+
+  /**
+   * Validate bookmark URL field
+   * @param {Object} bookmarkData - Source data
+   * @param {Object} validatedData - Target validated data
+   * @param {string[]} errors - Errors array
+   */
+  validateBookmarkUrl(bookmarkData, validatedData, errors) {
     if (!bookmarkData.url) {
       errors.push('URL is required');
     } else {
@@ -247,24 +267,45 @@ export class ValidationService {
         validatedData.url = urlResult.data;
       }
     }
+  }
 
-    // Validate title (optional)
+  /**
+   * Validate bookmark title field
+   * @param {Object} bookmarkData - Source data
+   * @param {Object} validatedData - Target validated data
+   * @param {string[]} errors - Errors array
+   */
+  validateBookmarkTitle(bookmarkData, validatedData, errors) {
     const titleResult = this.validateTitle(bookmarkData.title);
     if (!titleResult.isValid) {
       errors.push(...titleResult.errors);
     } else {
       validatedData.title = titleResult.data || 'Untitled';
     }
+  }
 
-    // Validate description (optional) - maps from notes field in UI
+  /**
+   * Validate bookmark description field
+   * @param {Object} bookmarkData - Source data
+   * @param {Object} validatedData - Target validated data
+   * @param {string[]} errors - Errors array
+   */
+  validateBookmarkDescription(bookmarkData, validatedData, errors) {
     const descriptionResult = this.validateNotes(bookmarkData.description || bookmarkData.notes);
     if (!descriptionResult.isValid) {
       errors.push(...descriptionResult.errors);
     } else {
       validatedData.description = descriptionResult.data;
     }
+  }
 
-    // Validate tags (optional)
+  /**
+   * Validate bookmark tags field
+   * @param {Object} bookmarkData - Source data
+   * @param {Object} validatedData - Target validated data
+   * @param {string[]} errors - Errors array
+   */
+  validateBookmarkTags(bookmarkData, validatedData, errors) {
     if (bookmarkData.tags !== undefined) {
       if (!Array.isArray(bookmarkData.tags)) {
         errors.push('Tags must be an array');
@@ -279,8 +320,16 @@ export class ValidationService {
     } else {
       validatedData.tags = [];
     }
+  }
 
-    // Validate status (optional, defaults to 'unread')
+  /**
+   * Validate bookmark status field
+   * @param {Object} bookmarkData - Source data
+   * @param {Object} validatedData - Target validated data
+   * @param {string[]} errors - Errors array
+   * @param {string[]} [validStatuses] - Valid status values
+   */
+  validateBookmarkStatus(bookmarkData, validatedData, errors, validStatuses) {
     if (bookmarkData.status) {
       const statusResult = this.validateStatus(
         bookmarkData.status,
@@ -294,12 +343,6 @@ export class ValidationService {
     } else {
       validatedData.status = 'unread';
     }
-
-    return {
-      isValid: errors.length === 0,
-      data: errors.length === 0 ? validatedData : null,
-      errors
-    };
   }
 
   /**
@@ -315,7 +358,27 @@ export class ValidationService {
       return { isValid: true, data: {}, errors: [] };
     }
 
-    // Validate query
+    // Validate individual search option groups
+    this.validateSearchQuery(searchOptions, validatedOptions, errors);
+    this.validateSearchFilters(searchOptions, validatedOptions, errors);
+    this.validateSearchDates(searchOptions, validatedOptions, errors);
+    this.validateSearchPagination(searchOptions, validatedOptions, errors);
+    this.validateSearchSorting(searchOptions, validatedOptions, errors);
+
+    return {
+      isValid: errors.length === 0,
+      data: errors.length === 0 ? validatedOptions : null,
+      errors
+    };
+  }
+
+  /**
+   * Validate search query
+   * @param {Object} searchOptions - Search options
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateSearchQuery(searchOptions, validatedOptions, errors) {
     if (searchOptions.query !== undefined) {
       if (typeof searchOptions.query !== 'string') {
         errors.push('Search query must be a string');
@@ -323,7 +386,15 @@ export class ValidationService {
         validatedOptions.query = this.sanitizeString(searchOptions.query);
       }
     }
+  }
 
+  /**
+   * Validate search filters (tags and statuses)
+   * @param {Object} searchOptions - Search options
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateSearchFilters(searchOptions, validatedOptions, errors) {
     // Validate tags filter
     if (searchOptions.tags !== undefined) {
       const tagsResult = this.validateTags(searchOptions.tags);
@@ -336,26 +407,44 @@ export class ValidationService {
 
     // Validate statuses filter
     if (searchOptions.statuses !== undefined) {
-      if (!Array.isArray(searchOptions.statuses)) {
-        errors.push('Statuses filter must be an array');
-      } else {
-        const validStatuses = [];
-        const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
-        for (const status of searchOptions.statuses) {
-          if (typeof status === 'string') {
-            const normalized = status.trim().toLowerCase();
-            if (!allowedStatuses.includes(normalized)) {
-              errors.push(`Invalid status: ${status}`);
-            } else {
-              validStatuses.push(normalized);
-            }
+      this.validateStatusesFilter(searchOptions.statuses, validatedOptions, errors);
+    }
+  }
+
+  /**
+   * Validate statuses filter
+   * @param {any} statuses - Statuses to validate
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateStatusesFilter(statuses, validatedOptions, errors) {
+    if (!Array.isArray(statuses)) {
+      errors.push('Statuses filter must be an array');
+    } else {
+      const validStatuses = [];
+      const allowedStatuses = ['unread', 'reading', 'read', 'archived'];
+      for (const status of statuses) {
+        if (typeof status === 'string') {
+          const normalized = status.trim().toLowerCase();
+          if (!allowedStatuses.includes(normalized)) {
+            errors.push(`Invalid status: ${status}`);
+          } else {
+            validStatuses.push(normalized);
           }
         }
-        validatedOptions.statuses = validStatuses;
       }
+      validatedOptions.statuses = validStatuses;
     }
+  }
 
-    // Validate date filters
+  /**
+   * Validate search date filters
+   * @param {Object} searchOptions - Search options
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateSearchDates(searchOptions, validatedOptions, errors) {
+    // Validate individual date fields
     ['dateFrom', 'dateTo'].forEach(dateField => {
       if (searchOptions[dateField] !== undefined) {
         const date = new Date(searchOptions[dateField]);
@@ -367,7 +456,7 @@ export class ValidationService {
       }
     });
 
-    // Validate date range
+    // Validate date range logic
     if (
       validatedOptions.dateFrom &&
       validatedOptions.dateTo &&
@@ -375,8 +464,15 @@ export class ValidationService {
     ) {
       errors.push('Date from cannot be after date to');
     }
+  }
 
-    // Validate pagination
+  /**
+   * Validate search pagination
+   * @param {Object} searchOptions - Search options
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateSearchPagination(searchOptions, validatedOptions, errors) {
     if (searchOptions.page !== undefined) {
       const page = parseInt(searchOptions.page, 10);
       if (isNaN(page) || page < 1) {
@@ -394,8 +490,15 @@ export class ValidationService {
         validatedOptions.pageSize = pageSize;
       }
     }
+  }
 
-    // Validate sort options
+  /**
+   * Validate search sorting options
+   * @param {Object} searchOptions - Search options
+   * @param {Object} validatedOptions - Target validated options
+   * @param {string[]} errors - Errors array
+   */
+  validateSearchSorting(searchOptions, validatedOptions, errors) {
     if (searchOptions.sortBy !== undefined) {
       const validSortFields = ['created_at', 'updated_at', 'title', 'url'];
       if (!validSortFields.includes(searchOptions.sortBy)) {
@@ -412,12 +515,6 @@ export class ValidationService {
         validatedOptions.sortOrder = searchOptions.sortOrder;
       }
     }
-
-    return {
-      isValid: errors.length === 0,
-      data: errors.length === 0 ? validatedOptions : null,
-      errors
-    };
   }
 
   /**
