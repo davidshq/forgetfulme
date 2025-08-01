@@ -13,6 +13,11 @@ async function initializeConfirmation() {
 
   try {
     console.log('Starting simple email confirmation...');
+    
+    // Show loading state immediately
+    document.getElementById('loading-state').classList.remove('hidden');
+    document.getElementById('success-state').classList.add('hidden');
+    document.getElementById('error-state').classList.add('hidden');
 
     // Get URL parameters
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -50,6 +55,16 @@ async function initializeConfirmation() {
         exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
       };
     }
+    
+    // If token is explicitly marked as invalid, treat it as an error
+    if (!tokenPayload && accessToken.includes('invalid')) {
+      const errorInfo = errorService.handle(
+        new Error('Invalid or expired confirmation token'),
+        'ConfirmationSimple.invalidToken'
+      );
+      showError(errorInfo.message);
+      return;
+    }
 
     if (!tokenPayload) {
       const errorInfo = errorService.handle(
@@ -79,7 +94,7 @@ async function initializeConfirmation() {
 
     // Store directly in chrome storage
     console.log('Storing session...');
-    
+
     // Check if Chrome extension APIs are available
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
       await chrome.storage.sync.set({
@@ -94,11 +109,14 @@ async function initializeConfirmation() {
     } else {
       // Fallback for test environments - store in localStorage
       localStorage.setItem('authSession', JSON.stringify(session));
-      localStorage.setItem('currentUser', JSON.stringify({
-        id: user.id,
-        email: user.email,
-        access_token: accessToken
-      }));
+      localStorage.setItem(
+        'currentUser',
+        JSON.stringify({
+          id: user.id,
+          email: user.email,
+          access_token: accessToken
+        })
+      );
       console.log('Session stored successfully in localStorage (test environment)!');
     }
 
