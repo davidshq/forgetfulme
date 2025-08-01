@@ -82,8 +82,9 @@ export class BaseController {
       messageArea.appendChild(message);
 
       // Auto-remove after duration
+      let autoRemoveTimeout = null;
       if (duration > 0) {
-        setTimeout(() => {
+        autoRemoveTimeout = setTimeout(() => {
           if (message.parentNode) {
             message.parentNode.removeChild(message);
           }
@@ -95,11 +96,24 @@ export class BaseController {
         if (message.parentNode) {
           message.parentNode.removeChild(message);
         }
+        if (autoRemoveTimeout) {
+          clearTimeout(autoRemoveTimeout);
+          autoRemoveTimeout = null;
+        }
       };
       message.addEventListener('click', dismissHandler);
 
+      // Add cleanup for both event listener and timeout
       this.addCleanup(() => {
         message.removeEventListener('click', dismissHandler);
+        if (autoRemoveTimeout) {
+          clearTimeout(autoRemoveTimeout);
+          autoRemoveTimeout = null;
+        }
+        // Remove message from DOM if still present
+        if (message.parentNode) {
+          message.parentNode.removeChild(message);
+        }
       });
     } catch (error) {
       console.error('Error showing message:', error);
