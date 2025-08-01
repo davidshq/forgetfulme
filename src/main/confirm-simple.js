@@ -13,7 +13,7 @@ async function initializeConfirmation() {
 
   try {
     console.log('Starting simple email confirmation...');
-    
+
     // Show loading state immediately
     document.getElementById('loading-state').classList.remove('hidden');
     document.getElementById('success-state').classList.add('hidden');
@@ -55,7 +55,7 @@ async function initializeConfirmation() {
         exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
       };
     }
-    
+
     // If token is explicitly marked as invalid, treat it as an error
     if (!tokenPayload && accessToken.includes('invalid')) {
       const errorInfo = errorService.handle(

@@ -377,32 +377,27 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
       const bookmarkList = document.getElementById('bookmark-list');
       const emptyState = document.getElementById('empty-state');
       
-      // Ensure bulk selection elements exist
-      let selectAllCheckbox = document.getElementById('bulk-select-all');
-      if (!selectAllCheckbox) {
-        selectAllCheckbox = document.createElement('input');
-        selectAllCheckbox.type = 'checkbox';
-        selectAllCheckbox.id = 'bulk-select-all';
-        selectAllCheckbox.className = 'bulk-select-all';
-        document.body.appendChild(selectAllCheckbox);
-      }
-      
-      let bulkActions = document.getElementById('bulk-actions');
-      if (!bulkActions) {
-        bulkActions = document.createElement('div');
-        bulkActions.id = 'bulk-actions';
-        bulkActions.className = 'bulk-actions hidden';
-        bulkActions.innerHTML = `
-          <span id="selected-count" class="selected-count hidden">0 selected</span>
-          <select id="bulk-status-update">
-            <option value="">Update Status</option>
-            <option value="read">Read</option>
-            <option value="unread">Unread</option>
-            <option value="in-progress">In Progress</option>
-          </select>
-          <button id="bulk-delete">Delete Selected</button>
-        `;
-        document.body.appendChild(bulkActions);
+      // Populate the bulk-status-update select with options
+      const bulkStatusSelect = document.getElementById('bulk-status-update');
+      if (bulkStatusSelect) {
+        // Clear existing options except the first one
+        while (bulkStatusSelect.options.length > 1) {
+          bulkStatusSelect.removeChild(bulkStatusSelect.lastChild);
+        }
+        
+        // Add status options
+        const statusTypes = [
+          { id: 'read', name: 'Read' },
+          { id: 'unread', name: 'Unread' },
+          { id: 'reading', name: 'Reading' }
+        ];
+        
+        statusTypes.forEach(status => {
+          const option = document.createElement('option');
+          option.value = status.id;
+          option.textContent = status.name;
+          bulkStatusSelect.appendChild(option);
+        });
       }
       
       if (bookmarkList && emptyState) {
@@ -439,9 +434,15 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
       }
     }, bulkBookmarks);
 
+    // Wait for bookmarks to be rendered
+    await page.waitForSelector('.bookmark-item', { timeout: 5000 });
+
     // Test bulk selection
     const selectAllCheckbox = page.locator('#bulk-select-all');
     await selectAllCheckbox.check();
+
+    // Wait for bulk selection logic to process
+    await page.waitForTimeout(300);
 
     // Verify all checkboxes are selected
     for (const bookmark of bulkBookmarks) {
@@ -456,11 +457,22 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
     await expect(selectedCount).toContainText('3 selected');
 
     // Test bulk status update
-    await page.selectOption('#bulk-status-update', 'read');
+    const statusSelect = page.locator('#bulk-status-update');
+    await expect(statusSelect).toBeVisible();
     
-    // Simulate bulk update
+    // Wait for options to be populated
+    await page.waitForFunction(() => {
+      const select = document.querySelector('#bulk-status-update');
+      return select && select.options.length > 1;
+    }, { timeout: 3000 });
+    
+    await statusSelect.selectOption('read');
+    
+    // Wait for change event to process
+    await page.waitForTimeout(500);
+    
+    // Simulate bulk update by changing all bookmark statuses
     await page.evaluate(() => {
-      // Mock bulk update by changing all bookmark statuses
       const checkboxes = document.querySelectorAll('.bookmark-checkbox:checked');
       checkboxes.forEach(checkbox => {
         const bookmarkId = checkbox.dataset.bookmarkId;
@@ -476,6 +488,31 @@ test.describe('Bookmark CRUD Workflow Integration', () => {
     for (const bookmark of bulkBookmarks) {
       await expect(page.locator(`[data-testid="bookmark-${bookmark.id}"] .bookmark-status`)).toContainText('read');
     }
+
+    // Test bulk delete functionality
+    const bulkDeleteButton = page.locator('#bulk-delete');
+    await expect(bulkDeleteButton).toBeVisible();
+
+    // Mock the confirmation dialog
+    page.on('dialog', async dialog => {
+      expect(dialog.message()).toContain('delete 3 selected bookmarks');
+      await dialog.accept();
+    });
+
+    await bulkDeleteButton.click();
+
+    // Wait for delete operation to complete
+    await page.waitForTimeout(500);
+
+    // Test unselecting all
+    await selectAllCheckbox.uncheck();
+    
+    // Wait for state to update
+    await page.waitForTimeout(200);
+    
+    // Verify bulk actions become hidden
+    await expect(bulkActions).toBeHidden();
+    await expect(selectedCount).toBeHidden();
 
     // Take screenshot of bulk operations
     await expect(page).toHaveScreenshot('bookmark-bulk-operations.png');
