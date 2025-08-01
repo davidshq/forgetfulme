@@ -24,6 +24,10 @@ export class AuthService extends withServicePatterns(class {}) {
     this.authChangeListeners = new Set();
     this.supabaseClient = null;
     this.isInitialized = false;
+    
+    // Race condition prevention
+    this.sessionOperationInProgress = false;
+    this.sessionOperationQueue = [];
   }
 
   /**
@@ -71,110 +75,116 @@ export class AuthService extends withServicePatterns(class {}) {
   }
 
   /**
-   * Sign in with email and password
+   * Sign in with email and password (synchronized to prevent race conditions)
    * @param {string} email - User email
    * @param {string} password - User password
    * @returns {Promise<Object>} User session
    */
   async signIn(email, password) {
-    try {
-      await this.ensureConfigured();
+    return this.withSessionLock(async () => {
+      try {
+        await this.ensureConfigured();
 
-      const response = await this.supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+        const response = await this.supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
 
-      if (response.error) {
-        throw new Error(response.error.message);
+        if (response.error) {
+          throw new Error(response.error.message);
+        }
+
+        const session = response.data.session;
+        if (!session) {
+          throw new Error('No session returned from sign in');
+        }
+
+        await this.handleAuthSuccess(session);
+        return this.currentUser;
+      } catch (error) {
+        this.handleAndThrow(error, 'AuthService.signIn');
       }
-
-      const session = response.data.session;
-      if (!session) {
-        throw new Error('No session returned from sign in');
-      }
-
-      await this.handleAuthSuccess(session);
-      return this.currentUser;
-    } catch (error) {
-      this.handleAndThrow(error, 'AuthService.signIn');
-    }
+    });
   }
 
   /**
-   * Sign up with email and password
+   * Sign up with email and password (synchronized to prevent race conditions)
    * @param {string} email - User email
    * @param {string} password - User password
    * @returns {Promise<Object>} User session
    */
   async signUp(email, password) {
-    try {
-      await this.ensureConfigured();
+    return this.withSessionLock(async () => {
+      try {
+        await this.ensureConfigured();
 
-      const response = await this.supabaseClient.auth.signUp({
-        email,
-        password
-      });
+        const response = await this.supabaseClient.auth.signUp({
+          email,
+          password
+        });
 
-      if (response.error) {
-        const error = new Error(response.error.message);
-        error.status = response.error.status;
-        throw error;
+        if (response.error) {
+          const error = new Error(response.error.message);
+          error.status = response.error.status;
+          throw error;
+        }
+
+        // Log response for debugging
+        console.log('SignUp response:', {
+          hasSession: !!response.data.session,
+          hasUser: !!response.data.user,
+          userEmailConfirmed: response.data.user?.email_confirmed_at,
+          user: JSON.stringify(response.data.user, null, 2),
+          session: JSON.stringify(response.data.session, null, 2)
+        });
+
+        // Handle email confirmation requirement
+        // Check both possible fields for email verification status
+        const emailNotConfirmed =
+          response.data.user &&
+          (response.data.user.email_confirmed_at === null ||
+            response.data.user.email_confirmed_at === undefined ||
+            (response.data.user.user_metadata &&
+              response.data.user.user_metadata.email_verified === false));
+
+        if (!response.data.session && response.data.user && emailNotConfirmed) {
+          // Email confirmation required - handle through extension UI
+          console.log('Email confirmation required for:', response.data.user.email);
+          return {
+            requiresConfirmation: true,
+            email: response.data.user.email
+          };
+        }
+
+        const session = response.data.session;
+        if (!session) {
+          throw new Error('No session returned from sign up');
+        }
+
+        await this.handleAuthSuccess(session);
+        return this.currentUser;
+      } catch (error) {
+        this.handleAndThrow(error, 'AuthService.signUp');
       }
-
-      // Log response for debugging
-      console.log('SignUp response:', {
-        hasSession: !!response.data.session,
-        hasUser: !!response.data.user,
-        userEmailConfirmed: response.data.user?.email_confirmed_at,
-        user: JSON.stringify(response.data.user, null, 2),
-        session: JSON.stringify(response.data.session, null, 2)
-      });
-
-      // Handle email confirmation requirement
-      // Check both possible fields for email verification status
-      const emailNotConfirmed =
-        response.data.user &&
-        (response.data.user.email_confirmed_at === null ||
-          response.data.user.email_confirmed_at === undefined ||
-          (response.data.user.user_metadata &&
-            response.data.user.user_metadata.email_verified === false));
-
-      if (!response.data.session && response.data.user && emailNotConfirmed) {
-        // Email confirmation required - handle through extension UI
-        console.log('Email confirmation required for:', response.data.user.email);
-        return {
-          requiresConfirmation: true,
-          email: response.data.user.email
-        };
-      }
-
-      const session = response.data.session;
-      if (!session) {
-        throw new Error('No session returned from sign up');
-      }
-
-      await this.handleAuthSuccess(session);
-      return this.currentUser;
-    } catch (error) {
-      this.handleAndThrow(error, 'AuthService.signUp');
-    }
+    });
   }
 
   /**
-   * Sign out current user
+   * Sign out current user (synchronized to prevent race conditions)
    * @returns {Promise<void>}
    */
   async signOut() {
-    try {
-      if (this.supabaseClient) {
-        await this.supabaseClient.auth.signOut();
-      }
+    return this.withSessionLock(async () => {
+      try {
+        if (this.supabaseClient) {
+          await this.supabaseClient.auth.signOut();
+        }
 
-      await this.handleAuthSignOut();
-    } catch (error) {
-      this.handleAndThrow(error, 'AuthService.signOut');
-    }
+        await this.handleAuthSignOut();
+      } catch (error) {
+        this.handleAndThrow(error, 'AuthService.signOut');
+      }
+    });
   }
 
   /**
@@ -194,29 +204,42 @@ export class AuthService extends withServicePatterns(class {}) {
   }
 
   /**
-   * Get current session
+   * Get current session (synchronized to prevent race conditions)
    * @returns {Promise<Object|null>} Current session or null
    */
   async getSession() {
-    try {
-      const configured = await this.ensureConfigured(false);
-      if (!configured) {
+    return this.withSessionLock(async () => {
+      try {
+        const configured = await this.ensureConfigured(false);
+        if (!configured) {
+          return null;
+        }
+
+        const { data } = await this.supabaseClient.auth.getSession();
+        return data.session;
+      } catch (error) {
+        this.errorService.handle(error, 'AuthService.getSession');
         return null;
       }
-
-      const { data } = await this.supabaseClient.auth.getSession();
-      return data.session;
-    } catch (error) {
-      this.errorService.handle(error, 'AuthService.getSession');
-      return null;
-    }
+    });
   }
 
   /**
-   * Refresh current session
+   * Refresh current session (synchronized to prevent race conditions)
    * @returns {Promise<Object|null>} Refreshed session or null
    */
   async refreshSession() {
+    return this.withSessionLock(async () => {
+      return this._refreshSessionInternal();
+    });
+  }
+
+  /**
+   * Internal refresh session implementation (without synchronization)
+   * @returns {Promise<Object|null>} Refreshed session or null
+   * @private
+   */
+  async _refreshSessionInternal() {
     try {
       const configured = await this.ensureConfigured(false);
       if (!configured) {
@@ -378,10 +401,49 @@ export class AuthService extends withServicePatterns(class {}) {
   }
 
   /**
+   * Synchronization wrapper to prevent race conditions in session operations
+   * @param {Function} operation - Async operation to execute
+   * @returns {Promise<any>} Result of the operation
+   * @private
+   */
+  async withSessionLock(operation) {
+    return new Promise((resolve, reject) => {
+      this.sessionOperationQueue.push({ operation, resolve, reject });
+      this.processSessionQueue();
+    });
+  }
+
+  /**
+   * Process queued session operations sequentially
+   * @private
+   */
+  async processSessionQueue() {
+    if (this.sessionOperationInProgress || this.sessionOperationQueue.length === 0) {
+      return;
+    }
+
+    this.sessionOperationInProgress = true;
+
+    while (this.sessionOperationQueue.length > 0) {
+      const { operation, resolve, reject } = this.sessionOperationQueue.shift();
+      
+      try {
+        const result = await operation();
+        resolve(result);
+      } catch (error) {
+        reject(error);
+      }
+    }
+
+    this.sessionOperationInProgress = false;
+  }
+
+  /**
    * Restore session from storage
    * @private
    */
   async restoreSession() {
+    return this.withSessionLock(async () => {
     try {
       const storedSession = await this.storageService.getUserSession();
 
@@ -416,8 +478,8 @@ export class AuthService extends withServicePatterns(class {}) {
 
       this.currentUser = storedSession;
 
-      // Try to refresh the session
-      await this.refreshSession();
+      // Try to refresh the session (but don't use withSessionLock here to avoid nested locks)
+      await this._refreshSessionInternal();
     } catch (error) {
       // If restoration fails, clear the stored session
       // Don't log "Auth session missing" as an error - it's normal
@@ -426,6 +488,7 @@ export class AuthService extends withServicePatterns(class {}) {
       }
       await this.handleAuthSignOut();
     }
+    });
   }
 
   /**
