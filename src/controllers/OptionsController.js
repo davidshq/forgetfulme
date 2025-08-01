@@ -3,7 +3,7 @@
  */
 
 import { BaseController } from './BaseController.js';
-import { $, $$, show, hide, setFormData } from '../utils/dom.js';
+import { $, $$, show, hide, setFormData, clearElement } from '../utils/dom.js';
 
 /**
  * Controller for the options page
@@ -314,7 +314,7 @@ export class OptionsController extends BaseController {
     const container = $('#status-types-list');
     if (!container) return;
 
-    container.innerHTML = '';
+    clearElement(container);
 
     this.statusTypes.forEach(statusType => {
       const item = this.createStatusTypeItem(statusType);
@@ -340,7 +340,16 @@ export class OptionsController extends BaseController {
     const preview = document.createElement('div');
     preview.className = 'status-type-preview';
     preview.style.backgroundColor = statusType.color;
-    preview.innerHTML = `<span class="status-dot" style="background-color: white;"></span>${statusType.name}`;
+    // Create status dot and name safely
+    const statusDot = document.createElement('span');
+    statusDot.className = 'status-dot';
+    statusDot.style.backgroundColor = 'white';
+
+    const statusName = document.createElement('span');
+    statusName.textContent = statusType.name;
+
+    preview.appendChild(statusDot);
+    preview.appendChild(statusName);
 
     // Details
     const details = document.createElement('div');
@@ -584,7 +593,7 @@ export class OptionsController extends BaseController {
       const statusSelect = $('#export-status-filter');
       if (statusSelect && this.statusTypes.length > 0) {
         // Clear existing options
-        statusSelect.innerHTML = '';
+        clearElement(statusSelect);
 
         // Add status options
         this.statusTypes.forEach(statusType => {
@@ -704,25 +713,46 @@ export class OptionsController extends BaseController {
     const resultsDiv = $('#import-results');
     if (!resultsDiv) return;
 
-    const html = `
-      <h4>Import Results</h4>
-      <p><strong>Successfully imported:</strong> ${results.imported} bookmarks</p>
-      <p><strong>Failed:</strong> ${results.failed} bookmarks</p>
-      ${
-        results.errors.length > 0
-          ? `
-        <details>
-          <summary>View Errors (${results.errors.length})</summary>
-          <ul>
-            ${results.errors.map(error => `<li>${error.bookmark}: ${error.error}</li>`).join('')}
-          </ul>
-        </details>
-      `
-          : ''
-      }
-    `;
+    // Clear previous results
+    clearElement(resultsDiv);
 
-    resultsDiv.innerHTML = html;
+    // Create header
+    const header = document.createElement('h4');
+    header.textContent = 'Import Results';
+    resultsDiv.appendChild(header);
+
+    // Create success paragraph
+    const successPara = document.createElement('p');
+    const successStrong = document.createElement('strong');
+    successStrong.textContent = 'Successfully imported: ';
+    successPara.appendChild(successStrong);
+    successPara.appendChild(document.createTextNode(`${results.imported} bookmarks`));
+    resultsDiv.appendChild(successPara);
+
+    // Create failed paragraph
+    const failedPara = document.createElement('p');
+    const failedStrong = document.createElement('strong');
+    failedStrong.textContent = 'Failed: ';
+    failedPara.appendChild(failedStrong);
+    failedPara.appendChild(document.createTextNode(`${results.failed} bookmarks`));
+    resultsDiv.appendChild(failedPara);
+
+    // Create error details if any
+    if (results.errors.length > 0) {
+      const details = document.createElement('details');
+      const summary = document.createElement('summary');
+      summary.textContent = `View Errors (${results.errors.length})`;
+      details.appendChild(summary);
+
+      const errorList = document.createElement('ul');
+      results.errors.forEach(error => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${error.bookmark}: ${error.error}`;
+        errorList.appendChild(listItem);
+      });
+      details.appendChild(errorList);
+      resultsDiv.appendChild(details);
+    }
     show(resultsDiv);
 
     this.showSuccess(
@@ -739,28 +769,56 @@ export class OptionsController extends BaseController {
       const storageInfo = $('#storage-info');
 
       if (storageInfo && usage) {
-        const html = `
-          <div class="storage-bar">
-            <span class="storage-bar-label">Sync Storage:</span>
-            <div class="storage-bar-progress">
-              <div class="storage-bar-fill" style="width: ${usage.sync.percentUsed}%"></div>
-            </div>
-            <span class="storage-bar-text">${this.formatBytes(usage.sync.used)} / ${this.formatBytes(usage.sync.quota)}</span>
-          </div>
-          <div class="storage-bar">
-            <span class="storage-bar-label">Local Storage:</span>
-            <div class="storage-bar-progress">
-              <div class="storage-bar-fill" style="width: ${usage.local.percentUsed}%"></div>
-            </div>
-            <span class="storage-bar-text">${this.formatBytes(usage.local.used)} / ${this.formatBytes(usage.local.quota)}</span>
-          </div>
-        `;
+        // Clear previous content
+        clearElement(storageInfo);
 
-        storageInfo.innerHTML = html;
+        // Create sync storage bar
+        const syncBar = this.createStorageBar('Sync Storage', usage.sync);
+        storageInfo.appendChild(syncBar);
+
+        // Create local storage bar
+        const localBar = this.createStorageBar('Local Storage', usage.local);
+        storageInfo.appendChild(localBar);
       }
     } catch (error) {
       this.handleError(error, 'OptionsController.loadStorageUsage');
     }
+  }
+
+  /**
+   * Create a storage bar element
+   * @param {string} label - Storage type label
+   * @param {Object} usage - Usage data with percentUsed, used, quota
+   * @returns {Element} Storage bar element
+   */
+  createStorageBar(label, usage) {
+    const container = document.createElement('div');
+    container.className = 'storage-bar';
+
+    // Label
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'storage-bar-label';
+    labelSpan.textContent = `${label}:`;
+    container.appendChild(labelSpan);
+
+    // Progress bar
+    const progressDiv = document.createElement('div');
+    progressDiv.className = 'storage-bar-progress';
+
+    const fillDiv = document.createElement('div');
+    fillDiv.className = 'storage-bar-fill';
+    fillDiv.style.width = `${usage.percentUsed}%`;
+
+    progressDiv.appendChild(fillDiv);
+    container.appendChild(progressDiv);
+
+    // Text
+    const textSpan = document.createElement('span');
+    textSpan.className = 'storage-bar-text';
+    textSpan.textContent = `${this.formatBytes(usage.used)} / ${this.formatBytes(usage.quota)}`;
+    container.appendChild(textSpan);
+
+    return container;
   }
 
   /**

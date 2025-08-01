@@ -3,7 +3,7 @@
  */
 
 import { BaseController } from './BaseController.js';
-import { $, $$, show, hide, setFormData, createElement } from '../utils/dom.js';
+import { $, $$, show, hide, setFormData, createElement, clearElement } from '../utils/dom.js';
 import { formatUrl } from '../utils/formatting.js';
 
 /**
@@ -351,7 +351,7 @@ export class BookmarkManagerController extends BaseController {
     }
 
     // Clear existing bookmarks
-    container.innerHTML = '';
+    clearElement(container);
 
     // Render bookmark items
     this.bookmarks.forEach(bookmark => {
@@ -930,7 +930,7 @@ export class BookmarkManagerController extends BaseController {
    * @param {number} maxPage - Maximum page number
    */
   renderPageNumbers(container, maxPage) {
-    container.innerHTML = '';
+    clearElement(container);
 
     if (maxPage <= 1) return;
 

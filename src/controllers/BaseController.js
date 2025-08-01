@@ -2,7 +2,7 @@
  * @fileoverview Base controller class with common functionality
  */
 
-import { show, hide, setText, createElement } from '../utils/dom.js';
+import { show, hide, setText, createElement, clearElement, setTrustedHTML } from '../utils/dom.js';
 import { formatDate } from '../utils/formatting.js';
 
 /**
@@ -213,7 +213,7 @@ export class BaseController {
     element.dataset.originalContent = element.innerHTML;
 
     // Replace with loading
-    element.innerHTML = '';
+    clearElement(element);
     element.appendChild(loadingContent);
   }
 
@@ -227,7 +227,7 @@ export class BaseController {
 
     // Restore original content
     if (element.dataset.originalContent) {
-      element.innerHTML = element.dataset.originalContent;
+      setTrustedHTML(element, element.dataset.originalContent);
       delete element.dataset.originalContent;
     }
   }

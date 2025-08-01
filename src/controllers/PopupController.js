@@ -3,7 +3,7 @@
  */
 
 import { BaseController } from './BaseController.js';
-import { $, show, hide, setFormData } from '../utils/dom.js';
+import { $, show, hide, setFormData, clearElement } from '../utils/dom.js';
 import { formatUrl } from '../utils/formatting.js';
 
 /**
@@ -416,7 +416,7 @@ export class PopupController extends BaseController {
         const statusType = this.statusTypes.find(s => s.id === this.currentBookmark.status);
         const statusIndicator = this.createStatusIndicator(statusType);
 
-        statusElement.innerHTML = '';
+        clearElement(statusElement);
         statusElement.appendChild(statusIndicator);
         statusElement.classList.add('exists');
         statusElement.classList.remove('new');
@@ -541,15 +541,22 @@ export class PopupController extends BaseController {
 
     try {
       // Show loading
-      list.innerHTML = '<li class="loading">Loading recent bookmarks...</li>';
+      clearElement(list);
+      const loadingItem = document.createElement('li');
+      loadingItem.className = 'loading';
+      loadingItem.textContent = 'Loading recent bookmarks...';
+      list.appendChild(loadingItem);
 
       const recentBookmarks = await this.bookmarkService.getRecentBookmarks(5);
 
       // Clear loading
-      list.innerHTML = '';
+      clearElement(list);
 
       if (recentBookmarks.length === 0) {
-        list.innerHTML = '<li class="loading">No bookmarks yet</li>';
+        const noBookmarksItem = document.createElement('li');
+        noBookmarksItem.className = 'loading';
+        noBookmarksItem.textContent = 'No bookmarks yet';
+        list.appendChild(noBookmarksItem);
         return;
       }
 
@@ -560,7 +567,11 @@ export class PopupController extends BaseController {
       });
     } catch (error) {
       this.handleError(error, 'PopupController.loadRecentBookmarks');
-      list.innerHTML = '<li class="loading">Failed to load bookmarks</li>';
+      clearElement(list);
+      const errorItem = document.createElement('li');
+      errorItem.className = 'loading';
+      errorItem.textContent = 'Failed to load bookmarks';
+      list.appendChild(errorItem);
     }
   }
 

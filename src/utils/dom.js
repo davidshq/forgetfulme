@@ -90,13 +90,62 @@ export function setText(element, text) {
 }
 
 /**
- * Set HTML content safely
- * @param {Element} element - Target element
- * @param {string} html - HTML to set
+ * Escape HTML to prevent XSS attacks
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped HTML
  */
-export function setHTML(element, html) {
+export function escapeHTML(text) {
+  if (!text) return '';
+
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Set HTML content safely by escaping user input
+ * @param {Element} element - Target element
+ * @param {string} html - HTML to set (will be escaped if not explicitly marked as safe)
+ * @param {boolean} [trusted=false] - Whether to trust the HTML content (skip escaping)
+ */
+export function setHTML(element, html, trusted = false) {
+  if (!element) return;
+
+  if (!html) {
+    element.innerHTML = '';
+    return;
+  }
+
+  if (trusted) {
+    // Only use innerHTML with explicitly trusted content
+    element.innerHTML = html;
+  } else {
+    // Escape HTML for safety
+    element.textContent = html;
+  }
+}
+
+/**
+ * Set HTML content for trusted content only (internal use)
+ * @param {Element} element - Target element
+ * @param {string} html - Trusted HTML to set
+ */
+export function setTrustedHTML(element, html) {
   if (!element) return;
   element.innerHTML = html || '';
+}
+
+/**
+ * Clear element content safely
+ * @param {Element} element - Element to clear
+ */
+export function clearElement(element) {
+  if (!element) return;
+
+  // More efficient than innerHTML = ''
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
 }
 
 /**
