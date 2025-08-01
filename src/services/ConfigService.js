@@ -448,40 +448,22 @@ export class ConfigService {
   }
 
   /**
-   * Validate single status type
+   * Validate single status type using ValidationService
    * @param {Object} statusType - Status type to validate
    * @returns {Object} Validated status type
    * @private
    */
   validateStatusType(statusType) {
-    if (!statusType || typeof statusType !== 'object') {
-      throw new Error('Status type must be an object');
+    const result = this.validationService.validateStatusType(statusType);
+
+    if (!result.isValid) {
+      throw new Error(result.errors?.[0] || 'Status type validation failed');
     }
 
-    const { id, name, color, icon, is_default } = statusType;
-
-    if (!id || typeof id !== 'string' || id.trim().length === 0) {
-      throw new Error('Status type ID is required');
-    }
-
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      throw new Error('Status type name is required');
-    }
-
-    if (!color || typeof color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(color)) {
-      throw new Error('Status type color must be a valid hex color');
-    }
-
-    if (!icon || typeof icon !== 'string' || icon.trim().length === 0) {
-      throw new Error('Status type icon is required');
-    }
-
+    // Add is_default property for ConfigService compatibility
     return {
-      id: id.trim().toLowerCase(),
-      name: name.trim(),
-      color: color.toLowerCase(),
-      icon: icon.trim(),
-      is_default: Boolean(is_default)
+      ...result.data,
+      is_default: Boolean(statusType.is_default)
     };
   }
 

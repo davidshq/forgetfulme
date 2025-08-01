@@ -42,21 +42,24 @@ export class OptionsController extends BaseController {
    * @returns {Promise<void>}
    */
   async initialize() {
-    try {
-      // Set up navigation
-      this.setupNavigation();
+    await this.safeExecute(
+      async () => {
+        // Set up navigation
+        this.setupNavigation();
 
-      // Set up event listeners
-      this.setupEventListeners();
+        // Set up event listeners
+        this.setupEventListeners();
 
-      // Load initial data
-      await this.loadInitialData();
+        // Load initial data
+        await this.loadInitialData();
 
-      // Show default section
-      this.showSection('database');
-    } catch (error) {
-      this.handleError(error, 'OptionsController.initialize');
-    }
+        // Show default section
+        this.showSection('database');
+      },
+      'OptionsController.initialize',
+      'main',
+      'Loading options...'
+    );
   }
 
   /**
@@ -911,10 +914,10 @@ export class OptionsController extends BaseController {
     if (!statusId) return;
 
     const form = $('#edit-status-form');
-    const formData = new FormData(form);
+    const formData = this.getFormData(form);
 
-    const name = formData.get('name')?.trim();
-    const color = formData.get('color');
+    const name = formData.name?.trim();
+    const color = formData.color;
 
     if (!name || !color) {
       this.showError('Please fill in all fields');

@@ -40,48 +40,51 @@ export class BookmarkManagerController extends BaseController {
    * @returns {Promise<void>}
    */
   async initialize() {
-    try {
-      // Check configuration first
-      const isConfigured = await this.configService.isSupabaseConfigured();
-      if (!isConfigured) {
-        this.showAuthenticationRequired(
-          'Configuration required. Please set up your Supabase credentials in Settings.'
-        );
-        return;
-      }
+    await this.safeExecute(
+      async () => {
+        // Check configuration first
+        const isConfigured = await this.configService.isSupabaseConfigured();
+        if (!isConfigured) {
+          this.showAuthenticationRequired(
+            'Configuration required. Please set up your Supabase credentials in Settings.'
+          );
+          return;
+        }
 
-      // Initialize auth service
-      const isAuthInitialized = await this.authService.initialize();
-      if (!isAuthInitialized) {
-        this.showAuthenticationRequired(
-          'Configuration required. Please set up your Supabase credentials in Settings.'
-        );
-        return;
-      }
+        // Initialize auth service
+        const isAuthInitialized = await this.authService.initialize();
+        if (!isAuthInitialized) {
+          this.showAuthenticationRequired(
+            'Configuration required. Please set up your Supabase credentials in Settings.'
+          );
+          return;
+        }
 
-      // Check authentication
-      if (!this.authService.isAuthenticated()) {
-        this.showAuthenticationRequired('Please sign in to access bookmarks.');
-        return;
-      }
+        // Check authentication
+        if (!this.authService.isAuthenticated()) {
+          this.showAuthenticationRequired('Please sign in to access bookmarks.');
+          return;
+        }
 
-      // Initialize services
-      await this.bookmarkService.initialize();
+        // Initialize services
+        await this.bookmarkService.initialize();
 
-      // Load initial data
-      await this.loadInitialData();
+        // Load initial data
+        await this.loadInitialData();
 
-      // Set up event listeners
-      this.setupEventListeners();
+        // Set up event listeners
+        this.setupEventListeners();
 
-      // Load bookmarks
-      await this.loadBookmarks();
+        // Load bookmarks
+        await this.loadBookmarks();
 
-      // Update UI
-      this.updateUserInfo();
-    } catch (error) {
-      this.handleError(error, 'BookmarkManagerController.initialize');
-    }
+        // Update UI
+        this.updateUserInfo();
+      },
+      'BookmarkManagerController.initialize',
+      'main',
+      'Initializing...'
+    );
   }
 
   /**
@@ -1179,21 +1182,21 @@ export class BookmarkManagerController extends BaseController {
    * Refresh authentication state
    */
   async refreshAuthentication() {
-    try {
-      // Clear existing auth required UI
-      const authRequired = $('#auth-required');
-      if (authRequired) {
-        authRequired.remove();
-      }
+    await this.safeExecute(
+      async () => {
+        // Clear existing auth required UI
+        const authRequired = $('#auth-required');
+        if (authRequired) {
+          authRequired.remove();
+        }
 
-      // Show loading
-      this.showLoading('#bookmark-list-container', 'Checking authentication...');
-
-      // Re-initialize
-      await this.initialize();
-    } catch (error) {
-      this.handleError(error, 'BookmarkManagerController.refreshAuthentication');
-    }
+        // Re-initialize
+        await this.initialize();
+      },
+      'BookmarkManagerController.refreshAuthentication',
+      '#bookmark-list-container',
+      'Checking authentication...'
+    );
   }
 
   /**
