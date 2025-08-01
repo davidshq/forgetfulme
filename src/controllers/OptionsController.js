@@ -130,6 +130,27 @@ export class OptionsController extends BaseController {
     this.addEventListener($('#clear-cache'), 'click', () => {
       this.handleClearCache();
     });
+
+    // Edit status modal event listeners
+    this.addEventListener($('#close-status-modal'), 'click', () => {
+      this.closeEditStatusModal();
+    });
+
+    this.addEventListener($('#cancel-status-edit'), 'click', () => {
+      this.closeEditStatusModal();
+    });
+
+    this.addEventListener($('#edit-status-form'), 'submit', e => {
+      e.preventDefault();
+      this.handleSaveStatusEdit();
+    });
+
+    // Close modal on backdrop click
+    this.addEventListener($('#edit-status-modal'), 'click', e => {
+      if (e.target === e.currentTarget) {
+        this.closeEditStatusModal();
+      }
+    });
   }
 
   /**
@@ -477,22 +498,7 @@ export class OptionsController extends BaseController {
     const statusType = this.statusTypes.find(s => s.id === statusId);
     if (!statusType) return;
 
-    // Simple prompt-based editing (could be enhanced with a modal)
-    const newName = prompt('Enter new name:', statusType.name);
-    if (!newName) return;
-
-    const newColor = prompt('Enter new color (hex):', statusType.color);
-    if (!newColor) return;
-
-    await this.safeExecute(async () => {
-      await this.configService.updateStatusType(statusId, {
-        name: newName,
-        color: newColor
-      });
-
-      this.showSuccess('Status type updated successfully');
-      await this.loadStatusTypes();
-    }, 'OptionsController.handleEditStatusType');
+    this.showEditStatusModal(statusType);
   }
 
   /**
@@ -503,10 +509,15 @@ export class OptionsController extends BaseController {
     const statusType = this.statusTypes.find(s => s.id === statusId);
     if (!statusType) return;
 
-    const confirmed = confirm(
-      `Are you sure you want to delete the "${statusType.name}" status type?`
-    );
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm(
+        `Are you sure you want to delete the "${statusType.name}" status type?`
+      );
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'OptionsController.handleDeleteStatusType');
+      return;
+    }
 
     await this.safeExecute(async () => {
       await this.configService.removeStatusType(statusId);
@@ -519,10 +530,15 @@ export class OptionsController extends BaseController {
    * Handle reset status types
    */
   async handleResetStatusTypes() {
-    const confirmed = confirm(
-      'Are you sure you want to reset all status types to defaults? This will remove any custom status types.'
-    );
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm(
+        'Are you sure you want to reset all status types to defaults? This will remove any custom status types.'
+      );
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'OptionsController.handleResetStatusTypes');
+      return;
+    }
 
     await this.safeExecute(async () => {
       await this.configService.resetStatusTypesToDefaults();
@@ -575,8 +591,13 @@ export class OptionsController extends BaseController {
    * Handle reset preferences
    */
   async handleResetPreferences() {
-    const confirmed = confirm('Are you sure you want to reset all preferences to defaults?');
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm('Are you sure you want to reset all preferences to defaults?');
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'OptionsController.handleResetPreferences');
+      return;
+    }
 
     await this.safeExecute(async () => {
       await this.configService.resetUserPreferences();
@@ -825,10 +846,15 @@ export class OptionsController extends BaseController {
    * Handle clear cache
    */
   async handleClearCache() {
-    const confirmed = confirm(
-      'Are you sure you want to clear the cache? This will remove locally cached data.'
-    );
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm(
+        'Are you sure you want to clear the cache? This will remove locally cached data.'
+      );
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'OptionsController.handleClearCache');
+      return;
+    }
 
     await this.safeExecute(async () => {
       this.storageService.clearCache();
@@ -837,6 +863,73 @@ export class OptionsController extends BaseController {
       this.showSuccess('Cache cleared successfully');
       await this.loadStorageUsage();
     }, 'OptionsController.handleClearCache');
+  }
+
+  /**
+   * Show edit status modal
+   * @param {Object} statusType - Status type to edit
+   */
+  showEditStatusModal(statusType) {
+    const modal = $('#edit-status-modal');
+    const form = $('#edit-status-form');
+
+    if (!modal || !form) return;
+
+    // Populate form fields
+    const nameInput = $('#status-name');
+    const colorInput = $('#status-color');
+
+    if (nameInput) nameInput.value = statusType.name;
+    if (colorInput) colorInput.value = statusType.color;
+
+    // Store the status ID for later use
+    modal.dataset.statusId = statusType.id;
+
+    // Show modal
+    modal.showModal();
+  }
+
+  /**
+   * Close edit status modal
+   */
+  closeEditStatusModal() {
+    const modal = $('#edit-status-modal');
+    if (modal) {
+      modal.close();
+      delete modal.dataset.statusId;
+    }
+  }
+
+  /**
+   * Handle save status edit
+   */
+  async handleSaveStatusEdit() {
+    const modal = $('#edit-status-modal');
+    const statusId = modal?.dataset.statusId;
+
+    if (!statusId) return;
+
+    const form = $('#edit-status-form');
+    const formData = new FormData(form);
+
+    const name = formData.get('name')?.trim();
+    const color = formData.get('color');
+
+    if (!name || !color) {
+      this.showError('Please fill in all fields');
+      return;
+    }
+
+    await this.safeExecute(async () => {
+      await this.configService.updateStatusType(statusId, {
+        name,
+        color
+      });
+
+      this.showSuccess('Status type updated successfully');
+      await this.loadStatusTypes();
+      this.closeEditStatusModal();
+    }, 'OptionsController.handleSaveStatusEdit');
   }
 
   /**

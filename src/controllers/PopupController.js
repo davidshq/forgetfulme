@@ -323,8 +323,14 @@ export class PopupController extends BaseController {
    * Handle forgot password
    */
   async handleForgotPassword() {
-    const email = prompt('Enter your email address:');
-    if (!email) return;
+    let email;
+    try {
+      email = prompt('Enter your email address:');
+      if (!email) return;
+    } catch (error) {
+      this.handleError(error, 'PopupController.handleForgotPassword');
+      return;
+    }
 
     await this.safeExecute(async () => {
       await this.authService.resetPassword(email);
@@ -513,8 +519,13 @@ export class PopupController extends BaseController {
   async handleDeleteBookmark() {
     if (!this.currentBookmark) return;
 
-    const confirmed = confirm('Are you sure you want to delete this bookmark?');
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm('Are you sure you want to delete this bookmark?');
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'PopupController.handleDeleteBookmark');
+      return;
+    }
 
     await this.safeExecute(
       async () => {

@@ -430,6 +430,66 @@
       <!-- Messages -->
       <div id="message-area" class="message-area" data-testid="message-area"></div>
 
+      <!-- Edit Status Type Modal -->
+      <dialog id="edit-status-modal" class="edit-status-modal" data-testid="edit-status-modal">
+        <article>
+          <header>
+            <button
+              aria-label="Close"
+              rel="prev"
+              id="close-status-modal"
+              class="close-modal"
+              data-testid="close-status-modal"
+            ></button>
+            <h3>Edit Status Type</h3>
+          </header>
+
+          <form id="edit-status-form" data-testid="edit-status-form">
+            <label for="status-name">
+              Name
+              <input
+                type="text"
+                id="status-name"
+                name="name"
+                required
+                maxlength="50"
+                data-testid="status-name"
+              />
+            </label>
+
+            <label for="status-color">
+              Color
+              <input
+                type="color"
+                id="status-color"
+                name="color"
+                required
+                data-testid="status-color"
+              />
+            </label>
+          </form>
+
+          <footer class="modal-actions">
+            <button
+              type="button"
+              id="cancel-status-edit"
+              class="secondary"
+              data-testid="cancel-status-edit"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="edit-status-form"
+              id="save-status-edit"
+              data-testid="save-status-edit"
+            >
+              Save Changes
+            </button>
+          </footer>
+        </article>
+      </dialog>
+
       <!-- Loading Overlay -->
       <div id="loading-overlay" class="loading-overlay hidden" data-testid="loading-overlay">
         <div class="loading-content">

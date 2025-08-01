@@ -708,10 +708,15 @@ export class BookmarkManagerController extends BaseController {
   async handleBulkStatusUpdate(statusId) {
     if (this.selectedBookmarks.size === 0) return;
 
-    const confirmed = confirm(
-      `Change status for ${this.selectedBookmarks.size} selected bookmarks?`
-    );
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm(
+        `Change status for ${this.selectedBookmarks.size} selected bookmarks?`
+      );
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'BookmarkManagerController.handleBulkStatusUpdate');
+      return;
+    }
 
     await this.safeExecute(async () => {
       const bookmarkIds = Array.from(this.selectedBookmarks);
@@ -728,10 +733,15 @@ export class BookmarkManagerController extends BaseController {
   async handleBulkDelete() {
     if (this.selectedBookmarks.size === 0) return;
 
-    const confirmed = confirm(
-      `Are you sure you want to delete ${this.selectedBookmarks.size} selected bookmarks? This cannot be undone.`
-    );
-    if (!confirmed) return;
+    try {
+      const confirmed = confirm(
+        `Are you sure you want to delete ${this.selectedBookmarks.size} selected bookmarks? This cannot be undone.`
+      );
+      if (!confirmed) return;
+    } catch (error) {
+      this.handleError(error, 'BookmarkManagerController.handleBulkDelete');
+      return;
+    }
 
     await this.safeExecute(async () => {
       const bookmarkIds = Array.from(this.selectedBookmarks);
