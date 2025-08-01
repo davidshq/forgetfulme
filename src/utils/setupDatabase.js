@@ -44,7 +44,8 @@ export async function setupDatabase() {
 
     console.log('Authenticated as:', user.email);
 
-    // Create tables using Supabase's SQL function
+    // Database schema for reference (from database/schema-simple.sql)
+    // This must be run manually in Supabase SQL Editor before using the extension
     const _schema = `
       -- Enable UUID extension
       CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -206,6 +207,7 @@ export async function setupDatabase() {
 /**
  * Create database tables manually if they don't exist
  * This is a workaround since Supabase JS doesn't support DDL
+ * Provides helpful error message with setup instructions
  */
 export async function createTablesManually() {
   try {
@@ -225,11 +227,13 @@ export async function createTablesManually() {
         'Please run the SQL schema in Supabase dashboard:\n\n' +
         '1. Go to Supabase Dashboard\n' +
         '2. Navigate to SQL Editor\n' +
-        '3. Copy the schema from database/schema.sql\n' +
-        '4. Run the SQL'
+        '3. Copy the schema from database/schema-simple.sql\n' +
+        '4. Run the SQL\n\n' +
+        'The schema is also available in setupDatabase.js for reference.'
     );
   } catch (error) {
     console.error('Manual table creation error:', error);
     throw error;
   }
 }
+

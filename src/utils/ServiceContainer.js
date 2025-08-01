@@ -71,26 +71,6 @@ export class ServiceContainer {
     return this.services.has(name) || this.factories.has(name);
   }
 
-  /**
-   * Clear all services and factories
-   */
-  clear() {
-    this.services.clear();
-    this.factories.clear();
-  }
-
-  /**
-   * Get all registered service names
-   * @returns {string[]} Service names
-   */
-  getServiceNames() {
-    const names = new Set();
-
-    this.services.forEach((_, name) => names.add(name));
-    this.factories.forEach((_, name) => names.add(name));
-
-    return Array.from(names);
-  }
 }
 
 // Create and export default container instance

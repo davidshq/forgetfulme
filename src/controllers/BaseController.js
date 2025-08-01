@@ -3,6 +3,7 @@
  */
 
 import { show, hide, setText, createElement } from '../utils/dom.js';
+import { formatDate } from '../utils/formatting.js';
 
 /**
  * Base controller class for common functionality
@@ -301,37 +302,7 @@ export class BaseController {
    * @returns {string} Formatted date
    */
   formatDate(date, format = 'relative') {
-    if (!date) return '';
-
-    const dateObj = new Date(date);
-    if (isNaN(dateObj.getTime())) return '';
-
-    const now = new Date();
-    const diff = now.getTime() - dateObj.getTime();
-
-    if (format === 'relative') {
-      const seconds = Math.floor(diff / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-
-      if (seconds < 60) return 'Just now';
-      if (minutes < 60) return `${minutes}m ago`;
-      if (hours < 24) return `${hours}h ago`;
-      if (days < 30) return `${days}d ago`;
-
-      return dateObj.toLocaleDateString();
-    }
-
-    if (format === 'short') {
-      return dateObj.toLocaleDateString();
-    }
-
-    return dateObj.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return formatDate(date, format);
   }
 
   /**

@@ -443,9 +443,9 @@ export class ErrorService {
       original:
         originalError instanceof Error
           ? {
-              message: originalError.message,
-              stack: originalError.stack
-            }
+            message: originalError.message,
+            stack: originalError.stack
+          }
           : { message: String(originalError) }
     };
 
@@ -486,13 +486,6 @@ export class ErrorService {
    * Clear error log entries
    */
   clearErrorLog() {
-    this.errorLog = [];
-  }
-
-  /**
-   * Clear error log
-   */
-  clearLog() {
     this.errorLog = [];
   }
 

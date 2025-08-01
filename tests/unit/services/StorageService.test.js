@@ -364,6 +364,7 @@ describe('StorageService', () => {
       const invalidData = { func: () => {} };
       expect(() => storageService.validateDataSize(invalidData)).toThrow();
     });
+
   });
 
   describe('error handling', () => {

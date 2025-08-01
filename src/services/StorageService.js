@@ -122,15 +122,8 @@ export class StorageService {
         throw new Error('Invalid arguments for set method');
       }
 
-      // Validate data first
-      this.validateData(data);
-
-      // Check data size
-      const dataString = JSON.stringify(data);
-      if (dataString.length > 8192) {
-        // Chrome sync storage limit per item
-        throw new Error('Data too large for storage');
-      }
+      // Validate data and size
+      this.validateDataSize(data);
 
       const storage = actualUseSync ? chrome.storage.sync : chrome.storage.local;
       await storage.set(data);
@@ -519,7 +512,7 @@ export class StorageService {
   }
 
   /**
-   * Validate data size for storage (test compatibility)
+   * Validate data size for storage (Chrome storage limits)
    * @param {*} data - Data to validate
    * @throws {Error} If data is not serializable or too large
    */

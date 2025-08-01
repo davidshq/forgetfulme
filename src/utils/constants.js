@@ -80,18 +80,3 @@ export const CACHE_DURATION = {
   USER_PROFILE: 30 * 60 * 1000 // 30 minutes
 };
 
-export const SYNC_INTERVALS = {
-  FAST: 30 * 1000, // 30 seconds
-  NORMAL: 5 * 60 * 1000, // 5 minutes
-  SLOW: 30 * 60 * 1000 // 30 minutes
-};
-
-export const MESSAGES = {
-  BOOKMARK_SAVED: 'Bookmark saved successfully',
-  BOOKMARK_UPDATED: 'Bookmark updated successfully',
-  BOOKMARK_DELETED: 'Bookmark deleted successfully',
-  SYNC_COMPLETE: 'Sync completed',
-  AUTH_REQUIRED: 'Please sign in to continue',
-  CONNECTION_ERROR: 'Connection error - please try again',
-  VALIDATION_ERROR: 'Please check your input and try again'
-};
