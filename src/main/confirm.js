@@ -4,7 +4,7 @@
  */
 
 import { ServiceContainer } from '../utils/ServiceContainer.js';
-import { createSupabaseClient } from '../lib/supabase-bundle.js';
+import { createClient } from '../lib/supabase.js';
 import { ErrorService } from '../services/ErrorService.js';
 
 /**
@@ -82,7 +82,7 @@ async function initializeConfirmation() {
     console.log('Config loaded');
 
     // Initialize Supabase client to get user details
-    const supabaseClient = createSupabaseClient(config.supabaseUrl, config.supabaseAnonKey);
+    const supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
     // Get user with the access token
     const {

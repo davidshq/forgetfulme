@@ -1116,16 +1116,44 @@ export class BookmarkManagerController extends BaseController {
     const authRequired = document.createElement('div');
     authRequired.id = 'auth-required';
     authRequired.className = 'auth-required';
-    authRequired.innerHTML = `
-      <div class="auth-required-content">
-        <h3>Authentication Required</h3>
-        <p>${message}</p>
-        <div class="auth-actions">
-          <button type="button" id="open-settings" class="primary">Go to Settings</button>
-          <button type="button" id="refresh-auth" class="secondary">Try Again</button>
-        </div>
-      </div>
-    `;
+
+    // Create content container
+    const authContent = document.createElement('div');
+    authContent.className = 'auth-required-content';
+
+    // Create title
+    const title = document.createElement('h3');
+    title.textContent = 'Authentication Required';
+
+    // Create message paragraph with safe text content
+    const messageP = document.createElement('p');
+    messageP.textContent = message;
+
+    // Create actions container
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'auth-actions';
+
+    // Create settings button
+    const settingsButton = document.createElement('button');
+    settingsButton.type = 'button';
+    settingsButton.id = 'open-settings';
+    settingsButton.className = 'primary';
+    settingsButton.textContent = 'Go to Settings';
+
+    // Create refresh button
+    const refreshButton = document.createElement('button');
+    refreshButton.type = 'button';
+    refreshButton.id = 'refresh-auth';
+    refreshButton.className = 'secondary';
+    refreshButton.textContent = 'Try Again';
+
+    // Assemble the elements
+    actionsDiv.appendChild(settingsButton);
+    actionsDiv.appendChild(refreshButton);
+    authContent.appendChild(title);
+    authContent.appendChild(messageP);
+    authContent.appendChild(actionsDiv);
+    authRequired.appendChild(authContent);
 
     // Add to container
     container.appendChild(authRequired);

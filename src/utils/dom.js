@@ -114,12 +114,26 @@ export function setHTML(element, html, trusted = false) {
 
 /**
  * Set HTML content for trusted content only (internal use)
+ * WARNING: Only use with known-safe HTML from static templates
  * @param {Element} element - Target element
- * @param {string} html - Trusted HTML to set
+ * @param {string} html - Trusted HTML to set (must be static, never user input)
  */
 export function setTrustedHTML(element, html) {
   if (!element) return;
-  element.innerHTML = html || '';
+
+  // Clear first for safety
+  element.textContent = '';
+
+  // Only set innerHTML if we have trusted content
+  if (html && typeof html === 'string') {
+    // Log warning if content looks suspicious (contains script or event handlers)
+    if (html.includes('<script') || html.includes('javascript:') || /on\w+=/i.test(html)) {
+      console.warn('setTrustedHTML: Potentially unsafe HTML detected:', html.substring(0, 100));
+      element.textContent = html; // Fallback to safe text content
+      return;
+    }
+    element.innerHTML = html;
+  }
 }
 
 /**

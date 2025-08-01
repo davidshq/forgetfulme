@@ -530,7 +530,26 @@ export class ValidationService {
     return input
       .trim()
       .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/[\x00-\x1F\x7F]/g, ''); // Remove control characters
+      .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/javascript:/gi, '') // Remove javascript: URLs
+      .replace(/data:/gi, '') // Remove data: URLs
+      .replace(/vbscript:/gi, '') // Remove vbscript: URLs
+      .replace(/on\w+\s*=/gi, '') // Remove event handlers like onclick=
+      .replace(/expression\s*\(/gi, '') // Remove CSS expressions
+      .replace(/url\s*\(/gi, '') // Remove CSS url() references
+      .replace(/&lt;|&gt;|&quot;|&#x27;|&#x2F;/g, match => {
+        // Decode common HTML entities that could be used to bypass filtering
+        const entityMap = {
+          '&lt;': '<',
+          '&gt;': '>',
+          '&quot;': '"',
+          '&#x27;': "'",
+          '&#x2F;': '/'
+        };
+        return entityMap[match] || match;
+      })
+      .replace(/<[^>]*>/g, ''); // Remove any remaining HTML tags after entity decoding
   }
 
   /**
