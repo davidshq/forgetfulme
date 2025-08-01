@@ -237,7 +237,7 @@ describe('OptionsController', () => {
 
       await controller.initialize();
 
-      expect(mockErrorService.handle).toHaveBeenCalledWith(error, 'OptionsController.initialize');
+      expect(mockErrorService.handle).toHaveBeenCalledWith(error, 'OptionsController.loadDatabaseConfig');
     });
   });
 
@@ -250,8 +250,9 @@ describe('OptionsController', () => {
       const navStatusTypes = document.getElementById('nav-status-types');
       const navDatabase = document.getElementById('nav-database');
 
-      expect(statusTypesSection.style.display).not.toBe('none');
-      expect(databaseSection.style.display).toBe('none');
+      // The hide() function uses 'hidden' class, not style.display
+      expect(statusTypesSection.classList.contains('hidden')).toBe(false);
+      expect(databaseSection.classList.contains('hidden')).toBe(true);
       expect(navStatusTypes.classList.contains('active')).toBe(true);
       expect(navDatabase.classList.contains('active')).toBe(false);
       expect(controller.currentSection).toBe('status-types');

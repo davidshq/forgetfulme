@@ -398,6 +398,13 @@ describe('PopupController', () => {
         controller.currentBookmark = null;
         controller.currentTab = { url: 'https://example.com', title: 'Test Page' };
 
+        // Mock getFormData to return the expected form data
+        controller.getFormData = vi.fn().mockReturnValue({
+          status: 'read',
+          tags: 'tag1, tag2',
+          notes: 'Test notes'
+        });
+
         await controller.handleSaveBookmark();
 
         expect(mockBookmarkService.createBookmark).toHaveBeenCalledWith({
@@ -405,13 +412,20 @@ describe('PopupController', () => {
           title: 'Test Page',
           status: 'read',
           tags: ['tag1', 'tag2'],
-          notes: 'Test notes'
+          description: 'Test notes'
         });
       });
 
       it('should update existing bookmark', async () => {
         controller.currentBookmark = { id: '1' };
         controller.currentTab = { url: 'https://example.com', title: 'Test Page' };
+
+        // Mock getFormData to return the expected form data
+        controller.getFormData = vi.fn().mockReturnValue({
+          status: 'read',
+          tags: 'tag1, tag2',
+          notes: 'Test notes'
+        });
 
         await controller.handleSaveBookmark();
 
@@ -420,7 +434,7 @@ describe('PopupController', () => {
           title: 'Test Page',
           status: 'read',
           tags: ['tag1', 'tag2'],
-          notes: 'Test notes'
+          description: 'Test notes'
         });
       });
 
@@ -534,8 +548,9 @@ describe('PopupController', () => {
 
       expect(signinTab.classList.contains('active')).toBe(false);
       expect(signupTab.classList.contains('active')).toBe(true);
-      expect(signinForm.style.display).toBe('none');
-      expect(signupForm.style.display).not.toBe('none');
+      // The hide() function uses 'hidden' class, not style.display
+      expect(signinForm.classList.contains('hidden')).toBe(true);
+      expect(signupForm.classList.contains('hidden')).toBe(false);
     });
 
     it('should switch to signin tab', () => {
@@ -548,8 +563,9 @@ describe('PopupController', () => {
 
       expect(signinTab.classList.contains('active')).toBe(true);
       expect(signupTab.classList.contains('active')).toBe(false);
-      expect(signinForm.style.display).not.toBe('none');
-      expect(signupForm.style.display).toBe('none');
+      // The hide() function uses 'hidden' class, not style.display
+      expect(signinForm.classList.contains('hidden')).toBe(false);
+      expect(signupForm.classList.contains('hidden')).toBe(true);
     });
   });
 
