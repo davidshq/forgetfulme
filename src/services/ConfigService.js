@@ -77,8 +77,14 @@ export class ConfigService {
   async getEnvironmentConfig() {
     try {
       // Skip dynamic imports in ServiceWorker context where they're not allowed
-      if (typeof globalThis !== 'undefined' && typeof globalThis.ServiceWorkerGlobalScope !== 'undefined' && globalThis instanceof globalThis.ServiceWorkerGlobalScope) {
-        console.log('[ConfigService] Environment config not available: import() not allowed in ServiceWorker context');
+      if (
+        typeof globalThis !== 'undefined' &&
+        typeof globalThis.ServiceWorkerGlobalScope !== 'undefined' &&
+        globalThis instanceof globalThis.ServiceWorkerGlobalScope
+      ) {
+        console.log(
+          '[ConfigService] Environment config not available: import() not allowed in ServiceWorker context'
+        );
         return null;
       }
 

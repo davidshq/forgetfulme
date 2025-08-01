@@ -5,14 +5,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BookmarkService } from '../../../src/services/BookmarkService.js';
 
-// Mock the Supabase client
-vi.mock('@supabase/supabase-js', () => ({
+// Mock the Supabase client from the correct path
+vi.mock('../../../src/lib/supabase.js', () => ({
   createClient: vi.fn(() => ({
     from: vi.fn(() => ({
-      insert: vi.fn().mockResolvedValue({ data: {}, error: null }),
-      select: vi.fn().mockResolvedValue({ data: [], error: null }),
-      update: vi.fn().mockResolvedValue({ data: {}, error: null }),
-      delete: vi.fn().mockResolvedValue({ data: {}, error: null })
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
+      ilike: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      then: vi.fn().mockResolvedValue({ data: [], error: null })
     }))
   }))
 }));
@@ -129,7 +137,6 @@ describe('BookmarkService', () => {
       // Mock the saveToDatabase method instead of mocking Supabase client
       vi.spyOn(bookmarkService, 'saveToDatabase').mockResolvedValue(mockCreatedBookmark);
       vi.spyOn(bookmarkService, 'updateCache').mockResolvedValue();
-      vi.spyOn(bookmarkService, 'generateId').mockReturnValue('bookmark-123');
 
       const result = await bookmarkService.createBookmark(bookmarkData);
 

@@ -156,6 +156,16 @@ const setupDOM = () => {
           <div id="storage-info"></div>
           <button id="clear-cache" type="button">Clear Cache</button>
         </section>
+        
+        <!-- Edit Status Type Modal -->
+        <dialog id="edit-status-modal" class="edit-status-modal">
+          <form id="edit-status-form">
+            <input type="text" id="status-name" name="name" required />
+            <input type="color" id="status-color" name="color" required />
+            <button type="button" id="cancel-status-edit">Cancel</button>
+            <button type="submit" id="save-status-edit">Save Changes</button>
+          </form>
+        </dialog>
       </body>
     </html>
   `);
@@ -362,13 +372,55 @@ describe('OptionsController', () => {
     });
 
     describe('handleEditStatusType', () => {
-      it('should edit status type with prompts', async () => {
+      it('should show edit modal for existing status type', async () => {
         controller.statusTypes = [
           { id: 'test', name: 'Test', color: '#000000' }
         ];
-        global.prompt.mockReturnValueOnce('New Name').mockReturnValueOnce('#ffffff');
+        
+        // Mock showModal method
+        const modal = document.getElementById('edit-status-modal');
+        modal.showModal = vi.fn();
 
         await controller.handleEditStatusType('test');
+
+        // Verify modal is configured and shown
+        expect(modal.showModal).toHaveBeenCalled();
+        expect(modal.dataset.statusId).toBe('test');
+        
+        // Verify form is populated
+        const nameInput = document.getElementById('status-name');
+        const colorInput = document.getElementById('status-color');
+        expect(nameInput.value).toBe('Test');
+        expect(colorInput.value).toBe('#000000');
+      });
+
+      it('should not show modal for non-existent status type', async () => {
+        controller.statusTypes = [
+          { id: 'test', name: 'Test', color: '#000000' }
+        ];
+        
+        const modal = document.getElementById('edit-status-modal');
+        modal.showModal = vi.fn();
+
+        await controller.handleEditStatusType('nonexistent');
+
+        expect(modal.showModal).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('handleSaveStatusEdit', () => {
+      it('should save status type changes', async () => {
+        // Set up modal with status ID
+        const modal = document.getElementById('edit-status-modal');
+        modal.dataset.statusId = 'test';
+        
+        // Set up form data
+        const nameInput = document.getElementById('status-name');
+        const colorInput = document.getElementById('status-color');
+        nameInput.value = 'New Name';
+        colorInput.value = '#ffffff';
+
+        await controller.handleSaveStatusEdit();
 
         expect(mockConfigService.updateStatusType).toHaveBeenCalledWith('test', {
           name: 'New Name',
@@ -376,11 +428,31 @@ describe('OptionsController', () => {
         });
       });
 
-      it('should handle cancelled edit', async () => {
-        controller.statusTypes = [{ id: 'test', name: 'Test', color: '#000000' }];
-        global.prompt.mockReturnValue(null);
+      it('should not save when required fields are missing', async () => {
+        const modal = document.getElementById('edit-status-modal');
+        modal.dataset.statusId = 'test';
+        
+        // Leave name empty
+        const nameInput = document.getElementById('status-name');
+        const colorInput = document.getElementById('status-color');
+        nameInput.value = '';
+        colorInput.value = '#ffffff';
 
-        await controller.handleEditStatusType('test');
+        await controller.handleSaveStatusEdit();
+
+        expect(mockConfigService.updateStatusType).not.toHaveBeenCalled();
+      });
+
+      it('should not save when no status ID is set', async () => {
+        const modal = document.getElementById('edit-status-modal');
+        delete modal.dataset.statusId;
+        
+        const nameInput = document.getElementById('status-name');
+        const colorInput = document.getElementById('status-color');
+        nameInput.value = 'Test Name';
+        colorInput.value = '#ffffff';
+
+        await controller.handleSaveStatusEdit();
 
         expect(mockConfigService.updateStatusType).not.toHaveBeenCalled();
       });

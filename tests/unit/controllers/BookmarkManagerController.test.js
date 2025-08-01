@@ -9,7 +9,8 @@ import { BookmarkManagerController } from '../../../src/controllers/BookmarkMana
 // Mock services
 const createMockAuthService = () => ({
   isAuthenticated: vi.fn().mockReturnValue(true),
-  getCurrentUser: vi.fn().mockReturnValue({ email: 'test@example.com' })
+  getCurrentUser: vi.fn().mockReturnValue({ email: 'test@example.com' }),
+  initialize: vi.fn().mockResolvedValue(true)
 });
 
 const createMockBookmarkService = () => ({
@@ -36,6 +37,7 @@ const createMockBookmarkService = () => ({
 });
 
 const createMockConfigService = () => ({
+  isSupabaseConfigured: vi.fn().mockResolvedValue(true),
   getStatusTypes: vi.fn().mockResolvedValue([
     { id: 'read', name: 'Read', color: '#4ade80', icon: '✓', is_default: true },
     { id: 'reference', name: 'Reference', color: '#3b82f6', icon: '⭐', is_default: false }

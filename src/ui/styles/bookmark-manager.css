@@ -640,3 +640,66 @@
     font-style: italic;
   }
 }
+
+/* Authentication Required UI */
+.auth-required {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.auth-required-content {
+  text-align: center;
+  max-width: 500px;
+  padding: 2rem;
+  background-color: var(--card-background-color);
+  border: 1px solid var(--muted-border-color);
+  border-radius: var(--border-radius);
+}
+
+.auth-required-content h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  color: var(--color);
+}
+
+.auth-required-content p {
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+  color: var(--muted-color);
+  line-height: 1.5;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.auth-actions button {
+  margin: 0;
+  min-width: 120px;
+}
+
+/* Responsive design for auth UI */
+@media (max-width: 768px) {
+  .auth-required {
+    min-height: 300px;
+    padding: 1rem;
+  }
+
+  .auth-required-content {
+    padding: 1.5rem;
+  }
+
+  .auth-actions {
+    flex-direction: column;
+  }
+
+  .auth-actions button {
+    width: 100%;
+  }
+}

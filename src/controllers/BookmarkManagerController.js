@@ -41,9 +41,27 @@ export class BookmarkManagerController extends BaseController {
    */
   async initialize() {
     try {
+      // Check configuration first
+      const isConfigured = await this.configService.isSupabaseConfigured();
+      if (!isConfigured) {
+        this.showAuthenticationRequired(
+          'Configuration required. Please set up your Supabase credentials in Settings.'
+        );
+        return;
+      }
+
+      // Initialize auth service
+      const isAuthInitialized = await this.authService.initialize();
+      if (!isAuthInitialized) {
+        this.showAuthenticationRequired(
+          'Configuration required. Please set up your Supabase credentials in Settings.'
+        );
+        return;
+      }
+
       // Check authentication
       if (!this.authService.isAuthenticated()) {
-        this.showError('Please sign in to access bookmarks');
+        this.showAuthenticationRequired('Please sign in to access bookmarks.');
         return;
       }
 
@@ -219,12 +237,10 @@ export class BookmarkManagerController extends BaseController {
    * Load status types
    */
   async loadStatusTypes() {
-    try {
+    await this.safeExecute(async () => {
       this.statusTypes = await this.configService.getStatusTypes();
       this.updateStatusSelects();
-    } catch (error) {
-      this.handleError(error, 'BookmarkManagerController.loadStatusTypes');
-    }
+    }, 'BookmarkManagerController.loadStatusTypes');
   }
 
   /**
@@ -263,7 +279,7 @@ export class BookmarkManagerController extends BaseController {
    * Load user preferences
    */
   async loadUserPreferences() {
-    try {
+    await this.safeExecute(async () => {
       const preferences = await this.configService.getUserPreferences();
 
       // Apply preferences
@@ -288,42 +304,41 @@ export class BookmarkManagerController extends BaseController {
 
       // Update view toggle
       this.updateViewToggle();
-    } catch (error) {
-      this.handleError(error, 'BookmarkManagerController.loadUserPreferences');
-    }
+    }, 'BookmarkManagerController.loadUserPreferences');
   }
 
   /**
    * Load bookmarks with current search and pagination
    */
   async loadBookmarks() {
-    try {
-      this.showLoading('#bookmark-list', 'Loading bookmarks...');
+    await this.safeExecute(
+      async () => {
+        this.showLoading('#bookmark-list', 'Loading bookmarks...');
 
-      // Build search options
-      const searchOptions = {
-        ...this.currentSearch,
-        page: this.currentPage,
-        pageSize: this.pageSize,
-        sortBy: $('#sort-by')?.value || 'created_at',
-        sortOrder: $('#sort-order')?.value || 'desc'
-      };
+        // Build search options
+        const searchOptions = {
+          ...this.currentSearch,
+          page: this.currentPage,
+          pageSize: this.pageSize,
+          sortBy: $('#sort-by')?.value || 'created_at',
+          sortOrder: $('#sort-order')?.value || 'desc'
+        };
 
-      // Execute search
-      const result = await this.bookmarkService.searchBookmarks(searchOptions);
+        // Execute search
+        const result = await this.bookmarkService.searchBookmarks(searchOptions);
 
-      this.bookmarks = result.items;
-      this.totalCount = result.total;
+        this.bookmarks = result.items;
+        this.totalCount = result.total;
 
-      // Update UI
-      this.renderBookmarks();
-      this.updatePagination();
-      this.updateBookmarkCount();
-      this.clearSelection();
-    } catch (error) {
-      this.handleError(error, 'BookmarkManagerController.loadBookmarks');
-      this.showEmptyState();
-    }
+        // Update UI
+        this.renderBookmarks();
+        this.updatePagination();
+        this.updateBookmarkCount();
+        this.clearSelection();
+      },
+      'BookmarkManagerController.loadBookmarks',
+      '#bookmark-list'
+    );
   }
 
   /**
@@ -511,61 +526,65 @@ export class BookmarkManagerController extends BaseController {
    * Handle search
    */
   async handleSearch() {
-    const form = $('#search-form');
-    const formData = this.getFormData(form);
+    await this.safeExecute(async () => {
+      const form = $('#search-form');
+      const formData = this.getFormData(form);
 
-    // Build search options
-    this.currentSearch = {};
+      // Build search options
+      this.currentSearch = {};
 
-    if (formData.query?.trim()) {
-      this.currentSearch.query = formData.query.trim();
-    }
+      if (formData.query?.trim()) {
+        this.currentSearch.query = formData.query.trim();
+      }
 
-    if (formData.statusFilter && Array.isArray(formData.statusFilter)) {
-      this.currentSearch.statuses = formData.statusFilter;
-    } else if (formData.statusFilter) {
-      this.currentSearch.statuses = [formData.statusFilter];
-    }
+      if (formData.statusFilter && Array.isArray(formData.statusFilter)) {
+        this.currentSearch.statuses = formData.statusFilter;
+      } else if (formData.statusFilter) {
+        this.currentSearch.statuses = [formData.statusFilter];
+      }
 
-    if (formData.tagFilter?.trim()) {
-      this.currentSearch.tags = formData.tagFilter
-        .trim()
-        .split(',')
-        .map(t => t.trim())
-        .filter(t => t);
-    }
+      if (formData.tagFilter?.trim()) {
+        this.currentSearch.tags = formData.tagFilter
+          .trim()
+          .split(',')
+          .map(t => t.trim())
+          .filter(t => t);
+      }
 
-    if (formData.dateFrom) {
-      this.currentSearch.dateFrom = new Date(formData.dateFrom);
-    }
+      if (formData.dateFrom) {
+        this.currentSearch.dateFrom = new Date(formData.dateFrom);
+      }
 
-    if (formData.dateTo) {
-      this.currentSearch.dateTo = new Date(formData.dateTo);
-    }
+      if (formData.dateTo) {
+        this.currentSearch.dateTo = new Date(formData.dateTo);
+      }
 
-    // Reset to first page
-    this.currentPage = 1;
+      // Reset to first page
+      this.currentPage = 1;
 
-    // Load bookmarks
-    await this.loadBookmarks();
+      // Load bookmarks
+      await this.loadBookmarks();
+    }, 'BookmarkManagerController.handleSearch');
   }
 
   /**
    * Handle clear search
    */
   async handleClearSearch() {
-    // Reset search form
-    const form = $('#search-form');
-    if (form) {
-      this.resetForm(form);
-    }
+    await this.safeExecute(async () => {
+      // Reset search form
+      const form = $('#search-form');
+      if (form) {
+        this.resetForm(form);
+      }
 
-    // Clear search options
-    this.currentSearch = {};
-    this.currentPage = 1;
+      // Clear search options
+      this.currentSearch = {};
+      this.currentPage = 1;
 
-    // Reload bookmarks
-    await this.loadBookmarks();
+      // Reload bookmarks
+      await this.loadBookmarks();
+    }, 'BookmarkManagerController.handleClearSearch');
   }
 
   /**
@@ -582,7 +601,9 @@ export class BookmarkManagerController extends BaseController {
    * Handle sort change
    */
   async handleSortChange() {
-    await this.loadBookmarks();
+    await this.safeExecute(async () => {
+      await this.loadBookmarks();
+    }, 'BookmarkManagerController.handleSortChange');
   }
 
   /**
@@ -993,6 +1014,76 @@ export class BookmarkManagerController extends BaseController {
    */
   formatUrl(url) {
     return formatUrl(url, 60);
+  }
+
+  /**
+   * Show authentication required UI
+   * @param {string} message - Message to display
+   */
+  showAuthenticationRequired(message) {
+    const container = $('#bookmark-list-container');
+    if (!container) return;
+
+    // Hide normal content
+    hide($('#bookmark-list'));
+    hide($('#empty-state'));
+    hide($('#loading-state'));
+    hide($('#pagination-nav'));
+
+    // Create authentication required UI
+    const authRequired = document.createElement('div');
+    authRequired.id = 'auth-required';
+    authRequired.className = 'auth-required';
+    authRequired.innerHTML = `
+      <div class="auth-required-content">
+        <h3>Authentication Required</h3>
+        <p>${message}</p>
+        <div class="auth-actions">
+          <button type="button" id="open-settings" class="primary">Go to Settings</button>
+          <button type="button" id="refresh-auth" class="secondary">Try Again</button>
+        </div>
+      </div>
+    `;
+
+    // Add to container
+    container.appendChild(authRequired);
+
+    // Set up event listeners
+    const openSettingsBtn = authRequired.querySelector('#open-settings');
+    const refreshAuthBtn = authRequired.querySelector('#refresh-auth');
+
+    if (openSettingsBtn) {
+      openSettingsBtn.addEventListener('click', () => {
+        this.openOptionsPage();
+      });
+    }
+
+    if (refreshAuthBtn) {
+      refreshAuthBtn.addEventListener('click', () => {
+        this.refreshAuthentication();
+      });
+    }
+  }
+
+  /**
+   * Refresh authentication state
+   */
+  async refreshAuthentication() {
+    try {
+      // Clear existing auth required UI
+      const authRequired = $('#auth-required');
+      if (authRequired) {
+        authRequired.remove();
+      }
+
+      // Show loading
+      this.showLoading('#bookmark-list-container', 'Checking authentication...');
+
+      // Re-initialize
+      await this.initialize();
+    } catch (error) {
+      this.handleError(error, 'BookmarkManagerController.refreshAuthentication');
+    }
   }
 
   /**

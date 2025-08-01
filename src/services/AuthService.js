@@ -24,7 +24,7 @@ export class AuthService extends withServicePatterns(class {}) {
     this.authChangeListeners = new Set();
     this.supabaseClient = null;
     this.isInitialized = false;
-    
+
     // Race condition prevention
     this.sessionOperationInProgress = false;
     this.sessionOperationQueue = [];
@@ -426,7 +426,7 @@ export class AuthService extends withServicePatterns(class {}) {
 
     while (this.sessionOperationQueue.length > 0) {
       const { operation, resolve, reject } = this.sessionOperationQueue.shift();
-      
+
       try {
         const result = await operation();
         resolve(result);
@@ -444,50 +444,52 @@ export class AuthService extends withServicePatterns(class {}) {
    */
   async restoreSession() {
     return this.withSessionLock(async () => {
-    try {
-      const storedSession = await this.storageService.getUserSession();
+      try {
+        const storedSession = await this.storageService.getUserSession();
 
-      if (!storedSession) {
-        return;
-      }
-
-      // Check if session is expired - handle both seconds and milliseconds format
-      if (storedSession.expires_at) {
-        const currentTime = Date.now();
-        const expiryTime = storedSession.expires_at;
-
-        // Determine if expires_at is in seconds or milliseconds
-        // If expires_at is much smaller than current time, it's likely in seconds
-        const isInSeconds = expiryTime < currentTime / 100; // Simple heuristic
-
-        const expiryTimeMs = isInSeconds ? expiryTime * TIME_CALCULATIONS.MILLISECONDS_PER_SECOND : expiryTime;
-
-        if (currentTime > expiryTimeMs) {
-          await this.handleAuthSignOut();
+        if (!storedSession) {
           return;
         }
-      }
 
-      // Restore session in Supabase client
-      if (this.supabaseClient && storedSession.access_token) {
-        await this.supabaseClient.auth.setSession({
-          access_token: storedSession.access_token,
-          refresh_token: storedSession.refresh_token
-        });
-      }
+        // Check if session is expired - handle both seconds and milliseconds format
+        if (storedSession.expires_at) {
+          const currentTime = Date.now();
+          const expiryTime = storedSession.expires_at;
 
-      this.currentUser = storedSession;
+          // Determine if expires_at is in seconds or milliseconds
+          // If expires_at is much smaller than current time, it's likely in seconds
+          const isInSeconds = expiryTime < currentTime / 100; // Simple heuristic
 
-      // Try to refresh the session (but don't use withSessionLock here to avoid nested locks)
-      await this._refreshSessionInternal();
-    } catch (error) {
-      // If restoration fails, clear the stored session
-      // Don't log "Auth session missing" as an error - it's normal
-      if (!error.message?.includes('Auth session missing')) {
-        console.log('[AuthService] Session restoration failed:', error.message);
+          const expiryTimeMs = isInSeconds
+            ? expiryTime * TIME_CALCULATIONS.MILLISECONDS_PER_SECOND
+            : expiryTime;
+
+          if (currentTime > expiryTimeMs) {
+            await this.handleAuthSignOut();
+            return;
+          }
+        }
+
+        // Restore session in Supabase client
+        if (this.supabaseClient && storedSession.access_token) {
+          await this.supabaseClient.auth.setSession({
+            access_token: storedSession.access_token,
+            refresh_token: storedSession.refresh_token
+          });
+        }
+
+        this.currentUser = storedSession;
+
+        // Try to refresh the session (but don't use withSessionLock here to avoid nested locks)
+        await this._refreshSessionInternal();
+      } catch (error) {
+        // If restoration fails, clear the stored session
+        // Don't log "Auth session missing" as an error - it's normal
+        if (!error.message?.includes('Auth session missing')) {
+          console.log('[AuthService] Session restoration failed:', error.message);
+        }
+        await this.handleAuthSignOut();
       }
-      await this.handleAuthSignOut();
-    }
     });
   }
 

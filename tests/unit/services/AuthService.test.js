@@ -5,8 +5,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthService } from '../../../src/services/AuthService.js';
 
-// Mock the Supabase client
-vi.mock('@supabase/supabase-js', () => ({
+// Mock the Supabase client from the correct path
+vi.mock('../../../src/lib/supabase.js', () => ({
   createClient: vi.fn(() => ({
     auth: {
       signInWithPassword: vi.fn(),
@@ -15,7 +15,10 @@ vi.mock('@supabase/supabase-js', () => ({
       getSession: vi.fn(),
       refreshSession: vi.fn(),
       getUser: vi.fn(),
-      setSession: vi.fn()
+      setSession: vi.fn(),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } }
+      }))
     }
   }))
 }));
@@ -95,11 +98,14 @@ describe('AuthService', () => {
       expect(authService.supabaseClient).toBeTruthy();
     });
 
-    it('should throw error when config not found', async () => {
+    it('should return false when config not found', async () => {
       mockConfigService.getSupabaseConfig.mockResolvedValue(null);
 
-      await expect(authService.initialize()).rejects.toThrow('Mock error message');
-      expect(mockErrorService.handle).toHaveBeenCalled();
+      const result = await authService.initialize();
+      
+      expect(result).toBe(false);
+      expect(authService.isInitialized).toBe(false);
+      expect(authService.supabaseClient).toBeNull();
     });
   });
 
