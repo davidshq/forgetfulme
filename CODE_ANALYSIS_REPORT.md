@@ -25,34 +25,25 @@ This comprehensive code analysis examined the ForgetfulMe Chrome extension codeb
 **Missing Import & Error Handling in confirm.js** ✅ **FIXED**
 **Missing Import in confirm.js** ✅ **FIXED** 
 **Inconsistent Error Handling in AuthService.js** ✅ **FIXED**
-**Unsafe Array Access in AuthService.js**
+**Unsafe Array Access in AuthService.js** ✅ **FIXED**
+**URL Formatting Logic** ✅ **FIXED**
 ---
 
 ## 🐛 Remaining Bugs & Logic Errors
 
 ## 🔄 Critical Duplicate Code Patterns
 
-### ~~1. **URL Formatting Logic**~~ ✅ **FIXED**
-**Files**: ~~`PopupController.js:616-635`, `BookmarkManagerController.js:983-1002`~~
+### ~~2. **Service Registration Pattern**~~ ✅ **FIXED**
+**Files**: ~~`background.js`, `bookmark-manager.js`, `options.js`, `popup.js`~~
 
-**Fixed**: Eliminated 20-line URL formatting function duplication:
-- **Removed**: Identical implementations from both controller files (40 lines total)
-- **Replaced**: Both now use shared `formatUrl()` from `src/utils/formatting.js`
-- **Preserved**: Different maxLength parameters (40 for popup, 60 for bookmark manager)
-- **Reduced**: Code duplication by consolidating logic into single, well-tested utility function
+**Fixed**: Eliminated service registration duplication across UI entry points:
+- **Created**: Shared `src/utils/serviceRegistration.js` utility with `registerAllServices()` and `registerCoreServices()`
+- **Removed**: ~30 lines of identical service registration code from each UI file (90 lines total)
+- **Note**: `background.js` retains original pattern due to service worker ES6 import limitations
+- **Replaced**: All UI files now import and call `registerAllServices()`
+- **Maintained**: Proper dependency injection patterns and service initialization order
 
-**Impact**: 40 lines of duplicate code eliminated, improved maintainability
-
-### 2. **Service Registration Pattern**
-**Files**: `background.js`, `bookmark-manager.js`, `options.js`, `popup.js`
-
-Nearly identical service registration blocks in all main entry points:
-```javascript
-// Duplicated ~15 lines in each file
-container.registerService('errorService', ErrorService);
-container.registerService('validationService', ValidationService);
-// ... etc
-```
+**Impact**: 90 lines of duplicate service registration code eliminated from UI contexts, centralized configuration
 
 ### 3. **Initialization Pattern** 
 **Files**: All services have similar patterns:
@@ -205,9 +196,9 @@ setTimeout(callback, 5000); // Should be constant
 | Logic Errors | 3 | Medium (2 more fixed) |
 | Security Issues | 3 | High |
 | Dead Code Items | 8 | Low |
-| Duplicate Patterns | 3 | Medium (1 more fixed) |
+| Duplicate Patterns | 2 | Medium (2 more fixed) |
 | Code Smells | 12 | Low-Medium |
-| **Total Issues** | **29** | **Mixed** |
+| **Total Issues** | **28** | **Mixed** |
 
 **Lines of Code**: ~5,500  
 

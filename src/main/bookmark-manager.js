@@ -4,42 +4,11 @@
 
 import { container } from '../utils/ServiceContainer.js';
 import { ready } from '../utils/dom.js';
-import { ErrorService } from '../services/ErrorService.js';
-import { ValidationService } from '../services/ValidationService.js';
-import { StorageService } from '../services/StorageService.js';
-import { ConfigService } from '../services/ConfigService.js';
-import { AuthService } from '../services/AuthService.js';
-import { BookmarkService } from '../services/BookmarkService.js';
+import { registerAllServices } from '../utils/serviceRegistration.js';
 import { BookmarkManagerController } from '../controllers/BookmarkManagerController.js';
 
-// Register services in dependency injection container
-container.register('errorService', () => new ErrorService());
-
-container.register('validationService', () => new ValidationService());
-
-container.register('storageService', c => new StorageService(c.get('errorService')));
-
-container.register(
-  'configService',
-  c => new ConfigService(c.get('storageService'), c.get('validationService'), c.get('errorService'))
-);
-
-container.register(
-  'authService',
-  c => new AuthService(c.get('configService'), c.get('storageService'), c.get('errorService'))
-);
-
-container.register(
-  'bookmarkService',
-  c =>
-    new BookmarkService(
-      c.get('authService'),
-      c.get('storageService'),
-      c.get('configService'),
-      c.get('validationService'),
-      c.get('errorService')
-    )
-);
+// Register all standard services for UI context
+registerAllServices(container);
 
 container.register(
   'bookmarkManagerController',
