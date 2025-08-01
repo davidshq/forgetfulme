@@ -5,6 +5,7 @@
 import { BaseController } from './BaseController.js';
 import { $, show, hide, setFormData, clearElement } from '../utils/dom.js';
 import { formatUrl } from '../utils/formatting.js';
+import { TIMEOUTS } from '../utils/constants.js';
 
 /**
  * Controller for the extension popup
@@ -305,7 +306,7 @@ export class PopupController extends BaseController {
         if (result.requiresConfirmation) {
           this.showInfo(
             `Confirmation email sent to ${result.email}. Please check your inbox.`,
-            10000
+            TIMEOUTS.AUTH_TOKEN_REFRESH
           );
         } else {
           this.showSuccess('Account created successfully');

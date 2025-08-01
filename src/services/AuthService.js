@@ -4,6 +4,7 @@
 
 import { createClient } from '../lib/supabase.js';
 import { withServicePatterns } from '../utils/serviceHelpers.js';
+import { TIME_CALCULATIONS } from '../utils/constants.js';
 
 /**
  * Service for managing user authentication with Supabase
@@ -397,7 +398,7 @@ export class AuthService extends withServicePatterns(class {}) {
         // If expires_at is much smaller than current time, it's likely in seconds
         const isInSeconds = expiryTime < currentTime / 100; // Simple heuristic
 
-        const expiryTimeMs = isInSeconds ? expiryTime * 1000 : expiryTime;
+        const expiryTimeMs = isInSeconds ? expiryTime * TIME_CALCULATIONS.MILLISECONDS_PER_SECOND : expiryTime;
 
         if (currentTime > expiryTimeMs) {
           await this.handleAuthSignOut();

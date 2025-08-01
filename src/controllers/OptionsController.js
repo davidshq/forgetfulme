@@ -4,6 +4,7 @@
 
 import { BaseController } from './BaseController.js';
 import { $, $$, show, hide, setFormData, clearElement } from '../utils/dom.js';
+import { TIMEOUTS } from '../utils/constants.js';
 
 /**
  * Controller for the options page
@@ -311,7 +312,7 @@ export class OptionsController extends BaseController {
       // Auto-hide after 10 seconds
       setTimeout(() => {
         hide(statusElement);
-      }, 10000);
+      }, TIMEOUTS.AUTH_TOKEN_REFRESH);
     }
   }
 

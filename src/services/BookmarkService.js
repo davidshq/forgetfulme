@@ -3,7 +3,7 @@
  */
 
 import { createClient } from '../lib/supabase.js';
-import { PAGINATION } from '../utils/constants.js';
+import { PAGINATION, TIME_CALCULATIONS } from '../utils/constants.js';
 import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
@@ -381,8 +381,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
       };
 
       const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const oneWeekAgo = new Date(now.getTime() - TIME_CALCULATIONS.MILLISECONDS_PER_WEEK);
+      const oneMonthAgo = new Date(now.getTime() - TIME_CALCULATIONS.MILLISECONDS_PER_MONTH);
 
       bookmarks.forEach(bookmark => {
         // Count by status

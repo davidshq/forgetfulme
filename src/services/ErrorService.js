@@ -2,7 +2,7 @@
  * @fileoverview Centralized error handling service for the ForgetfulMe extension
  */
 
-import { ERROR_CATEGORIES, ERROR_SEVERITY } from '../utils/constants.js';
+import { ERROR_CATEGORIES, ERROR_SEVERITY, TIME_CALCULATIONS } from '../utils/constants.js';
 
 /**
  * Centralized error handling and user-friendly message generation
@@ -501,7 +501,7 @@ export class ErrorService {
       recent24h: 0
     };
 
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(Date.now() - TIME_CALCULATIONS.MILLISECONDS_PER_DAY);
 
     this.errorLog.forEach(entry => {
       // Count by category

@@ -2,6 +2,8 @@
  * @fileoverview Display formatting utilities for the ForgetfulMe extension
  */
 
+import { TIME_CALCULATIONS } from './constants.js';
+
 /**
  * Format date for display
  * @param {Date|string} date - Date to format
@@ -18,7 +20,7 @@ export function formatDate(date, format = 'relative') {
   const diff = now.getTime() - dateObj.getTime();
 
   if (format === 'relative') {
-    const seconds = Math.floor(diff / 1000);
+    const seconds = Math.floor(diff / TIME_CALCULATIONS.MILLISECONDS_PER_SECOND);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);

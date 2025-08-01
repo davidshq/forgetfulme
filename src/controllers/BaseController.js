@@ -4,6 +4,7 @@
 
 import { show, hide, setText, createElement, clearElement, setTrustedHTML } from '../utils/dom.js';
 import { formatDate } from '../utils/formatting.js';
+import { TIMEOUTS } from '../utils/constants.js';
 
 /**
  * Base controller class for common functionality
@@ -58,9 +59,9 @@ export class BaseController {
    * Show a message to the user
    * @param {string} text - Message text
    * @param {string} [type='info'] - Message type: success, error, warning, info
-   * @param {number} [duration=5000] - Duration in milliseconds (0 for permanent)
+   * @param {number} [duration=TIMEOUTS.MESSAGE_DEFAULT] - Duration in milliseconds (0 for permanent)
    */
-  showMessage(text, type = 'info', duration = 5000) {
+  showMessage(text, type = 'info', duration = TIMEOUTS.MESSAGE_DEFAULT) {
     try {
       const messageArea = document.getElementById('message-area');
       if (!messageArea) {
@@ -123,9 +124,9 @@ export class BaseController {
   /**
    * Show success message
    * @param {string} text - Message text
-   * @param {number} [duration=3000] - Duration in milliseconds
+   * @param {number} [duration=TIMEOUTS.MESSAGE_SUCCESS] - Duration in milliseconds
    */
-  showSuccess(text, duration = 3000) {
+  showSuccess(text, duration = TIMEOUTS.MESSAGE_SUCCESS) {
     this.showMessage(text, 'success', duration);
   }
 
@@ -141,18 +142,18 @@ export class BaseController {
   /**
    * Show warning message
    * @param {string} text - Message text
-   * @param {number} [duration=5000] - Duration in milliseconds
+   * @param {number} [duration=TIMEOUTS.MESSAGE_WARNING] - Duration in milliseconds
    */
-  showWarning(text, duration = 5000) {
+  showWarning(text, duration = TIMEOUTS.MESSAGE_WARNING) {
     this.showMessage(text, 'warning', duration);
   }
 
   /**
    * Show info message
    * @param {string} text - Message text
-   * @param {number} [duration=5000] - Duration in milliseconds
+   * @param {number} [duration=TIMEOUTS.MESSAGE_INFO] - Duration in milliseconds
    */
-  showInfo(text, duration = 5000) {
+  showInfo(text, duration = TIMEOUTS.MESSAGE_INFO) {
     this.showMessage(text, 'info', duration);
   }
 
