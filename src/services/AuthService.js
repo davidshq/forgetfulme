@@ -17,8 +17,9 @@ export class AuthService extends withServicePatterns(class {}) {
    * @param {ConfigService} configService - Configuration service
    * @param {StorageService} storageService - Storage service
    * @param {ErrorService} errorService - Error handling service
+   * @param {LoggingService} [loggingService] - Optional logging service
    */
-  constructor(configService, storageService, errorService) {
+  constructor(configService, storageService, errorService, loggingService = null) {
     super();
 
     // Clean up previous instance if exists
@@ -30,6 +31,7 @@ export class AuthService extends withServicePatterns(class {}) {
     this.configService = configService;
     this.storageService = storageService;
     this.errorService = errorService;
+    this.loggingService = loggingService;
     this.currentUser = null;
     this.authChangeListeners = new Set();
     this.supabaseClient = null;
@@ -46,8 +48,10 @@ export class AuthService extends withServicePatterns(class {}) {
    */
   async initialize() {
     try {
+      this.loggingService?.debug('AuthService', 'Initializing authentication service');
       const config = await this.configService.getSupabaseConfig();
       if (!config) {
+        this.loggingService?.info('AuthService', 'No configuration found - configuration required');
         console.log('[AuthService] No configuration found - configuration required');
         this.supabaseClient = null;
         this.isInitialized = false;
@@ -57,18 +61,25 @@ export class AuthService extends withServicePatterns(class {}) {
       // Create official Supabase client
       this.supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
       this.isInitialized = true;
+      this.loggingService?.info('AuthService', 'Supabase client initialized successfully');
 
       // Restore session from storage (don't let this fail initialization)
       try {
         await this.restoreSession();
+        this.loggingService?.debug('AuthService', 'Session restored successfully');
       } catch (sessionError) {
         // Session restoration failure is normal - just log it and continue
+        this.loggingService?.debug(
+          'AuthService',
+          'No valid session to restore (normal for first-time users)'
+        );
         console.log('[AuthService] No valid session to restore (normal for first-time users)');
       }
 
       return true;
     } catch (error) {
       const errorInfo = this.errorService.handle(error, 'AuthService.initialize');
+      this.loggingService?.error('AuthService', 'Initialization failed', error);
       console.error('[AuthService] Initialization failed:', errorInfo.message);
       this.supabaseClient = null;
       this.isInitialized = false;

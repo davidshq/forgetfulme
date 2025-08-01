@@ -16,14 +16,23 @@ export class BookmarkService extends withServicePatterns(class {}) {
    * @param {ConfigService} configService - Configuration service
    * @param {ValidationService} validationService - Validation service
    * @param {ErrorService} errorService - Error handling service
+   * @param {LoggingService} [loggingService] - Optional logging service
    */
-  constructor(authService, storageService, configService, validationService, errorService) {
+  constructor(
+    authService,
+    storageService,
+    configService,
+    validationService,
+    errorService,
+    loggingService = null
+  ) {
     super();
     this.authService = authService;
     this.storageService = storageService;
     this.configService = configService;
     this.validationService = validationService;
     this.errorService = errorService;
+    this.loggingService = loggingService;
     this.supabaseClient = null;
   }
 
