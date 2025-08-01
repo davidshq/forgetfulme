@@ -1,2 +1,2 @@
-# Run lint-staged for staged files
-npx lint-staged
+# Run comprehensive validation (lint + format + unit tests + visual regression)
+npm run validate:full

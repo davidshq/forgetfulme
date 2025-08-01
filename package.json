@@ -27,6 +27,8 @@
     "audit:security": "npm audit --audit-level=moderate",
     "audit:fix": "npm audit fix",
     "validate": "npm run check && npm test",
+    "validate:quick": "npm run check && npm run test:quick",
+    "validate:full": "npm run check && npm test && npm run test:visual:simple",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -53,12 +55,10 @@
   "lint-staged": {
     "src/**/*.js": [
       "eslint --fix",
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ],
     "src/**/*.{html,css,json}": [
-      "prettier --write",
-      "git add"
+      "prettier --write"
     ]
   }
 }

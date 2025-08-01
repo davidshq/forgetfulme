@@ -1,10 +1,4 @@
-
 echo "🔍 Running pre-push quality checks..."
 
-# Run full quality check suite
-npm run check:all
-
-# Run security audit
-npm run audit:security
-
-echo "✅ Pre-push checks completed successfully!"
+# Run comprehensive quality check suite including integration tests
+npm run quality
