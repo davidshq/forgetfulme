@@ -393,6 +393,14 @@ export class BackgroundService {
           await this.handleShowNotification(message.data, sendResponse);
           break;
 
+        case 'USER_STATE_CHANGED':
+          await this.handleUserStateChanged(message.data, sendResponse);
+          break;
+
+        case 'NEW_USER_CONFIRMED':
+          await this.handleNewUserConfirmed(message.data, sendResponse);
+          break;
+
         default:
           sendResponse({ error: 'Unknown message type' });
       }
@@ -459,6 +467,76 @@ export class BackgroundService {
       this.showNotification(data);
       sendResponse({ success: true });
     } catch (error) {
+      sendResponse({ error: error.message });
+    }
+  }
+
+  /**
+   * Handle user state change message
+   * @param {Object} data - User state data
+   * @param {Function} sendResponse - Response function
+   * @private
+   */
+  async handleUserStateChanged(data, sendResponse) {
+    try {
+      console.log('User state changed:', data);
+
+      if (data.isAuthenticated) {
+        // User signed in - update badge
+        this.updateBadge('●', '#10B981'); // Green dot for authenticated
+
+        // Show welcome notification for new users
+        if (data.isNewUser) {
+          this.showNotification({
+            type: 'basic',
+            iconUrl: 'icons/icon48.png',
+            title: 'Welcome to ForgetfulMe!',
+            message: "Your account is ready. Start bookmarking pages you've read!"
+          });
+        }
+      } else {
+        // User signed out - clear badge
+        this.updateBadge();
+      }
+
+      sendResponse({ success: true });
+    } catch (error) {
+      sendResponse({ error: error.message });
+    }
+  }
+
+  /**
+   * Handle new user email confirmation
+   * @param {Object} data - Confirmation data
+   * @param {Function} sendResponse - Response function
+   * @private
+   */
+  async handleNewUserConfirmed(data, sendResponse) {
+    try {
+      console.log('New user confirmed email:', data);
+
+      // Store the new user state for synchronization across extension contexts
+      await this.storageService.set('newUserConfirmed', {
+        userId: data.userId,
+        email: data.email,
+        confirmedAt: new Date().toISOString(),
+        needsOnboarding: true
+      });
+
+      // Show congratulations notification
+      this.showNotification({
+        type: 'basic',
+        iconUrl: 'icons/icon48.png',
+        title: 'Email Confirmed! 🎉',
+        message: 'Your account is ready. Click the extension icon to get started!'
+      });
+
+      // Update badge to indicate ready state
+      this.updateBadge('!', '#10B981'); // Green exclamation for "ready to start"
+
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error('Error handling new user confirmation:', error);
       sendResponse({ error: error.message });
     }
   }

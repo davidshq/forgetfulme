@@ -111,7 +111,10 @@ async function initializeConfirmation() {
             id: user.id,
             email: user.email,
             access_token: accessToken
-          }
+          },
+          // Flag to indicate this is a new user who just confirmed their email
+          isNewUser: true,
+          newUserOnboardingRequired: true
         });
         console.log('Session stored successfully in Chrome storage!');
       } else {
@@ -125,11 +128,30 @@ async function initializeConfirmation() {
             access_token: accessToken
           })
         );
+        localStorage.setItem('isNewUser', 'true');
+        localStorage.setItem('newUserOnboardingRequired', 'true');
         console.log('Session stored successfully in localStorage (test environment)!');
       }
     } catch (storageError) {
       // Handle storage errors specifically
       throw new Error(`Unable to save authentication data: ${storageError.message}`);
+    }
+
+    // Notify background service about new user confirmation
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        await chrome.runtime.sendMessage({
+          type: 'NEW_USER_CONFIRMED',
+          data: {
+            userId: user.id,
+            email: user.email
+          }
+        });
+        console.log('Notified background service about new user confirmation');
+      }
+    } catch (messageError) {
+      // Don't fail the confirmation if messaging fails
+      console.warn('Failed to notify background service:', messageError);
     }
 
     showSuccess();
@@ -228,6 +250,38 @@ function addErrorGuidance(message, _options = {}) {
  * Setup event listeners
  */
 function setupEventListeners() {
+  // Open extension button
+  const openExtensionButton = document.getElementById('open-extension');
+  if (openExtensionButton) {
+    openExtensionButton.addEventListener('click', async () => {
+      try {
+        if (typeof chrome !== 'undefined' && chrome.action) {
+          // Try to open the extension popup
+          await chrome.action.openPopup();
+        } else if (typeof chrome !== 'undefined' && chrome.browserAction) {
+          // Fallback for older Chrome extension APIs
+          chrome.browserAction.openPopup();
+        } else {
+          // Fallback: try to navigate to the popup directly
+          const popupUrl = chrome.runtime
+            ? chrome.runtime.getURL('src/ui/popup.html')
+            : '../ui/popup.html';
+          window.open(popupUrl, '_blank', 'width=400,height=600');
+        }
+
+        // Close this tab after a brief delay to allow popup to open
+        setTimeout(() => {
+          window.close();
+        }, 500);
+      } catch (error) {
+        console.error('Error opening extension:', error);
+        // If we can't open the popup programmatically, show instructions
+        alert('Please click the ForgetfulMe icon in your browser toolbar to access the extension.');
+        window.close();
+      }
+    });
+  }
+
   // Close tab button
   const closeTabButton = document.getElementById('close-tab');
   if (closeTabButton) {

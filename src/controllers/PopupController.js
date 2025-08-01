@@ -118,6 +118,9 @@ export class PopupController extends BaseController {
         this.setText('#user-email', user.email);
       }
 
+      // Check if this is a new user needing onboarding
+      await this.checkAndShowOnboarding();
+
       // Load current page bookmark status
       await this.loadCurrentPageBookmark();
 
@@ -502,7 +505,17 @@ export class PopupController extends BaseController {
           // Create new bookmark
           const created = await this.bookmarkService.createBookmark(bookmarkData);
           this.currentBookmark = created;
-          this.showSuccess('Bookmark saved');
+
+          // Check if this might be their first bookmark for extra celebration
+          const recentBookmarks = await this.bookmarkService.getRecentBookmarks(2);
+          if (recentBookmarks.length === 1) {
+            // This is likely their first bookmark!
+            this.showSuccess(
+              "🎉 Congratulations! You've created your first bookmark. You're all set to track your reading progress!"
+            );
+          } else {
+            this.showSuccess('Bookmark saved');
+          }
         }
 
         // Refresh current page status and recent bookmarks
@@ -655,6 +668,91 @@ export class PopupController extends BaseController {
       }
     } catch (error) {
       this.handleError(error, 'PopupController.openOptionsPage');
+    }
+  }
+
+  /**
+   * Check if user needs onboarding and show welcome message
+   */
+  async checkAndShowOnboarding() {
+    try {
+      // Check if this is a new user who just confirmed their email
+      const isNewUser = await this.getStorageValue('isNewUser');
+      const needsOnboarding = await this.getStorageValue('newUserOnboardingRequired');
+
+      if (isNewUser && needsOnboarding) {
+        // Show welcome message for new users
+        this.showInfo(
+          "🎉 Welcome to ForgetfulMe! Let's create your first bookmark to get started. Fill out the form below for this page.",
+          8000 // Show for 8 seconds
+        );
+
+        // Clear the onboarding flags
+        await this.clearOnboardingFlags();
+
+        // Highlight the bookmark form to draw attention
+        this.highlightBookmarkForm();
+      }
+    } catch (error) {
+      // Don't let onboarding errors break the main flow
+      console.warn('Onboarding check failed:', error);
+    }
+  }
+
+  /**
+   * Get value from Chrome storage with fallback to localStorage
+   * @param {string} key - Storage key
+   * @returns {Promise<any>} Storage value
+   */
+  async getStorageValue(key) {
+    try {
+      if (chrome && chrome.storage && chrome.storage.sync) {
+        const result = await chrome.storage.sync.get(key);
+        return result[key];
+      } else {
+        // Fallback to localStorage for tests
+        const value = localStorage.getItem(key);
+        return value === 'true' ? true : value === 'false' ? false : value;
+      }
+    } catch (error) {
+      console.warn(`Failed to get storage value for ${key}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Clear onboarding flags from storage
+   */
+  async clearOnboardingFlags() {
+    try {
+      if (chrome && chrome.storage && chrome.storage.sync) {
+        await chrome.storage.sync.remove(['isNewUser', 'newUserOnboardingRequired']);
+      } else {
+        // Fallback to localStorage for tests
+        localStorage.removeItem('isNewUser');
+        localStorage.removeItem('newUserOnboardingRequired');
+      }
+    } catch (error) {
+      console.warn('Failed to clear onboarding flags:', error);
+    }
+  }
+
+  /**
+   * Highlight the bookmark form to draw attention
+   */
+  highlightBookmarkForm() {
+    const bookmarkForm = $('#bookmark-form');
+    if (bookmarkForm) {
+      // Add a subtle highlight animation
+      bookmarkForm.style.transition = 'all 0.3s ease';
+      bookmarkForm.style.boxShadow = '0 0 20px rgba(33, 150, 243, 0.3)';
+      bookmarkForm.style.border = '2px solid rgba(33, 150, 243, 0.5)';
+
+      // Remove highlight after 6 seconds
+      setTimeout(() => {
+        bookmarkForm.style.boxShadow = '';
+        bookmarkForm.style.border = '';
+      }, 6000);
     }
   }
 

@@ -262,20 +262,76 @@ test.describe('User Registration Flow Integration', () => {
     await page.goto(popupFilePath);
     await page.waitForLoadState('networkidle');
 
-    // Mock authenticated state
-    await page.evaluate(() => {
-      window.mockConfigured = true;
-      window.mockAuthenticated = true;
-      // Mock current page data
+    // Mock authenticated state with storage data that matches what confirmation would set
+    await page.evaluate((testEmail) => {
+      // Set up authenticated state in localStorage to simulate confirmation storage
+      const mockSession = {
+        access_token: 'confirmed-access-token',
+        refresh_token: 'confirmed-refresh-token',
+        token_type: 'bearer',
+        expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+        user: {
+          id: 'test-user-id',
+          email: testEmail,
+          email_confirmed_at: new Date().toISOString()
+        }
+      };
+      
+      const mockUser = {
+        id: 'test-user-id',
+        email: testEmail,
+        access_token: 'confirmed-access-token',
+        refresh_token: 'confirmed-refresh-token',
+        expires_at: Math.floor(Date.now() / 1000) + 3600
+      };
+      
+      localStorage.setItem('authSession', JSON.stringify(mockSession));
+      localStorage.setItem('currentUser', JSON.stringify(mockUser)); 
+      localStorage.setItem('isNewUser', 'true');
+      localStorage.setItem('newUserOnboardingRequired', 'true');
+      
+      // Set up supabase config to ensure services can initialize
+      const mockSupabaseConfig = {
+        url: 'https://mock-project.supabase.co',
+        anonKey: 'mock-anon-key'
+      };
+      localStorage.setItem('supabaseConfig', JSON.stringify(mockSupabaseConfig));
+      
+      // Mock current page data for bookmarking  
       window.mockPageData = {
         title: 'My First Bookmark',
         url: 'https://example.com/first-page'
       };
-    });
+    }, testEmail);
+    
     await page.reload();
     await page.waitForLoadState('networkidle');
 
-    // Verify main section is visible
+    // Wait for the loading section to disappear and either auth or main section to appear
+    await page.waitForFunction(() => {
+      const loadingSection = document.getElementById('loading-section');
+      const authSection = document.getElementById('auth-section');  
+      const mainSection = document.getElementById('main-section');
+      
+      // Loading should be hidden and either auth or main should be visible
+      return loadingSection?.classList.contains('hidden') && 
+             ((!authSection?.classList.contains('hidden')) || (!mainSection?.classList.contains('hidden')));
+    }, { timeout: 10000 });
+
+    // Check what actually became visible
+    const visibleSection = await page.evaluate(() => {
+      const sections = ['loading-section', 'auth-section', 'main-section'];
+      const visible = {};
+      sections.forEach(id => {
+        const element = document.getElementById(id);
+        visible[id] = element ? !element.classList.contains('hidden') : false;
+      });
+      return visible;
+    });
+    
+    console.log('Visible sections after initialization:', visibleSection);
+
+    // Verify main section is visible (should be, since we set up authenticated state)
     const mainSection = page.locator('#main-section');
     await expect(mainSection).toBeVisible();
 
@@ -284,11 +340,11 @@ test.describe('User Registration Flow Integration', () => {
     await expect(userEmail).toContainText(testEmail);
 
     // Step 7: Create first bookmark
-    // Verify page data is populated
+    // Verify page data is populated (page title and URL are displayed as text, not form inputs)
     const pageTitle = page.locator('#page-title');
     const pageUrl = page.locator('#page-url');
-    await expect(pageTitle).toHaveValue('My First Bookmark');
-    await expect(pageUrl).toHaveValue('https://example.com/first-page');
+    await expect(pageTitle).toContainText('My First Bookmark');
+    await expect(pageUrl).toContainText('https://example.com/first-page');
 
     // Add tags and notes
     await page.fill('#bookmark-tags', 'tutorial, first-bookmark, test');
