@@ -523,8 +523,8 @@ export class ErrorService {
 
     this.errorLog.push(logEntry);
 
-    // Keep log size manageable
-    if (this.errorLog.length > this.maxLogSize) {
+    // Keep log size manageable - remove oldest entries to maintain max size
+    while (this.errorLog.length > this.maxLogSize) {
       this.errorLog.shift();
     }
 

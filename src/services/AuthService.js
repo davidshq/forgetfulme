@@ -10,6 +10,9 @@ import { TIME_CALCULATIONS } from '../utils/constants.js';
  * Service for managing user authentication with Supabase
  */
 export class AuthService extends withServicePatterns(class {}) {
+  // Static instance tracking for cleanup
+  static currentInstance = null;
+  
   /**
    * @param {ConfigService} configService - Configuration service
    * @param {StorageService} storageService - Storage service
@@ -17,6 +20,13 @@ export class AuthService extends withServicePatterns(class {}) {
    */
   constructor(configService, storageService, errorService) {
     super();
+    
+    // Clean up previous instance if exists
+    if (AuthService.currentInstance) {
+      AuthService.currentInstance.cleanup();
+    }
+    AuthService.currentInstance = this;
+    
     this.configService = configService;
     this.storageService = storageService;
     this.errorService = errorService;
@@ -480,8 +490,12 @@ export class AuthService extends withServicePatterns(class {}) {
 
         this.currentUser = storedSession;
 
-        // Try to refresh the session (but don't use withSessionLock here to avoid nested locks)
-        await this._refreshSessionInternal();
+        // Schedule session refresh outside of the lock to avoid nested locking
+        setTimeout(() => {
+          this._refreshSessionInternal().catch(error => {
+            console.log('[AuthService] Failed to refresh session after restore:', error.message);
+          });
+        }, 0);
       } catch (error) {
         // If restoration fails, clear the stored session
         // Don't log "Auth session missing" as an error - it's normal
@@ -524,5 +538,23 @@ export class AuthService extends withServicePatterns(class {}) {
         : null,
       hasSupabaseConfig: this.supabaseClient !== null
     };
+  }
+  
+  /**
+   * Cleanup service resources
+   * @private
+   */
+  cleanup() {
+    // Clear all auth change listeners
+    this.authChangeListeners.clear();
+    
+    // NOTE: Supabase auth state cleanup is handled by service recreation
+    // We cannot safely unsubscribe from auth state changes as the subscription
+    // is managed by the Supabase client instance
+    
+    // Clear references
+    this.currentUser = null;
+    this.supabaseClient = null;
+    this.isInitialized = false;
   }
 }

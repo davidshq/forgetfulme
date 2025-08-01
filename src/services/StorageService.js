@@ -17,6 +17,8 @@ export class StorageService {
     this.cacheTimestamps = new Map();
     this.changeListeners = new Map();
     this.maxCacheSize = 100; // Maximum cache entries
+    this.cacheOperationQueue = [];
+    this.cacheOperationInProgress = false;
 
     this.setupStorageListener();
   }
@@ -428,8 +430,10 @@ export class StorageService {
    * Clear all cache
    */
   clearCache() {
-    this.cache.clear();
-    this.cacheTimestamps.clear();
+    this.executeAtomicCacheOperation(() => {
+      this.cache.clear();
+      this.cacheTimestamps.clear();
+    });
   }
 
   /**
@@ -439,18 +443,49 @@ export class StorageService {
    * @param {number} [ttl] - Time to live in milliseconds
    */
   setCache(key, data, ttl = CACHE_DURATION.BOOKMARKS) {
-    // Evict oldest entries if cache is full
-    if (this.cache.size >= this.maxCacheSize && !this.cache.has(key)) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
-      this.cacheTimestamps.delete(oldestKey);
-    }
+    // Make cache operations atomic
+    this.executeAtomicCacheOperation(() => {
+      // First, clean up expired entries
+      const now = Date.now();
+      const keysToDelete = [];
+      
+      for (const [cacheKey, cacheEntry] of this.cache.entries()) {
+        if (now > cacheEntry.expires) {
+          keysToDelete.push(cacheKey);
+        }
+      }
+      
+      keysToDelete.forEach(k => {
+        this.cache.delete(k);
+        this.cacheTimestamps.delete(k);
+      });
+      
+      // If still at capacity after cleanup, evict enough entries to make room
+      if (this.cache.size >= this.maxCacheSize && !this.cache.has(key)) {
+        // Calculate how many to evict (at least 1)
+        const entriesToEvict = Math.max(1, this.cache.size - this.maxCacheSize + 1);
+        const sortedKeys = Array.from(this.cacheTimestamps.entries())
+          .sort((a, b) => a[1] - b[1])
+          .slice(0, entriesToEvict)
+          .map(entry => entry[0]);
+          
+        sortedKeys.forEach(k => {
+          this.cache.delete(k);
+          this.cacheTimestamps.delete(k);
+        });
+      }
 
-    this.cache.set(key, {
-      data: data,
-      expires: Date.now() + ttl
+      // Update existing entry to implement LRU
+      if (this.cache.has(key)) {
+        this.cache.delete(key);
+      }
+      
+      this.cache.set(key, {
+        data: data,
+        expires: now + ttl
+      });
+      this.cacheTimestamps.set(key, now);
     });
-    this.cacheTimestamps.set(key, Date.now());
   }
 
   /**
@@ -459,19 +494,67 @@ export class StorageService {
    * @returns {*|null} Cached data or null if expired/not found
    */
   getCache(key) {
-    const cached = this.cache.get(key);
-    if (!cached) {
-      return null;
-    }
+    let result = null;
+    
+    this.executeAtomicCacheOperation(() => {
+      const cached = this.cache.get(key);
+      if (!cached) {
+        result = null;
+        return;
+      }
 
-    // Check if expired
-    if (Date.now() > cached.expires) {
+      const now = Date.now();
+      
+      // Check if expired
+      if (now > cached.expires) {
+        this.cache.delete(key);
+        this.cacheTimestamps.delete(key);
+        result = null;
+        return;
+      }
+
+      // Update access time for LRU
+      this.cacheTimestamps.set(key, now);
+      
+      // Move to end of Map for LRU (delete and re-add)
       this.cache.delete(key);
-      this.cacheTimestamps.delete(key);
-      return null;
-    }
+      this.cache.set(key, cached);
+      
+      result = cached.data;
+    });
+    
+    return result;
+  }
 
-    return cached.data;
+  /**
+   * Execute an atomic cache operation
+   * @param {Function} operation - Operation to execute
+   * @private
+   */
+  executeAtomicCacheOperation(operation) {
+    if (this.cacheOperationInProgress) {
+      // Queue the operation if another is in progress
+      this.cacheOperationQueue.push(operation);
+      return;
+    }
+    
+    this.cacheOperationInProgress = true;
+    try {
+      operation();
+    } finally {
+      this.cacheOperationInProgress = false;
+      
+      // Process queued operations
+      while (this.cacheOperationQueue.length > 0) {
+        const nextOperation = this.cacheOperationQueue.shift();
+        this.cacheOperationInProgress = true;
+        try {
+          nextOperation();
+        } finally {
+          this.cacheOperationInProgress = false;
+        }
+      }
+    }
   }
 
   /**
