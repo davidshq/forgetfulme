@@ -186,9 +186,7 @@ export class BaseController {
   clearMessages() {
     const messageArea = document.getElementById('message-area');
     if (messageArea) {
-      while (messageArea.firstChild) {
-        messageArea.removeChild(messageArea.firstChild);
-      }
+      messageArea.innerHTML = '';
     }
   }
 

@@ -143,10 +143,7 @@ export function setTrustedHTML(element, html) {
 export function clearElement(element) {
   if (!element) return;
 
-  // More efficient than innerHTML = ''
-  while (element.firstChild) {
-    element.removeChild(element.firstChild);
-  }
+  element.innerHTML = '';
 }
 
 /**

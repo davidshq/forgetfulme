@@ -557,7 +557,6 @@ export class BookmarkService extends withServicePatterns(class {}) {
       for (const bookmark of data.bookmarks) {
         try {
           // Remove id to create new bookmark
-          // eslint-disable-next-line no-unused-vars
           const {
             id: _id,
             user_id: _user_id,
