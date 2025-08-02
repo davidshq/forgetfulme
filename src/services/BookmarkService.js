@@ -2,6 +2,8 @@
  * @fileoverview Bookmark management service for the ForgetfulMe extension
  */
 
+/* global AbortController */
+
 import { createClient } from '../lib/supabase.js';
 import { PAGINATION, TIME_CALCULATIONS } from '../utils/constants.js';
 import { withServicePatterns } from '../utils/serviceHelpers.js';
@@ -316,26 +318,34 @@ export class BookmarkService extends withServicePatterns(class {}) {
    */
   async searchBookmarks(options = {}) {
     try {
+      console.log('BookmarkService: Starting search with options:', options);
+
       if (!this.authService.isAuthenticated()) {
+        console.error('BookmarkService: User not authenticated');
         throw new Error('User not authenticated');
       }
 
       // Validate search options
       const validation = this.validationService.validateSearchOptions(options);
       if (!validation.isValid) {
+        console.error('BookmarkService: Invalid search options:', validation.errors);
         throw new Error(`Invalid search options: ${validation.errors.join(', ')}`);
       }
 
       const searchOptions = validation.data;
       const user = this.authService.getCurrentUser();
+      console.log('BookmarkService: User authenticated, proceeding with search');
 
       await this.ensureInitialized();
+      console.log('BookmarkService: Service initialized, executing parallel queries');
 
       // Execute search and count queries in parallel for better performance
       const [bookmarksResponse, totalCount] = await Promise.all([
         this.executeSearchQuery(searchOptions, user),
         this.getTotalCount(searchOptions, user.id)
       ]);
+
+      console.log('BookmarkService: Parallel queries completed');
 
       const page = searchOptions.page || 1;
       const pageSize = searchOptions.pageSize || PAGINATION.DEFAULT_PAGE_SIZE;
@@ -348,7 +358,7 @@ export class BookmarkService extends withServicePatterns(class {}) {
         hasMore: page * pageSize < totalCount
       };
     } catch (error) {
-      this.handleAndThrow(error, 'BookmarkService.searchBookmarksDefault');
+      this.handleAndThrow(error, 'BookmarkService.searchBookmarks');
     }
   }
 
@@ -362,19 +372,43 @@ export class BookmarkService extends withServicePatterns(class {}) {
   async executeSearchQuery(searchOptions, user) {
     const query = this.buildSearchQuery(searchOptions, user.id);
 
-    const response = await fetch(`${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${query}`, {
-      headers: {
-        apikey: this.supabaseClient.supabaseKey,
-        Authorization: `Bearer ${user.access_token}`,
-        'Content-Type': 'application/json'
+    console.log('BookmarkService: Executing search query:', query);
+
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = setTimeout(() => controller?.abort(), 10000); // 10 second timeout
+
+    try {
+      const response = await fetch(
+        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${query}`,
+        {
+          headers: {
+            apikey: this.supabaseClient.supabaseKey,
+            Authorization: `Bearer ${user.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          ...(controller ? { signal: controller.signal } : {})
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error(
+          'BookmarkService: Search failed with status:',
+          response.status,
+          response.statusText
+        );
+        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error('Search failed');
+      const result = await response.json();
+      console.log('BookmarkService: Search completed, found', result.length, 'bookmarks');
+      return result;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      console.error('BookmarkService: Search query failed:', error);
+      throw error;
     }
-
-    return await response.json();
   }
 
   /**
@@ -858,7 +892,13 @@ export class BookmarkService extends withServicePatterns(class {}) {
       const params = this.buildBaseQueryParams(options, userId);
       params.set('select', 'count');
 
+      console.log('BookmarkService: Getting total count with params:', params.toString());
+
       const user = this.authService.getCurrentUser();
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
         `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${params.toString()}`,
         {
@@ -866,17 +906,28 @@ export class BookmarkService extends withServicePatterns(class {}) {
             apikey: this.supabaseClient.supabaseKey,
             Authorization: `Bearer ${user.access_token}`,
             'Content-Type': 'application/json'
-          }
+          },
+          ...(controller ? { signal: controller.signal } : {})
         }
       );
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
+        console.error(
+          'BookmarkService: Count query failed with status:',
+          response.status,
+          response.statusText
+        );
         return 0;
       }
 
       const result = await response.json();
-      return result[0]?.count || 0;
+      const count = result[0]?.count || 0;
+      console.log('BookmarkService: Total count retrieved:', count);
+      return count;
     } catch (error) {
+      console.error('BookmarkService: Count query error:', error);
       return 0;
     }
   }

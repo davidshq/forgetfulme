@@ -206,17 +206,6 @@
   color: var(--muted-color);
 }
 
-.form-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.form-actions button {
-  flex: 1;
-  margin: 0;
-}
-
 /* Recent Bookmarks */
 .recent-bookmarks {
   border-top: 1px solid var(--muted-border-color);
@@ -321,34 +310,12 @@
   font-size: 0.875rem;
 }
 
-/* Message Area (specific positioning for popup) */
+/* Message Area (popup positioning overrides) */
 .message-area {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  right: 1rem;
-  z-index: 1000;
-  max-width: none;
-}
-
-/* Responsive adjustments for very small popups */
-@media (max-width: 400px) {
-  .container {
-    width: 320px;
-    padding: 0.75rem;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .user-info {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-
-  /* Keep tabs side by side even on mobile */
+  --message-area-top: var(--pico-spacing);
+  --message-area-left: var(--pico-spacing);
+  --message-area-right: var(--pico-spacing);
+  --message-area-max-width: none;
 }
 
 /* Dark mode specific adjustments */

@@ -75,8 +75,15 @@ export class BookmarkManagerController extends BaseController {
         // Set up event listeners
         this.setupEventListeners();
 
-        // Load bookmarks
-        await this.loadBookmarks();
+        // Load bookmarks - initial load should show all bookmarks (no filters)
+        console.log(
+          'BookmarkManagerController: Initial load with currentSearch:',
+          this.currentSearch
+        );
+        this.currentSearch = {}; // Ensure no filters for initial load
+
+        // Wait for bookmark list element to be available, then load bookmarks
+        await this.waitForElementAndLoadBookmarks();
 
         // Update UI
         this.updateUserInfo();
@@ -340,55 +347,120 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
+   * Wait for bookmark list element to be available and then load bookmarks
+   */
+  async waitForElementAndLoadBookmarks() {
+    let attempts = 0;
+    const maxAttempts = 20; // Wait up to 2 seconds (20 * 100ms)
+
+    while (attempts < maxAttempts) {
+      const bookmarkList = $('#bookmark-list');
+      if (bookmarkList) {
+        console.log('BookmarkManagerController: DOM ready, loading bookmarks');
+        await this.loadBookmarks();
+        return;
+      }
+
+      console.log('BookmarkManagerController: Waiting for DOM, attempt', attempts + 1);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    console.error('BookmarkManagerController: Timeout waiting for bookmark-list element');
+  }
+
+  /**
    * Load bookmarks with current search and pagination
    */
   async loadBookmarks() {
+    console.log('BookmarkManagerController: Starting loadBookmarks');
+
+    // Ensure DOM is ready
+    const bookmarkList = $('#bookmark-list');
+    if (!bookmarkList) {
+      console.error(
+        'BookmarkManagerController: bookmark-list element not found, DOM may not be ready'
+      );
+      return;
+    }
+
     await this.safeExecute(
       async () => {
+        console.log('BookmarkManagerController: Inside safeExecute operation');
+
+        // Show loading state for bookmark list specifically
         this.showLoading('#bookmark-list', 'Loading bookmarks...');
 
-        // Build search options
+        // Build search options - start with no filters for initial load
         const searchOptions = {
-          ...this.currentSearch,
           page: this.currentPage,
           pageSize: this.pageSize,
           sortBy: $('#sort-by')?.value || 'created_at',
           sortOrder: $('#sort-order')?.value || 'desc'
         };
 
+        // Only add search filters if they exist and are not empty
+        if (this.currentSearch && Object.keys(this.currentSearch).length > 0) {
+          Object.assign(searchOptions, this.currentSearch);
+        }
+
+        console.log(
+          'BookmarkManagerController: Calling searchBookmarks with options:',
+          searchOptions
+        );
         // Execute search
         const result = await this.bookmarkService.searchBookmarks(searchOptions);
 
+        console.log('BookmarkManagerController: Got search result:', result);
         this.bookmarks = result.items;
         this.totalCount = result.total;
 
-        // Update UI
+        console.log('BookmarkManagerController: About to update UI');
+        // Update UI - renderBookmarks will hide its own loading
         this.renderBookmarks();
         this.updatePagination();
         this.updateBookmarkCount();
         this.clearSelection();
+        console.log('BookmarkManagerController: UI update completed');
       },
-      'BookmarkManagerController.loadBookmarks',
-      '#bookmark-list'
+      'BookmarkManagerController.loadBookmarks'
+      // Note: No loadingTarget for safeExecute, we handle bookmark-list loading manually
     );
+    console.log('BookmarkManagerController: loadBookmarks completed');
   }
 
   /**
    * Render bookmarks list
    */
   renderBookmarks() {
+    console.log(
+      'BookmarkManagerController: Starting renderBookmarks, bookmarks count:',
+      this.bookmarks.length
+    );
     const container = $('#bookmark-list');
-    if (!container) return;
+    if (!container) {
+      console.error('BookmarkManagerController: bookmark-list container not found!');
+      return;
+    }
 
+    console.log('BookmarkManagerController: Container found, calling hideLoading');
     this.hideLoading(container);
 
     if (this.bookmarks.length === 0) {
+      console.log('BookmarkManagerController: No bookmarks, showing empty state');
       this.showEmptyState();
       return;
     }
 
-    // Hide empty state
-    hide($('#empty-state'));
+    console.log(
+      'BookmarkManagerController: Have bookmarks, ensuring all states are properly managed'
+    );
+    // Ensure all loading and empty states are hidden
+    this.hideAllLoadingStates();
+
+    // Show bookmark list and pagination
+    show($('#bookmark-list'));
+    show($('#pagination-nav'));
 
     // Update container class for view type
     if (this.isCompactView) {
@@ -397,14 +469,19 @@ export class BookmarkManagerController extends BaseController {
       container.classList.remove('compact');
     }
 
+    console.log('BookmarkManagerController: Clearing existing content');
     // Clear existing bookmarks
     clearElement(container);
 
+    console.log('BookmarkManagerController: Rendering bookmark items');
     // Render bookmark items
-    this.bookmarks.forEach(bookmark => {
+    this.bookmarks.forEach((bookmark, index) => {
       const item = this.createBookmarkItem(bookmark);
       container.appendChild(item);
+      if (index === 0)
+        console.log('BookmarkManagerController: First bookmark item created and appended');
     });
+    console.log('BookmarkManagerController: renderBookmarks completed');
   }
 
   /**
@@ -576,10 +653,35 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
+   * Hide all possible loading states
+   */
+  hideAllLoadingStates() {
+    // Hide static loading state
+    hide($('#loading-state'));
+
+    // Hide empty state
+    hide($('#empty-state'));
+
+    // Clear any dynamic loading states in bookmark list
+    const bookmarkList = $('#bookmark-list');
+    if (bookmarkList) {
+      // Remove any loading classes
+      bookmarkList.classList.remove('loading');
+
+      // Clear any loading content that might be stuck
+      const loadingElements = bookmarkList.querySelectorAll('.loading-state, .loading-spinner');
+      loadingElements.forEach(el => el.remove());
+    }
+
+    console.log('BookmarkManagerController: All loading states cleared');
+  }
+
+  /**
    * Show empty state
    */
   showEmptyState() {
     hide($('#bookmark-list'));
+    hide($('#loading-state'));
     show($('#empty-state'));
     hide($('#pagination-nav'));
   }
@@ -618,15 +720,24 @@ export class BookmarkManagerController extends BaseController {
       // Build search options
       this.currentSearch = {};
 
+      console.log('BookmarkManagerController: Form data for search:', formData);
+
       if (formData.query?.trim()) {
         this.currentSearch.query = formData.query.trim();
       }
 
+      // Handle status filter - only include if specific statuses are selected
       if (formData.statusFilter && Array.isArray(formData.statusFilter)) {
-        this.currentSearch.statuses = formData.statusFilter;
-      } else if (formData.statusFilter) {
+        // Filter out empty values (which represent "All Statuses")
+        const selectedStatuses = formData.statusFilter.filter(status => status && status.trim());
+        if (selectedStatuses.length > 0) {
+          this.currentSearch.statuses = selectedStatuses;
+        }
+      } else if (formData.statusFilter && formData.statusFilter.trim()) {
+        // Single status selected, only include if not empty
         this.currentSearch.statuses = [formData.statusFilter];
       }
+      // If no specific statuses selected, don't include statuses filter (show all)
 
       if (formData.tagFilter?.trim()) {
         this.currentSearch.tags = formData.tagFilter
@@ -646,6 +757,8 @@ export class BookmarkManagerController extends BaseController {
 
       // Reset to first page
       this.currentPage = 1;
+
+      console.log('BookmarkManagerController: Final search options:', this.currentSearch);
 
       // Load bookmarks
       await this.loadBookmarks();

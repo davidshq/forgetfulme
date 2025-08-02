@@ -292,14 +292,30 @@ export class BaseController {
    * @param {string|Element} target - Target element or selector
    */
   hideLoading(target) {
+    console.log('BaseController: hideLoading called with target:', target);
     const element = typeof target === 'string' ? $(target) : target;
-    if (!element) return;
+    if (!element) {
+      console.error('BaseController: hideLoading - element not found!');
+      return;
+    }
+
+    console.log('BaseController: hideLoading - element found, checking for original content');
+    console.log(
+      'BaseController: hideLoading - element has originalContent?',
+      !!element.dataset.originalContent
+    );
 
     // Restore original content
     if (element.dataset.originalContent) {
+      console.log('BaseController: hideLoading - restoring original content');
       setTrustedHTML(element, element.dataset.originalContent);
       delete element.dataset.originalContent;
+    } else {
+      console.log('BaseController: hideLoading - no original content to restore, clearing element');
+      // If no original content, just clear the loading state
+      element.innerHTML = '';
     }
+    console.log('BaseController: hideLoading completed');
   }
 
   /**

@@ -395,13 +395,12 @@
   color: var(--color);
 }
 
-/* Message Area (specific positioning for options) */
+/* Message Area (options positioning overrides) */
 .message-area {
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
+  --message-area-top: calc(var(--pico-spacing) * 2);
+  --message-area-right: calc(var(--pico-spacing) * 2);
+  --message-area-max-width: 400px;
   z-index: 1500;
-  max-width: 400px;
 }
 
 /* Responsive Design */
@@ -451,24 +450,6 @@
   .storage-bar-text {
     text-align: left;
     min-width: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .options-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .nav-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.75rem;
-  }
-
-  .export-section,
-  .import-section,
-  .storage-usage,
-  .add-status-form {
-    padding: 1rem;
   }
 }
 
