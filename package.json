@@ -16,6 +16,7 @@
     "test:visual": "playwright test tests/visual/",
     "test:visual:update": "playwright test tests/visual/ --update-snapshots",
     "test:visual:simple": "playwright test tests/visual/simple-visual.test.js",
+    "test:visual:report": "playwright test tests/visual/ && npx playwright show-report",
     "test:all": "npm test && npm run test:playwright && npm run test:visual",
     "install-browsers": "playwright install chromium",
     "lint": "eslint src/**/*.js",

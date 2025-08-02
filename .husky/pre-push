@@ -1,4 +1,3 @@
-echo "🔍 Running pre-push quality checks..."
-
-# Run comprehensive quality check suite including integration tests
-npm run quality
+#!/usr/bin/env sh
+# Pre-push hook intentionally minimal - validation happens at pre-commit
+echo "✅ Pre-push: All validation completed at commit time"

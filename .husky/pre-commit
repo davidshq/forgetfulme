@@ -1,2 +1,3 @@
-# Run comprehensive validation (lint + format + unit tests + visual regression)
+#!/usr/bin/env sh
+export CI=1
 npm run validate:full
