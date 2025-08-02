@@ -8,28 +8,28 @@
   min-height: 400px;
   max-height: 600px;
   margin: 0;
-  padding: 1rem;
+  padding: var(--pico-spacing);
   overflow-y: auto;
 }
 
 /* Header Styles */
 .popup-header {
   text-align: center;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--muted-border-color);
-  padding-bottom: 1rem;
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
+  border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+  padding-bottom: var(--pico-spacing);
 }
 
 .popup-header h1 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 0.5) 0;
   font-size: 1.5rem;
-  color: var(--primary);
+  color: var(--pico-primary);
 }
 
 .popup-header p {
   margin: 0;
   font-size: 0.875rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* User Info Header */
@@ -37,12 +37,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--pico-spacing);
 }
 
 .user-email {
   font-size: 0.875rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -56,21 +56,21 @@
 
 .auth-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: calc(var(--pico-spacing) * 0.5);
+  margin-bottom: var(--pico-spacing);
 }
 
 .tab-button {
   flex: 1;
   margin: 0;
-  padding: 0.5rem 1rem;
+  padding: calc(var(--pico-spacing) * 0.5) var(--pico-spacing);
   font-size: 0.875rem;
 }
 
-/* Remove custom tab styling - let Pico handle it */
+/* Tab styling uses Pico's button classes (.secondary for inactive, default for active) */
 
 .auth-form {
-  margin-bottom: 1rem;
+  margin-bottom: var(--pico-spacing);
 }
 
 .auth-form fieldset {
@@ -84,7 +84,7 @@
 }
 
 .auth-form label {
-  margin-bottom: 1rem;
+  margin-bottom: var(--pico-spacing);
 }
 
 .auth-form input {
@@ -93,7 +93,7 @@
 
 .auth-form button {
   width: 100%;
-  margin: 0.5rem 0;
+  margin: calc(var(--pico-spacing) * 0.5) 0;
 }
 
 /* Configuration Required */

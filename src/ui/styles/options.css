@@ -6,59 +6,59 @@
 .container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: calc(var(--pico-spacing) * 2);
 }
 
 /* Header */
 .options-header {
   text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--muted-border-color);
+  margin-bottom: calc(var(--pico-spacing) * 2);
+  padding-bottom: var(--pico-spacing);
+  border-bottom: calc(var(--pico-border-width) * 2) solid var(--pico-muted-border-color);
 }
 
 .options-header h1 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 0.5) 0;
   font-size: 2rem;
-  color: var(--primary);
+  color: var(--pico-primary);
 }
 
 .options-header p {
   margin: 0;
   font-size: 1rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* Navigation */
 .options-nav {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  border-bottom: 1px solid var(--muted-border-color);
+  gap: calc(var(--pico-spacing) * 0.5);
+  margin-bottom: calc(var(--pico-spacing) * 2);
+  border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
   overflow-x: auto;
 }
 
 .nav-button {
   background: none;
   border: none;
-  padding: 1rem 1.5rem;
+  padding: var(--pico-spacing) calc(var(--pico-spacing) * 1.5);
   cursor: pointer;
   font-size: 0.875rem;
-  color: var(--muted-color);
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+  color: var(--pico-muted-color);
+  border-bottom: calc(var(--pico-border-width) * 2) solid transparent;
+  transition: var(--pico-transition);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .nav-button:hover {
-  color: var(--color);
-  background-color: var(--muted-background-color);
+  color: var(--pico-color);
+  background-color: var(--pico-muted-background-color);
 }
 
 .nav-button.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: var(--pico-primary);
+  border-bottom-color: var(--pico-primary);
 }
 
 /* Sections */

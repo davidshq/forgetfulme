@@ -20,8 +20,8 @@
 .loading-spinner {
   width: 2rem;
   height: 2rem;
-  border: 2px solid var(--muted-border-color);
-  border-top: 2px solid var(--primary);
+  border: 2px solid var(--pico-muted-border-color);
+  border-top: 2px solid var(--pico-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -38,29 +38,29 @@
 
 .loading-state {
   text-align: center;
-  padding: 2rem;
-  color: var(--color);
+  padding: calc(var(--pico-spacing) * 2);
+  color: var(--pico-color);
 }
 
 .loading-state p {
-  margin-top: 1rem;
+  margin-top: var(--pico-spacing);
   font-size: 0.875rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* Messages */
 .message-area {
   position: fixed;
-  top: 1rem;
-  right: 1rem;
+  top: var(--pico-spacing);
+  right: var(--pico-spacing);
   z-index: 1000;
   max-width: 300px;
 }
 
 .message {
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: var(--border-radius);
+  padding: calc(var(--pico-spacing) * 0.75) var(--pico-spacing);
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+  border-radius: var(--pico-border-radius);
   font-size: 0.875rem;
   line-height: 1.4;
   animation: slideIn 0.3s ease-out;
@@ -122,9 +122,9 @@
 .status-indicator {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--border-radius);
+  gap: calc(var(--pico-spacing) * 0.25);
+  padding: calc(var(--pico-spacing) * 0.25) calc(var(--pico-spacing) * 0.5);
+  border-radius: var(--pico-border-radius);
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: capitalize;
@@ -140,47 +140,47 @@
 /* Tag Elements */
 .tag {
   display: inline-block;
-  padding: 0.125rem 0.375rem;
-  margin: 0.125rem;
-  background-color: var(--muted-background-color);
-  color: var(--muted-color);
-  border-radius: var(--border-radius);
+  padding: calc(var(--pico-spacing) * 0.125) calc(var(--pico-spacing) * 0.375);
+  margin: calc(var(--pico-spacing) * 0.125);
+  background-color: var(--pico-muted-background-color);
+  color: var(--pico-muted-color);
+  border-radius: var(--pico-border-radius);
   font-size: 0.75rem;
   text-decoration: none;
-  border: 1px solid var(--muted-border-color);
+  border: 1px solid var(--pico-muted-border-color);
 }
 
 .tag:hover {
-  background-color: var(--secondary-background-color);
-  color: var(--secondary-color);
+  background-color: var(--pico-secondary-background);
+  color: var(--pico-secondary-inverse);
 }
 
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
-  margin: 0.25rem 0;
+  gap: calc(var(--pico-spacing) * 0.25);
+  margin: calc(var(--pico-spacing) * 0.25) 0;
 }
 
-/* Form Enhancements */
+/* Form Enhancements - Use Pico's built-in grid when possible */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: var(--pico-spacing);
 }
 
 .form-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
   justify-content: flex-end;
-  margin-top: 1rem;
+  margin-top: var(--pico-spacing);
 }
 
 .form-actions button {
   margin: 0;
 }
 
-/* Modal Improvements */
+/* Modal Improvements - Use Pico spacing variables */
 dialog {
   max-width: 500px;
   margin: auto;
@@ -192,9 +192,9 @@ dialog article {
 
 .modal-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
   justify-content: flex-end;
-  margin-top: 1.5rem;
+  margin-top: calc(var(--pico-spacing) * 1.5);
 }
 
 .modal-actions button {
@@ -207,12 +207,12 @@ dialog article {
   font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
   line-height: 1;
 }
 
 .close-button:hover {
-  color: var(--color);
+  color: var(--pico-color);
 }
 
 /* Responsive Utilities */
