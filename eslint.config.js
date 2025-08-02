@@ -3,7 +3,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 export default [
   {
     files: ["src/**/*.js"],
-    ignores: ["src/lib/supabase-js.min.js"],
+    ignores: ["src/lib/supabase-js.min.js", "src/lib/pico.min.css"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",

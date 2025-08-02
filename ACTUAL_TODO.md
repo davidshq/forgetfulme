@@ -20,10 +20,3 @@ These are todos created due to actual usage of the extension.
 
 # Recent Entries
 In the popup the recent entries doens't have a container around it differentiating it from the rest of the page.
-
-
-# Future
-- Add a notes field
-- Keep a log of when we visited pages and how long we dwelt on the page.
-    - This should be off by default and be configurable in settings at both levels - e.g., one can log visited pages or not and if one is logging visited pages then it should allow one to enable/disable dwell time.
-    - If the dwell time option is enabled we need to record site dwell when we visit them even if they aren't saved, if they decide to save the page we'll want that. If they navigate away from the page without saving it then we should dispose of that time since we aren't tracking the page.
