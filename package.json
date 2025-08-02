@@ -9,6 +9,7 @@
     "test:unit:ui": "vitest --ui",
     "test:unit:coverage": "vitest --run --coverage",
     "test:playwright": "playwright test",
+    "test:playwright:ci": "CI=1 playwright test",
     "test:playwright:headed": "playwright test --headed",
     "test:playwright:debug": "playwright test --debug",
     "test:playwright:ui": "playwright test --ui",
