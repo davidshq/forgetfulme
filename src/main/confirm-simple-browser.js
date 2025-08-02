@@ -9,6 +9,9 @@ console.log('confirm-simple-browser.js loaded!', {
   hash: window.location.hash
 });
 
+// Global variable to store user data for event handlers
+let confirmationUserData = null;
+
 /**
  * Initialize confirmation handler
  */
@@ -91,6 +94,9 @@ async function initializeConfirmation() {
       user_metadata: tokenPayload.user_metadata || {}
     };
 
+    // Store user data globally for event handlers
+    confirmationUserData = user;
+
     // Create session object
     const session = {
       access_token: accessToken,
@@ -144,7 +150,8 @@ async function initializeConfirmation() {
           type: 'NEW_USER_CONFIRMED',
           data: {
             userId: user.id,
-            email: user.email
+            email: user.email,
+            timestamp: new Date().toISOString()
           }
         });
         console.log('Notified background service about new user confirmation');
@@ -255,6 +262,25 @@ function setupEventListeners() {
   if (openExtensionButton) {
     openExtensionButton.addEventListener('click', async () => {
       try {
+        // Notify the background service about successful confirmation
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+          try {
+            await chrome.runtime.sendMessage({
+              type: 'USER_STATE_CHANGED',
+              data: {
+                isAuthenticated: true,
+                userId: confirmationUserData?.id || 'unknown',
+                email: confirmationUserData?.email || 'unknown',
+                isNewUser: true,
+                timestamp: new Date().toISOString()
+              }
+            });
+            console.log('Notified background service about email confirmation');
+          } catch (messageError) {
+            console.warn('Failed to notify background service:', messageError);
+          }
+        }
+
         if (typeof chrome !== 'undefined' && chrome.action) {
           // Try to open the extension popup
           await chrome.action.openPopup();

@@ -506,15 +506,39 @@ export class PopupController extends BaseController {
           const created = await this.bookmarkService.createBookmark(bookmarkData);
           this.currentBookmark = created;
 
-          // Check if this might be their first bookmark for extra celebration
-          const recentBookmarks = await this.bookmarkService.getRecentBookmarks(2);
-          if (recentBookmarks.length === 1) {
-            // This is likely their first bookmark!
+          // Check if this is their first bookmark with special celebration
+          const isFirstBookmark = await this.getStorageValue('isFirstBookmark');
+          if (isFirstBookmark) {
+            // This is their first bookmark after registration!
             this.showSuccess(
               "🎉 Congratulations! You've created your first bookmark. You're all set to track your reading progress!"
             );
+
+            // Clear the first bookmark flag
+            await this.setStorageValue('isFirstBookmark', false);
+
+            // Add a subtle visual effect to mark this milestone
+            const bookmarkForm = $('#bookmark-form');
+            if (bookmarkForm) {
+              bookmarkForm.style.transition = 'all 0.5s ease';
+              bookmarkForm.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+
+              // Remove the effect after a few seconds
+              setTimeout(() => {
+                bookmarkForm.style.backgroundColor = '';
+              }, 3000);
+            }
           } else {
-            this.showSuccess('Bookmark saved');
+            // Check if this might be their first bookmark for extra celebration (fallback)
+            const recentBookmarks = await this.bookmarkService.getRecentBookmarks(2);
+            if (recentBookmarks.length === 1) {
+              // This is likely their first bookmark!
+              this.showSuccess(
+                "🎉 Congratulations! You've created your first bookmark. You're all set to track your reading progress!"
+              );
+            } else {
+              this.showSuccess('Bookmark saved');
+            }
           }
         }
 
@@ -676,11 +700,33 @@ export class PopupController extends BaseController {
    */
   async checkAndShowOnboarding() {
     try {
-      // Check if this is a new user who just confirmed their email
+      // Check multiple sources for new user state
       const isNewUser = await this.getStorageValue('isNewUser');
       const needsOnboarding = await this.getStorageValue('newUserOnboardingRequired');
+      const newUserConfirmed = await this.getStorageValue('newUserConfirmed');
 
-      if (isNewUser && needsOnboarding) {
+      // Check if this is a new user from either source
+      const isNewUserFromAnySource =
+        (isNewUser && needsOnboarding) || (newUserConfirmed && newUserConfirmed.needsOnboarding);
+
+      if (isNewUserFromAnySource) {
+        // Check if the user has any bookmarks - if they do, skip onboarding
+        try {
+          const existingBookmarks = await this.bookmarkService.getRecentBookmarks(1);
+
+          if (existingBookmarks.length > 0) {
+            // User already has bookmarks, clear flags and skip onboarding
+            await this.clearOnboardingFlags();
+            await this.clearNewUserConfirmedFlag();
+            return;
+          }
+        } catch (bookmarkError) {
+          console.warn(
+            'Could not check existing bookmarks, proceeding with onboarding:',
+            bookmarkError
+          );
+        }
+
         // Show welcome message for new users
         this.showInfo(
           "🎉 Welcome to ForgetfulMe! Let's create your first bookmark to get started. Fill out the form below for this page.",
@@ -689,9 +735,13 @@ export class PopupController extends BaseController {
 
         // Clear the onboarding flags
         await this.clearOnboardingFlags();
+        await this.clearNewUserConfirmedFlag();
 
         // Highlight the bookmark form to draw attention
         this.highlightBookmarkForm();
+
+        // Set up a flag to track if this is their very first bookmark
+        await this.setStorageValue('isFirstBookmark', true);
       }
     } catch (error) {
       // Don't let onboarding errors break the main flow
@@ -721,6 +771,24 @@ export class PopupController extends BaseController {
   }
 
   /**
+   * Set value in Chrome storage with fallback to localStorage
+   * @param {string} key - Storage key
+   * @param {any} value - Storage value
+   */
+  async setStorageValue(key, value) {
+    try {
+      if (chrome && chrome.storage && chrome.storage.sync) {
+        await chrome.storage.sync.set({ [key]: value });
+      } else {
+        // Fallback to localStorage for tests
+        localStorage.setItem(key, typeof value === 'boolean' ? value.toString() : value);
+      }
+    } catch (error) {
+      console.warn(`Failed to set storage value for ${key}:`, error);
+    }
+  }
+
+  /**
    * Clear onboarding flags from storage
    */
   async clearOnboardingFlags() {
@@ -734,6 +802,22 @@ export class PopupController extends BaseController {
       }
     } catch (error) {
       console.warn('Failed to clear onboarding flags:', error);
+    }
+  }
+
+  /**
+   * Clear new user confirmed flag from storage
+   */
+  async clearNewUserConfirmedFlag() {
+    try {
+      if (chrome && chrome.storage && chrome.storage.sync) {
+        await chrome.storage.sync.remove(['newUserConfirmed']);
+      } else {
+        // Fallback to localStorage for tests
+        localStorage.removeItem('newUserConfirmed');
+      }
+    } catch (error) {
+      console.warn('Failed to clear new user confirmed flag:', error);
     }
   }
 
