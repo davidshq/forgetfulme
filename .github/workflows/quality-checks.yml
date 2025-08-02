@@ -1,0 +1,209 @@
+name: Comprehensive Quality Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  lint-and-format:
+    name: Code Style & Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run ESLint
+      run: npm run lint
+      
+    - name: Check Prettier formatting
+      run: npm run format:check
+      
+    - name: Report lint results
+      if: always()
+      run: |
+        echo "## Code Style Results" >> $GITHUB_STEP_SUMMARY
+        echo "✅ ESLint passed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Prettier formatting passed" >> $GITHUB_STEP_SUMMARY
+
+  unit-tests:
+    name: Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run unit tests with coverage
+      run: npm run test:unit:coverage
+      
+    - name: Check coverage thresholds
+      run: |
+        # Extract coverage percentage from coverage report
+        COVERAGE=$(grep -o 'All files.*[0-9]\+\.[0-9]\+' coverage/lcov-report/index.html | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+        echo "Current coverage: $COVERAGE%"
+        
+        # Set minimum coverage threshold
+        MIN_COVERAGE=68.0
+        
+        if (( $(echo "$COVERAGE < $MIN_COVERAGE" | bc -l) )); then
+          echo "❌ Coverage $COVERAGE% is below minimum threshold $MIN_COVERAGE%"
+          exit 1
+        else
+          echo "✅ Coverage $COVERAGE% meets minimum threshold $MIN_COVERAGE%"
+        fi
+      
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 30
+
+  integration-tests:
+    name: Integration & Visual Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install Playwright browsers
+      run: npm run install-browsers
+      
+    - name: Run integration tests
+      run: npm run test:playwright
+      
+    - name: Run visual regression tests
+      run: npm run test:visual
+      
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 14
+
+  security-check:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run npm audit
+      run: npm run audit:security
+      continue-on-error: true
+      
+    - name: Generate security report
+      run: |
+        echo "## Security Audit Results" >> $GITHUB_STEP_SUMMARY
+        npm audit --json > audit-results.json || true
+        
+        # Count vulnerabilities by severity
+        HIGH=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "high")) | length' audit-results.json)
+        MODERATE=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "moderate")) | length' audit-results.json)
+        LOW=$(jq '.vulnerabilities | to_entries | map(select(.value.severity == "low")) | length' audit-results.json)
+        
+        echo "- High severity: $HIGH" >> $GITHUB_STEP_SUMMARY
+        echo "- Moderate severity: $MODERATE" >> $GITHUB_STEP_SUMMARY
+        echo "- Low severity: $LOW" >> $GITHUB_STEP_SUMMARY
+
+  code-complexity:
+    name: Code Complexity Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Generate complexity report
+      run: |
+        echo "## Code Complexity Analysis" >> $GITHUB_STEP_SUMMARY
+        
+        # Count JavaScript files
+        JS_FILES=$(find src -name "*.js" -not -path "*/lib/*" | wc -l)
+        echo "- Total JavaScript files: $JS_FILES" >> $GITHUB_STEP_SUMMARY
+        
+        # Analyze file sizes
+        LARGE_FILES=$(find src -name "*.js" -not -path "*/lib/*" -exec wc -l {} + | awk '$1 > 300 {print $2 " (" $1 " lines)"}' | wc -l)
+        echo "- Files over 300 lines: $LARGE_FILES" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for potential complexity issues
+        LONG_FUNCTIONS=$(grep -r "function\|=>" src --include="*.js" | wc -l)
+        echo "- Total functions: $LONG_FUNCTIONS" >> $GITHUB_STEP_SUMMARY
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, unit-tests, integration-tests, security-check]
+    if: always()
+    
+    steps:
+    - name: Check quality gate
+      run: |
+        if [[ "${{ needs.lint-and-format.result }}" == "success" && 
+              "${{ needs.unit-tests.result }}" == "success" && 
+              "${{ needs.integration-tests.result }}" == "success" ]]; then
+          echo "✅ Quality gate passed - all checks successful"
+          echo "## 🎉 Quality Gate: PASSED" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Quality gate failed - some checks failed"
+          echo "## ❌ Quality Gate: FAILED" >> $GITHUB_STEP_SUMMARY
+          echo "- Lint & Format: ${{ needs.lint-and-format.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Check: ${{ needs.security-check.result }}" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi

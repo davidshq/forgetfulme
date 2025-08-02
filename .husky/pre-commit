@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+export CI=1
+npm run validate:full
