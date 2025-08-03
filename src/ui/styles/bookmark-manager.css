@@ -23,22 +23,23 @@
 }
 
 .gridjs-th {
-  background-color: var(--pico-card-sectioning-background-color) !important;
-  color: var(--pico-color) !important;
-  border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color) !important;
+  background-color: var(--pico-contrast-background) !important;
+  color: var(--pico-contrast-inverse) !important;
+  border-bottom: var(--pico-border-width) solid var(--pico-contrast-border) !important;
   font-weight: 600;
   padding: var(--pico-spacing) !important;
 }
 
 .gridjs-td {
-  background-color: transparent !important;
+  background-color: var(--pico-background-color) !important;
   color: var(--pico-color) !important;
-  border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color) !important;
+  border-bottom: var(--pico-border-width) solid var(--pico-table-border-color) !important;
   padding: var(--pico-spacing) !important;
 }
 
 .gridjs-tr:hover .gridjs-td {
-  background-color: var(--pico-muted-background-color) !important;
+  background-color: var(--pico-table-row-stripped-background-color) !important;
+  color: var(--pico-color) !important;
 }
 
 /* Grid.js Search - use Pico form styling */
@@ -82,9 +83,9 @@
 }
 
 .gridjs-pagination button {
-  background-color: transparent !important;
-  border: var(--pico-border-width) solid var(--pico-secondary) !important;
-  color: var(--pico-secondary) !important;
+  background-color: var(--pico-secondary-background) !important;
+  border: var(--pico-border-width) solid var(--pico-secondary-border) !important;
+  color: var(--pico-secondary-inverse) !important;
   border-radius: var(--pico-border-radius) !important;
   padding: calc(var(--pico-form-element-spacing-vertical) * 0.75)
     var(--pico-form-element-spacing-horizontal) !important;
@@ -94,15 +95,15 @@
 }
 
 .gridjs-pagination button:hover:not(:disabled) {
-  background-color: var(--pico-secondary) !important;
+  background-color: var(--pico-secondary-hover-background) !important;
   color: var(--pico-secondary-inverse) !important;
-  border-color: var(--pico-secondary) !important;
+  border-color: var(--pico-secondary-hover-border) !important;
 }
 
 .gridjs-pagination button:disabled {
-  opacity: 0.5 !important;
+  opacity: var(--pico-form-element-disabled-opacity) !important;
   cursor: not-allowed;
-  background-color: transparent !important;
+  background-color: var(--pico-form-element-background-color) !important;
   color: var(--pico-muted-color) !important;
   border-color: var(--pico-muted-border-color) !important;
 }
@@ -293,7 +294,7 @@
   align-items: center;
   margin-bottom: 1rem;
   padding: 1rem;
-  background-color: var(--pico-muted-background-color);
+  background-color: var(--pico-card-sectioning-background-color);
   border-radius: var(--pico-border-radius);
   flex-wrap: wrap;
   gap: 1rem;
@@ -452,7 +453,7 @@
   --close-button-margin: calc(var(--pico-spacing) * -0.25);
   --close-button-border-radius: var(--pico-border-radius);
   --close-button-transition: color 0.2s ease;
-  --close-button-hover-bg: var(--pico-muted-background-color);
+  --close-button-hover-bg: var(--pico-dropdown-hover-background-color);
 }
 
 /* Help text styling */
@@ -581,6 +582,36 @@
   .pagination-nav {
     background-color: var(--pico-card-background-color);
   }
+
+  /* Enhanced grid contrast for dark mode */
+  .gridjs-th {
+    background-color: var(--pico-contrast-background) !important;
+    color: var(--pico-contrast-inverse) !important;
+    border-bottom: var(--pico-border-width) solid var(--pico-contrast-border) !important;
+  }
+
+  .gridjs-td {
+    background-color: var(--pico-card-background-color) !important;
+    color: var(--pico-color) !important;
+    border-bottom: var(--pico-border-width) solid var(--pico-table-border-color) !important;
+  }
+
+  .gridjs-tr:hover .gridjs-td {
+    background-color: var(--pico-dropdown-hover-background-color) !important;
+    color: var(--pico-color) !important;
+  }
+
+  .gridjs-pagination button {
+    background-color: var(--pico-secondary-background) !important;
+    color: var(--pico-secondary-inverse) !important;
+    border-color: var(--pico-secondary-border) !important;
+  }
+
+  .gridjs-pagination button:hover:not(:disabled) {
+    background-color: var(--pico-secondary-hover-background) !important;
+    color: var(--pico-secondary-inverse) !important;
+    border-color: var(--pico-secondary-hover-border) !important;
+  }
 }
 
 /* High contrast mode */
@@ -623,7 +654,7 @@
   }
 
   .bookmark-item {
-    border: 1px solid #ccc;
+    border: var(--pico-border-width) solid var(--pico-muted-border-color);
     page-break-inside: avoid;
     margin-bottom: 1rem;
   }
