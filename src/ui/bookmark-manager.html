@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ForgetfulMe - Bookmark Manager</title>
     <link rel="stylesheet" href="../lib/pico.min.css" />
+    <link rel="stylesheet" href="../lib/gridjs-theme.min.css" />
     <link rel="stylesheet" href="styles/shared.css" />
     <link rel="stylesheet" href="styles/bookmark-manager.css" />
   </head>
@@ -35,107 +36,53 @@
         </div>
       </header>
 
-      <!-- Search and Filters -->
-      <section class="search-section" data-testid="search-section">
-        <form id="search-form" class="search-form" data-testid="search-form">
-          <div class="search-grid">
-            <label for="search-query">
-              Search
-              <input
-                type="search"
-                id="search-query"
-                name="query"
-                placeholder="Search bookmarks..."
-                data-testid="search-query"
-              />
-            </label>
+      <!-- Simplified Filters -->
+      <section class="filters-section" data-testid="filters-section">
+        <div class="filters-grid">
+          <label for="status-filter">
+            Filter by Status:
+            <select id="status-filter" name="statusFilter" data-testid="status-filter">
+              <option value="">All Statuses</option>
+              <!-- Options populated by JavaScript -->
+            </select>
+          </label>
 
-            <label for="status-filter">
-              Status
-              <select id="status-filter" name="statusFilter" multiple data-testid="status-filter">
-                <option value="">All Statuses</option>
-                <!-- Options populated by JavaScript -->
-              </select>
-            </label>
+          <label for="tag-filter">
+            Filter by Tags:
+            <input
+              type="text"
+              id="tag-filter"
+              name="tagFilter"
+              placeholder="e.g. web, docs"
+              data-testid="tag-filter"
+            />
+          </label>
 
-            <label for="tag-filter">
-              Tags
-              <input
-                type="text"
-                id="tag-filter"
-                name="tagFilter"
-                placeholder="Filter by tags..."
-                data-testid="tag-filter"
-              />
-              <small>Separate multiple tags with commas</small>
-            </label>
-
-            <label for="date-from">
-              From Date
-              <input type="date" id="date-from" name="dateFrom" data-testid="date-from" />
-            </label>
-
-            <label for="date-to">
-              To Date
-              <input type="date" id="date-to" name="dateTo" data-testid="date-to" />
-            </label>
-
-            <div class="search-actions">
-              <button type="submit" id="search-bookmarks" data-testid="search-bookmarks">
-                Search
-              </button>
-              <button
-                type="button"
-                id="clear-search"
-                class="secondary outline"
-                data-testid="clear-search"
-              >
-                Clear
-              </button>
-            </div>
+          <div class="filter-actions">
+            <button type="button" id="apply-filters" class="secondary" data-testid="apply-filters">
+              Apply Filters
+            </button>
+            <button
+              type="button"
+              id="clear-filters"
+              class="secondary outline"
+              data-testid="clear-filters"
+            >
+              Clear
+            </button>
           </div>
-        </form>
+        </div>
       </section>
 
       <!-- Toolbar -->
       <section class="toolbar" data-testid="toolbar">
         <div class="toolbar-left">
-          <label for="bulk-select-all">
-            <input type="checkbox" id="bulk-select-all" data-testid="bulk-select-all" />
-            Select All
-          </label>
           <span id="selected-count" class="selected-count hidden" data-testid="selected-count"
             >0 selected</span
           >
         </div>
 
-        <div class="toolbar-center">
-          <label for="sort-by">
-            Sort by:
-            <select id="sort-by" name="sortBy" data-testid="sort-by">
-              <option value="created_at">Date Created</option>
-              <option value="updated_at">Date Modified</option>
-              <option value="title">Title</option>
-              <option value="url">URL</option>
-            </select>
-          </label>
-          <label for="sort-order">
-            <select id="sort-order" name="sortOrder" data-testid="sort-order">
-              <option value="desc">Newest First</option>
-              <option value="asc">Oldest First</option>
-            </select>
-          </label>
-        </div>
-
         <div class="toolbar-right">
-          <button
-            type="button"
-            id="view-toggle"
-            class="secondary outline"
-            data-testid="view-toggle"
-          >
-            Compact View
-          </button>
           <div class="bulk-actions hidden" id="bulk-actions" data-testid="bulk-actions">
             <select id="bulk-status-update" data-testid="bulk-status-update">
               <option value="">Change Status...</option>
@@ -153,10 +100,10 @@
         </div>
       </section>
 
-      <!-- Bookmark List -->
+      <!-- Bookmark Grid -->
       <main class="bookmark-list-container" data-testid="bookmark-list-container">
-        <div id="bookmark-list" class="bookmark-list" data-testid="bookmark-list">
-          <!-- Bookmarks will be populated by JavaScript -->
+        <div id="bookmark-grid" class="bookmark-grid" data-testid="bookmark-grid">
+          <!-- Grid.js table will be rendered here -->
         </div>
 
         <!-- Empty State -->
@@ -174,46 +121,6 @@
           <p>Loading bookmarks...</p>
         </div>
       </main>
-
-      <!-- Pagination -->
-      <nav class="pagination-nav" id="pagination-nav" data-testid="pagination-nav">
-        <div class="pagination-info">
-          <span id="pagination-info" data-testid="pagination-info">Showing 0 - 0 of 0</span>
-        </div>
-        <div class="pagination-controls">
-          <button
-            type="button"
-            id="prev-page"
-            class="secondary outline"
-            disabled
-            data-testid="prev-page"
-          >
-            &larr; Previous
-          </button>
-          <span id="page-numbers" class="page-numbers" data-testid="page-numbers">
-            <!-- Page numbers will be populated by JavaScript -->
-          </span>
-          <button
-            type="button"
-            id="next-page"
-            class="secondary outline"
-            disabled
-            data-testid="next-page"
-          >
-            Next &rarr;
-          </button>
-        </div>
-        <div class="pagination-size">
-          <label for="page-size">
-            Per page:
-            <select id="page-size" name="pageSize" data-testid="page-size">
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </label>
-        </div>
-      </nav>
 
       <!-- Messages -->
       <div id="message-area" class="message-area" data-testid="message-area"></div>
@@ -375,6 +282,7 @@
     </dialog>
 
     <script src="../lib/supabase-js.min.js"></script>
+    <script src="../lib/gridjs.umd.js"></script>
     <script type="module" src="../main/bookmark-manager.js"></script>
   </body>
 </html>

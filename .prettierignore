@@ -1,2 +1,4 @@
 src/lib/supabase-js.min.js
 src/lib/pico.min.css
+src/lib/grid-theme.min.css
+src/lib/gridjs.umd.js

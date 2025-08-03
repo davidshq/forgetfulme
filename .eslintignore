@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Test artifacts
+coverage/
+test-results/
+playwright-report/
+
+# Build outputs
+dist/
+build/
+
+# External libraries
+src/lib/gridjs.umd.js
+src/lib/supabase-js.min.js
+src/lib/pico.min.css
+
+# Test files
+test-*.html

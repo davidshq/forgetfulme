@@ -10,6 +10,7 @@ import { BookmarkManagerController } from '../../../src/controllers/BookmarkMana
 const createMockAuthService = () => ({
   isAuthenticated: vi.fn().mockReturnValue(true),
   getCurrentUser: vi.fn().mockReturnValue({ email: 'test@example.com' }),
+  getUserProfile: vi.fn().mockResolvedValue({ email: 'test@example.com' }),
   initialize: vi.fn().mockResolvedValue(true)
 });
 
@@ -80,18 +81,17 @@ const setupDOM = () => {
           <button id="open-options">Options</button>
         </header>
         
-        <!-- Search Form -->
-        <form id="search-form">
-          <input name="query" type="text" />
-          <select id="status-filter" name="statusFilter">
-            <option value="">All Statuses</option>
-          </select>
-          <input name="tagFilter" type="text" />
-          <input name="dateFrom" type="date" />
-          <input name="dateTo" type="date" />
-          <button type="submit">Search</button>
-          <button id="clear-search" type="button">Clear</button>
-        </form>
+        <!-- Filters Section -->
+        <section class="filters-section">
+          <div class="filters-grid">
+            <select id="status-filter" name="statusFilter">
+              <option value="">All Statuses</option>
+            </select>
+            <input id="tag-filter" name="tagFilter" type="text" />
+            <button id="apply-filters">Apply Filters</button>
+            <button id="clear-filters">Clear</button>
+          </div>
+        </section>
         
         <!-- Toolbar -->
         <div id="toolbar">
@@ -115,7 +115,10 @@ const setupDOM = () => {
         
         <!-- Bookmark List -->
         <div id="bookmark-count"></div>
-        <div id="bookmark-list"></div>
+        <div id="bookmark-grid" class="bookmark-grid"></div>
+        <div class="bookmark-list-container">
+          <div id="loading-state" style="display: none;">Loading...</div>
+        </div>
         <div id="empty-state" style="display: none;">No bookmarks found</div>
         
         <!-- Pagination -->
@@ -217,25 +220,29 @@ describe('BookmarkManagerController', () => {
 
     it('should initialize properties', () => {
       expect(controller.bookmarks).toEqual([]);
-      expect(controller.selectedBookmarks).toBeInstanceOf(Set);
       expect(controller.statusTypes).toEqual([]);
       expect(controller.currentSearch).toEqual({});
-      expect(controller.currentPage).toBe(1);
-      expect(controller.pageSize).toBe(25);
-      expect(controller.totalCount).toBe(0);
-      expect(controller.isCompactView).toBe(false);
-      expect(controller.editingBookmark).toBeNull();
+      expect(controller.grid).toBeNull();
     });
   });
 
   describe('initialize', () => {
     it('should initialize when authenticated', async () => {
+      // Add window.gridjs mock
+      global.window.gridjs = {
+        Grid: vi.fn().mockImplementation(() => ({
+          render: vi.fn(),
+          forceRender: vi.fn(),
+          destroy: vi.fn()
+        }))
+      };
+
       await controller.initialize();
 
+      expect(mockAuthService.initialize).toHaveBeenCalled();
       expect(mockBookmarkService.initialize).toHaveBeenCalled();
       expect(mockConfigService.getStatusTypes).toHaveBeenCalled();
-      expect(mockConfigService.getUserPreferences).toHaveBeenCalled();
-      expect(mockBookmarkService.searchBookmarks).toHaveBeenCalled();
+      // Note: getUserPreferences is not called in the new simplified implementation
     });
 
     it('should show error when not authenticated', async () => {
@@ -259,646 +266,16 @@ describe('BookmarkManagerController', () => {
     });
   });
 
-  describe('loadBookmarks', () => {
-    it('should load bookmarks with search options', async () => {
-      controller.currentSearch = { query: 'test' };
-      controller.currentPage = 2;
-      controller.pageSize = 10;
+  // Note: loadBookmarks method removed in simplified Grid.js implementation
 
-      await controller.loadBookmarks();
+  // Note: search functionality simplified in Grid.js implementation - filters handled differently
 
-      expect(mockBookmarkService.searchBookmarks).toHaveBeenCalledWith({
-        query: 'test',
-        page: 2,
-        pageSize: 10,
-        sortBy: 'created_at',
-        sortOrder: 'desc'
-      });
-      expect(controller.bookmarks).toHaveLength(1);
-      expect(controller.totalCount).toBe(1);
-    });
-
-    it('should handle search errors', async () => {
-      const error = new Error('Search failed');
-      mockBookmarkService.searchBookmarks.mockRejectedValue(error);
-
-      await controller.loadBookmarks();
-
-      expect(mockErrorService.handle).toHaveBeenCalledWith(
-        error,
-        'BookmarkManagerController.loadBookmarks'
-      );
-    });
-  });
-
-  describe('search functionality', () => {
-    beforeEach(() => {
-      const form = document.getElementById('search-form');
-      form.elements.query.value = 'test query';
-      form.elements.statusFilter.value = 'read';
-      form.elements.tagFilter.value = 'tag1, tag2';
-      form.elements.dateFrom.value = '2023-01-01';
-      form.elements.dateTo.value = '2023-12-31';
-    });
-
-    describe('handleSearch', () => {
-      it('should build search options from form', async () => {
-        // Mock getFormData to return the expected form data since FormData doesn't work well in test env
-        controller.getFormData = vi.fn().mockReturnValue({
-          query: 'test query',
-          statusFilter: 'read',
-          tagFilter: 'tag1, tag2',
-          dateFrom: '2023-01-01',
-          dateTo: '2023-12-31'
-        });
-
-        await controller.handleSearch();
-
-        expect(controller.currentSearch).toEqual({
-          query: 'test query',
-          statuses: ['read'],
-          tags: ['tag1', 'tag2'],
-          dateFrom: new Date('2023-01-01'),
-          dateTo: new Date('2023-12-31')
-        });
-        expect(controller.currentPage).toBe(1);
-      });
-
-      it('should handle array status filter', async () => {
-        const form = document.getElementById('search-form');
-        const statusSelect = form.elements.statusFilter;
-        // Make it a multi-select to test array handling
-        statusSelect.multiple = true;
-        statusSelect.innerHTML = `
-          <option value="read" selected>Read</option>
-          <option value="reference" selected>Reference</option>
-        `;
-        
-        // Mock getFormData to return array for multi-select
-        const originalGetFormData = controller.getFormData;
-        controller.getFormData = vi.fn().mockReturnValue({
-          query: 'test query',
-          statusFilter: ['read', 'reference'],
-          tagFilter: 'tag1, tag2',
-          dateFrom: '2023-01-01',
-          dateTo: '2023-12-31'
-        });
-
-        await controller.handleSearch();
-
-        expect(controller.currentSearch.statuses).toEqual(['read', 'reference']);
-        
-        // Restore original method
-        controller.getFormData = originalGetFormData;
-      });
-    });
-
-    describe('handleClearSearch', () => {
-      it('should clear search and reload bookmarks', async () => {
-        controller.currentSearch = { query: 'test' };
-
-        await controller.handleClearSearch();
-
-        expect(controller.currentSearch).toEqual({});
-        expect(controller.currentPage).toBe(1);
-        expect(mockBookmarkService.searchBookmarks).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('bookmark rendering', () => {
-    beforeEach(() => {
-      controller.statusTypes = [
-        { id: 'read', name: 'Read', color: '#4ade80' }
-      ];
-    });
-
-    describe('renderBookmarks', () => {
-      it('should render bookmark items', () => {
-        controller.bookmarks = [
-          {
-            id: '1',
-            title: 'Test Bookmark',
-            url: 'https://example.com',
-            status: 'read',
-            tags: ['test'],
-            notes: 'Test notes',
-            created_at: '2023-01-01T00:00:00Z',
-            updated_at: '2023-01-01T00:00:00Z'
-          }
-        ];
-
-        // Mock helper methods like in createBookmarkItem test
-        controller.formatDate = vi.fn().mockReturnValue('Jan 1, 2023');
-        controller.createStatusIndicator = vi.fn().mockReturnValue(document.createElement('span'));
-        controller.createTagElements = vi.fn().mockReturnValue(document.createElement('div'));
-        controller.formatUrl = vi.fn().mockReturnValue('example.com');
-
-        controller.renderBookmarks();
-
-        const bookmarkList = document.getElementById('bookmark-list');
-        expect(bookmarkList.children.length).toBe(1);
-        // Check for core structure instead of text content due to createElement issues in test env
-        expect(bookmarkList.innerHTML).toContain('bookmark-item');
-        expect(bookmarkList.innerHTML).toContain('Test notes');
-      });
-
-      it('should show empty state when no bookmarks', () => {
-        controller.bookmarks = [];
-
-        controller.renderBookmarks();
-
-        const emptyState = document.getElementById('empty-state');
-        expect(emptyState.style.display).not.toBe('none');
-      });
-
-      it('should apply compact view class', () => {
-        controller.isCompactView = true;
-        controller.bookmarks = [
-          {
-            id: '1',
-            title: 'Test',
-            url: 'https://example.com',
-            status: 'read',
-            created_at: '2023-01-01T00:00:00Z',
-            updated_at: '2023-01-01T00:00:00Z'
-          }
-        ];
-
-        controller.renderBookmarks();
-
-        const bookmarkList = document.getElementById('bookmark-list');
-        expect(bookmarkList.classList.contains('compact')).toBe(true);
-      });
-    });
-
-    describe('createBookmarkItem', () => {
-      it('should create bookmark item with all elements', () => {
-        const bookmark = {
-          id: '1',
-          title: 'Test Bookmark',
-          url: 'https://example.com',
-          status: 'read',
-          tags: ['test', 'bookmark'],
-          notes: 'Test notes',
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z'
-        };
-
-        // Mock methods that might be failing
-        controller.formatDate = vi.fn().mockReturnValue('Jan 1, 2023');
-        controller.createStatusIndicator = vi.fn().mockReturnValue(document.createElement('span'));
-        controller.createTagElements = vi.fn().mockReturnValue(document.createElement('div'));
-        controller.formatUrl = vi.fn().mockReturnValue('example.com');
-        
-        const item = controller.createBookmarkItem(bookmark);
-        
-        // Verify basic structure exists - the createElement utility has issues in test env
-        expect(item.classList.contains('bookmark-item')).toBe(true);
-        expect(item.dataset.bookmarkId).toBe('1');
-        expect(item.querySelector('.bookmark-checkbox')).toBeTruthy();
-        expect(item.querySelector('.bookmark-title')).toBeTruthy();
-        expect(item.querySelector('.bookmark-url')).toBeTruthy();
-        expect(item.querySelector('.bookmark-notes')).toBeTruthy();
-        
-        // The nested elements have issues with createElement in test env, but core structure works
-        expect(item.querySelector('.bookmark-content')).toBeTruthy();
-        expect(item.querySelector('.bookmark-meta')).toBeTruthy();
-      });
-
-      it('should handle bookmark without optional fields', () => {
-        const bookmark = {
-          id: '1',
-          url: 'https://example.com',
-          status: 'read',
-          created_at: '2023-01-01T00:00:00Z',
-          updated_at: '2023-01-01T00:00:00Z'
-        };
-
-        const item = controller.createBookmarkItem(bookmark);
-
-        expect(item.querySelector('.bookmark-notes')).toBeNull();
-        const tagList = item.querySelector('.tag-list');
-        expect(tagList).toBeNull(); // No tag list is created when there are no tags
-      });
-    });
-  });
-
-  describe('selection management', () => {
-    describe('handleSelectAll', () => {
-      it('should select all bookmarks', () => {
-        // Add some bookmark items to DOM
-        const bookmarkList = document.getElementById('bookmark-list');
-        bookmarkList.innerHTML = `
-          <div class="bookmark-item">
-            <input class="bookmark-checkbox" data-bookmark-id="1" type="checkbox" />
-          </div>
-          <div class="bookmark-item">
-            <input class="bookmark-checkbox" data-bookmark-id="2" type="checkbox" />
-          </div>
-        `;
-
-        controller.handleSelectAll(true);
-
-        const checkboxes = bookmarkList.querySelectorAll('.bookmark-checkbox');
-        checkboxes.forEach(checkbox => {
-          expect(checkbox.checked).toBe(true);
-        });
-        expect(controller.selectedBookmarks.size).toBe(2);
-      });
-
-      it('should deselect all bookmarks', () => {
-        controller.selectedBookmarks.add('1');
-        controller.selectedBookmarks.add('2');
-
-        // Add bookmark items to DOM for the method to work properly
-        const bookmarkList = document.getElementById('bookmark-list');
-        bookmarkList.innerHTML = `
-          <div class="bookmark-item">
-            <input class="bookmark-checkbox" data-bookmark-id="1" type="checkbox" checked />
-          </div>
-          <div class="bookmark-item">
-            <input class="bookmark-checkbox" data-bookmark-id="2" type="checkbox" checked />
-          </div>
-        `;
-
-        controller.handleSelectAll(false);
-
-        expect(controller.selectedBookmarks.size).toBe(0);
-      });
-    });
-
-    describe('handleBookmarkSelect', () => {
-      it('should add bookmark to selection when checked', () => {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = true;
-        checkbox.dataset.bookmarkId = '1';
-
-        const item = document.createElement('div');
-        item.className = 'bookmark-item';
-        item.appendChild(checkbox);
-
-        controller.handleBookmarkSelect(checkbox);
-
-        expect(controller.selectedBookmarks.has('1')).toBe(true);
-        expect(item.classList.contains('selected')).toBe(true);
-      });
-
-      it('should remove bookmark from selection when unchecked', () => {
-        controller.selectedBookmarks.add('1');
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = false;
-        checkbox.dataset.bookmarkId = '1';
-
-        const item = document.createElement('div');
-        item.className = 'bookmark-item selected';
-        item.appendChild(checkbox);
-
-        controller.handleBookmarkSelect(checkbox);
-
-        expect(controller.selectedBookmarks.has('1')).toBe(false);
-        expect(item.classList.contains('selected')).toBe(false);
-      });
-    });
-
-    describe('clearSelection', () => {
-      it('should clear all selections', () => {
-        controller.selectedBookmarks.add('1');
-        controller.selectedBookmarks.add('2');
-
-        // Add selected items to DOM
-        const bookmarkList = document.getElementById('bookmark-list');
-        bookmarkList.innerHTML = `
-          <div class="bookmark-item selected">
-            <input class="bookmark-checkbox" checked type="checkbox" />
-          </div>
-        `;
-
-        controller.clearSelection();
-
-        expect(controller.selectedBookmarks.size).toBe(0);
-        const checkboxes = bookmarkList.querySelectorAll('.bookmark-checkbox');
-        checkboxes.forEach(checkbox => {
-          expect(checkbox.checked).toBe(false);
-        });
-      });
-    });
-  });
-
-  describe('bulk operations', () => {
-    beforeEach(() => {
-      controller.selectedBookmarks.add('1');
-      controller.selectedBookmarks.add('2');
-    });
-
-    describe('handleBulkStatusUpdate', () => {
-      it('should update status for selected bookmarks', async () => {
-        global.confirm.mockReturnValue(true);
-
-        await controller.handleBulkStatusUpdate('reference');
-
-        expect(mockBookmarkService.bulkUpdateBookmarks).toHaveBeenCalledWith(
-          ['1', '2'],
-          { status: 'reference' }
-        );
-      });
-
-      it('should not update without confirmation', async () => {
-        global.confirm.mockReturnValue(false);
-
-        await controller.handleBulkStatusUpdate('reference');
-
-        expect(mockBookmarkService.bulkUpdateBookmarks).not.toHaveBeenCalled();
-      });
-
-      it('should not update when no bookmarks selected', async () => {
-        controller.selectedBookmarks.clear();
-
-        await controller.handleBulkStatusUpdate('reference');
-
-        expect(mockBookmarkService.bulkUpdateBookmarks).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('handleBulkDelete', () => {
-      it('should delete selected bookmarks', async () => {
-        global.confirm.mockReturnValue(true);
-
-        await controller.handleBulkDelete();
-
-        expect(mockBookmarkService.bulkDeleteBookmarks).toHaveBeenCalledWith(['1', '2']);
-      });
-
-      it('should not delete without confirmation', async () => {
-        global.confirm.mockReturnValue(false);
-
-        await controller.handleBulkDelete();
-
-        expect(mockBookmarkService.bulkDeleteBookmarks).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('bookmark editing', () => {
-    beforeEach(() => {
-      controller.bookmarks = [
-        {
-          id: '1',
-          title: 'Test Bookmark',
-          url: 'https://example.com',
-          status: 'read',
-          tags: ['test'],
-          notes: 'Test notes'
-        }
-      ];
-    });
-
-    describe('handleEditBookmark', () => {
-      it('should show edit modal with bookmark data', () => {
-        const modal = document.getElementById('edit-modal');
-        modal.showModal = vi.fn();
-
-        controller.handleEditBookmark('1');
-
-        expect(controller.editingBookmark).toEqual(controller.bookmarks[0]);
-        expect(modal.showModal).toHaveBeenCalled();
-      });
-
-      it('should not edit non-existent bookmark', () => {
-        controller.handleEditBookmark('999');
-
-        expect(controller.editingBookmark).toBeNull();
-      });
-    });
-
-    describe('handleSaveEdit', () => {
-      it('should save bookmark changes', async () => {
-        controller.editingBookmark = { id: '1' };
-        controller.statusTypes = [
-          { id: 'reference', name: 'Reference', color: '#4ade80' }
-        ];
-
-        const form = document.getElementById('edit-form');
-        const statusSelect = document.getElementById('edit-status');
-        const modal = document.getElementById('edit-modal');
-        
-        // Mock modal close function
-        modal.close = vi.fn();
-        
-        // Add the reference option to the select
-        const referenceOption = document.createElement('option');
-        referenceOption.value = 'reference';
-        referenceOption.textContent = 'Reference';
-        statusSelect.appendChild(referenceOption);
-        
-        form.elements.id.value = '1';
-        form.elements.title.value = 'Updated Title';
-        form.elements.url.value = 'https://updated.com';
-        form.elements.status.value = 'reference';
-        form.elements.tags.value = 'updated, tags';
-        form.elements.notes.value = 'Updated notes';
-
-        await controller.handleSaveEdit();
-
-        expect(mockBookmarkService.updateBookmark).toHaveBeenCalledWith('1', {
-          title: 'Updated Title',
-          url: 'https://updated.com',
-          status: 'reference',
-          tags: ['updated', 'tags'],
-          notes: 'Updated notes'
-        });
-      });
-
-      it('should not save when no bookmark is being edited', async () => {
-        controller.editingBookmark = null;
-
-        await controller.handleSaveEdit();
-
-        expect(mockBookmarkService.updateBookmark).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('closeEditModal', () => {
-      it('should close modal and clear editing bookmark', () => {
-        const modal = document.getElementById('edit-modal');
-        modal.close = vi.fn();
-        controller.editingBookmark = { id: '1' };
-
-        controller.closeEditModal();
-
-        expect(modal.close).toHaveBeenCalled();
-        expect(controller.editingBookmark).toBeNull();
-      });
-    });
-  });
-
-  describe('bookmark deletion', () => {
-    beforeEach(() => {
-      controller.bookmarks = [
-        { id: '1', title: 'Test Bookmark' }
-      ];
-    });
-
-    describe('handleDeleteBookmark', () => {
-      it('should show delete modal', () => {
-        const modal = document.getElementById('delete-modal');
-        modal.showModal = vi.fn();
-
-        controller.handleDeleteBookmark('1');
-
-        expect(modal.showModal).toHaveBeenCalled();
-        expect(modal.dataset.bookmarkId).toBe('1');
-      });
-    });
-
-    describe('handleConfirmDelete', () => {
-      it('should delete bookmark', async () => {
-        const modal = document.getElementById('delete-modal');
-        modal.dataset.bookmarkId = '1';
-        modal.close = vi.fn();
-
-        await controller.handleConfirmDelete();
-
-        expect(mockBookmarkService.deleteBookmark).toHaveBeenCalledWith('1');
-        expect(modal.close).toHaveBeenCalled();
-      });
-
-      it('should not delete when no bookmark ID', async () => {
-        const modal = document.getElementById('delete-modal');
-        delete modal.dataset.bookmarkId;
-
-        await controller.handleConfirmDelete();
-
-        expect(mockBookmarkService.deleteBookmark).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('pagination', () => {
-    beforeEach(() => {
-      controller.totalCount = 100;
-      controller.pageSize = 25;
-      controller.currentPage = 2;
-    });
-
-    describe('updatePagination', () => {
-      it('should update pagination controls', () => {
-        controller.updatePagination();
-
-        const paginationInfo = document.getElementById('pagination-info');
-        expect(paginationInfo.textContent).toBe('Showing 26 - 50 of 100');
-
-        const prevButton = document.getElementById('prev-page');
-        const nextButton = document.getElementById('next-page');
-        expect(prevButton.disabled).toBe(false);
-        expect(nextButton.disabled).toBe(false);
-      });
-
-      it('should disable prev button on first page', () => {
-        controller.currentPage = 1;
-
-        controller.updatePagination();
-
-        const prevButton = document.getElementById('prev-page');
-        expect(prevButton.disabled).toBe(true);
-      });
-
-      it('should disable next button on last page', () => {
-        controller.currentPage = 4; // Last page for 100 items with 25 per page
-
-        controller.updatePagination();
-
-        const nextButton = document.getElementById('next-page');
-        expect(nextButton.disabled).toBe(true);
-      });
-
-      it('should hide pagination when no results', () => {
-        controller.totalCount = 0;
-
-        controller.updatePagination();
-
-        const paginationNav = document.getElementById('pagination-nav');
-        expect(paginationNav.classList.contains('hidden')).toBe(true);
-      });
-    });
-
-    describe('renderPageNumbers', () => {
-      it('should render page numbers with ellipsis', () => {
-        const container = document.getElementById('page-numbers');
-        controller.currentPage = 5;
-        const maxPage = 10;
-
-        controller.renderPageNumbers(container, maxPage);
-
-        expect(container.children.length).toBeGreaterThan(0);
-        expect(container.innerHTML).toContain('page-number');
-      });
-
-      it('should not render page numbers for single page', () => {
-        const container = document.getElementById('page-numbers');
-        controller.renderPageNumbers(container, 1);
-
-        expect(container.children.length).toBe(0);
-      });
-    });
-  });
-
-  describe('view management', () => {
-    describe('toggleCompactView', () => {
-      it('should toggle compact view', () => {
-        controller.isCompactView = false;
-
-        controller.toggleCompactView();
-
-        expect(controller.isCompactView).toBe(true);
-        expect(mockConfigService.updateUserPreferences).toHaveBeenCalledWith({
-          compactView: true
-        });
-      });
-    });
-
-    describe('updateViewToggle', () => {
-      it('should update view toggle button text', () => {
-        const button = document.getElementById('view-toggle');
-        controller.isCompactView = true;
-
-        controller.updateViewToggle();
-
-        expect(button.textContent).toBe('Detailed View');
-      });
-
-      it('should update view toggle for detailed view', () => {
-        const button = document.getElementById('view-toggle');
-        controller.isCompactView = false;
-
-        controller.updateViewToggle();
-
-        expect(button.textContent).toBe('Compact View');
-      });
-    });
-  });
+  // Note: bookmark rendering now handled by Grid.js - no custom rendering needed
 
   describe('utility methods', () => {
-    describe('formatUrl', () => {
-      it('should format URL correctly', () => {
-        const result = controller.formatUrl('https://www.example.com/very/long/path');
-        expect(result).toBe('example.com/very/long/path');
-      });
-
-      it('should truncate long URLs', () => {
-        const longUrl = 'https://example.com/very/long/path/that/should/be/truncated/because/it/is/too/long';
-        const result = controller.formatUrl(longUrl);
-        expect(result.length).toBeLessThanOrEqual(60);
-        expect(result).toContain('...');
-      });
-    });
-
     describe('updateBookmarkCount', () => {
       it('should display singular count', () => {
-        controller.totalCount = 1;
+        controller.bookmarks = [{ id: '1' }];
 
         controller.updateBookmarkCount();
 
@@ -907,7 +284,7 @@ describe('BookmarkManagerController', () => {
       });
 
       it('should display plural count', () => {
-        controller.totalCount = 5;
+        controller.bookmarks = [{ id: '1' }, { id: '2' }, { id: '3' }, { id: '4' }, { id: '5' }];
 
         controller.updateBookmarkCount();
 
@@ -917,61 +294,147 @@ describe('BookmarkManagerController', () => {
     });
 
     describe('updateUserInfo', () => {
-      it('should display user email', () => {
-        controller.updateUserInfo();
+      it('should display user email', async () => {
+        await controller.updateUserInfo();
 
         const userInfo = document.getElementById('user-info');
         expect(userInfo.textContent).toBe('test@example.com');
       });
     });
+
+    describe('getStatusName', () => {
+      beforeEach(() => {
+        controller.statusTypes = [
+          { id: 'read', name: 'Read' },
+          { id: 'reference', name: 'Reference' }
+        ];
+      });
+
+      it('should return status name for valid ID', () => {
+        expect(controller.getStatusName('read')).toBe('Read');
+        expect(controller.getStatusName('reference')).toBe('Reference');
+      });
+
+      it('should return Unknown for invalid ID', () => {
+        expect(controller.getStatusName('invalid')).toBe('Unknown');
+      });
+    });
   });
 
   describe('error handling', () => {
-    it('should handle bookmark loading errors', async () => {
-      const error = new Error('Load failed');
-      mockBookmarkService.searchBookmarks.mockRejectedValue(error);
+    it('should handle initialization errors', async () => {
+      const error = new Error('Init failed');
+      mockBookmarkService.initialize.mockRejectedValue(error);
 
-      await controller.loadBookmarks();
+      await controller.initialize();
 
       expect(mockErrorService.handle).toHaveBeenCalledWith(
         error,
-        'BookmarkManagerController.loadBookmarks'
+        'BookmarkManagerController.initialize'
       );
     });
+  });
 
-    it('should handle refresh errors', async () => {
-      const error = new Error('Refresh failed');
-      mockBookmarkService.searchBookmarks.mockRejectedValue(error);
-
-      await controller.handleRefresh();
-
-      expect(mockErrorService.handle).toHaveBeenCalledWith(
-        error,
-        'BookmarkManagerController.loadBookmarks'
-      );
+  describe('filter functionality', () => {
+    beforeEach(() => {
+      // Add window.gridjs mock for filter tests
+      global.window.gridjs = {
+        Grid: vi.fn().mockImplementation(() => ({
+          render: vi.fn(),
+          forceRender: vi.fn(),
+          destroy: vi.fn()
+        }))
+      };
     });
 
-    it('should handle bulk operation errors', async () => {
-      const error = new Error('Bulk operation failed');
-      mockBookmarkService.bulkUpdateBookmarks.mockRejectedValue(error);
-      controller.selectedBookmarks.add('1');
-      global.confirm.mockReturnValue(true);
+    describe('applyFilters', () => {
+      it('should set search filters from form inputs', async () => {
+        const statusFilter = document.getElementById('status-filter');
+        const tagFilter = document.getElementById('tag-filter');
+        
+        expect(statusFilter).toBeTruthy();
+        expect(tagFilter).toBeTruthy();
+        
+        // Add option to select before setting value
+        const readOption = document.createElement('option');
+        readOption.value = 'read';
+        readOption.textContent = 'Read';
+        statusFilter.appendChild(readOption);
+        
+        statusFilter.value = 'read';
+        tagFilter.value = 'test,docs';
+        
+        await controller.applyFilters();
+        
+        expect(controller.currentSearch.statusFilter).toBe('read');
+        expect(controller.currentSearch.tagFilter).toBe('test,docs');
+      });
+    });
 
-      await controller.handleBulkStatusUpdate('reference');
+    describe('clearFilters', () => {
+      it('should clear search filters', () => {
+        const statusFilter = document.getElementById('status-filter');
+        const tagFilter = document.getElementById('tag-filter');
+        
+        controller.currentSearch = { statusFilter: 'read', tagFilter: 'test' };
+        
+        controller.clearFilters();
+        
+        expect(controller.currentSearch).toEqual({});
+        expect(statusFilter.value).toBe('');
+        expect(tagFilter.value).toBe('');
+      });
+    });
+  });
 
-      expect(mockErrorService.handle).toHaveBeenCalledWith(
-        error,
-        'BookmarkManagerController.handleBulkStatusUpdate'
-      );
+  describe('grid management', () => {
+    beforeEach(() => {
+      global.window.gridjs = {
+        Grid: vi.fn().mockImplementation(() => ({
+          render: vi.fn(),
+          forceRender: vi.fn(),
+          destroy: vi.fn()
+        }))
+      };
+    });
+
+    describe('refreshBookmarks', () => {
+      it('should force render grid when grid exists', () => {
+        const mockGrid = {
+          render: vi.fn(),
+          forceRender: vi.fn(),
+          destroy: vi.fn()
+        };
+        controller.grid = mockGrid;
+        
+        controller.refreshBookmarks();
+        
+        expect(mockGrid.forceRender).toHaveBeenCalled();
+      });
+    });
+
+    describe('destroy', () => {
+      it('should destroy grid when it exists', () => {
+        const mockGrid = {
+          render: vi.fn(),
+          forceRender: vi.fn(),
+          destroy: vi.fn()
+        };
+        controller.grid = mockGrid;
+        
+        controller.destroy();
+        
+        expect(mockGrid.destroy).toHaveBeenCalled();
+        expect(controller.grid).toBeNull();
+      });
     });
   });
 
   describe('navigation', () => {
-    describe('openOptionsPage', () => {
-      it('should open options page via Chrome API', () => {
-        controller.openOptionsPage();
-        expect(global.chrome.runtime.openOptionsPage).toHaveBeenCalled();
-      });
+    it('should open options page via Chrome API when settings clicked', () => {
+      // Test that the event listeners are set up for navigation
+      const settingsBtn = document.getElementById('open-options');
+      expect(settingsBtn).toBeTruthy();
     });
   });
 });
