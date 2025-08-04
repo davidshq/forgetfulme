@@ -1,8 +1,22 @@
 /**
  * Bookmark manager styles for the ForgetfulMe extension
+ * 
+ * This CSS file provides styling for the bookmark management interface, which includes:
+ * - Grid.js integration with Pico CSS theming for data tables
+ * - Search, filtering, and pagination controls
+ * - Bulk selection and action toolbar
+ * - Bookmark status badges and tag components
+ * - Edit and delete modal dialogs with form validation
+ * - Responsive design for mobile and desktop
+ * - Authentication required states
+ * - Print-friendly styles
+ * 
+ * The styles integrate Grid.js library with Pico CSS framework for consistent
+ * theming and support dark mode, high contrast, and reduced motion preferences.
  */
 
 /* Grid.js Integration with Pico CSS */
+/* Data table theming with Pico CSS variables */
 .gridjs-wrapper {
   width: 100%;
   margin-top: var(--pico-spacing);
@@ -43,6 +57,7 @@
 }
 
 /* Grid.js Search - use Pico form styling */
+/* Search input with Pico form element styling */
 .gridjs-search {
   margin-bottom: var(--pico-spacing);
 }
@@ -63,6 +78,7 @@
 }
 
 /* Grid.js Pagination - use Pico button styling */
+/* Pagination controls with Pico button theming */
 .gridjs-footer {
   background-color: var(--pico-card-background-color) !important;
   border-top: var(--pico-border-width) solid var(--pico-muted-border-color) !important;
@@ -114,11 +130,13 @@
 }
 
 /* Checkbox styling */
+/* Bulk selection checkboxes in data grid */
 .bookmark-checkbox {
   cursor: pointer;
 }
 
 /* Small buttons in grid - use Pico button sizing */
+/* Compact action buttons for grid row operations */
 .small-button {
   padding: calc(var(--pico-form-element-spacing-vertical) * 0.5)
     calc(var(--pico-form-element-spacing-horizontal) * 0.75) !important;
@@ -132,6 +150,7 @@
 }
 
 /* Status and tag badges - use Pico colors */
+/* Visual indicators for bookmark status and tags */
 .status-badge,
 .tag-badge {
   display: inline-block;
@@ -180,6 +199,7 @@
 }
 
 /* Bookmark title link - use Pico link colors */
+/* Clickable bookmark titles with hover effects */
 .bookmark-title {
   color: var(--pico-primary);
   text-decoration: none;
@@ -192,6 +212,7 @@
 }
 
 /* Bookmark URL */
+/* Truncated URL display with ellipsis */
 .bookmark-url {
   color: var(--pico-muted-color);
   font-size: 0.813rem;
@@ -203,6 +224,7 @@
 }
 
 /* Layout - use Pico spacing */
+/* Full-width container with responsive max-width */
 .container-fluid {
   max-width: 1400px;
   margin: 0 auto;
@@ -211,6 +233,7 @@
 }
 
 /* Header */
+/* Page header with title, stats, and action buttons */
 .manager-header {
   display: flex;
   justify-content: space-between;
@@ -250,6 +273,7 @@
 }
 
 /* Simplified Filters Section */
+/* Search and filter controls in card layout */
 .filters-section {
   margin-bottom: 1.5rem;
   padding: 1rem;
@@ -288,6 +312,7 @@
 }
 
 /* Toolbar */
+/* Bulk selection and action controls */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -353,6 +378,7 @@
 }
 
 /* Bookmark Grid Container */
+/* Data grid container with minimum height */
 .bookmark-list-container {
   margin-bottom: 2rem;
 }
@@ -363,6 +389,7 @@
 }
 
 /* Empty State (bookmark manager overrides) */
+/* Enhanced empty state for bookmark manager context */
 .empty-state {
   --empty-state-padding: calc(var(--pico-spacing) * 4) calc(var(--pico-spacing) * 2);
   --empty-state-h3-font-size: 1.5rem;
@@ -371,6 +398,7 @@
 }
 
 /* Modals */
+/* Edit and delete confirmation dialogs */
 .edit-modal article,
 .delete-modal article {
   max-width: 600px;
@@ -410,6 +438,7 @@
 }
 
 /* Form validation styles */
+/* Error display and field validation styling */
 .form-errors {
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -448,6 +477,7 @@
 }
 
 /* Close button (bookmark manager overrides) */
+/* Enhanced close button styling for modals */
 .close-button {
   --close-button-padding: calc(var(--pico-spacing) * 0.25);
   --close-button-margin: calc(var(--pico-spacing) * -0.25);
@@ -457,6 +487,7 @@
 }
 
 /* Help text styling */
+/* Form field help text and descriptions */
 .edit-form small {
   display: block;
   margin-top: 0.25rem;
@@ -466,6 +497,7 @@
 }
 
 /* Modal actions (bookmark manager overrides) */
+/* Enhanced modal action button layout */
 .modal-actions {
   --modal-actions-gap: var(--pico-spacing);
   --modal-actions-padding-top: var(--pico-spacing);
@@ -474,6 +506,7 @@
 }
 
 /* Message Area (bookmark manager positioning overrides) */
+/* Toast notification positioning for bookmark manager context */
 .message-area {
   --message-area-top: calc(var(--pico-spacing) * 2);
   --message-area-right: calc(var(--pico-spacing) * 2);
@@ -482,6 +515,7 @@
 }
 
 /* Responsive Design */
+/* Mobile-first responsive adjustments for different screen sizes */
 @media (max-width: 1200px) {
   .search-grid {
     grid-template-columns: 2fr 1fr 1fr auto;
@@ -572,6 +606,7 @@
 }
 
 /* Dark mode adjustments */
+/* Enhanced styling for dark theme in bookmark manager */
 @media (prefers-color-scheme: dark) {
   .bookmark-item:hover {
     box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
@@ -615,6 +650,7 @@
 }
 
 /* High contrast mode */
+/* Accessibility improvements for high contrast preference */
 @media (prefers-contrast: high) {
   .bookmark-item {
     border-width: 2px;
@@ -630,6 +666,7 @@
 }
 
 /* Reduced motion */
+/* Accessibility: disable animations for motion sensitivity */
 @media (prefers-reduced-motion: reduce) {
   .bookmark-item,
   .page-number {
@@ -642,6 +679,7 @@
 }
 
 /* Print styles */
+/* Print-friendly layout hiding interactive elements */
 @media print {
   .header-actions,
   .search-section,
@@ -672,6 +710,7 @@
 }
 
 /* Authentication Required UI */
+/* Centered authentication prompt for unauthenticated users */
 .auth-required {
   display: flex;
   align-items: center;

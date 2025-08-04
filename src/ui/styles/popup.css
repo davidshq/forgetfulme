@@ -1,8 +1,21 @@
 /**
  * Popup-specific styles for the ForgetfulMe extension
+ * 
+ * This CSS file provides styling for the extension's popup interface, which includes:
+ * - Compact popup container with fixed dimensions and scrollable content
+ * - Authentication forms (sign in/sign up) with tab navigation
+ * - Current page information display with bookmark status
+ * - Bookmark creation form with validation styling
+ * - Recent bookmarks list with hover interactions
+ * - Loading states and configuration requirements
+ * - Message area positioning for toast notifications
+ * 
+ * The styles are optimized for the popup's constrained space and support
+ * responsive design, dark mode, high contrast, and reduced motion preferences.
  */
 
 /* Container Sizing */
+/* Fixed-width popup container with scrollable content */
 .container {
   width: 380px;
   min-height: 400px;
@@ -13,6 +26,7 @@
 }
 
 /* Header Styles */
+/* Popup title and description with bottom border separator */
 .popup-header {
   text-align: center;
   margin-bottom: calc(var(--pico-spacing) * 1.5);
@@ -33,6 +47,7 @@
 }
 
 /* User Info Header */
+/* Authenticated user email display with truncation */
 .user-info {
   display: flex;
   justify-content: space-between;
@@ -50,6 +65,7 @@
 }
 
 /* Authentication Section */
+/* Sign in/sign up forms with tab navigation */
 .auth-section {
   padding: 0;
 }
@@ -97,6 +113,7 @@
 }
 
 /* Configuration Required */
+/* Setup prompt when database connection is not configured */
 .config-required {
   text-align: center;
   padding: 2rem 1rem;
@@ -117,11 +134,13 @@
 }
 
 /* Main Content */
+/* Primary popup content area for authenticated users */
 .main-section {
   padding: 0;
 }
 
 /* Current Page Info */
+/* Active tab information display with bookmark status */
 .current-page {
   background-color: var(--background-color);
   border: 1px solid var(--muted-border-color);
@@ -172,6 +191,7 @@
 }
 
 /* Bookmark Form */
+/* New bookmark creation form with validation styling */
 .bookmark-form {
   margin-bottom: 1.5rem;
 }
@@ -207,6 +227,7 @@
 }
 
 /* Recent Bookmarks */
+/* Scrollable list of recently created bookmarks */
 .recent-bookmarks {
   border-top: 1px solid var(--muted-border-color);
   padding-top: 1.5rem;
@@ -296,6 +317,7 @@
 }
 
 /* Loading Section */
+/* Centered loading indicator for async operations */
 .loading-section {
   display: flex;
   flex-direction: column;
@@ -311,6 +333,7 @@
 }
 
 /* Message Area (popup positioning overrides) */
+/* Toast notification positioning for popup context */
 .message-area {
   --message-area-top: var(--pico-spacing);
   --message-area-left: var(--pico-spacing);
@@ -319,6 +342,7 @@
 }
 
 /* Dark mode specific adjustments */
+/* Enhanced styling for dark theme in popup context */
 @media (prefers-color-scheme: dark) {
   .current-page {
     background-color: var(--card-background-color);
@@ -340,6 +364,7 @@
 }
 
 /* High contrast mode support */
+/* Accessibility improvements for high contrast preference */
 @media (prefers-contrast: high) {
   .current-page,
   .recent-list li {
@@ -352,6 +377,7 @@
 }
 
 /* Reduced motion support */
+/* Accessibility: disable animations for motion sensitivity */
 @media (prefers-reduced-motion: reduce) {
   .tab-button,
   .recent-list li {

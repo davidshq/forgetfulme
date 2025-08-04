@@ -1,9 +1,23 @@
 /**
  * Shared styles for the ForgetfulMe extension
  * Using Pico CSS v2 as the base framework
+ * 
+ * This CSS file provides common styling components used across all extension pages:
+ * - Utility classes for common display and sizing needs
+ * - Loading states and spinners for async operations
+ * - Toast message system with different types (success, error, warning, info)
+ * - Empty state styling for when no data is available
+ * - Status indicators and tag components
+ * - Form enhancements and modal improvements
+ * - Responsive utilities and accessibility improvements
+ * - Dark mode support and print styles
+ * 
+ * These styles extend Pico CSS with custom components while maintaining
+ * consistency with the framework's design system.
  */
 
 /* Utility Classes */
+/* Common utility classes for display and sizing */
 .hidden {
   display: none !important;
 }
@@ -13,6 +27,7 @@
 }
 
 /* Loading States */
+/* Animated spinner and loading state containers */
 .loading-spinner {
   width: 2rem;
   height: 2rem;
@@ -45,6 +60,7 @@
 }
 
 /* Messages */
+/* Toast notification system with different message types */
 .message-area {
   position: fixed;
   top: var(--message-area-top, var(--pico-spacing));
@@ -99,6 +115,7 @@
 }
 
 /* Empty States */
+/* Styling for when no data is available to display */
 .empty-state {
   text-align: center;
   padding: var(--empty-state-padding, calc(var(--pico-spacing) * 3) calc(var(--pico-spacing) * 2));
@@ -117,6 +134,7 @@
 }
 
 /* Status Indicators */
+/* Visual status badges with colored dots */
 .status-indicator {
   display: inline-flex;
   align-items: center;
@@ -136,6 +154,7 @@
 }
 
 /* Tag Elements */
+/* Removable tag components for categorization */
 .tag {
   display: inline-block;
   padding: calc(var(--pico-spacing) * 0.125) calc(var(--pico-spacing) * 0.375);
@@ -161,6 +180,7 @@
 }
 
 /* Form Enhancements - Use Pico's built-in grid when possible */
+/* Responsive form layouts and action button styling */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -179,6 +199,7 @@
 }
 
 /* Modal Improvements - Use Pico spacing variables */
+/* Enhanced modal styling with consistent spacing */
 dialog {
   max-width: 500px;
   margin: auto;
@@ -221,6 +242,7 @@ dialog article {
 }
 
 /* Responsive Utilities */
+/* Mobile-first responsive adjustments */
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -242,6 +264,7 @@ dialog article {
 }
 
 /* Focus Improvements */
+/* Enhanced focus indicators for accessibility */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -251,6 +274,7 @@ textarea:focus-visible {
 }
 
 /* Dark Mode Support */
+/* Enhanced styling for dark theme preference */
 @media (prefers-color-scheme: dark) {
   .message.success {
     background-color: #1e3a2e;
@@ -278,6 +302,7 @@ textarea:focus-visible {
 }
 
 /* Accessibility Improvements */
+/* Disable animations for motion sensitivity */
 @media (prefers-reduced-motion: reduce) {
   .loading-spinner {
     animation: none;
@@ -289,6 +314,7 @@ textarea:focus-visible {
 }
 
 /* Print Styles */
+/* Hide interactive elements when printing */
 @media print {
   .message-area,
   .loading-spinner,
