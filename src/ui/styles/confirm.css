@@ -1,0 +1,165 @@
+/**
+ * Email confirmation page styles for the ForgetfulMe extension
+ * 
+ * This CSS file provides styling for the email confirmation page, including:
+ * - Centered confirmation layout with proper spacing
+ * - Loading, success, and error states with consistent styling
+ * - Icon styling for visual feedback
+ * - Responsive design for mobile and desktop
+ * - Consistent with Pico CSS framework variables
+ */
+
+/* Main Layout */
+/* Centered confirmation container with full viewport height */
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.confirmation-container {
+  text-align: center;
+  max-width: 500px;
+  padding: calc(var(--pico-spacing) * 2);
+}
+
+/* Loading State */
+/* Centered loading indicator with spinner animation */
+.loading-spinner {
+  margin: calc(var(--pico-spacing) * 2) auto;
+}
+
+/* Success State */
+/* Success confirmation with green checkmark icon */
+.success-icon {
+  font-size: 4rem;
+  color: var(--pico-ins-color);
+  margin-bottom: var(--pico-spacing);
+}
+
+/* Error State */
+/* Error state with red X icon for failed confirmations */
+.error-icon {
+  font-size: 4rem;
+  color: var(--pico-del-color);
+  margin-bottom: var(--pico-spacing);
+}
+
+/* Information Boxes */
+/* Styled information containers with consistent spacing */
+.confirmation-info-box {
+  margin: calc(var(--pico-spacing) * 2) 0;
+  padding: var(--pico-spacing);
+  background-color: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
+}
+
+.confirmation-info-box h3 {
+  margin-top: 0;
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+  color: var(--pico-color);
+}
+
+.confirmation-info-box p {
+  text-align: left;
+  margin: var(--pico-spacing) 0;
+  color: var(--pico-color);
+}
+
+.confirmation-info-box ol {
+  text-align: left;
+  margin: var(--pico-spacing) 0;
+  padding-left: calc(var(--pico-spacing) * 1.5);
+}
+
+.confirmation-info-box ol li {
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+  color: var(--pico-color);
+}
+
+.confirmation-info-box small {
+  color: var(--pico-muted-color);
+}
+
+/* Error Guidance Box */
+/* Specific styling for error guidance information */
+.error-guidance {
+  margin: calc(var(--pico-spacing) * 1.5) 0;
+  padding: var(--pico-spacing);
+  background-color: var(--pico-card-background-color);
+  border-radius: var(--pico-border-radius);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
+}
+
+.error-guidance h4 {
+  margin-top: 0;
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+  color: var(--pico-color);
+}
+
+.error-guidance ul {
+  text-align: left;
+  margin: calc(var(--pico-spacing) * 0.5) 0;
+  padding-left: calc(var(--pico-spacing) * 1.5);
+}
+
+.error-guidance ul li {
+  margin-bottom: calc(var(--pico-spacing) * 0.25);
+  color: var(--pico-color);
+}
+
+/* Action Buttons */
+/* Button group styling with consistent spacing */
+.confirmation-actions {
+  display: flex;
+  gap: var(--pico-spacing);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: calc(var(--pico-spacing) * 1.5);
+}
+
+.confirmation-actions button {
+  margin: 0;
+  min-width: 120px;
+}
+
+/* Responsive Design */
+/* Mobile-friendly adjustments */
+@media (max-width: 768px) {
+  .confirmation-container {
+    padding: var(--pico-spacing);
+    max-width: 90vw;
+  }
+
+  .confirmation-actions {
+    flex-direction: column;
+  }
+
+  .confirmation-actions button {
+    width: 100%;
+  }
+
+  .success-icon,
+  .error-icon {
+    font-size: 3rem;
+  }
+}
+
+/* High Contrast Support */
+/* Enhanced visibility for high contrast preference */
+@media (prefers-contrast: high) {
+  .confirmation-info-box,
+  .error-guidance {
+    border-width: calc(var(--pico-border-width) * 2);
+  }
+}
+
+/* Reduced Motion Support */
+/* Disable animations for motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+  }
+}

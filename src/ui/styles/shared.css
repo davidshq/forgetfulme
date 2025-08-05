@@ -80,27 +80,27 @@
 }
 
 .message.success {
-  background-color: var(--success-background-color, #d4edda);
-  color: var(--success-color, #155724);
-  border: 1px solid var(--success-border-color, #c3e6cb);
+  background-color: var(--pico-ins-background-color);
+  color: var(--pico-ins-color);
+  border: var(--pico-border-width) solid var(--pico-ins-color);
 }
 
 .message.error {
-  background-color: var(--error-background-color, #f8d7da);
-  color: var(--error-color, #721c24);
-  border: 1px solid var(--error-border-color, #f5c6cb);
+  background-color: var(--pico-del-background-color);
+  color: var(--pico-del-color);
+  border: var(--pico-border-width) solid var(--pico-del-color);
 }
 
 .message.warning {
-  background-color: var(--warning-background-color, #fff3cd);
-  color: var(--warning-color, #856404);
-  border: 1px solid var(--warning-border-color, #ffeaa7);
+  background-color: var(--pico-mark-background-color);
+  color: var(--pico-mark-color);
+  border: var(--pico-border-width) solid var(--pico-mark-color);
 }
 
 .message.info {
-  background-color: var(--info-background-color, #d1ecf1);
-  color: var(--info-color, #0c5460);
-  border: 1px solid var(--info-border-color, #bee5eb);
+  background-color: var(--pico-code-background-color);
+  color: var(--pico-code-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
 }
 
 @keyframes slideIn {
@@ -159,17 +159,18 @@
   display: inline-block;
   padding: calc(var(--pico-spacing) * 0.125) calc(var(--pico-spacing) * 0.375);
   margin: calc(var(--pico-spacing) * 0.125);
-  background-color: var(--pico-muted-background-color);
-  color: var(--pico-muted-color);
+  background-color: var(--pico-code-background-color);
+  color: var(--pico-code-color);
   border-radius: var(--pico-border-radius);
   font-size: 0.75rem;
   text-decoration: none;
-  border: 1px solid var(--pico-muted-border-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
 }
 
 .tag:hover {
   background-color: var(--pico-secondary-background);
   color: var(--pico-secondary-inverse);
+  border-color: var(--pico-secondary-border);
 }
 
 .tag-list {
@@ -269,37 +270,12 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline: calc(var(--pico-outline-width) * 2) solid var(--pico-primary);
+  outline-offset: calc(var(--pico-outline-width));
 }
 
 /* Dark Mode Support */
-/* Enhanced styling for dark theme preference */
-@media (prefers-color-scheme: dark) {
-  .message.success {
-    background-color: #1e3a2e;
-    color: #a3d977;
-    border-color: #2d5a3d;
-  }
-
-  .message.error {
-    background-color: #3a1e1e;
-    color: #ff7b7b;
-    border-color: #5a2d2d;
-  }
-
-  .message.warning {
-    background-color: #3a2e1e;
-    color: #ffd700;
-    border-color: #5a3d2d;
-  }
-
-  .message.info {
-    background-color: #1e2e3a;
-    color: #77b3d9;
-    border-color: #2d3d5a;
-  }
-}
+/* Pico CSS variables automatically handle dark mode - no custom overrides needed */
 
 /* Accessibility Improvements */
 /* Disable animations for motion sensitivity */

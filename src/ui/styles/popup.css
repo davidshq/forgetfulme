@@ -116,21 +116,21 @@
 /* Setup prompt when database connection is not configured */
 .config-required {
   text-align: center;
-  padding: 2rem 1rem;
-  background-color: var(--muted-background-color);
-  border-radius: var(--border-radius);
-  border: 1px solid var(--muted-border-color);
+  padding: calc(var(--pico-spacing) * 2) var(--pico-spacing);
+  background-color: var(--pico-card-sectioning-background-color);
+  border-radius: var(--pico-border-radius);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
 }
 
 .config-required h3 {
-  margin: 0 0 0.5rem 0;
-  color: var(--color);
+  margin: 0 0 calc(var(--pico-spacing) * 0.5) 0;
+  color: var(--pico-color);
 }
 
 .config-required p {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 1.5) 0;
   font-size: 0.875rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* Main Content */
@@ -142,11 +142,11 @@
 /* Current Page Info */
 /* Active tab information display with bookmark status */
 .current-page {
-  background-color: var(--background-color);
-  border: 1px solid var(--muted-border-color);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  background-color: var(--pico-card-background-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--pico-spacing);
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
 }
 
 .page-info {
@@ -154,18 +154,18 @@
 }
 
 .page-title {
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 0.25) 0;
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--color);
+  color: var(--pico-color);
   word-break: break-word;
 }
 
 .page-url {
   margin: 0;
   font-size: 0.75rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
   word-break: break-all;
   line-height: 1.2;
 }
@@ -183,11 +183,11 @@
 }
 
 .bookmark-status.exists {
-  color: var(--primary);
+  color: var(--pico-primary);
 }
 
 .bookmark-status.new {
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* Bookmark Form */
@@ -205,12 +205,12 @@
 .bookmark-form legend {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--color);
+  margin-bottom: var(--pico-spacing);
+  color: var(--pico-color);
 }
 
 .bookmark-form label {
-  margin-bottom: 1rem;
+  margin-bottom: var(--pico-spacing);
 }
 
 .bookmark-form input,
@@ -221,45 +221,45 @@
 
 .bookmark-form small {
   display: block;
-  margin-top: 0.25rem;
+  margin-top: calc(var(--pico-spacing) * 0.25);
   font-size: 0.75rem;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 /* Recent Bookmarks */
 /* Scrollable list of recently created bookmarks */
 .recent-bookmarks {
-  border-top: 1px solid var(--muted-border-color);
-  padding-top: 1.5rem;
+  border-top: var(--pico-border-width) solid var(--pico-muted-border-color);
+  padding-top: calc(var(--pico-spacing) * 1.5);
 }
 
 .recent-bookmarks h4 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 var(--pico-spacing) 0;
   font-size: 1rem;
-  color: var(--color);
+  color: var(--pico-color);
 }
 
 .recent-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 1rem 0;
+  margin: 0 0 var(--pico-spacing) 0;
   max-height: 200px;
   overflow-y: auto;
 }
 
 .recent-list li {
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  background-color: var(--background-color);
-  border: 1px solid var(--muted-border-color);
-  border-radius: var(--border-radius);
+  padding: calc(var(--pico-spacing) * 0.75);
+  margin-bottom: calc(var(--pico-spacing) * 0.5);
+  background-color: var(--pico-card-background-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .recent-list li:hover {
-  background-color: var(--muted-background-color);
-  border-color: var(--primary);
+  background-color: var(--pico-dropdown-hover-background-color);
+  border-color: var(--pico-primary);
 }
 
 .recent-list li.loading {
@@ -270,23 +270,23 @@
 }
 
 .recent-list li.loading:hover {
-  background-color: var(--background-color);
-  border-color: var(--muted-border-color);
+  background-color: var(--pico-card-background-color);
+  border-color: var(--pico-muted-border-color);
 }
 
 .recent-item-title {
   font-size: 0.875rem;
   font-weight: 500;
-  margin: 0 0 0.25rem 0;
-  color: var(--color);
+  margin: 0 0 calc(var(--pico-spacing) * 0.25) 0;
+  color: var(--pico-color);
   line-height: 1.3;
   word-break: break-word;
 }
 
 .recent-item-url {
   font-size: 0.75rem;
-  color: var(--muted-color);
-  margin: 0 0 0.5rem 0;
+  color: var(--pico-muted-color);
+  margin: 0 0 calc(var(--pico-spacing) * 0.5) 0;
   word-break: break-all;
   line-height: 1.2;
 }
@@ -305,7 +305,7 @@
 }
 
 .recent-item-date {
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 .recent-actions {
@@ -324,11 +324,11 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: var(--muted-color);
+  color: var(--pico-muted-color);
 }
 
 .loading-section p {
-  margin-top: 1rem;
+  margin-top: var(--pico-spacing);
   font-size: 0.875rem;
 }
 
@@ -341,27 +341,7 @@
   --message-area-max-width: none;
 }
 
-/* Dark mode specific adjustments */
-/* Enhanced styling for dark theme in popup context */
-@media (prefers-color-scheme: dark) {
-  .current-page {
-    background-color: var(--card-background-color);
-  }
-
-  .recent-list li {
-    background-color: var(--card-background-color);
-  }
-
-  .recent-list li:hover {
-    background-color: var(--card-sectionning-background-color);
-  }
-
-  /* Ensure tab visibility in dark mode */
-  .tab-button:not(.active) {
-    background-color: var(--card-background-color);
-    color: var(--color);
-  }
-}
+/* Dark mode handled by Pico CSS variables automatically */
 
 /* High contrast mode support */
 /* Accessibility improvements for high contrast preference */

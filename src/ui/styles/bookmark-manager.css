@@ -279,9 +279,9 @@
 }
 
 .header-content h1 {
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 0.5) 0;
   font-size: 2rem;
-  color: var(--primary);
+  color: var(--pico-primary);
 }
 
 .header-stats {
@@ -310,17 +310,17 @@
 /* Simplified Filters Section */
 /* Search and filter controls in card layout */
 .filters-section {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
+  padding: var(--pico-spacing);
   background-color: var(--pico-card-background-color);
-  border: 1px solid var(--pico-muted-border-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
   border-radius: var(--pico-border-radius);
 }
 
 .filters-grid {
   display: grid;
   grid-template-columns: 1fr 1fr auto;
-  gap: 1rem;
+  gap: var(--pico-spacing);
   align-items: end;
 }
 
@@ -337,7 +337,7 @@
 
 .filter-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
 }
 
 .filter-actions button {
@@ -352,12 +352,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding: 1rem;
+  margin-bottom: var(--pico-spacing);
+  padding: var(--pico-spacing);
   background-color: var(--pico-card-sectioning-background-color);
   border-radius: var(--pico-border-radius);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--pico-spacing);
 }
 
 .toolbar-left,
@@ -365,13 +365,13 @@
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--pico-spacing);
 }
 
 .toolbar-left label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
   margin: 0;
   font-size: 0.875rem;
   color: var(--pico-color);
@@ -383,14 +383,14 @@
 
 .selected-count {
   font-size: 0.875rem;
-  color: var(--primary);
+  color: var(--pico-primary);
   font-weight: 600;
 }
 
 .toolbar-center label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
   margin: 0;
   font-size: 0.875rem;
   color: var(--pico-color);
@@ -403,7 +403,7 @@
 
 .bulk-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: calc(var(--pico-spacing) * 0.5);
   align-items: center;
 }
 
@@ -415,7 +415,7 @@
 /* Bookmark Grid Container */
 /* Data grid container with minimum height */
 .bookmark-list-container {
-  margin-bottom: 2rem;
+  margin-bottom: calc(var(--pico-spacing) * 2);
 }
 
 .bookmark-grid {
@@ -437,7 +437,7 @@
 .edit-modal article,
 .delete-modal article {
   max-width: 600px;
-  margin: 2rem auto;
+  margin: calc(var(--pico-spacing) * 2) auto;
 }
 
 .edit-modal header,
@@ -445,7 +445,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
 }
 
 .edit-modal h3,
@@ -462,7 +462,7 @@
 }
 
 .edit-form label {
-  margin-bottom: 1rem;
+  margin-bottom: var(--pico-spacing);
   display: block;
 }
 
@@ -475,10 +475,10 @@
 /* Form validation styles */
 /* Error display and field validation styling */
 .form-errors {
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  padding: var(--pico-spacing);
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
   background-color: var(--pico-del-background-color);
-  border: 1px solid var(--pico-del-color);
+  border: var(--pico-border-width) solid var(--pico-del-color);
   border-radius: var(--pico-border-radius);
   color: var(--pico-del-color);
   font-size: 0.875rem;
@@ -486,7 +486,7 @@
 
 .field-error {
   display: block;
-  margin-top: 0.5rem;
+  margin-top: calc(var(--pico-spacing) * 0.5);
   font-size: 0.875rem;
   color: var(--pico-del-color);
   line-height: 1.3;
@@ -525,7 +525,7 @@
 /* Form field help text and descriptions */
 .edit-form small {
   display: block;
-  margin-top: 0.25rem;
+  margin-top: calc(var(--pico-spacing) * 0.25);
   font-size: 0.75rem;
   color: var(--pico-muted-color);
   line-height: 1.3;
@@ -566,19 +566,19 @@
 
 @media (max-width: 768px) {
   .container-fluid {
-    padding: 0.5rem;
+    padding: calc(var(--pico-spacing) * 0.5);
   }
 
   .manager-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: var(--pico-spacing);
   }
 
   .header-stats {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: calc(var(--pico-spacing) * 0.5);
   }
 
   .search-grid {
@@ -641,24 +641,24 @@
   }
 
   .bookmark-item {
-    padding: 1rem;
+    padding: var(--pico-spacing);
   }
 
   .bookmark-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: calc(var(--pico-spacing) * 0.5);
   }
 
   .bookmark-meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: calc(var(--pico-spacing) * 0.5);
   }
 
   .bookmark-dates {
     flex-direction: column;
-    gap: 0.25rem;
+    gap: calc(var(--pico-spacing) * 0.25);
   }
 
   .bookmark-actions {
@@ -765,7 +765,7 @@
   .bookmark-item {
     border: var(--pico-border-width) solid var(--pico-muted-border-color);
     page-break-inside: avoid;
-    margin-bottom: 1rem;
+    margin-bottom: var(--pico-spacing);
   }
 
   .bookmark-title a,
@@ -787,26 +787,26 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
-  padding: 2rem;
+  padding: calc(var(--pico-spacing) * 2);
 }
 
 .auth-required-content {
   text-align: center;
   max-width: 500px;
-  padding: 2rem;
+  padding: calc(var(--pico-spacing) * 2);
   background-color: var(--pico-card-background-color);
-  border: 1px solid var(--pico-muted-border-color);
+  border: var(--pico-border-width) solid var(--pico-muted-border-color);
   border-radius: var(--pico-border-radius);
 }
 
 .auth-required-content h3 {
-  margin: 0 0 1rem 0;
+  margin: 0 0 var(--pico-spacing) 0;
   font-size: 1.5rem;
   color: var(--pico-color);
 }
 
 .auth-required-content p {
-  margin: 0 0 2rem 0;
+  margin: 0 0 calc(var(--pico-spacing) * 2) 0;
   font-size: 1rem;
   color: var(--pico-muted-color);
   line-height: 1.5;
@@ -814,7 +814,7 @@
 
 .auth-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--pico-spacing);
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -828,11 +828,11 @@
 @media (max-width: 768px) {
   .auth-required {
     min-height: 300px;
-    padding: 1rem;
+    padding: var(--pico-spacing);
   }
 
   .auth-required-content {
-    padding: 1.5rem;
+    padding: calc(var(--pico-spacing) * 1.5);
   }
 
   .auth-actions {
