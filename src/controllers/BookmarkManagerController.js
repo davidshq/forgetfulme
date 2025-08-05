@@ -91,7 +91,17 @@ export class BookmarkManagerController extends BaseController {
 
     // Create simple grid
     this.grid = new window.gridjs.Grid({
-      columns: ['Title', 'URL', 'Status', 'Tags', 'Date'],
+      columns: [
+        'Title',
+        {
+          name: 'URL',
+          formatter: cell =>
+            window.gridjs.html(`<div class="bookmark-url" title="${cell}">${cell}</div>`)
+        },
+        'Status',
+        'Tags',
+        'Date'
+      ],
       data: async () => {
         try {
           const result = await this.bookmarkService.searchBookmarks(this.currentSearch);

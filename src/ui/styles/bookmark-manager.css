@@ -34,6 +34,39 @@
   background-color: var(--pico-card-background-color);
   color: var(--pico-color);
   border: none;
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Column width constraints to prevent horizontal scrolling */
+.gridjs-th:nth-child(1),
+.gridjs-td:nth-child(1) {
+  width: 25%;
+  min-width: 120px;
+}
+
+.gridjs-th:nth-child(2),
+.gridjs-td:nth-child(2) {
+  width: 30%;
+  min-width: 150px;
+}
+
+.gridjs-th:nth-child(3),
+.gridjs-td:nth-child(3) {
+  width: 15%;
+  min-width: 80px;
+}
+
+.gridjs-th:nth-child(4),
+.gridjs-td:nth-child(4) {
+  width: 20%;
+  min-width: 100px;
+}
+
+.gridjs-th:nth-child(5),
+.gridjs-td:nth-child(5) {
+  width: 10%;
+  min-width: 80px;
 }
 
 .gridjs-th {
@@ -212,15 +245,17 @@
 }
 
 /* Bookmark URL */
-/* Truncated URL display with ellipsis */
+/* Truncated URL display with ellipsis to prevent horizontal scrolling */
 .bookmark-url {
   color: var(--pico-muted-color);
   font-size: 0.813rem;
-  display: inline-block;
-  max-width: 300px;
+  display: block;
+  max-width: 250px;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  word-break: break-all;
 }
 
 /* Layout - use Pico spacing */
@@ -567,6 +602,42 @@
   .toolbar-center,
   .toolbar-right {
     justify-content: space-between;
+  }
+
+  /* Mobile responsive adjustments for grid columns */
+  .gridjs-th:nth-child(1),
+  .gridjs-td:nth-child(1) {
+    width: 30%;
+    min-width: 100px;
+  }
+
+  .gridjs-th:nth-child(2),
+  .gridjs-td:nth-child(2) {
+    width: 35%;
+    min-width: 120px;
+  }
+
+  .gridjs-th:nth-child(3),
+  .gridjs-td:nth-child(3) {
+    width: 15%;
+    min-width: 60px;
+  }
+
+  .gridjs-th:nth-child(4),
+  .gridjs-td:nth-child(4) {
+    width: 15%;
+    min-width: 60px;
+  }
+
+  .gridjs-th:nth-child(5),
+  .gridjs-td:nth-child(5) {
+    width: 5%;
+    min-width: 50px;
+  }
+
+  /* Adjust URL truncation for mobile */
+  .bookmark-url {
+    max-width: 150px;
   }
 
   .bookmark-item {
