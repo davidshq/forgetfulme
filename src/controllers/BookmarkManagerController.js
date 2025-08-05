@@ -101,7 +101,7 @@ export class BookmarkManagerController extends BaseController {
           return this.bookmarks.map(bookmark => [
             bookmark.title || 'Untitled',
             bookmark.url,
-            this.getStatusName(bookmark.status_type),
+            this.getStatusName(bookmark.status),
             (bookmark.tags || []).join(', '),
             new Date(bookmark.created_at).toLocaleDateString()
           ]);
