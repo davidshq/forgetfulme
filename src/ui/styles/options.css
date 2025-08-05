@@ -46,20 +46,15 @@
 /* Navigation */
 /* Tab-style navigation between options sections with horizontal scroll */
 .options-nav {
-  display: flex;
-  gap: calc(var(--pico-spacing) * 0.5);
+  /* Use shared tab navigation styling from shared.css */
   margin-bottom: calc(var(--pico-spacing) * 2);
   overflow-x: auto;
 }
 
 .nav-button {
-  flex: 1;
-  margin: 0;
+  /* Additional nav-specific styling for wider padding */
   padding: calc(var(--pico-spacing) * 0.75) calc(var(--pico-spacing) * 1.5);
-  font-size: 0.875rem;
-  white-space: nowrap;
   flex-shrink: 0;
-  border-radius: var(--pico-border-radius);
 }
 
 /* Use Pico's button classes for active/inactive state */

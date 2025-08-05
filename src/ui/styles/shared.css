@@ -180,6 +180,28 @@
   margin: calc(var(--pico-spacing) * 0.25) 0;
 }
 
+/* Tab Navigation Components */
+/* Unified tab styling for consistent navigation across all pages */
+.tab-navigation {
+  display: flex;
+  gap: calc(var(--pico-spacing) * 0.5);
+  margin-bottom: var(--pico-spacing);
+}
+
+.tab-button {
+  flex: 1;
+  margin: 0;
+  padding: calc(var(--pico-spacing) * 0.75) var(--pico-spacing);
+  font-size: 0.875rem;
+  white-space: nowrap;
+  border-radius: var(--pico-border-radius);
+}
+
+/* Active state uses default Pico button styling, inactive uses secondary */
+.tab-button:not(.active) {
+  /* Handled by .secondary class in HTML */
+}
+
 /* Form Enhancements - Use Pico's built-in grid when possible */
 /* Responsive form layouts and action button styling */
 .form-grid {

@@ -71,19 +71,10 @@
 }
 
 .auth-tabs {
-  display: flex;
-  gap: calc(var(--pico-spacing) * 0.5);
-  margin-bottom: var(--pico-spacing);
+  /* Use shared tab navigation styling from shared.css */
 }
 
-.tab-button {
-  flex: 1;
-  margin: 0;
-  padding: calc(var(--pico-spacing) * 0.5) var(--pico-spacing);
-  font-size: 0.875rem;
-}
-
-/* Tab styling uses Pico's button classes (.secondary for inactive, default for active) */
+/* Auth tabs now use unified .tab-navigation and .tab-button classes */
 
 .auth-form {
   margin-bottom: var(--pico-spacing);
