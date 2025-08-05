@@ -49,32 +49,21 @@
   display: flex;
   gap: calc(var(--pico-spacing) * 0.5);
   margin-bottom: calc(var(--pico-spacing) * 2);
-  border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
   overflow-x: auto;
 }
 
 .nav-button {
-  background: none;
-  border: none;
-  padding: var(--pico-spacing) calc(var(--pico-spacing) * 1.5);
-  cursor: pointer;
+  flex: 1;
+  margin: 0;
+  padding: calc(var(--pico-spacing) * 0.75) calc(var(--pico-spacing) * 1.5);
   font-size: 0.875rem;
-  color: var(--pico-muted-color);
-  border-bottom: calc(var(--pico-border-width) * 2) solid transparent;
-  transition: var(--pico-transition);
   white-space: nowrap;
   flex-shrink: 0;
+  border-radius: var(--pico-border-radius);
 }
 
-.nav-button:hover {
-  color: var(--pico-color);
-  background-color: var(--pico-muted-background-color);
-}
-
-.nav-button.active {
-  color: var(--pico-primary);
-  border-bottom-color: var(--pico-primary);
-}
+/* Use Pico's button classes for active/inactive state */
+/* Active buttons use default styling, inactive use secondary */
 
 /* Sections */
 /* Individual content sections with fade-in animation */
@@ -508,10 +497,6 @@
 /* High contrast mode */
 /* Accessibility improvements for high contrast preference */
 @media (prefers-contrast: high) {
-  .nav-button.active {
-    border-bottom-width: 3px;
-  }
-
   .status-type-item,
   .export-section,
   .import-section,

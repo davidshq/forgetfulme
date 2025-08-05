@@ -177,9 +177,9 @@ export class OptionsController extends BaseController {
     // Update navigation
     $$('.nav-button').forEach(button => {
       if (button.id === `nav-${sectionId}`) {
-        button.classList.add('active');
+        button.classList.remove('secondary');
       } else {
-        button.classList.remove('active');
+        button.classList.add('secondary');
       }
     });
 

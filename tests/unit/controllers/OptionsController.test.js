@@ -263,8 +263,8 @@ describe('OptionsController', () => {
       // The hide() function uses 'hidden' class, not style.display
       expect(statusTypesSection.classList.contains('hidden')).toBe(false);
       expect(databaseSection.classList.contains('hidden')).toBe(true);
-      expect(navStatusTypes.classList.contains('active')).toBe(true);
-      expect(navDatabase.classList.contains('active')).toBe(false);
+      expect(navStatusTypes.classList.contains('secondary')).toBe(false);
+      expect(navDatabase.classList.contains('secondary')).toBe(true);
       expect(controller.currentSection).toBe('status-types');
     });
   });
