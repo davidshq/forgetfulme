@@ -197,11 +197,6 @@
   border-radius: var(--pico-border-radius);
 }
 
-/* Active state uses default Pico button styling, inactive uses secondary */
-.tab-button:not(.active) {
-  /* Handled by .secondary class in HTML */
-}
-
 /* Form Enhancements - Use Pico's built-in grid when possible */
 /* Responsive form layouts and action button styling */
 .form-grid {
@@ -221,16 +216,55 @@
   margin: 0;
 }
 
+/* Form Validation Errors */
+/* Standardized error display and field validation styling */
+.form-errors {
+  padding: var(--pico-spacing, 1rem);
+  margin-bottom: calc(var(--pico-spacing, 1rem) * 1.5);
+  background-color: var(--pico-mark-background-color);
+  border: var(--pico-border-width, 1px) solid var(--pico-form-element-invalid-border-color);
+  border-radius: var(--pico-border-radius, 0.5rem);
+  color: var(--pico-del-color, #dc3545);
+  font-size: 0.875rem;
+}
+
+.field-error {
+  display: block;
+  margin-top: calc(var(--pico-spacing, 1rem) * 0.5);
+  font-size: 0.875rem;
+  color: var(--pico-del-color, #dc3545);
+  line-height: 1.3;
+}
+
+.field-error:not(.hidden) {
+  display: block;
+}
+
+/* Legacy support for .error class (deprecated - use aria-invalid="true") */
+input.error,
+select.error,
+textarea.error {
+  border-color: var(--pico-form-element-invalid-border-color);
+  background-color: var(--pico-mark-background-color);
+}
+
+input.error:focus,
+select.error:focus,
+textarea.error:focus {
+  border-color: var(--pico-form-element-invalid-border-color);
+  box-shadow: 0 0 0 var(--pico-outline-width, 0.2rem) var(--pico-form-element-invalid-border-color);
+}
+
 /* Modal Improvements - Use Pico spacing variables */
 /* Enhanced modal styling with consistent spacing */
 dialog {
-  max-width: 500px;
+  max-width: 600px;
   margin: auto;
 }
 
 dialog article {
   margin: 0;
-  max-width: 600px;
+  width: 100%;
 }
 
 /* Consistent modal header styling */
