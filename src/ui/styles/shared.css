@@ -230,38 +230,58 @@ dialog {
 
 dialog article {
   margin: 0;
+  max-width: 600px;
 }
 
+/* Consistent modal header styling */
+dialog header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: calc(var(--pico-spacing) * 1.5);
+}
+
+dialog header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--pico-color);
+}
+
+/* Standardized modal actions */
 .modal-actions {
   display: flex;
-  gap: var(--modal-actions-gap, calc(var(--pico-spacing) * 0.5));
+  gap: var(--modal-actions-gap, var(--pico-spacing));
   justify-content: flex-end;
   margin-top: calc(var(--pico-spacing) * 1.5);
-  padding-top: var(--modal-actions-padding-top, 0);
-  border-top: var(--modal-actions-border-top, none);
+  padding-top: var(--modal-actions-padding-top, var(--pico-spacing));
+  border-top: var(
+    --modal-actions-border-top,
+    var(--pico-border-width) solid var(--pico-muted-border-color)
+  );
 }
 
 .modal-actions button {
   margin: 0;
-  min-width: var(--modal-actions-button-min-width, auto);
+  min-width: var(--modal-actions-button-min-width, 100px);
 }
 
+/* Standardized close button */
 .close-button {
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  padding: var(--close-button-padding, 0);
-  margin: var(--close-button-margin, 0);
+  padding: var(--close-button-padding, calc(var(--pico-spacing) * 0.25));
+  margin: var(--close-button-margin, calc(var(--pico-spacing) * -0.25));
   color: var(--pico-muted-color);
   line-height: 1;
-  border-radius: var(--close-button-border-radius, 0);
-  transition: var(--close-button-transition, none);
+  border-radius: var(--close-button-border-radius, var(--pico-border-radius));
+  transition: var(--close-button-transition, color 0.2s ease);
 }
 
 .close-button:hover {
   color: var(--pico-color);
-  background-color: var(--close-button-hover-bg, transparent);
+  background-color: var(--close-button-hover-bg, var(--pico-dropdown-hover-background-color));
 }
 
 /* Responsive Utilities */

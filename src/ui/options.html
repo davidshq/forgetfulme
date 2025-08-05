@@ -439,14 +439,16 @@
       <dialog id="edit-status-modal" class="edit-status-modal" data-testid="edit-status-modal">
         <article>
           <header>
-            <button
-              aria-label="Close"
-              rel="prev"
-              id="close-status-modal"
-              class="close-modal"
-              data-testid="close-status-modal"
-            ></button>
             <h3>Edit Status Type</h3>
+            <button
+              type="button"
+              id="close-status-modal"
+              class="close-button"
+              aria-label="Close"
+              data-testid="close-status-modal"
+            >
+              &times;
+            </button>
           </header>
 
           <form id="edit-status-form" data-testid="edit-status-form">
