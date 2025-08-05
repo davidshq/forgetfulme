@@ -4,6 +4,8 @@
 
 import { BaseController } from './BaseController.js';
 import { $, show, hide } from '../utils/dom.js';
+import { loadHTMLComponent } from '../utils/componentLoader.js';
+import { AuthModalComponent } from '../ui/components/AuthModalComponent.js';
 
 /**
  * Controller for the bookmark manager page with Grid.js
@@ -28,6 +30,9 @@ export class BookmarkManagerController extends BaseController {
     this.bookmarks = [];
     this.statusTypes = [];
     this.currentSearch = {};
+    this.authModal = null;
+    this.authModalLoading = false; // Prevent concurrent initialization
+    this.eventListenersSetup = false;
   }
 
   /**
@@ -41,13 +46,17 @@ export class BookmarkManagerController extends BaseController {
       // Initialize auth service first
       const isAuthInitialized = await this.authService.initialize();
       if (!isAuthInitialized) {
-        this.showAuthRequired();
+        // Hide loading state and show auth modal
+        hide($('#loading-state'));
+        await this.showAuthModal('signin');
         return;
       }
 
       // Check authentication after initialization
       if (!this.authService.isAuthenticated()) {
-        this.showAuthRequired();
+        // Hide loading state and show auth modal
+        hide($('#loading-state'));
+        await this.showAuthModal('signin');
         return;
       }
 
@@ -57,8 +66,11 @@ export class BookmarkManagerController extends BaseController {
       // Load status types
       this.statusTypes = await this.configService.getStatusTypes();
 
-      // Set up the UI
-      this.setupEventListeners();
+      // Set up the UI (only once)
+      if (!this.eventListenersSetup) {
+        this.setupEventListeners();
+        this.eventListenersSetup = true;
+      }
       this.updateStatusFilters();
       await this.updateUserInfo();
 
@@ -87,7 +99,7 @@ export class BookmarkManagerController extends BaseController {
     // Show the container and clear any existing content
     show(container);
     hide($('#loading-state'));
-    container.innerHTML = ''; // Clear the container for Grid.js
+    container.replaceChildren(); // Clear the container for Grid.js safely
 
     // Create simple grid
     this.grid = new window.gridjs.Grid({
@@ -172,7 +184,7 @@ export class BookmarkManagerController extends BaseController {
       refreshBtn.addEventListener('click', () => this.refreshBookmarks());
     }
 
-    // Settings button
+    // Settings button - always goes to options page
     const settingsBtn = $('#open-options');
     if (settingsBtn) {
       settingsBtn.addEventListener('click', () => {
@@ -287,9 +299,92 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
-   * Show authentication required message
+   * Lazy-load and show the authentication modal
+   * @param {string} defaultTab - Default tab to show ('signin' or 'signup')
+   * @returns {Promise<void>}
+   * @private
    */
-  showAuthRequired() {
+  async showAuthModal(defaultTab = 'signin') {
+    let initializationFailed = false;
+
+    try {
+      // Only load and initialize if not already done or in progress
+      if (!this.authModal && !this.authModalLoading) {
+        this.authModalLoading = true;
+        initializationFailed = true; // We're creating a new modal
+
+        // Load auth modal component
+        const componentUrl = chrome.runtime.getURL('src/ui/components/auth-modal.html');
+        const loadSuccess = await loadHTMLComponent(componentUrl, '#auth-modal-container');
+
+        if (!loadSuccess) {
+          console.error('Failed to load auth modal component');
+          this.authModalLoading = false; // Clear loading flag on failure
+          this.showFallbackAuthMessage();
+          return;
+        }
+
+        // Initialize auth modal
+        this.authModal = new AuthModalComponent(
+          this.authService,
+          this.configService,
+          this.errorService,
+          this.validationService
+        );
+
+        await this.authModal.initialize(() => this.onAuthSuccess());
+
+        // Verify initialization succeeded
+        if (!this.authModal.isInitialized) {
+          throw new Error('Auth modal initialization failed');
+        }
+
+        initializationFailed = false; // Initialization succeeded
+        this.authModalLoading = false; // Clear loading flag
+      } else if (this.authModalLoading) {
+        // Another call is already loading, wait for it to complete
+        console.warn('Auth modal is already loading, waiting...');
+        // Poll until loading is complete or fails
+        while (this.authModalLoading && !this.authModal) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        // If still no modal after loading, something went wrong
+        if (!this.authModal) {
+          console.error('Auth modal loading failed from concurrent call');
+          this.showFallbackAuthMessage();
+          return;
+        }
+      }
+
+      // Show the modal
+      await this.authModal.show(defaultTab);
+    } catch (error) {
+      console.error('Error showing auth modal:', error);
+
+      // Only clean up if initialization failed, not if show() failed
+      if (initializationFailed && this.authModal) {
+        try {
+          this.authModal.destroy();
+        } catch (destroyError) {
+          console.error('Error destroying failed auth modal:', destroyError);
+        }
+        this.authModal = null;
+      }
+
+      // Always clear loading flag on error
+      if (initializationFailed) {
+        this.authModalLoading = false;
+      }
+
+      this.showFallbackAuthMessage();
+    }
+  }
+
+  /**
+   * Show fallback authentication message when modal fails to load
+   * @private
+   */
+  showFallbackAuthMessage() {
     const container = $('.bookmark-list-container');
     if (!container) return;
 
@@ -297,24 +392,117 @@ export class BookmarkManagerController extends BaseController {
     hide($('#bookmark-grid'));
     show(container);
 
-    container.innerHTML = `
-      <div class="auth-required" style="text-align: center; padding: 3rem;">
-        <h3>Authentication Required</h3>
-        <p>Please sign in to access your bookmarks.</p>
-        <button type="button" class="secondary" onclick="chrome.runtime.openOptionsPage()">
-          Open Settings
-        </button>
-      </div>
-    `;
+    // Create elements safely without innerHTML
+    const authDiv = document.createElement('div');
+    authDiv.className = 'auth-required';
+    authDiv.style.cssText = 'text-align: center; padding: 3rem;';
+
+    const title = document.createElement('h3');
+    title.textContent = 'Authentication Required';
+
+    const message = document.createElement('p');
+    message.textContent = 'Please sign in to access your bookmarks.';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'secondary';
+    button.textContent = 'Open Settings';
+    button.addEventListener('click', () => chrome.runtime.openOptionsPage());
+
+    authDiv.appendChild(title);
+    authDiv.appendChild(message);
+    authDiv.appendChild(button);
+
+    container.replaceChildren(authDiv);
+  }
+
+  /**
+   * Show authentication required message
+   * @deprecated Use showAuthModal instead
+   */
+  showAuthRequired() {
+    // This method is deprecated - we now show the auth modal directly
+    console.warn('showAuthRequired is deprecated - showing auth modal instead');
+    if (this.authModal) {
+      this.authModal.show('signin');
+    } else {
+      this.showAuthModal('signin');
+    }
+  }
+
+  /**
+   * Handle successful authentication
+   */
+  async onAuthSuccess() {
+    console.log('Authentication successful, reinitializing...');
+
+    try {
+      // Verify authentication state before proceeding
+      if (!this.authService.isAuthenticated()) {
+        console.error('Auth success callback called but user is not authenticated');
+        return;
+      }
+
+      // Hide the auth modal if it exists
+      if (this.authModal) {
+        this.authModal.hide();
+      }
+
+      // Clear any existing error states
+      const messageArea = $('#message-area');
+      if (messageArea) {
+        messageArea.replaceChildren(); // Safer than innerHTML = ''
+      }
+
+      // Show loading state while reinitializing
+      const loadingState = $('#loading-state');
+      if (loadingState) {
+        show(loadingState);
+      }
+
+      // Try to reinitialize services without reloading
+      await this.bookmarkService.initialize();
+      this.statusTypes = await this.configService.getStatusTypes();
+      // Don't setup event listeners again - they're already set up
+      this.updateStatusFilters();
+      await this.updateUserInfo();
+      await this.initializeGrid();
+
+      console.log('BookmarkManagerController: Reinitialization complete');
+    } catch (error) {
+      console.error('Error during authentication success handling:', error);
+      // Only reload as last resort if reinitialize fails
+      console.log('Reinitialize failed, reloading page...');
+      window.location.reload();
+    }
   }
 
   /**
    * Cleanup resources
    */
   destroy() {
-    if (this.grid) {
-      this.grid.destroy();
-      this.grid = null;
+    try {
+      // Clean up Grid.js instance
+      if (this.grid) {
+        this.grid.destroy();
+        this.grid = null;
+      }
+
+      // Clean up auth modal and its event listeners
+      if (this.authModal) {
+        // If AuthModalComponent has a destroy method, call it
+        if (typeof this.authModal.destroy === 'function') {
+          this.authModal.destroy();
+        }
+        this.authModal = null;
+      }
+
+      // Clear any references to prevent memory leaks
+      this.bookmarks = [];
+      this.statusTypes = [];
+      this.currentSearch = {};
+    } catch (error) {
+      console.error('Error during BookmarkManagerController cleanup:', error);
     }
   }
 }

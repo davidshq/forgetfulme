@@ -37,7 +37,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/ui/*.html", "src/ui/styles/*.css", "icons/*"],
+      "resources": ["src/ui/*.html", "src/ui/components/*.html", "src/ui/styles/*.css", "icons/*"],
       "matches": ["<all_urls>"]
     }
   ]
