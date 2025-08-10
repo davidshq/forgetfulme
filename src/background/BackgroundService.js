@@ -314,10 +314,10 @@ export class BackgroundService {
    * Handle tab updates
    * @param {number} tabId - Tab ID
    * @param {Object} changeInfo - Change information
-   * @param {Object} tab - Tab object
+   * @param {Object} _tab - Tab object (unused, but required by Chrome API)
    * @private
    */
-  async handleTabUpdated(tabId, changeInfo) {
+  async handleTabUpdated(tabId, changeInfo, _tab) {
     try {
       // Only react to URL or loading complete changes
       if (changeInfo.url || changeInfo.status === 'complete') {
@@ -643,12 +643,14 @@ export class BackgroundService {
    * @returns {Promise<Object>} Extension information
    */
   async getExtensionInfo() {
+    const isConfigured = await this.configService.isSupabaseConfigured();
+    
     return {
       id: chrome.runtime.id,
       version: chrome.runtime.getManifest().version,
       isInitialized: this.isInitialized,
       isAuthenticated: this.authService ? this.authService.isAuthenticated() : false,
-      isConfigured: await this.configService.isSupabaseConfigured()
+      isConfigured: isConfigured
     };
   }
 }
