@@ -634,14 +634,14 @@ describe('BackgroundService', () => {
   });
 
   describe('Extension Info Reporting', () => {
-    it('should return extension info when not initialized', () => {
-      const info = backgroundService.getExtensionInfo();
+    it('should return extension info when not initialized', async () => {
+      const info = await backgroundService.getExtensionInfo();
 
       expect(info.id).toBe('test-extension-id');
       expect(info.version).toBe('1.0.0');
       expect(info.isInitialized).toBe(false);
       expect(info.isAuthenticated).toBe(false);
-      expect(info.isConfigured).toBeInstanceOf(Promise);
+      expect(typeof info.isConfigured).toBe('boolean');
     });
 
     it('should return extension info when initialized and authenticated', async () => {
@@ -649,16 +649,13 @@ describe('BackgroundService', () => {
       vi.spyOn(mockAuthService, 'isAuthenticated').mockReturnValue(true);
       vi.spyOn(mockConfigService, 'isSupabaseConfigured').mockResolvedValue(true);
       
-      const info = backgroundService.getExtensionInfo();
+      const info = await backgroundService.getExtensionInfo();
 
       expect(info.id).toBe('test-extension-id');
       expect(info.version).toBe('1.0.0');
       expect(info.isInitialized).toBe(true);
       expect(info.isAuthenticated).toBe(true);
-      expect(info.isConfigured).toBeInstanceOf(Promise);
-      
-      // Check the promise resolves to true
-      await expect(info.isConfigured).resolves.toBe(true);
+      expect(info.isConfigured).toBe(true);
     });
   });
 

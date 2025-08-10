@@ -200,17 +200,53 @@ export class BookmarkManagerController extends BaseController {
     const statusFilter = $('#status-filter');
     const tagFilter = $('#tag-filter');
 
-    this.currentSearch = {
-      statusFilter: statusFilter?.value || undefined,
-      tagFilter: tagFilter?.value || undefined
-    };
+    // Map UI filters to BookmarkService expected format (statuses/tags arrays)
+    this.currentSearch = {};
 
-    // Remove empty values
-    Object.keys(this.currentSearch).forEach(key => {
-      if (!this.currentSearch[key]) {
-        delete this.currentSearch[key];
+    // Status filter: convert single value to array if present
+    if (statusFilter?.value) {
+      this.currentSearch.statuses = [statusFilter.value];
+    }
+
+    // Tag filter: split comma-separated values into array if present
+    if (tagFilter?.value) {
+      // Split tags by comma and validate them properly
+      const rawTags = tagFilter.value
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+
+      // Use ValidationService to properly sanitize and validate tags
+      if (rawTags.length > 0) {
+        const tagValidation = this.validationService.validateTags(rawTags);
+        if (tagValidation.isValid) {
+          this.currentSearch.tags = tagValidation.data;
+        } else {
+          // Some tags were invalid - show user-friendly message
+          const validTagCount = tagValidation.data?.length || 0;
+          const invalidTagCount = rawTags.length - validTagCount;
+
+          if (validTagCount > 0 && invalidTagCount > 0) {
+            // Show non-blocking notification about filtered tags
+            console.info(
+              `Applied ${validTagCount} valid tags. ${invalidTagCount} invalid tags were filtered out.`
+            );
+            this.showTagFilterMessage(
+              `Applied ${validTagCount} tag${validTagCount !== 1 ? 's' : ''}. ${invalidTagCount} invalid tag${invalidTagCount !== 1 ? 's' : ''} filtered out.`
+            );
+          } else if (validTagCount === 0) {
+            // All tags were invalid
+            console.warn('No valid tags found:', tagValidation.errors);
+            this.showTagFilterMessage(
+              'No valid tags found. Tags must contain only letters, numbers, and hyphens.'
+            );
+          }
+
+          // Use the valid tags that passed validation (could be empty array)
+          this.currentSearch.tags = tagValidation.data || [];
+        }
       }
-    });
+    }
 
     // Refresh the grid
     if (this.grid) {
@@ -279,6 +315,41 @@ export class BookmarkManagerController extends BaseController {
   }
 
   /**
+   * Show non-blocking message about tag filtering
+   * @param {string} message - Message to display
+   * @private
+   */
+  showTagFilterMessage(message) {
+    const messageArea = $('#message-area');
+    if (!messageArea) return;
+
+    // Create info message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message-info';
+    messageDiv.style.cssText =
+      'padding: 0.5rem; margin: 0.5rem 0; background: var(--pico-primary-background); color: var(--pico-primary-inverse); border-radius: 0.25rem; font-size: 0.875rem;';
+    messageDiv.textContent = message;
+
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText =
+      'float: right; background: none; border: none; color: inherit; font-size: 1.2em; cursor: pointer; padding: 0; margin-left: 0.5rem;';
+    closeBtn.addEventListener('click', () => messageDiv.remove());
+    messageDiv.appendChild(closeBtn);
+
+    // Clear existing messages and add new one
+    messageArea.replaceChildren(messageDiv);
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 5000);
+  }
+
+  /**
    * Update user info display
    */
   async updateUserInfo() {
@@ -306,11 +377,13 @@ export class BookmarkManagerController extends BaseController {
    */
   async showAuthModal(defaultTab = 'signin') {
     let initializationFailed = false;
+    let wasLoading = false;
 
     try {
       // Only load and initialize if not already done or in progress
       if (!this.authModal && !this.authModalLoading) {
         this.authModalLoading = true;
+        wasLoading = true;
         initializationFailed = true; // We're creating a new modal
 
         // Load auth modal component
@@ -319,7 +392,6 @@ export class BookmarkManagerController extends BaseController {
 
         if (!loadSuccess) {
           console.error('Failed to load auth modal component');
-          this.authModalLoading = false; // Clear loading flag on failure
           this.showFallbackAuthMessage();
           return;
         }
@@ -340,7 +412,6 @@ export class BookmarkManagerController extends BaseController {
         }
 
         initializationFailed = false; // Initialization succeeded
-        this.authModalLoading = false; // Clear loading flag
       } else if (this.authModalLoading) {
         // Another call is already loading, wait for it to complete
         console.warn('Auth modal is already loading, waiting...');
@@ -371,12 +442,12 @@ export class BookmarkManagerController extends BaseController {
         this.authModal = null;
       }
 
-      // Always clear loading flag on error
-      if (initializationFailed) {
+      this.showFallbackAuthMessage();
+    } finally {
+      // Always clear loading flag if we set it
+      if (wasLoading) {
         this.authModalLoading = false;
       }
-
-      this.showFallbackAuthMessage();
     }
   }
 

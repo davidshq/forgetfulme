@@ -103,6 +103,29 @@ export class ValidationService extends withServicePatterns(class {}) {
   }
 
   /**
+   * Validate password strength
+   * @param {string} password - Password to validate
+   * @returns {ValidationResult<string>} Validation result
+   */
+  validatePassword(password) {
+    const errors = [];
+
+    if (!password || typeof password !== 'string') {
+      errors.push('Password is required');
+      return { isValid: false, data: null, errors };
+    }
+
+    // Intentionally not trimming passwords - users may have spaces as part of their password
+    // This preserves the exact password as entered by the user
+    if (password.length < 8) {
+      errors.push('Password must be at least 8 characters long');
+      return { isValid: false, data: null, errors };
+    }
+
+    return { isValid: true, data: password, errors: [] };
+  }
+
+  /**
    * Validate bookmark title
    * @param {string} title - Title to validate
    * @returns {ValidationResult<string>} Validation result with sanitized title

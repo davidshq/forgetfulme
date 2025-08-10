@@ -3,29 +3,11 @@
  */
 
 import { container } from '../utils/ServiceContainer.js';
-import { ErrorService } from '../services/ErrorService.js';
-import { ValidationService } from '../services/ValidationService.js';
-import { StorageService } from '../services/StorageService.js';
-import { ConfigService } from '../services/ConfigService.js';
-import { LoggingService } from '../services/LoggingService.js';
+import { registerCoreServices } from '../utils/serviceRegistration.js';
 import { BackgroundService } from '../background/BackgroundService.js';
 
 // Register core services for background context
-container.register('errorService', () => new ErrorService());
-
-container.register('validationService', () => new ValidationService());
-
-container.register('storageService', c => new StorageService(c.get('errorService')));
-
-container.register(
-  'loggingService',
-  c => new LoggingService(c.get('storageService'), c.get('errorService'))
-);
-
-container.register(
-  'configService',
-  c => new ConfigService(c.get('storageService'), c.get('validationService'), c.get('errorService'))
-);
+registerCoreServices(container);
 
 // Background service with minimal dependencies (no Supabase services)
 container.register(

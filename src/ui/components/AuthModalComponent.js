@@ -239,7 +239,7 @@ export class AuthModalComponent {
     // Validate inputs
     const validationErrors = {};
 
-    if (!this.validationService.validateEmail(email)) {
+    if (!this.validationService.validateEmail(email).isValid) {
       validationErrors.email = 'Please enter a valid email address';
     }
 
@@ -293,11 +293,11 @@ export class AuthModalComponent {
     // Validate inputs
     const validationErrors = {};
 
-    if (!this.validationService.validateEmail(email)) {
+    if (!this.validationService.validateEmail(email).isValid) {
       validationErrors.email = 'Please enter a valid email address';
     }
 
-    if (!this.validationService.validatePassword(password)) {
+    if (!this.validationService.validatePassword(password).isValid) {
       validationErrors.password = 'Password must be at least 8 characters long';
     }
 
@@ -346,7 +346,7 @@ export class AuthModalComponent {
     const emailInput = $('#signin-email');
     const email = emailInput?.value;
 
-    if (!email || !this.validationService.validateEmail(email)) {
+    if (!email || !this.validationService.validateEmail(email).isValid) {
       this.showFormError('signin', 'Please enter a valid email address first');
       return;
     }

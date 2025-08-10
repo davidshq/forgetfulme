@@ -828,6 +828,19 @@ export class BookmarkService extends withServicePatterns(class {}) {
       params.set('status', `in.(${options.statuses.join(',')})`);
     }
 
+    // Tags filter - array contains any of the specified tags
+    if (options.tags && options.tags.length > 0) {
+      // For PostgreSQL arrays, use 'ov' (overlap) to check if arrays have any common elements
+      // Each tag must be properly quoted to handle special characters safely
+      const quotedTags = options.tags.map(tag => {
+        // PostgREST expects double quotes for array elements containing special characters
+        // Escape any existing quotes in the tag
+        const escaped = tag.replace(/"/g, '\\"');
+        return `"${escaped}"`;
+      });
+      params.set('tags', `ov.{${quotedTags.join(',')}}`);
+    }
+
     // Date filters - use different parameter names to avoid overwriting
     if (options.dateFrom) {
       params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
@@ -890,14 +903,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
   async getTotalCount(options, userId) {
     try {
       const params = this.buildBaseQueryParams(options, userId);
-      params.set('select', 'count');
+      // Use minimal select to reduce data transfer while getting count from header
+      params.set('select', 'id');
 
       console.log('BookmarkService: Getting total count with params:', params.toString());
 
       const user = this.authService.getCurrentUser();
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const timeoutId = setTimeout(() => controller?.abort(), 10000); // 10 second timeout
 
       const response = await fetch(
         `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${params.toString()}`,
@@ -905,7 +919,8 @@ export class BookmarkService extends withServicePatterns(class {}) {
           headers: {
             apikey: this.supabaseClient.supabaseKey,
             Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Prefer: 'count=exact'
           },
           ...(controller ? { signal: controller.signal } : {})
         }
@@ -922,8 +937,18 @@ export class BookmarkService extends withServicePatterns(class {}) {
         return 0;
       }
 
-      const result = await response.json();
-      const count = result[0]?.count || 0;
+      // Extract count from content-range header
+      const contentRange = response.headers.get('content-range');
+      let count = 0;
+
+      if (contentRange) {
+        // Content-Range format: "0-9/42" where 42 is the total count
+        const match = contentRange.match(/\/(\d+)$/);
+        if (match) {
+          count = parseInt(match[1], 10);
+        }
+      }
+
       console.log('BookmarkService: Total count retrieved:', count);
       return count;
     } catch (error) {

@@ -640,15 +640,15 @@ export class BackgroundService {
 
   /**
    * Get extension info
-   * @returns {Object} Extension information
+   * @returns {Promise<Object>} Extension information
    */
-  getExtensionInfo() {
+  async getExtensionInfo() {
     return {
       id: chrome.runtime.id,
       version: chrome.runtime.getManifest().version,
       isInitialized: this.isInitialized,
       isAuthenticated: this.authService ? this.authService.isAuthenticated() : false,
-      isConfigured: this.configService.isSupabaseConfigured()
+      isConfigured: await this.configService.isSupabaseConfigured()
     };
   }
 }

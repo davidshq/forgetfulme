@@ -54,7 +54,8 @@ const createMockConfigService = () => ({
 
 const createMockValidationService = () => ({
   validateBookmarkData: vi.fn().mockReturnValue(true),
-  validateUrl: vi.fn().mockReturnValue({ isValid: true, data: 'https://updated.com', errors: [] })
+  validateUrl: vi.fn().mockReturnValue({ isValid: true, data: 'https://updated.com', errors: [] }),
+  validateTags: vi.fn().mockReturnValue({ isValid: true, data: ['test', 'docs'], errors: [] })
 });
 
 const createMockErrorService = () => ({
@@ -366,8 +367,8 @@ describe('BookmarkManagerController', () => {
         
         await controller.applyFilters();
         
-        expect(controller.currentSearch.statusFilter).toBe('read');
-        expect(controller.currentSearch.tagFilter).toBe('test,docs');
+        expect(controller.currentSearch.statuses).toEqual(['read']);
+        expect(controller.currentSearch.tags).toEqual(['test', 'docs']);
       });
     });
 
@@ -376,7 +377,7 @@ describe('BookmarkManagerController', () => {
         const statusFilter = document.getElementById('status-filter');
         const tagFilter = document.getElementById('tag-filter');
         
-        controller.currentSearch = { statusFilter: 'read', tagFilter: 'test' };
+        controller.currentSearch = { statuses: ['read'], tags: ['test'] };
         
         controller.clearFilters();
         
@@ -435,6 +436,65 @@ describe('BookmarkManagerController', () => {
       // Test that the event listeners are set up for navigation
       const settingsBtn = document.getElementById('open-options');
       expect(settingsBtn).toBeTruthy();
+    });
+  });
+
+  describe('user feedback', () => {
+    describe('showTagFilterMessage', () => {
+      it('should display tag filter message in message area', () => {
+        const testMessage = 'Applied 2 tags. 1 invalid tag filtered out.';
+        
+        controller.showTagFilterMessage(testMessage);
+        
+        const messageArea = document.getElementById('message-area');
+        expect(messageArea).toBeTruthy();
+        expect(messageArea.children.length).toBe(1);
+        
+        const messageDiv = messageArea.children[0];
+        expect(messageDiv.className).toBe('message-info');
+        expect(messageDiv.textContent).toContain(testMessage);
+        expect(messageDiv.textContent).toContain('×'); // Close button
+      });
+
+      it('should replace existing messages', () => {
+        const firstMessage = 'First message';
+        const secondMessage = 'Second message';
+        
+        controller.showTagFilterMessage(firstMessage);
+        controller.showTagFilterMessage(secondMessage);
+        
+        const messageArea = document.getElementById('message-area');
+        expect(messageArea.children.length).toBe(1);
+        expect(messageArea.children[0].textContent).toContain(secondMessage);
+        expect(messageArea.children[0].textContent).not.toContain(firstMessage);
+      });
+
+      it('should handle missing message area gracefully', () => {
+        // Remove message area from DOM
+        const messageArea = document.getElementById('message-area');
+        messageArea.remove();
+        
+        // Should not throw error
+        expect(() => {
+          controller.showTagFilterMessage('Test message');
+        }).not.toThrow();
+      });
+
+      it('should allow manual closing via close button', () => {
+        controller.showTagFilterMessage('Test message');
+        
+        const messageArea = document.getElementById('message-area');
+        const messageDiv = messageArea.children[0];
+        const closeBtn = messageDiv.querySelector('button');
+        
+        expect(closeBtn).toBeTruthy();
+        expect(messageDiv.parentNode).toBe(messageArea);
+        
+        // Click close button
+        closeBtn.click();
+        
+        expect(messageDiv.parentNode).toBeNull();
+      });
     });
   });
 });

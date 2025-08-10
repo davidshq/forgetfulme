@@ -22,8 +22,8 @@ const createMockErrorService = () => ({
 });
 
 const createMockValidationService = () => ({
-  validateEmail: vi.fn().mockReturnValue(true),
-  validatePassword: vi.fn().mockReturnValue(true)
+  validateEmail: vi.fn().mockReturnValue({ isValid: true, data: 'test@example.com', errors: [] }),
+  validatePassword: vi.fn().mockReturnValue({ isValid: true, data: 'password123', errors: [] })
 });
 
 const setupDOM = () => {
@@ -167,7 +167,7 @@ describe('AuthModalComponent', () => {
     });
 
     it('should validate email before sign in', async () => {
-      mockValidationService.validateEmail.mockReturnValue(false);
+      mockValidationService.validateEmail.mockReturnValue({ isValid: false, data: null, errors: ['Invalid email'] });
 
       const form = document.getElementById('signin-form');
       form.elements.email.value = 'invalid-email';
