@@ -17,7 +17,6 @@
 - **BackgroundService**: Large responsibility surface while purposely avoiding Supabase work in SW context; some branches are effectively no-ops.
 
 ### Bad practices / risks
-- **Mixed storage access**: Controllers (e.g., `PopupController`) use `chrome.storage`/`localStorage` directly instead of `StorageService`, increasing inconsistency and testing burden.
 - **Direct PostgREST fetches using internal client fields**: Code reads `supabaseClient.supabaseKey`; this is not a documented public field and may break on upgrades.
 - **Verbose console output**: Frequent logs (including in SW) may be noisy in production.
 - **Inadequate test coverage for edge cases**: Several confirmed bugs suggest testing gaps in validation logic and error handling paths.
@@ -37,7 +36,6 @@
 - **Consolidate validation**: Keep validation in `ValidationService`. Fix consumers to rely on it (auth modal, forms) and remove per-controller re-validations.
 
 ### Medium-term improvements
-- **Unify storage usage**: Route reads/writes through `StorageService` for flags (e.g., onboarding) to simplify tests and behavior.
 - **Reduce noise in production**: Default log level to WARN in SW; INFO in UI contexts.
 - **Encapsulate PostgREST access**: Prefer the official Supabase client methods where possible; if using REST, keep headers and patterns in one helper.
 
@@ -74,17 +72,12 @@
 
 ### Suggested implementation order (low risk first)
 
-**Phase 2: Practice improvements** (Medium term, medium risk)
-- Unify storage access patterns and reduce console noise in production.
 
 **Phase 3: Major refactoring** (Long term, higher risk but high reward)
 - Service simplification (LoggingService → ErrorService → StorageService).
 - Comprehensive testing of simplified services.
 - Performance validation to ensure simplified services meet all use cases.
 
-### Affected files (by recommendation)
-
 **Major Refactoring (Long-term):**
 - Service simplification: `src/services/LoggingService.js` (637 lines), `src/services/ErrorService.js` (594 lines), `src/services/StorageService.js` (781 lines)
-- Controller updates: All controllers that directly access chrome.storage instead of using StorageService
 - Test updates: Mock simplification in unit tests after service refactoring

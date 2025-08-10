@@ -35,6 +35,12 @@ const createMockConfigService = () => ({
   getDefaultStatusType: vi.fn().mockResolvedValue({ id: 'read' })
 });
 
+const createMockStorageService = () => ({
+  get: vi.fn().mockResolvedValue({}),
+  set: vi.fn().mockResolvedValue(),
+  remove: vi.fn().mockResolvedValue()
+});
+
 const createMockErrorService = () => ({
   handle: vi.fn().mockReturnValue({ 
     code: 'GENERIC_ERROR', 
@@ -134,6 +140,7 @@ describe('PopupController', () => {
   let mockAuthService;
   let mockBookmarkService;
   let mockConfigService;
+  let mockStorageService;
   let mockErrorService;
   let dom;
 
@@ -142,12 +149,14 @@ describe('PopupController', () => {
     mockAuthService = createMockAuthService();
     mockBookmarkService = createMockBookmarkService();
     mockConfigService = createMockConfigService();
+    mockStorageService = createMockStorageService();
     mockErrorService = createMockErrorService();
 
     controller = new PopupController(
       mockAuthService,
       mockBookmarkService,
       mockConfigService,
+      mockStorageService,
       mockErrorService
     );
   });
@@ -162,6 +171,7 @@ describe('PopupController', () => {
       expect(controller.authService).toBe(mockAuthService);
       expect(controller.bookmarkService).toBe(mockBookmarkService);
       expect(controller.configService).toBe(mockConfigService);
+      expect(controller.storageService).toBe(mockStorageService);
       expect(controller.errorService).toBe(mockErrorService);
     });
 

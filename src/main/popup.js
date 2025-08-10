@@ -17,6 +17,7 @@ container.register(
       c.get('authService'),
       c.get('bookmarkService'),
       c.get('configService'),
+      c.get('storageService'),
       c.get('errorService')
     )
 );

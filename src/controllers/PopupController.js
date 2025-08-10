@@ -15,13 +15,15 @@ export class PopupController extends BaseController {
    * @param {AuthService} authService - Authentication service
    * @param {BookmarkService} bookmarkService - Bookmark service
    * @param {ConfigService} configService - Configuration service
+   * @param {StorageService} storageService - Storage service
    * @param {ErrorService} errorService - Error handling service
    */
-  constructor(authService, bookmarkService, configService, errorService) {
+  constructor(authService, bookmarkService, configService, storageService, errorService) {
     super(errorService);
     this.authService = authService;
     this.bookmarkService = bookmarkService;
     this.configService = configService;
+    this.storageService = storageService;
 
     this.currentTab = null;
     this.currentBookmark = null;
@@ -507,7 +509,8 @@ export class PopupController extends BaseController {
           this.currentBookmark = created;
 
           // Check if this is their first bookmark with special celebration
-          const isFirstBookmark = await this.getStorageValue('isFirstBookmark');
+          const result = await this.storageService.get('isFirstBookmark', true);
+          const isFirstBookmark = result.isFirstBookmark;
           if (isFirstBookmark) {
             // This is their first bookmark after registration!
             this.showSuccess(
@@ -515,7 +518,7 @@ export class PopupController extends BaseController {
             );
 
             // Clear the first bookmark flag
-            await this.setStorageValue('isFirstBookmark', false);
+            await this.storageService.set('isFirstBookmark', false, true);
 
             // Add a subtle visual effect to mark this milestone
             const bookmarkForm = $('#bookmark-form');
@@ -701,9 +704,13 @@ export class PopupController extends BaseController {
   async checkAndShowOnboarding() {
     try {
       // Check multiple sources for new user state
-      const isNewUser = await this.getStorageValue('isNewUser');
-      const needsOnboarding = await this.getStorageValue('newUserOnboardingRequired');
-      const newUserConfirmed = await this.getStorageValue('newUserConfirmed');
+      const storageResult = await this.storageService.get(
+        ['isNewUser', 'newUserOnboardingRequired', 'newUserConfirmed'],
+        true
+      );
+      const isNewUser = storageResult.isNewUser;
+      const needsOnboarding = storageResult.newUserOnboardingRequired;
+      const newUserConfirmed = storageResult.newUserConfirmed;
 
       // Check if this is a new user from either source
       const isNewUserFromAnySource =
@@ -716,8 +723,10 @@ export class PopupController extends BaseController {
 
           if (existingBookmarks.length > 0) {
             // User already has bookmarks, clear flags and skip onboarding
-            await this.clearOnboardingFlags();
-            await this.clearNewUserConfirmedFlag();
+            await this.storageService.remove(
+              ['isNewUser', 'newUserOnboardingRequired', 'newUserConfirmed'],
+              true
+            );
             return;
           }
         } catch (bookmarkError) {
@@ -734,90 +743,20 @@ export class PopupController extends BaseController {
         );
 
         // Clear the onboarding flags
-        await this.clearOnboardingFlags();
-        await this.clearNewUserConfirmedFlag();
+        await this.storageService.remove(
+          ['isNewUser', 'newUserOnboardingRequired', 'newUserConfirmed'],
+          true
+        );
 
         // Highlight the bookmark form to draw attention
         this.highlightBookmarkForm();
 
         // Set up a flag to track if this is their very first bookmark
-        await this.setStorageValue('isFirstBookmark', true);
+        await this.storageService.set('isFirstBookmark', true, true);
       }
     } catch (error) {
       // Don't let onboarding errors break the main flow
       console.warn('Onboarding check failed:', error);
-    }
-  }
-
-  /**
-   * Get value from Chrome storage with fallback to localStorage
-   * @param {string} key - Storage key
-   * @returns {Promise<any>} Storage value
-   */
-  async getStorageValue(key) {
-    try {
-      if (chrome && chrome.storage && chrome.storage.sync) {
-        const result = await chrome.storage.sync.get(key);
-        return result[key];
-      } else {
-        // Fallback to localStorage for tests
-        const value = localStorage.getItem(key);
-        return value === 'true' ? true : value === 'false' ? false : value;
-      }
-    } catch (error) {
-      console.warn(`Failed to get storage value for ${key}:`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Set value in Chrome storage with fallback to localStorage
-   * @param {string} key - Storage key
-   * @param {any} value - Storage value
-   */
-  async setStorageValue(key, value) {
-    try {
-      if (chrome && chrome.storage && chrome.storage.sync) {
-        await chrome.storage.sync.set({ [key]: value });
-      } else {
-        // Fallback to localStorage for tests
-        localStorage.setItem(key, typeof value === 'boolean' ? value.toString() : value);
-      }
-    } catch (error) {
-      console.warn(`Failed to set storage value for ${key}:`, error);
-    }
-  }
-
-  /**
-   * Clear onboarding flags from storage
-   */
-  async clearOnboardingFlags() {
-    try {
-      if (chrome && chrome.storage && chrome.storage.sync) {
-        await chrome.storage.sync.remove(['isNewUser', 'newUserOnboardingRequired']);
-      } else {
-        // Fallback to localStorage for tests
-        localStorage.removeItem('isNewUser');
-        localStorage.removeItem('newUserOnboardingRequired');
-      }
-    } catch (error) {
-      console.warn('Failed to clear onboarding flags:', error);
-    }
-  }
-
-  /**
-   * Clear new user confirmed flag from storage
-   */
-  async clearNewUserConfirmedFlag() {
-    try {
-      if (chrome && chrome.storage && chrome.storage.sync) {
-        await chrome.storage.sync.remove(['newUserConfirmed']);
-      } else {
-        // Fallback to localStorage for tests
-        localStorage.removeItem('newUserConfirmed');
-      }
-    } catch (error) {
-      console.warn('Failed to clear new user confirmed flag:', error);
     }
   }
 
