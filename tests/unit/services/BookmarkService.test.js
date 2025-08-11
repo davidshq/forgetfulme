@@ -255,11 +255,16 @@ describe('BookmarkService', () => {
     it('should delete bookmark successfully', async () => {
       const bookmarkId = 'bookmark-123';
 
-      // Mock global fetch for delete operation
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue({})
-      });
+      // Mock Supabase client delete operation with correct chaining
+      // Actual Supabase API: supabase.from('table').delete().eq('col', val).eq('col2', val2)
+      const mockEqChain = vi.fn().mockResolvedValue({ data: null, error: null });
+      const mockFirstEq = vi.fn().mockReturnValue({ eq: mockEqChain });
+      const mockDelete = vi.fn().mockReturnValue({ eq: mockFirstEq });
+      const mockFrom = vi.fn().mockReturnValue({ delete: mockDelete });
+
+      bookmarkService.supabaseClient = {
+        from: mockFrom
+      };
 
       // Mock updateCache method
       vi.spyOn(bookmarkService, 'updateCache').mockResolvedValue();
@@ -267,7 +272,7 @@ describe('BookmarkService', () => {
       await bookmarkService.deleteBookmark(bookmarkId);
 
       expect(bookmarkService.updateCache).toHaveBeenCalled();
-      expect(global.fetch).toHaveBeenCalled();
+      expect(mockFrom).toHaveBeenCalledWith('bookmarks');
     });
   });
 
@@ -288,13 +293,8 @@ describe('BookmarkService', () => {
         data: searchOptions
       });
 
-      // Mock global fetch and helper methods
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockResults)
-      });
-
-      vi.spyOn(bookmarkService, 'buildSearchQuery').mockReturnValue('select=*&user_id=eq.user-123');
+      // Mock executeSearchQuery and getTotalCount methods
+      vi.spyOn(bookmarkService, 'executeSearchQuery').mockResolvedValue(mockResults);
       vi.spyOn(bookmarkService, 'getTotalCount').mockResolvedValue(1);
 
       const result = await bookmarkService.searchBookmarks(searchOptions);
@@ -321,11 +321,19 @@ describe('BookmarkService', () => {
         { status: 'unread', tags: ['tag3'], created_at: new Date().toISOString() }
       ];
 
-      // Mock global fetch
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: vi.fn().mockResolvedValue(mockBookmarks)
+      // Mock Supabase client select operation
+      const mockFrom = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
+            data: mockBookmarks,
+            error: null
+          })
+        })
       });
+      
+      bookmarkService.supabaseClient = {
+        from: mockFrom
+      };
 
       const result = await bookmarkService.getBookmarkStats();
 
@@ -335,6 +343,7 @@ describe('BookmarkService', () => {
       expect(result.byTag.tag1).toBe(3);
       expect(result.byTag.tag2).toBe(2);
       expect(result.byTag.tag3).toBe(1);
+      expect(mockFrom).toHaveBeenCalledWith('bookmarks');
     });
   });
 });

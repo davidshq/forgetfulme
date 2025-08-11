@@ -2,14 +2,18 @@
  * @fileoverview Bookmark management service for the ForgetfulMe extension
  */
 
-/* global AbortController */
-
 import { createClient } from '../lib/supabase.js';
 import { PAGINATION, TIME_CALCULATIONS } from '../utils/constants.js';
 import { withServicePatterns } from '../utils/serviceHelpers.js';
 
 /**
  * Service for managing bookmarks with full CRUD operations
+ *
+ * ERROR HANDLING PATTERN:
+ * - Supabase API errors: throw Error with descriptive message, let catch block handle with this.handleAndThrow()
+ * - Validation errors: use this.errorService.handle() for user-facing messages  
+ * - All methods have try/catch that calls this.handleAndThrow() for consistency
+ * - Special cases: Known error codes (PGRST116 = not found) handled specifically
  */
 export class BookmarkService extends withServicePatterns(class {}) {
   /**
@@ -192,25 +196,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       await this.ensureInitialized();
 
-      // Delete from database
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?id=eq.${bookmarkId}&user_id=eq.${user.id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Delete from database using Supabase client
+      const { error } = await this.supabaseClient
+        .from('bookmarks')
+        .delete()
+        .eq('id', bookmarkId)
+        .eq('user_id', user.id);
 
-      if (!response.ok) {
-        const errorInfo = this.errorService.handle(
-          new Error('Failed to delete bookmark'),
-          'BookmarkService.deleteBookmark'
-        );
-        throw new Error(errorInfo.message);
+      if (error) {
+        throw new Error(`Failed to delete bookmark: ${error.message}`);
       }
 
       // Update cache
@@ -288,23 +282,22 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       await this.ensureInitialized();
 
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?select=*&id=eq.${bookmarkId}&user_id=eq.${user.id}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const { data, error } = await this.supabaseClient
+        .from('bookmarks')
+        .select('*')
+        .eq('id', bookmarkId)
+        .eq('user_id', user.id)
+        .single();
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch bookmark');
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - bookmark not found
+          return null;
+        }
+        throw new Error(`Failed to fetch bookmark: ${error.message}`);
       }
 
-      const bookmarks = await response.json();
-      return bookmarks.length > 0 ? bookmarks[0] : null;
+      return data;
     } catch (error) {
       this.errorService.handle(error, 'BookmarkService.getBookmarkById');
       return null;
@@ -370,44 +363,66 @@ export class BookmarkService extends withServicePatterns(class {}) {
    * @private
    */
   async executeSearchQuery(searchOptions, user) {
-    const query = this.buildSearchQuery(searchOptions, user.id);
-
-    console.log('BookmarkService: Executing search query:', query);
-
-    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-    const timeoutId = setTimeout(() => controller?.abort(), 10000); // 10 second timeout
+    console.log('BookmarkService: Executing search with options:', searchOptions);
 
     try {
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${query}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          ...(controller ? { signal: controller.signal } : {})
-        }
-      );
+      let query = this.supabaseClient.from('bookmarks').select('*').eq('user_id', user.id);
 
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error(
-          'BookmarkService: Search failed with status:',
-          response.status,
-          response.statusText
+      // Text search across multiple columns
+      // SECURITY NOTE: Supabase client automatically handles parameterization when building
+      // PostgREST queries. No SQL injection risk exists because no direct SQL is executed.
+      // The client builds HTTP query strings sent to PostgREST, which handles escaping.
+      // Reference: https://github.com/orgs/supabase/discussions/9777
+      if (searchOptions.query) {
+        query = query.or(
+          `title.ilike.%${searchOptions.query}%,url.ilike.%${searchOptions.query}%,notes.ilike.%${searchOptions.query}%`
         );
-        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
       }
 
-      const result = await response.json();
-      console.log('BookmarkService: Search completed, found', result.length, 'bookmarks');
-      return result;
+      // Status filter
+      if (searchOptions.statuses && searchOptions.statuses.length > 0) {
+        query = query.in('status', searchOptions.statuses);
+      }
+
+      // Tags filter
+      if (searchOptions.tags && searchOptions.tags.length > 0) {
+        query = query.overlaps('tags', searchOptions.tags);
+      }
+
+      // Date filters
+      if (searchOptions.dateFrom) {
+        query = query.gte('created_at', searchOptions.dateFrom.toISOString());
+      }
+      if (searchOptions.dateTo) {
+        query = query.lte('created_at', searchOptions.dateTo.toISOString());
+      }
+
+      // Sorting
+      const sortBy = searchOptions.sortBy || 'created_at';
+      const ascending = searchOptions.sortOrder === 'asc';
+      query = query.order(sortBy, { ascending });
+
+      // Pagination
+      const page = searchOptions.page || 1;
+      const pageSize = Math.min(
+        searchOptions.pageSize || PAGINATION.DEFAULT_PAGE_SIZE,
+        PAGINATION.MAX_PAGE_SIZE
+      );
+      const offset = (page - 1) * pageSize;
+      query = query.range(offset, offset + pageSize - 1);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('BookmarkService: Search query failed:', error);
+        throw new Error(`Search failed: ${error.message}`);
+      }
+
+      console.log('BookmarkService: Search completed, found', data.length, 'bookmarks');
+      return data;
     } catch (error) {
-      clearTimeout(timeoutId);
       console.error('BookmarkService: Search query failed:', error);
-      throw error;
+      this.handleAndThrow(error, 'BookmarkService.executeSearchQuery');
     }
   }
 
@@ -446,23 +461,15 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       await this.ensureInitialized();
 
-      // Get all bookmarks for statistics
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?select=status,tags,created_at&user_id=eq.${user.id}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // Get all bookmarks for statistics using Supabase client
+      const { data: bookmarks, error } = await this.supabaseClient
+        .from('bookmarks')
+        .select('status,tags,created_at')
+        .eq('user_id', user.id);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch bookmarks for stats');
+      if (error) {
+        throw new Error(`Failed to fetch bookmarks for stats: ${error.message}`);
       }
-
-      const bookmarks = await response.json();
 
       // Calculate statistics
       const stats = {
@@ -730,23 +737,24 @@ export class BookmarkService extends withServicePatterns(class {}) {
 
       await this.ensureInitialized();
 
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?select=*&url=eq.${encodeURIComponent(normalizedUrl)}&user_id=eq.${user.id}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const { data, error } = await this.supabaseClient
+        .from('bookmarks')
+        .select('*')
+        .eq('url', normalizedUrl)
+        .eq('user_id', user.id)
+        .single();
 
-      if (!response.ok) {
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - bookmark not found
+          return null;
+        }
+        // Log other errors but don't throw
+        this.errorService.handle(error, 'BookmarkService.findBookmarkByUrl');
         return null;
       }
 
-      const bookmarks = await response.json();
-      return bookmarks.length > 0 ? bookmarks[0] : null;
+      return data;
     } catch (error) {
       this.errorService.handle(error, 'BookmarkService.findBookmarkByUrl');
       return null;
@@ -760,137 +768,41 @@ export class BookmarkService extends withServicePatterns(class {}) {
    * @private
    */
   async saveToDatabase(bookmark) {
-    const user = this.authService.getCurrentUser();
-    const isUpdate = Boolean(bookmark.id);
+    try {
+      const user = this.authService.getCurrentUser();
+      const isUpdate = Boolean(bookmark.id);
 
-    let response;
-    if (isUpdate) {
-      // Update existing bookmark
-      response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?id=eq.${bookmark.id}&user_id=eq.${user.id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=representation'
-          },
-          body: JSON.stringify(bookmark)
-        }
-      );
-    } else {
-      // Create new bookmark - don't include id field
-      const { id: _id, ...bookmarkData } = bookmark;
-      response = await fetch(`${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks`, {
-        method: 'POST',
-        headers: {
-          apikey: this.supabaseClient.supabaseKey,
-          Authorization: `Bearer ${user.access_token}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=representation'
-        },
-        body: JSON.stringify(bookmarkData)
-      });
-    }
-
-    if (!response.ok) {
-      throw new Error(`Failed to save bookmark: ${response.statusText}`);
-    }
-
-    const savedBookmarks = await response.json();
-    return savedBookmarks[0];
-  }
-
-  /**
-   * Build base query parameters for search and count operations
-   * @param {Object} options - Search options
-   * @param {string} userId - User ID
-   * @returns {URLSearchParams} Base query parameters
-   * @private
-   */
-  buildBaseQueryParams(options, userId) {
-    const params = new URLSearchParams();
-
-    // User filter
-    params.set('user_id', `eq.${userId}`);
-
-    // Text search
-    if (options.query) {
-      params.set(
-        'or',
-        `title.ilike.%${options.query}%,url.ilike.%${options.query}%,notes.ilike.%${options.query}%`
-      );
-    }
-
-    // Status filter
-    if (options.statuses && options.statuses.length > 0) {
-      params.set('status', `in.(${options.statuses.join(',')})`);
-    }
-
-    // Tags filter - array contains any of the specified tags
-    if (options.tags && options.tags.length > 0) {
-      // For PostgreSQL arrays, use 'ov' (overlap) to check if arrays have any common elements
-      // Each tag must be properly quoted to handle special characters safely
-      const quotedTags = options.tags.map(tag => {
-        // PostgREST expects double quotes for array elements containing special characters
-        // Escape any existing quotes in the tag
-        const escaped = tag.replace(/"/g, '\\"');
-        return `"${escaped}"`;
-      });
-      params.set('tags', `ov.{${quotedTags.join(',')}}`);
-    }
-
-    // Date filters - use different parameter names to avoid overwriting
-    if (options.dateFrom) {
-      params.set('created_at', `gte.${options.dateFrom.toISOString()}`);
-    }
-    if (options.dateTo) {
-      // Use 'and' parameter to combine with dateFrom filter
-      if (options.dateFrom) {
-        params.set(
-          'and',
-          `(created_at.gte.${options.dateFrom.toISOString()},created_at.lte.${options.dateTo.toISOString()})`
-        );
-        params.delete('created_at'); // Remove single filter
+      let result;
+      
+      if (isUpdate) {
+        // Update existing bookmark
+        result = await this.supabaseClient
+          .from('bookmarks')
+          .update(bookmark)
+          .eq('id', bookmark.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
       } else {
-        params.set('created_at', `lte.${options.dateTo.toISOString()}`);
+        // Create new bookmark - remove id field if present
+        const { id: _id, ...bookmarkData } = bookmark;
+        result = await this.supabaseClient
+          .from('bookmarks')
+          .insert(bookmarkData)
+          .select()
+          .single();
       }
+
+      const { data, error } = result;
+
+      if (error) {
+        throw new Error(`Failed to save bookmark: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
+      this.handleAndThrow(error, 'BookmarkService.saveToDatabase');
     }
-
-    return params;
-  }
-
-  /**
-   * Build search query string with pagination and sorting
-   * @param {Object} options - Search options
-   * @param {string} userId - User ID
-   * @returns {string} Query string
-   * @private
-   */
-  buildSearchQuery(options, userId) {
-    const params = this.buildBaseQueryParams(options, userId);
-
-    // Base selection
-    params.set('select', '*');
-
-    // Sorting
-    const sortBy = options.sortBy || 'created_at';
-    const sortOrder = options.sortOrder || 'desc';
-    params.set('order', `${sortBy}.${sortOrder}`);
-
-    // Pagination
-    const page = options.page || 1;
-    const pageSize = Math.min(
-      options.pageSize || PAGINATION.DEFAULT_PAGE_SIZE,
-      PAGINATION.MAX_PAGE_SIZE
-    );
-    const offset = (page - 1) * pageSize;
-
-    params.set('limit', pageSize.toString());
-    params.set('offset', offset.toString());
-
-    return params.toString();
   }
 
   /**
@@ -902,55 +814,45 @@ export class BookmarkService extends withServicePatterns(class {}) {
    */
   async getTotalCount(options, userId) {
     try {
-      const params = this.buildBaseQueryParams(options, userId);
-      // Use minimal select to reduce data transfer while getting count from header
-      params.set('select', 'id');
+      console.log('BookmarkService: Getting total count for search options:', options);
 
-      console.log('BookmarkService: Getting total count with params:', params.toString());
+      let query = this.supabaseClient
+        .from('bookmarks')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
 
-      const user = this.authService.getCurrentUser();
-
-      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      const timeoutId = setTimeout(() => controller?.abort(), 10000); // 10 second timeout
-
-      const response = await fetch(
-        `${this.supabaseClient.supabaseUrl}/rest/v1/bookmarks?${params.toString()}`,
-        {
-          headers: {
-            apikey: this.supabaseClient.supabaseKey,
-            Authorization: `Bearer ${user.access_token}`,
-            'Content-Type': 'application/json',
-            Prefer: 'count=exact'
-          },
-          ...(controller ? { signal: controller.signal } : {})
-        }
-      );
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error(
-          'BookmarkService: Count query failed with status:',
-          response.status,
-          response.statusText
+      // Apply the same filters as in search (must match executeSearchQuery filters exactly)
+      // SECURITY NOTE: Same as above - Supabase client handles parameterization automatically
+      if (options.query) {
+        query = query.or(
+          `title.ilike.%${options.query}%,url.ilike.%${options.query}%,notes.ilike.%${options.query}%`
         );
+      }
+
+      if (options.statuses && options.statuses.length > 0) {
+        query = query.in('status', options.statuses);
+      }
+
+      if (options.tags && options.tags.length > 0) {
+        query = query.overlaps('tags', options.tags);
+      }
+
+      if (options.dateFrom) {
+        query = query.gte('created_at', options.dateFrom.toISOString());
+      }
+      if (options.dateTo) {
+        query = query.lte('created_at', options.dateTo.toISOString());
+      }
+
+      const { count, error } = await query;
+
+      if (error) {
+        console.error('BookmarkService: Count query failed:', error);
         return 0;
       }
 
-      // Extract count from content-range header
-      const contentRange = response.headers.get('content-range');
-      let count = 0;
-
-      if (contentRange) {
-        // Content-Range format: "0-9/42" where 42 is the total count
-        const match = contentRange.match(/\/(\d+)$/);
-        if (match) {
-          count = parseInt(match[1], 10);
-        }
-      }
-
       console.log('BookmarkService: Total count retrieved:', count);
-      return count;
+      return count || 0;
     } catch (error) {
       console.error('BookmarkService: Count query error:', error);
       return 0;
