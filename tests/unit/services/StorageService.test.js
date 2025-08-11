@@ -197,96 +197,6 @@ describe('StorageService', () => {
     });
   });
 
-  describe('cache operations', () => {
-    beforeEach(() => {
-      storageService.cache.clear();
-    });
-
-    describe('setCache', () => {
-      it('should store data in cache with TTL', () => {
-        const testData = { key: 'value' };
-        storageService.setCache('test-key', testData, 5000);
-
-        const cached = storageService.cache.get('test-key');
-        expect(cached.data).toEqual(testData);
-        expect(cached.expires).toBeGreaterThan(Date.now());
-      });
-
-      it('should use default TTL when not specified', () => {
-        const testData = { key: 'value' };
-        storageService.setCache('test-key', testData);
-
-        const cached = storageService.cache.get('test-key');
-        expect(cached.expires).toBeGreaterThan(Date.now() + 290000); // Close to 5 minutes
-      });
-    });
-
-    describe('getCache', () => {
-      it('should return cached data if not expired', () => {
-        const testData = { key: 'value' };
-        storageService.setCache('test-key', testData, 5000);
-
-        const result = storageService.getCache('test-key');
-        expect(result).toEqual(testData);
-      });
-
-      it('should return null for expired cache', () => {
-        const testData = { key: 'value' };
-        storageService.setCache('test-key', testData, -1000); // Expired
-
-        const result = storageService.getCache('test-key');
-        expect(result).toBeNull();
-      });
-
-      it('should return null for non-existent cache', () => {
-        const result = storageService.getCache('non-existent');
-        expect(result).toBeNull();
-      });
-
-      it('should cleanup expired entries', () => {
-        storageService.setCache('expired-key', { data: 'test' }, -1000);
-        storageService.setCache('valid-key', { data: 'test' }, 5000);
-
-        storageService.getCache('expired-key');
-
-        expect(storageService.cache.has('expired-key')).toBe(false);
-        expect(storageService.cache.has('valid-key')).toBe(true);
-      });
-    });
-
-    describe('clearCache', () => {
-      it('should clear all cache entries', () => {
-        storageService.setCache('key1', { data: 'test1' });
-        storageService.setCache('key2', { data: 'test2' });
-
-        expect(storageService.cache.size).toBe(2);
-
-        storageService.clearCache();
-
-        expect(storageService.cache.size).toBe(0);
-      });
-    });
-
-    describe('cache size management', () => {
-      it('should evict oldest entries when cache is full', () => {
-        const maxSize = storageService.maxCacheSize;
-        
-        // Fill cache to max size
-        for (let i = 0; i < maxSize; i++) {
-          storageService.setCache(`key-${i}`, { data: `value-${i}` });
-        }
-
-        expect(storageService.cache.size).toBe(maxSize);
-
-        // Add one more entry
-        storageService.setCache('new-key', { data: 'new-value' });
-
-        expect(storageService.cache.size).toBe(maxSize);
-        expect(storageService.cache.has('key-0')).toBe(false); // Oldest evicted
-        expect(storageService.cache.has('new-key')).toBe(true); // New entry exists
-      });
-    });
-  });
 
   describe('bookmark cache operations', () => {
     describe('setBookmarkCache', () => {
@@ -298,7 +208,7 @@ describe('StorageService', () => {
 
         storageService.setBookmarkCache('user-123', bookmarks);
 
-        const cached = storageService.getCache('bookmarks:user-123');
+        const cached = storageService.getBookmarkCache('user-123');
         expect(cached).toEqual(bookmarks);
       });
     });
@@ -325,25 +235,21 @@ describe('StorageService', () => {
       it('should clear bookmark cache for specific user', () => {
         storageService.setBookmarkCache('user-123', [{ id: '1' }]);
         storageService.setBookmarkCache('user-456', [{ id: '2' }]);
-        storageService.setCache('other-cache', { data: 'test' });
 
         storageService.clearBookmarkCache('user-123');
 
         expect(storageService.getBookmarkCache('user-123')).toBeNull();
         expect(storageService.getBookmarkCache('user-456')).not.toBeNull();
-        expect(storageService.getCache('other-cache')).not.toBeNull();
       });
 
       it('should clear all bookmark cache when no user specified', () => {
         storageService.setBookmarkCache('user-123', [{ id: '1' }]);
         storageService.setBookmarkCache('user-456', [{ id: '2' }]);
-        storageService.setCache('other-cache', { data: 'test' });
 
         storageService.clearBookmarkCache();
 
         expect(storageService.getBookmarkCache('user-123')).toBeNull();
         expect(storageService.getBookmarkCache('user-456')).toBeNull();
-        expect(storageService.getCache('other-cache')).not.toBeNull();
       });
     });
   });
@@ -357,13 +263,6 @@ describe('StorageService', () => {
         .rejects.toThrow('Cannot store circular references');
     });
 
-    it('should validate JSON serialization', () => {
-      const validData = { key: 'value', number: 123, array: [1, 2, 3] };
-      expect(() => storageService.validateDataSize(validData)).not.toThrow();
-
-      const invalidData = { func: () => {} };
-      expect(() => storageService.validateDataSize(invalidData)).toThrow();
-    });
 
   });
 

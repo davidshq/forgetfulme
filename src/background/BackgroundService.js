@@ -644,7 +644,7 @@ export class BackgroundService {
    */
   async getExtensionInfo() {
     const isConfigured = await this.configService.isSupabaseConfigured();
-    
+
     return {
       id: chrome.runtime.id,
       version: chrome.runtime.getManifest().version,

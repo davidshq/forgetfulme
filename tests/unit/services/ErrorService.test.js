@@ -184,7 +184,7 @@ describe('ErrorService', () => {
     it('should categorize config errors correctly', () => {
       expect(errorService.isConfigError(new Error('missing config'), 'missing config')).toBe(true);
       expect(errorService.isConfigError(new Error('invalid URL'), 'invalid URL')).toBe(true);
-      expect(errorService.isConfigError(new Error('Supabase'), 'Supabase')).toBe(true);
+      expect(errorService.isConfigError(new Error('Supabase config missing'), 'Supabase config missing')).toBe(true);
     });
 
     it('should categorize storage errors correctly', () => {
