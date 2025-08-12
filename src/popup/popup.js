@@ -50,7 +50,8 @@ toggleBtn.addEventListener('click', async () => {
   const url = await getActiveTabUrl();
   if (!url) return;
   await toggleReadForUrl(url);
-  statusEl.textContent = 'Toggled';
+  const st = await getStatusForUrl(url);
+  statusEl.textContent = st || 'Unknown';
   await renderRecent(searchInput.value || '');
 });
 

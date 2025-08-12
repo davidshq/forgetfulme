@@ -11,6 +11,7 @@ This doc tracks decisions, constraints, and day-to-day guidance while we rebuild
 - Supabase (Auth + Postgres): `@supabase/supabase-js` bundled locally (no CDN).
 - Styling: Pico.css (local copy in `src/lib/`). Optional small utilities only.
 - Tests: Vitest (unit) + Playwright (integration + mandatory visual).
+ - Bundling: run `npm run bundle:supabase` to (re)generate `src/lib/supabase.bundle.js`.
 
 ## Required Policies
 - Visual tests are mandatory for UI changes. Keep baselines updated intentionally and review reports in PRs.

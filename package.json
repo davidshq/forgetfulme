@@ -41,6 +41,7 @@
     "docker:test:visual:report:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers && npm run test:visual:report'\""
   },
   "devDependencies": {
+    "esbuild": "^0.23.0",
     "@playwright/test": "^1.54.0",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
