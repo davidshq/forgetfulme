@@ -9,11 +9,11 @@
     "notifications"
   ],
   "background": {
-    "service_worker": "src/main/background.js",
+    "service_worker": "src/background/index.js",
     "type": "module"
   },
   "action": {
-    "default_popup": "src/ui/popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_title": "ForgetfulMe",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -22,7 +22,7 @@
       "128": "icons/icon128.png"
     }
   },
-  "options_page": "src/ui/options.html",
+  "options_page": "src/options/options.html",
   "commands": {
     "mark_as_read": {
       "suggested_key": {
@@ -37,7 +37,13 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/ui/*.html", "src/ui/components/*.html", "src/ui/styles/*.css", "icons/*"],
+      "resources": [
+        "src/popup/*.html",
+        "src/popup/*.css",
+        "src/options/*.html",
+        "src/lib/*.css",
+        "icons/*"
+      ],
       "matches": ["<all_urls>"]
     }
   ]

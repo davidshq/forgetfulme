@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ForgetfulMe Options</title>
+    <link rel="stylesheet" href="../lib/pico.min.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Settings</h1>
+      <form id="config-form">
+        <label>
+          Supabase URL
+          <input id="sb-url" type="url" placeholder="https://project.supabase.co" required />
+        </label>
+        <label>
+          Supabase anon key
+          <input id="sb-key" type="password" placeholder="eyJhbGciOiJI..." required />
+        </label>
+        <label>
+          Privacy mode (hash URLs)
+          <input id="privacy" type="checkbox" />
+        </label>
+        <button type="submit">Save</button>
+        <button type="button" id="test">Test connection</button>
+      </form>
+      <small id="status" aria-live="polite"></small>
+    </main>
+    <script type="module" src="./options.js"></script>
+  </body>
+  </html>
+

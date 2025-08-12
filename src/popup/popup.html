@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ForgetfulMe</title>
+    <link rel="stylesheet" href="../lib/pico.min.css" />
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>ForgetfulMe</h1>
+        <p>Track what you’ve read</p>
+      </header>
+
+      <section>
+        <div id="status-pill" data-testid="status-pill" class="status">Unknown</div>
+        <div class="actions">
+          <button id="toggle-btn" role="button">Toggle Read</button>
+        </div>
+      </section>
+
+      <section>
+        <input id="search" type="search" placeholder="Search recent reads" />
+        <ul id="recent-list" aria-live="polite"></ul>
+      </section>
+    </main>
+    <script type="module" src="./popup.js"></script>
+  </body>
+  </html>
+
