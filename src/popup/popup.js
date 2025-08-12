@@ -26,20 +26,75 @@ async function renderRecent(query = '') {
   recentList.innerHTML = '';
   for (const it of items) {
     const li = document.createElement('li');
-    li.textContent = it.title || it.url;
+    const title = document.createElement('div');
+    title.textContent = it.title || it.url;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const chip = document.createElement('span');
+    const st = (it.status || '').toLowerCase();
+    chip.className = `chip ${st}`;
+    chip.textContent = st || 'unknown';
+    const when = document.createElement('span');
+    if (it.last_read_at) {
+      try {
+        when.textContent = ' • ' + new Date(it.last_read_at).toLocaleString();
+      } catch {}
+    }
+    meta.appendChild(chip);
+    meta.appendChild(when);
+    li.appendChild(title);
+    li.appendChild(meta);
     recentList.appendChild(li);
   }
 }
 
+function isMockSignedIn() {
+  try {
+    const p = new URLSearchParams(location.search);
+    return p.get('mock') === 'signedin';
+  } catch { return false; }
+}
+
+const mockState = {
+  status: 'read',
+  recent: [
+    { title: 'Example Article', url: 'https://example.com/a', status: 'read', last_read_at: new Date().toISOString() },
+    { title: 'Another Read', url: 'https://example.com/b', status: 'unread', last_read_at: new Date(Date.now()-3600_000).toISOString() }
+  ]
+};
+
 async function init() {
-  const user = await getUser();
   const url = await getActiveTabUrl();
+  const mock = isMockSignedIn();
+  const user = mock ? { id: 'mock' } : await getUser();
   if (user) {
     authSection.hidden = true;
     appSection.hidden = false;
-    const st = url ? await getStatusForUrl(url) : null;
+    const st = mock ? mockState.status : (url ? await getStatusForUrl(url) : null);
     statusEl.textContent = st || (url ? 'Unknown' : 'No tab');
-    await renderRecent();
+    if (mock) {
+      recentList.innerHTML = '';
+      for (const it of mockState.recent) {
+        const li = document.createElement('li');
+        const title = document.createElement('div');
+        title.textContent = it.title || it.url;
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        const chip = document.createElement('span');
+        const st = (it.status || '').toLowerCase();
+        chip.className = `chip ${st}`;
+        chip.textContent = st || 'unknown';
+        const when = document.createElement('span');
+        when.textContent = ' • ' + new Date(it.last_read_at).toLocaleString();
+        meta.appendChild(chip);
+        meta.appendChild(when);
+        li.appendChild(title);
+        li.appendChild(meta);
+        recentList.appendChild(li);
+      }
+    } else {
+      await renderRecent();
+    }
   } else {
     appSection.hidden = true;
     authSection.hidden = false;
@@ -49,8 +104,13 @@ async function init() {
 toggleBtn.addEventListener('click', async () => {
   const url = await getActiveTabUrl();
   if (!url) return;
-  await toggleReadForUrl(url);
-  const st = await getStatusForUrl(url);
+  const mock = isMockSignedIn();
+  if (mock) {
+    mockState.status = mockState.status === 'read' ? 'unread' : 'read';
+  } else {
+    await toggleReadForUrl(url);
+  }
+  const st = mock ? mockState.status : await getStatusForUrl(url);
   statusEl.textContent = st || 'Unknown';
   await renderRecent(searchInput.value || '');
 });

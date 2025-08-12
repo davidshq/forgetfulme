@@ -9,6 +9,16 @@
 .actions { margin: 0.75rem 0; }
 ul { list-style: none; padding: 0; margin: 0.5rem 0 0; }
 li { padding: 0.25rem 0; border-bottom: 1px solid var(--pico-muted-border-color); }
+
+.chip {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+.chip.read { background: #e8f5e9; color: #256029; }
+.chip.unread { background: #ffebee; color: #b00020; }
+.meta { color: var(--pico-muted-color); font-size: 0.75rem; }
 .container, body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
     "Noto Sans", Helvetica, Arial, sans-serif;
