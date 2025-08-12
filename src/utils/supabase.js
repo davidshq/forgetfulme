@@ -59,21 +59,25 @@ export async function testConnection() {
   return Boolean(client);
 }
 
-export async function listRecent(query = '') {
+export async function listRecent(query = '', page = 1, pageSize = 10) {
   const client = await getClient();
-  if (!client) return [];
+  if (!client) return { items: [], hasMore: false };
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize; // request one extra to detect hasMore
   let q = client
     .from('reads')
     .select('url,title,domain,status,last_read_at')
     .order('last_read_at', { ascending: false })
-    .limit(20);
+    .range(from, to);
   if (query) {
     const esc = query.replace(/%/g, '\\%').replace(/_/g, '\\_');
     q = q.or(`title.ilike.%${esc}%,domain.ilike.%${esc}%`);
   }
   const { data, error } = await q;
-  if (error) return [];
-  return data || [];
+  if (error) return { items: [], hasMore: false };
+  const items = (data || []).slice(0, pageSize);
+  const hasMore = (data || []).length > pageSize;
+  return { items, hasMore };
 }
 
 export async function toggleReadForUrl(rawUrl, title = null) {

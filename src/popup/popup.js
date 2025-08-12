@@ -21,9 +21,17 @@ const authEmail = document.getElementById('auth-email');
 const authPassword = document.getElementById('auth-password');
 const authStatus = document.getElementById('auth-status');
 const messageArea = document.getElementById('message-area');
+const prevBtn = document.getElementById('prev-page');
+const nextBtn = document.getElementById('next-page');
+const pageInfo = document.getElementById('page-info');
+
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let hasMore = false;
 
 async function renderRecent(query = '') {
-  const items = await listRecent(query);
+  const { items, hasMore: more } = await listRecent(query, currentPage, PAGE_SIZE);
+  hasMore = more;
   recentList.innerHTML = '';
   for (const it of items) {
     const li = document.createElement('li');
@@ -52,6 +60,10 @@ async function renderRecent(query = '') {
     li.appendChild(meta);
     recentList.appendChild(li);
   }
+  // pagination controls
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = !hasMore;
+  pageInfo.textContent = `Page ${currentPage}`;
 }
 
 function isMockSignedIn() {
@@ -127,6 +139,20 @@ toggleBtn.addEventListener('click', async () => {
 
 searchInput.addEventListener('input', () => renderRecent(searchInput.value || ''));
 
+prevBtn?.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage -= 1;
+    renderRecent(searchInput.value || '');
+  }
+});
+
+nextBtn?.addEventListener('click', () => {
+  if (hasMore) {
+    currentPage += 1;
+    renderRecent(searchInput.value || '');
+  }
+});
+
 signoutBtn?.addEventListener('click', async () => {
   await signOut();
   authSection.hidden = false;
@@ -154,6 +180,14 @@ function showMessage(kind, text) {
   const el = document.createElement('div');
   el.className = `toast ${kind}`;
   el.textContent = text;
+  if (arguments[2]?.retry) {
+    const btn = document.createElement('button');
+    btn.textContent = 'Retry';
+    btn.addEventListener('click', () => {
+      try { arguments[2].retry(); } finally { el.remove(); }
+    });
+    el.appendChild(btn);
+  }
   messageArea.appendChild(el);
   setTimeout(() => {
     el.remove();

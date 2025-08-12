@@ -35,6 +35,19 @@ li { padding: 0.25rem 0; border-bottom: 1px solid var(--pico-muted-border-color)
 .toast.info { background: #e8f0fe; color: #1a73e8; }
 .toast.success { background: #e6f4ea; color: #137333; }
 .toast.error { background: #fce8e6; color: #c5221f; }
+
+.toast button {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
 .container, body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell,
     "Noto Sans", Helvetica, Arial, sans-serif;

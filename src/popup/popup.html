@@ -36,6 +36,11 @@
       <section>
         <input id="search" type="search" placeholder="Search recent reads" />
         <ul id="recent-list" aria-live="polite"></ul>
+        <nav class="pagination">
+          <button id="prev-page" class="secondary" aria-label="Previous page">Prev</button>
+          <span id="page-info" class="meta" aria-live="polite"></span>
+          <button id="next-page" class="secondary" aria-label="Next page">Next</button>
+        </nav>
       </section>
     </main>
     <script type="module" src="./popup.js"></script>
