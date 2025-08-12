@@ -1,6 +1,11 @@
 export async function getActiveTabUrl() {
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tabs[0]?.url || '';
+  try {
+    if (!globalThis.chrome?.tabs?.query) return '';
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    return tabs[0]?.url || '';
+  } catch {
+    return '';
+  }
 }
 
 export function normalizeUrl(raw) {
@@ -18,4 +23,3 @@ export function normalizeUrl(raw) {
 export function domainOf(raw) {
   try { return new URL(raw).hostname.toLowerCase(); } catch { return ''; }
 }
-

@@ -3,9 +3,35 @@ name: Visual Tests
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: ["**"]
+  workflow_dispatch:
+    inputs:
+      updateSnapshots:
+        description: "Update visual baselines"
+        required: false
+        default: "false"
 
 jobs:
+  unit:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Bundle supabase-js for MV3
+        run: npm run bundle:supabase
+      - name: Lint and format check
+        run: npm run check
+      - name: Run unit tests
+        run: npm test
+
   visual:
     runs-on: ubuntu-latest
     container:
@@ -21,7 +47,12 @@ jobs:
         run: npx playwright install chromium
 
       - name: Run visual tests
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.updateSnapshots != 'true' }}
         run: npm run test:visual
+
+      - name: Update visual baselines
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.updateSnapshots == 'true' }}
+        run: npm run test:visual:update
 
       - name: Upload Playwright report
         if: always()
@@ -30,4 +61,3 @@ jobs:
           name: playwright-report
           path: playwright-report
           if-no-files-found: ignore
-

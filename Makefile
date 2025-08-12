@@ -11,13 +11,13 @@ docker-npm-ci:
 	$(DOCKER_RUN) bash -lc "npm ci && npx playwright install chromium"
 
 docker-test-unit:
-	$(DOCKER_RUN) bash -lc "npm ci && npm test"
+	$(DOCKER_RUN) bash -lc "npm ci && npm run bundle:supabase && npm test"
 
 docker-test-visual:
-	$(DOCKER_RUN) bash -lc "npm ci && npx playwright install chromium && npm run test:visual"
+	$(DOCKER_RUN) bash -lc "npm ci && npm run bundle:supabase && npx playwright install chromium && npm run test:visual"
 
 docker-test-visual-update:
-	$(DOCKER_RUN) bash -lc "npm ci && npx playwright install chromium && npm run test:visual:update"
+	$(DOCKER_RUN) bash -lc "npm ci && npm run bundle:supabase && npx playwright install chromium && npm run test:visual:update"
 
 docker-test-visual-report:
-	$(DOCKER_RUN) bash -lc "npm ci && npx playwright install chromium && npm run test:visual:report"
+	$(DOCKER_RUN) bash -lc "npm ci && npm run bundle:supabase && npx playwright install chromium && npm run test:visual:report"

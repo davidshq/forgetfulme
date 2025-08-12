@@ -12,18 +12,18 @@ This repo includes Docker targets to run tests (including visual screenshots) wi
 - PowerShell via npm (Windows):
   - Open shell: `npm run docker:shell:ps`
   - Install deps: `npm run docker:npm:ci:ps`
-  - Unit tests: `npm run docker:test:unit:ps`
-  - Visual tests: `npm run docker:test:visual:ps`
-  - Update baselines: `npm run docker:test:visual:update:ps`
-  - View report: `npm run docker:test:visual:report:ps`
+  - Unit tests: `npm run docker:test:unit:ps` (runs `npm run bundle:supabase`)
+  - Visual tests: `npm run docker:test:visual:ps` (runs `npm run bundle:supabase`)
+  - Update baselines: `npm run docker:test:visual:update:ps` (runs `npm run bundle:supabase`)
+  - View report: `npm run docker:test:visual:report:ps` (runs `npm run bundle:supabase`)
 
 Make targets (optional):
 - Open shell: `make docker-shell`
 - Install deps: `make docker-npm-ci`
-- Unit tests: `make docker-test-unit`
-- Visual tests: `make docker-test-visual`
-- Update baselines: `make docker-test-visual-update`
-- View report: `make docker-test-visual-report`
+- Unit tests: `make docker-test-unit` (runs `npm run bundle:supabase`)
+- Visual tests: `make docker-test-visual` (runs `npm run bundle:supabase`)
+- Update baselines: `make docker-test-visual-update` (runs `npm run bundle:supabase`)
+- View report: `make docker-test-visual-report` (runs `npm run bundle:supabase`)
 
 Notes
 - Commands run as root inside the container for Windows volume mount compatibility.

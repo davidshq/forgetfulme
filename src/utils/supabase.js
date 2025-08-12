@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import { get, set, remove } from './storage.js';
 import { normalizeUrl, domainOf } from './url.js';
 
@@ -36,6 +35,14 @@ async function getClient() {
   if (cachedClient) return cachedClient;
   const { url, key } = await getConfig();
   if (!url || !key) return null;
+  // Lazy import local bundled ESM to satisfy MV3 CSP (see bundle:supabase script)
+  let createClient;
+  try {
+    ({ createClient } = await import('../lib/supabase.bundle.js'));
+  } catch (e) {
+    console.warn('Supabase bundle not found. Run: npm run bundle:supabase');
+    return null;
+  }
   cachedClient = createClient(url, key, {
     auth: {
       storage: AuthStorageAdapter,
@@ -81,4 +88,37 @@ export async function toggleReadForUrl(rawUrl, title = null) {
   });
   if (error) return null;
   return data;
+}
+
+export async function getUser() {
+  const client = await getClient();
+  if (!client) return null;
+  const { data } = await client.auth.getUser();
+  return data?.user || null;
+}
+
+export async function signInWithPassword(email, password) {
+  const client = await getClient();
+  if (!client) return { error: 'no-client' };
+  const { error } = await client.auth.signInWithPassword({ email, password });
+  return { error };
+}
+
+export async function signOut() {
+  const client = await getClient();
+  if (!client) return;
+  await client.auth.signOut();
+}
+
+export async function getStatusForUrl(rawUrl) {
+  const client = await getClient();
+  if (!client) return null;
+  const url = normalizeUrl(rawUrl);
+  const { data, error } = await client
+    .from('reads')
+    .select('status')
+    .eq('url', url)
+    .maybeSingle();
+  if (error) return null;
+  return data?.status || null;
 }

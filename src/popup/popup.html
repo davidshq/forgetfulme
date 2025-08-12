@@ -14,10 +14,21 @@
         <p>Track what you’ve read</p>
       </header>
 
-      <section>
+      <section id="auth-section" hidden>
+        <h2>Sign in</h2>
+        <form id="auth-form">
+          <label>Email<input id="auth-email" type="email" required /></label>
+          <label>Password<input id="auth-password" type="password" required /></label>
+          <button type="submit">Sign in</button>
+        </form>
+        <small id="auth-status" aria-live="polite"></small>
+      </section>
+
+      <section id="app-section" hidden>
         <div id="status-pill" data-testid="status-pill" class="status">Unknown</div>
         <div class="actions">
           <button id="toggle-btn" role="button">Toggle Read</button>
+          <button id="signout-btn" class="secondary" role="button">Sign out</button>
         </div>
       </section>
 
@@ -29,4 +40,3 @@
     <script type="module" src="./popup.js"></script>
   </body>
   </html>
-
