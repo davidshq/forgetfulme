@@ -24,12 +24,18 @@ const messageArea = document.getElementById('message-area');
 const prevBtn = document.getElementById('prev-page');
 const nextBtn = document.getElementById('next-page');
 const pageInfo = document.getElementById('page-info');
+const clearSearchBtn = document.getElementById('clear-search');
 
 const PAGE_SIZE = 10;
-let currentPage = 1;
+let currentPage = Number(sessionStorage.getItem('fm.page') || '1');
 let hasMore = false;
+let currentQuery = sessionStorage.getItem('fm.query') || '';
+if (currentQuery && searchInput) searchInput.value = currentQuery;
 
 async function renderRecent(query = '') {
+  currentQuery = query;
+  sessionStorage.setItem('fm.query', currentQuery);
+  sessionStorage.setItem('fm.page', String(currentPage));
   const { items, hasMore: more } = await listRecent(query, currentPage, PAGE_SIZE);
   hasMore = more;
   recentList.innerHTML = '';
@@ -137,7 +143,16 @@ toggleBtn.addEventListener('click', async () => {
   await renderRecent(searchInput.value || '');
 });
 
-searchInput.addEventListener('input', () => renderRecent(searchInput.value || ''));
+searchInput.addEventListener('input', () => {
+  currentPage = 1;
+  renderRecent(searchInput.value || '');
+});
+
+clearSearchBtn?.addEventListener('click', () => {
+  if (searchInput) searchInput.value = '';
+  currentPage = 1;
+  renderRecent('');
+});
 
 prevBtn?.addEventListener('click', () => {
   if (currentPage > 1) {
@@ -193,3 +208,13 @@ function showMessage(kind, text) {
     el.remove();
   }, 2500);
 }
+
+// Keyboard shortcuts: '/' focus search, 'Escape' clears when focused
+window.addEventListener('keydown', e => {
+  if (e.key === '/' && !/(input|textarea)/i.test(document.activeElement?.tagName || '')) {
+    e.preventDefault();
+    searchInput?.focus();
+  } else if (e.key === 'Escape' && document.activeElement === searchInput) {
+    clearSearchBtn?.click();
+  }
+});

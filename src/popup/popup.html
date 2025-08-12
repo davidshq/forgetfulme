@@ -34,7 +34,10 @@
       </section>
 
       <section>
-        <input id="search" type="search" placeholder="Search recent reads" />
+        <div class="search-row">
+          <input id="search" type="search" placeholder="Search recent reads" />
+          <button id="clear-search" class="secondary" aria-label="Clear search">Clear</button>
+        </div>
         <ul id="recent-list" aria-live="polite"></ul>
         <nav class="pagination">
           <button id="prev-page" class="secondary" aria-label="Previous page">Prev</button>

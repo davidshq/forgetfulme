@@ -29,6 +29,7 @@ This doc tracks decisions, constraints, and day-to-day guidance while we rebuild
 - Unit files: `tests/unit/**.test.js` (jsdom). Coverage via `npm run test:unit:coverage`.
 - Integration: load extension with `--load-extension` when `chrome.*` is needed.
 - Visual: viewport 380x560, low threshold (<=0.2), deterministic font.
+ - Seeding (optional): `SEED_USER_ID=<uuid> SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed:supabase` to insert sample reads.
 
 ## Open Questions
 - Do we need search across titles/domains or full text? (Default: title/domain only.)
@@ -44,3 +45,4 @@ This doc tracks decisions, constraints, and day-to-day guidance while we rebuild
 - Prettier: https://prettier.io/docs/en/
 - Vitest: https://vitest.dev/
 - Playwright: https://playwright.dev/docs/intro
+ - esbuild: https://esbuild.github.io/

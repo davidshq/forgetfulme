@@ -32,6 +32,7 @@
     "validate:quick": "npm run check && npm run test:quick",
     "validate:full": "npm run check && npm test && npm run test:visual:simple",
     "bundle:supabase": "node scripts/bundle-supabase.mjs",
+    "seed:supabase": "node scripts/seed-supabase.mjs",
     "prepare": "husky",
     "docker:shell:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash\"",
     "docker:npm:ci:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers'\"",
