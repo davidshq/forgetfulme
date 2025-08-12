@@ -12,7 +12,7 @@ export default defineConfig({
     ['list']
   ],
   use: {
-    // No baseURL - we'll use file:// protocol directly
+    baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure'
   },
@@ -26,12 +26,17 @@ export default defineConfig({
     }
   },
 
+  webServer: {
+    command: 'npx http-server src -p 3000 -c-1',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000
+  },
+
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
     }
   ]
-
-  // No webServer needed for browser extension files
 });

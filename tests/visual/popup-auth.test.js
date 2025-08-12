@@ -4,7 +4,7 @@ test.describe('Popup auth view', () => {
   test.use({ viewport: { width: 380, height: 560 } });
 
   test('shows auth form when signed out', async ({ page }) => {
-    await page.goto('file://' + process.cwd() + '/src/popup/popup.html');
+    await page.goto('/popup/popup.html');
     
     // Wait for the JavaScript to load and execute
     await page.waitForLoadState('networkidle');
