@@ -29,7 +29,8 @@ This doc tracks decisions, constraints, and day-to-day guidance while we rebuild
 - Unit files: `tests/unit/**.test.js` (jsdom). Coverage via `npm run test:unit:coverage`.
 - Integration: load extension with `--load-extension` when `chrome.*` is needed.
 - Visual: viewport 380x560, low threshold (<=0.2), deterministic font.
- - Seeding (optional): `SEED_USER_ID=<uuid> SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed:supabase` to insert sample reads.
+- Seeding (optional): `SEED_USER_ID=<uuid> SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run seed:supabase` to insert sample reads.
+ - Optional RPCs: `list_recent(q text, page int, page_size int)` can return `{ items jsonb[], has_more bool }`; client will auto-detect and use it when present, else fallback to `.range()` paging.
 
 ## Open Questions
 - Do we need search across titles/domains or full text? (Default: title/domain only.)

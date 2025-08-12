@@ -174,13 +174,32 @@ signoutBtn?.addEventListener('click', async () => {
   appSection.hidden = true;
 });
 
+let lastCreds = null;
+
 authForm?.addEventListener('submit', async e => {
   e.preventDefault();
   authStatus.textContent = 'Signing in...';
-  const { error } = await signInWithPassword(authEmail.value, authPassword.value);
+  const email = authEmail.value;
+  const password = authPassword.value;
+  lastCreds = { email, password };
+  const { error } = await signInWithPassword(email, password);
   if (error) {
     authStatus.textContent = 'Sign-in failed';
-    showMessage('error', 'Sign-in failed');
+    showMessage('error', 'Sign-in failed', {
+      retry: async () => {
+        if (!lastCreds) return;
+        authStatus.textContent = 'Retrying...';
+        const { error: e2 } = await signInWithPassword(lastCreds.email, lastCreds.password);
+        if (e2) {
+          authStatus.textContent = 'Sign-in failed';
+          showMessage('error', 'Sign-in failed');
+        } else {
+          authStatus.textContent = 'Signed in';
+          showMessage('success', 'Signed in');
+          await init();
+        }
+      }
+    });
     return;
   }
   authStatus.textContent = 'Signed in';

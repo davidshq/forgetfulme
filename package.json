@@ -34,12 +34,14 @@
     "bundle:supabase": "node scripts/bundle-supabase.mjs",
     "seed:supabase": "node scripts/seed-supabase.mjs",
     "prepare": "husky",
-    "docker:shell:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash\"",
-    "docker:npm:ci:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers'\"",
-    "docker:test:unit:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm test'\"",
-    "docker:test:visual:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers && npm run test:visual'\"",
-    "docker:test:visual:update:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers && npm run test:visual:update'\"",
-    "docker:test:visual:report:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work mcr.microsoft.com/playwright:v1.54.0-noble bash -lc 'npm ci && npm run install-browsers && npm run test:visual:report'\""
+    "docker:build:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker build -t forgetfulme-test .\"",
+    "docker:rebuild:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker build --no-cache -t forgetfulme-test .\"",
+    "docker:clean:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker rmi forgetfulme-test 2>$null; docker system prune -f\"",
+    "docker:shell:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work forgetfulme-test bash\"",
+    "docker:test:unit:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work forgetfulme-test bash -lc 'npm test'\"",
+    "docker:test:visual:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work forgetfulme-test bash -lc 'npm run test:visual'\"",
+    "docker:test:visual:update:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work forgetfulme-test bash -lc 'npm run test:visual:update'\"",
+    "docker:test:visual:report:ps": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"docker run --rm -it --user root -v \\\"${PWD}:/work\\\" -w /work forgetfulme-test bash -lc 'npm run test:visual:report'\""
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

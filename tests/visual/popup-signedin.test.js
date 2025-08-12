@@ -16,6 +16,17 @@ test.describe('Popup signed-in visual', () => {
     await page.evaluate(() => {
       document.getElementById('auth-section').hidden = true;
       document.getElementById('app-section').hidden = false;
+      
+      // Set some sample content for the signed-in state
+      document.getElementById('status-pill').textContent = 'Read';
+      
+      // Add some sample recent items
+      const recentList = document.getElementById('recent-list');
+      recentList.innerHTML = `
+        <li>Example Website 1</li>
+        <li>Example Website 2</li>
+        <li>Example Website 3</li>
+      `;
     });
     
     await expect(page).toHaveScreenshot('popup-signedin.png');

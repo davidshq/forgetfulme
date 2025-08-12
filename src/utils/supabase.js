@@ -62,6 +62,19 @@ export async function testConnection() {
 export async function listRecent(query = '', page = 1, pageSize = 10) {
   const client = await getClient();
   if (!client) return { items: [], hasMore: false };
+  // Prefer server-side RPC if available for consistent paging and performance
+  try {
+    const { data, error } = await client.rpc('list_recent', {
+      q: query || null,
+      page,
+      page_size: pageSize
+    });
+    if (!error && data && Array.isArray(data.items)) {
+      return { items: data.items, hasMore: !!data.has_more };
+    }
+  } catch {}
+
+  // Fallback to client-side paging using range
   const from = (page - 1) * pageSize;
   const to = from + pageSize; // request one extra to detect hasMore
   let q = client

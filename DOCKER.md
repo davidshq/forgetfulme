@@ -1,34 +1,74 @@
-# Docker Usage — ForgetfulMe v2
+# Docker Testing Workflow
 
-This repo includes Docker targets to run tests (including visual screenshots) without installing Node locally.
+This project uses Docker for consistent testing across different environments. The Docker setup has been optimized for speed by pre-installing dependencies and browsers.
 
-## Image
-- Base image: `mcr.microsoft.com/playwright:v1.54.0-noble` (includes Node, npm, and browsers).
+## Quick Start
 
-## Prerequisites
-- Docker installed (Docker Desktop or similar).
+### First Time Setup
+```bash
+# Build the Docker image with all dependencies pre-installed
+npm run docker:build:ps
+```
 
-## Common Commands
-- PowerShell via npm (Windows):
-  - Open shell: `npm run docker:shell:ps`
-  - Install deps: `npm run docker:npm:ci:ps`
-  - Unit tests: `npm run docker:test:unit:ps` (runs `npm run bundle:supabase`)
-  - Visual tests: `npm run docker:test:visual:ps` (runs `npm run bundle:supabase`)
-  - Update baselines: `npm run docker:test:visual:update:ps` (runs `npm run bundle:supabase`)
-  - View report: `npm run docker:test:visual:report:ps` (runs `npm run bundle:supabase`)
+### Running Tests
+```bash
+# Run visual tests (fast - no dependency installation)
+npm run docker:test:visual:ps
 
-Make targets (optional):
-- Open shell: `make docker-shell`
-- Install deps: `make docker-npm-ci`
-- Unit tests: `make docker-test-unit` (runs `npm run bundle:supabase`)
-- Visual tests: `make docker-test-visual` (runs `npm run bundle:supabase`)
-- Update baselines: `make docker-test-visual-update` (runs `npm run bundle:supabase`)
-- View report: `make docker-test-visual-report` (runs `npm run bundle:supabase`)
+# Run unit tests
+npm run docker:test:unit:ps
 
-Notes
-- Commands run as root inside the container for Windows volume mount compatibility.
-- Tests run headless inside the container with a fixed viewport; baselines are stored in the repo (under `tests/visual/__screenshots__`).
-- If you see font diffs across platforms, consider committing a deterministic font stack in CSS (we can add this if needed).
+# Update visual test snapshots
+npm run docker:test:visual:update:ps
 
-Advanced
-- You can also build a local dev image with dependencies baked in: `docker build -t forgetfulme-dev -f Dockerfile .` then run `docker run --rm -it -v "$PWD":/work -w /work forgetfulme-dev bash`.
+# Generate test report
+npm run docker:test:visual:report:ps
+```
+
+## Available Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run docker:build:ps` | Build the Docker image with dependencies |
+| `npm run docker:rebuild:ps` | Rebuild Docker image without cache |
+| `npm run docker:clean:ps` | Clean up Docker images and containers |
+| `npm run docker:shell:ps` | Open interactive shell in container |
+| `npm run docker:test:unit:ps` | Run unit tests |
+| `npm run docker:test:visual:ps` | Run visual tests |
+| `npm run docker:test:visual:update:ps` | Update visual test snapshots |
+| `npm run docker:test:visual:report:ps` | Run tests and show report |
+
+## Performance Benefits
+
+- **Fast**: No dependency installation on each run
+- **Consistent**: Same environment across all machines
+- **Isolated**: Tests run in clean container environment
+- **Cached**: Docker layers are cached for faster rebuilds
+
+## When to Rebuild
+
+Rebuild the Docker image when:
+- `package.json` dependencies change
+- `Dockerfile` is modified
+- You want to ensure a clean environment
+
+```bash
+npm run docker:rebuild:ps
+```
+
+## Troubleshooting
+
+### Clean up Docker resources
+```bash
+npm run docker:clean:ps
+```
+
+### Check Docker image
+```bash
+docker images | grep forgetfulme-test
+```
+
+### View container logs
+```bash
+docker logs <container-id>
+```
