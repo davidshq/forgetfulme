@@ -1,5 +1,5 @@
 // Minimal popup bootstrap
-import { getActiveTabUrl } from '../utils/url.js';
+import { getActiveTabUrl, domainOf } from '../utils/url.js';
 import {
   listRecent,
   toggleReadForUrl,
@@ -20,6 +20,7 @@ const authForm = document.getElementById('auth-form');
 const authEmail = document.getElementById('auth-email');
 const authPassword = document.getElementById('auth-password');
 const authStatus = document.getElementById('auth-status');
+const messageArea = document.getElementById('message-area');
 
 async function renderRecent(query = '') {
   const items = await listRecent(query);
@@ -34,6 +35,9 @@ async function renderRecent(query = '') {
     const st = (it.status || '').toLowerCase();
     chip.className = `chip ${st}`;
     chip.textContent = st || 'unknown';
+    const dom = document.createElement('span');
+    dom.className = 'chip domain';
+    dom.textContent = it.domain || domainOf(it.url || '');
     const when = document.createElement('span');
     if (it.last_read_at) {
       try {
@@ -41,6 +45,8 @@ async function renderRecent(query = '') {
       } catch {}
     }
     meta.appendChild(chip);
+    meta.appendChild(document.createTextNode(' '));
+    meta.appendChild(dom);
     meta.appendChild(when);
     li.appendChild(title);
     li.appendChild(meta);
@@ -108,7 +114,11 @@ toggleBtn.addEventListener('click', async () => {
   if (mock) {
     mockState.status = mockState.status === 'read' ? 'unread' : 'read';
   } else {
-    await toggleReadForUrl(url);
+    const res = await toggleReadForUrl(url);
+    if (!res) {
+      showMessage('error', 'Failed to update status');
+      return;
+    }
   }
   const st = mock ? mockState.status : await getStatusForUrl(url);
   statusEl.textContent = st || 'Unknown';
@@ -129,10 +139,23 @@ authForm?.addEventListener('submit', async e => {
   const { error } = await signInWithPassword(authEmail.value, authPassword.value);
   if (error) {
     authStatus.textContent = 'Sign-in failed';
+    showMessage('error', 'Sign-in failed');
     return;
   }
   authStatus.textContent = 'Signed in';
+  showMessage('success', 'Signed in');
   await init();
 });
 
 init();
+
+function showMessage(kind, text) {
+  if (!messageArea) return;
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.textContent = text;
+  messageArea.appendChild(el);
+  setTimeout(() => {
+    el.remove();
+  }, 2500);
+}
