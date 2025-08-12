@@ -36,7 +36,14 @@ async function renderRecent(query = '') {
   currentQuery = query;
   sessionStorage.setItem('fm.query', currentQuery);
   sessionStorage.setItem('fm.page', String(currentPage));
-  const { items, hasMore: more } = await listRecent(query, currentPage, PAGE_SIZE);
+  const res = await listRecent(query, currentPage, PAGE_SIZE);
+  if (res?.authError) {
+    showMessage('error', 'Session expired. Please sign in.');
+    appSection.hidden = true;
+    authSection.hidden = false;
+    return;
+  }
+  const { items, hasMore: more } = res;
   hasMore = more;
   recentList.innerHTML = '';
   for (const it of items) {
@@ -94,8 +101,14 @@ async function init() {
   if (user) {
     authSection.hidden = true;
     appSection.hidden = false;
-    const st = mock ? mockState.status : (url ? await getStatusForUrl(url) : null);
-    statusEl.textContent = st || (url ? 'Unknown' : 'No tab');
+    const stObj = mock ? { status: mockState.status } : (url ? await getStatusForUrl(url) : { status: null });
+    if (stObj?.authError) {
+      showMessage('error', 'Session expired. Please sign in.');
+      appSection.hidden = true;
+      authSection.hidden = false;
+      return;
+    }
+    statusEl.textContent = stObj.status || (url ? 'Unknown' : 'No tab');
     if (mock) {
       recentList.innerHTML = '';
       for (const it of mockState.recent) {
@@ -133,13 +146,25 @@ toggleBtn.addEventListener('click', async () => {
     mockState.status = mockState.status === 'read' ? 'unread' : 'read';
   } else {
     const res = await toggleReadForUrl(url);
-    if (!res) {
-      showMessage('error', 'Failed to update status');
+    if (res?.authError) {
+      showMessage('error', 'Session expired. Please sign in.');
+      appSection.hidden = true;
+      authSection.hidden = false;
+      return;
+    }
+    if (!res?.ok) {
+      showMessage('error', 'Failed to update status', { retry: async () => toggleBtn.click() });
       return;
     }
   }
-  const st = mock ? mockState.status : await getStatusForUrl(url);
-  statusEl.textContent = st || 'Unknown';
+  const stObj = mock ? { status: mockState.status } : await getStatusForUrl(url);
+  if (stObj?.authError) {
+    showMessage('error', 'Session expired. Please sign in.');
+    appSection.hidden = true;
+    authSection.hidden = false;
+    return;
+  }
+  statusEl.textContent = stObj?.status || 'Unknown';
   await renderRecent(searchInput.value || '');
 });
 

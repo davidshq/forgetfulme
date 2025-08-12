@@ -59,9 +59,15 @@ export async function testConnection() {
   return Boolean(client);
 }
 
+function isAuthError(err) {
+  if (!err) return false;
+  const msg = (err.message || '').toLowerCase();
+  return err.status === 401 || msg.includes('jwt');
+}
+
 export async function listRecent(query = '', page = 1, pageSize = 10) {
   const client = await getClient();
-  if (!client) return { items: [], hasMore: false };
+  if (!client) return { items: [], hasMore: false, authError: true };
   // Prefer server-side RPC if available for consistent paging and performance
   try {
     const { data, error } = await client.rpc('list_recent', {
@@ -72,7 +78,10 @@ export async function listRecent(query = '', page = 1, pageSize = 10) {
     if (!error && data && Array.isArray(data.items)) {
       return { items: data.items, hasMore: !!data.has_more };
     }
-  } catch {}
+    if (error && isAuthError(error)) return { items: [], hasMore: false, authError: true };
+  } catch (e) {
+    if (isAuthError(e)) return { items: [], hasMore: false, authError: true };
+  }
 
   // Fallback to client-side paging using range
   const from = (page - 1) * pageSize;
@@ -87,7 +96,10 @@ export async function listRecent(query = '', page = 1, pageSize = 10) {
     q = q.or(`title.ilike.%${esc}%,domain.ilike.%${esc}%`);
   }
   const { data, error } = await q;
-  if (error) return { items: [], hasMore: false };
+  if (error) {
+    if (isAuthError(error)) return { items: [], hasMore: false, authError: true };
+    return { items: [], hasMore: false };
+  }
   const items = (data || []).slice(0, pageSize);
   const hasMore = (data || []).length > pageSize;
   return { items, hasMore };
@@ -95,7 +107,7 @@ export async function listRecent(query = '', page = 1, pageSize = 10) {
 
 export async function toggleReadForUrl(rawUrl, title = null) {
   const client = await getClient();
-  if (!client) return null;
+  if (!client) return { ok: false, authError: true };
   const url = normalizeUrl(rawUrl);
   const domain = domainOf(url);
   const { data, error } = await client.rpc('toggle_read', {
@@ -103,8 +115,11 @@ export async function toggleReadForUrl(rawUrl, title = null) {
     p_title: title,
     p_domain: domain
   });
-  if (error) return null;
-  return data;
+  if (error) {
+    if (isAuthError(error)) return { ok: false, authError: true };
+    return { ok: false };
+  }
+  return { ok: true, data };
 }
 
 export async function getUser() {
@@ -129,13 +144,16 @@ export async function signOut() {
 
 export async function getStatusForUrl(rawUrl) {
   const client = await getClient();
-  if (!client) return null;
+  if (!client) return { status: null, authError: true };
   const url = normalizeUrl(rawUrl);
   const { data, error } = await client
     .from('reads')
     .select('status')
     .eq('url', url)
     .maybeSingle();
-  if (error) return null;
-  return data?.status || null;
+  if (error) {
+    if (isAuthError(error)) return { status: null, authError: true };
+    return { status: null };
+  }
+  return { status: data?.status || null };
 }

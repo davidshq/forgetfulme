@@ -90,6 +90,49 @@ begin
 end;$$;
 
 grant execute on function public.toggle_read(text,text,text) to anon, authenticated;
+
+-- Optional: paginated listing RPC for better performance and consistent paging
+create or replace function public.list_recent(q text, page int, page_size int)
+returns jsonb language plpgsql as $$
+declare v_user uuid := auth.uid();
+        v_from int := greatest((coalesce(page,1)-1) * coalesce(page_size,10), 0);
+        v_to int := v_from + coalesce(page_size,10);
+        v_items jsonb;
+        v_has_more boolean;
+begin
+  if v_user is null then
+    raise exception 'Not authenticated';
+  end if;
+  with base as (
+    select url, title, domain, status, last_read_at
+    from public.reads
+    where user_id = v_user
+      and (q is null or title ilike '%'||q||'%' or domain ilike '%'||q||'%')
+    order by last_read_at desc
+    offset v_from limit (coalesce(page_size,10) + 1)
+  )
+  select jsonb_agg(to_jsonb(b) - 'f1')
+  from (
+    select jsonb_build_object(
+      'url', url,
+      'title', title,
+      'domain', domain,
+      'status', status,
+      'last_read_at', last_read_at
+    ) as f1, *
+    from base
+  ) s
+  into v_items;
+
+  v_has_more := jsonb_array_length(coalesce(v_items,'[]'::jsonb)) > coalesce(page_size,10);
+  if v_has_more then
+    v_items := v_items - (jsonb_array_length(v_items) - 1);
+  end if;
+
+  return jsonb_build_object('items', coalesce(v_items, '[]'::jsonb), 'has_more', v_has_more);
+end;$$;
+
+grant execute on function public.list_recent(text,int,int) to anon, authenticated;
 ```
 
 ## Core Flows (pseudocode)
