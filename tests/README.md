@@ -30,7 +30,14 @@ tests/
 ├── helpers/                 # Test utilities and factories
 │   ├── test-utils.js       # Core test utilities
 │   ├── test-factories.js   # Specialized test factories
-│   └── extension-helper.js # Playwright extension helper
+│   ├── extension-helper.js  # Playwright extension helper
+│   └── mocks/              # Modular mock implementations
+│       ├── dom.js          # DOM element, document, window mocks
+│       ├── chrome-api.js   # Chrome extension API mocks
+│       ├── console.js      # Console method mocks
+│       ├── error-handler.js # ErrorHandler mocks
+│       ├── ui-components.js # UIComponents mocks
+│       └── README.md       # Mock documentation
 ├── popup.test.js           # Playwright integration tests
 ├── options.test.js         # Playwright integration tests
 └── README.md              # This file
@@ -60,6 +67,18 @@ These tests use Playwright for end-to-end functionality:
 - **options.test.js** - Options page configuration
 
 ## Test Utilities
+
+### Modular Mocks (`helpers/mocks/`)
+
+The test mocks are organized into modular files for better maintainability:
+
+- **`dom.js`** - DOM element, document, and window mocks
+- **`chrome-api.js`** - Chrome extension API mocks
+- **`console.js`** - Console method mocks
+- **`error-handler.js`** - ErrorHandler utility mocks
+- **`ui-components.js`** - UIComponents mocks
+
+These mocks are automatically set up in `vitest.setup.js` and can also be imported individually in test files. See `helpers/mocks/README.md` for detailed documentation.
 
 ### Core Utilities (`test-utils.js`)
 
