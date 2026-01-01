@@ -206,6 +206,15 @@ npm run format
 
 # Check code quality
 npm run check
+
+# Compare development branches
+npm run compare-branches
+
+# Compare branches with detailed report
+npm run compare-branches:detailed
+
+# Save comparison report to file
+npm run compare-branches:save
 ```
 
 ### Setting Up Development Environment
@@ -249,6 +258,16 @@ The project maintains high code quality through:
 - **Comprehensive Testing**: Unit and integration tests
 - **Error Handling**: Robust error management
 - **Security**: CSP compliance and secure practices
+
+### Branch Comparison
+
+The project includes tools for comparing different development branches:
+
+- **Automated Comparison**: Use `npm run compare-branches` to compare branches
+- **Detailed Analysis**: Generate comprehensive reports with metrics and file differences
+- **AI Development Tracking**: Compare implementations from different AI assistants
+
+See [Branch Comparison Guide](docs/BRANCH_COMPARISON.md) and [scripts/README.md](scripts/README.md) for more details.
 
 ### Building for Distribution
 
