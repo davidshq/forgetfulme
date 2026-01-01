@@ -24,15 +24,6 @@ const CONFIG = {
   MIGRATION_VERSION: 1,
 };
 
-const configManager = new ConfigManager();
-await configManager.initialize();
-
-// Get Supabase configuration
-const supabaseConfig = await configManager.getSupabaseConfig();
-
-// Set custom status types
-await configManager.setCustomStatusTypes(['read', 'important', 'review']);
-
 class ConfigManager {
   /**
    * Initialize the configuration manager

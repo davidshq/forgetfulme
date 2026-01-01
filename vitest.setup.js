@@ -76,17 +76,15 @@ global.chrome = {
  * Enhanced DOM element mock factory
  * @function createMockElement
  * @param {string} tagName - The HTML tag name for the element
- * @returns {Object} Mock DOM element with full functionality
- * @description Creates a comprehensive mock DOM element with event handling and DOM manipulation capabilities
+ * @returns {Object} Mock DOM element
  */
-const createMockElement = tagName => {
+const createMockElement = function (tagName) {
   const element = {
     tagName: tagName.toUpperCase(),
     id: '',
     className: '',
     textContent: '',
     innerHTML: '',
-    style: {},
     children: [],
     parentNode: null,
     nextSibling: null,
@@ -94,167 +92,63 @@ const createMockElement = tagName => {
     firstChild: null,
     lastChild: null,
 
-    // Event handling
+    // Event methods
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(function (event) {
-      // Actually call the event listeners
-      const listeners = this._eventListeners || [];
-      listeners.forEach(listener => {
-        if (listener.type === event.type) {
-          listener.handler.call(this, event);
-        }
-      });
-      return true;
+      if (this._eventListeners) {
+        this._eventListeners
+          .filter(listener => listener.type === event.type)
+          .forEach(listener => listener.handler(event));
+      }
     }),
 
     // DOM manipulation
     appendChild: vi.fn(function (child) {
-      if (child && typeof child === 'object') {
-        // Ensure child has required properties
-        if (!Object.prototype.hasOwnProperty.call(child, 'parentNode')) {
-          child.parentNode = null;
-        }
-        if (!Object.prototype.hasOwnProperty.call(child, 'children')) {
-          child.children = [];
-        }
-
-        child.parentNode = this;
-        this.children.push(child);
-        if (!this.firstChild) this.firstChild = child;
-        this.lastChild = child;
-      }
+      this.children.push(child);
+      child.parentNode = this;
+      this.firstChild = this.children[0];
+      this.lastChild = this.children[this.children.length - 1];
       return child;
     }),
     removeChild: vi.fn(function (child) {
-      if (child && typeof child === 'object') {
-        const index = this.children.indexOf(child);
-        if (index > -1) {
-          this.children.splice(index, 1);
-          if (Object.prototype.hasOwnProperty.call(child, 'parentNode')) {
-            child.parentNode = null;
-          }
-          if (this.firstChild === child) {
-            this.firstChild = this.children[0] || null;
-          }
-          if (this.lastChild === child) {
-            this.lastChild = this.children[this.children.length - 1] || null;
-          }
-        }
+      const index = this.children.indexOf(child);
+      if (index > -1) {
+        this.children.splice(index, 1);
+        child.parentNode = null;
       }
       return child;
     }),
-    insertBefore: vi.fn(function (newNode, referenceNode) {
-      if (newNode && typeof newNode === 'object') {
-        // Ensure newNode has required properties
-        if (!Object.prototype.hasOwnProperty.call(newNode, 'parentNode')) {
-          newNode.parentNode = null;
-        }
-        if (!Object.prototype.hasOwnProperty.call(newNode, 'children')) {
-          newNode.children = [];
-        }
-
-        const index = referenceNode
-          ? this.children.indexOf(referenceNode)
-          : this.children.length;
-        this.children.splice(index, 0, newNode);
-        newNode.parentNode = this;
-        if (!this.firstChild) this.firstChild = newNode;
-        if (this.lastChild === referenceNode) this.lastChild = newNode;
-      }
-      return newNode;
-    }),
     replaceChild: vi.fn(function (newChild, oldChild) {
-      if (
-        newChild &&
-        typeof newChild === 'object' &&
-        oldChild &&
-        typeof oldChild === 'object'
-      ) {
-        // Ensure newChild has required properties
-        if (!Object.prototype.hasOwnProperty.call(newChild, 'parentNode')) {
-          newChild.parentNode = null;
-        }
-        if (!Object.prototype.hasOwnProperty.call(newChild, 'children')) {
-          newChild.children = [];
-        }
-
-        const index = this.children.indexOf(oldChild);
-        if (index > -1) {
-          this.children[index] = newChild;
-          if (Object.prototype.hasOwnProperty.call(oldChild, 'parentNode')) {
-            oldChild.parentNode = null;
-          }
-          newChild.parentNode = this;
-          if (this.firstChild === oldChild) this.firstChild = newChild;
-          if (this.lastChild === oldChild) this.lastChild = newChild;
-        }
+      const index = this.children.indexOf(oldChild);
+      if (index > -1) {
+        this.children[index] = newChild;
+        oldChild.parentNode = null;
+        newChild.parentNode = this;
       }
       return oldChild;
     }),
+    insertBefore: vi.fn(function (newChild, refChild) {
+      const index = this.children.indexOf(refChild);
+      if (index > -1) {
+        this.children.splice(index, 0, newChild);
+        newChild.parentNode = this;
+      } else {
+        this.children.push(newChild);
+        newChild.parentNode = this;
+      }
+      return newChild;
+    }),
 
     // Query methods
-    querySelector: vi.fn(function (selector) {
-      // Return the first child that matches the selector
-      for (const child of this.children) {
-        if (
-          child.className &&
-          child.className.includes(selector.replace('.', ''))
-        ) {
-          return child;
-        }
-        if (
-          child.tagName &&
-          child.tagName.toLowerCase() === selector.toLowerCase()
-        ) {
-          return child;
-        }
-        // Check nested children
-        const nested = child.querySelector(selector);
-        if (nested) return nested;
-      }
-      return null;
-    }),
+    querySelector: vi.fn(),
     querySelectorAll: vi.fn(function (selector) {
-      const results = [];
-      const seen = new Set();
-
-      const searchElement = element => {
-        if (seen.has(element)) return;
-        seen.add(element);
-
-        // Handle class selectors
-        if (selector.startsWith('.')) {
-          const className = selector.substring(1);
-          if (
-            element.className &&
-            element.className.split(' ').includes(className)
-          ) {
-            results.push(element);
-          }
-        }
-        // Handle tag selectors
-        else if (
-          element.tagName &&
-          element.tagName.toLowerCase() === selector.toLowerCase()
-        ) {
-          results.push(element);
-        }
-
-        // Search children
-        for (const child of element.children) {
-          searchElement(child);
-        }
-      };
-
-      searchElement(this);
-      return results;
+      return [];
     }),
 
-    // Properties
+    // Style and layout
+    style: {},
     getBoundingClientRect: vi.fn(() => ({
-      top: 0,
-      left: 0,
       width: 100,
       height: 50,
       right: 100,
