@@ -5,6 +5,7 @@ A cross-browser extension that helps you mark websites as "read" for research pu
 ## Features
 
 ### Core Functionality
+
 - **Mark pages as read** with customizable status types
 - **Add tags** to organize your entries
 - **Keyboard shortcuts** for quick marking (Ctrl+Shift+R)
@@ -13,11 +14,13 @@ A cross-browser extension that helps you mark websites as "read" for research pu
 - **Unlimited storage** for hundreds of thousands of entries
 
 ### Customizable Status Types
+
 - Default types: "Read", "Good Reference", "Low Value", "Revisit Later"
 - **Fully customizable** - add your own status types
 - User-defined tags for better organization
 
 ### User Interface
+
 - **Clean popup interface** for quick marking
 - **Settings page** for customization and data management
 - **Recent entries view** to see your latest marks
@@ -25,12 +28,14 @@ A cross-browser extension that helps you mark websites as "read" for research pu
 - **Authentication system** for secure data access
 
 ### Data Management
+
 - **Export/Import** functionality for data backup
 - **Cross-device sync** through Supabase
 - **Data statistics** and usage insights
 - **Secure user accounts** with email/password
 
 ### Error Handling & Reliability
+
 - **Centralized error handling** system for consistent user experience
 - **User-friendly error messages** instead of technical jargon
 - **Service worker compatibility** for background script reliability
@@ -75,6 +80,7 @@ Before using the extension, you need to set up a Supabase backend:
 The extension uses a secure configuration system that prevents sensitive credentials from being committed to version control:
 
 #### Option 1: Extension Settings (Recommended for Users)
+
 1. **Load the extension** in Chrome
 2. **Open the options page** (click the extension icon → Settings)
 3. **Go to Supabase Configuration** section
@@ -82,14 +88,15 @@ The extension uses a secure configuration system that prevents sensitive credent
 5. **Save the configuration**
 
 #### Option 2: Local Development (For Developers)
+
 1. **Copy the template file**:
    ```bash
    cp supabase-config.template.js supabase-config.local.js
    ```
 2. **Edit `supabase-config.local.js`** with your credentials:
    ```javascript
-   this.supabaseUrl = 'https://your-project.supabase.co'
-   this.supabaseAnonKey = 'your-anon-public-key-here'
+   this.supabaseUrl = 'https://your-project.supabase.co';
+   this.supabaseAnonKey = 'your-anon-public-key-here';
    ```
 3. **Update HTML files** to include the local config:
    ```html
@@ -99,7 +106,9 @@ The extension uses a secure configuration system that prevents sensitive credent
    ```
 
 #### Option 3: Environment Variables (For Advanced Users)
+
 Set environment variables in your development environment:
+
 ```bash
 export SUPABASE_URL="https://your-project.supabase.co"
 export SUPABASE_ANON_KEY="your-anon-public-key-here"
@@ -123,6 +132,7 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 ## Development
 
 ### Project Structure
+
 ```
 forgetfulme/
 ├── manifest.json          # Extension configuration
@@ -164,6 +174,7 @@ forgetfulme/
 ```
 
 ### Key Technologies
+
 - **Manifest V3** - Latest Chrome extension standard
 - **Supabase** - Backend-as-a-Service with PostgreSQL
 - **Service Workers** - Background processing
@@ -223,18 +234,21 @@ npm run check
 The project uses a comprehensive testing approach:
 
 #### Unit Tests (Vitest)
+
 - **Location**: `tests/unit/`
 - **Focus**: Individual utility modules and business logic
 - **Coverage**: 90%+ target for utility modules
 - **Framework**: Vitest with JSDOM environment
 
 #### Integration Tests (Playwright)
+
 - **Location**: `tests/` (popup.test.js, options.test.js)
 - **Focus**: End-to-end user workflows
 - **Browser**: Chromium-based browsers
 - **Framework**: Playwright
 
 #### Test Utilities
+
 - **Test Factories**: Specialized test instance creation
 - **Mock Utilities**: Chrome API and dependency mocking
 - **Helper Functions**: Common test setup and teardown
@@ -284,6 +298,7 @@ The project maintains high code quality through:
 ## Roadmap
 
 ### Phase 1 (Current)
+
 - ✅ Basic marking functionality
 - ✅ Custom status types
 - ✅ Keyboard shortcuts
@@ -301,6 +316,7 @@ The project maintains high code quality through:
 - ✅ **Service worker compatibility**
 
 ### Phase 2 (Planned)
+
 - 🔄 Advanced search and filtering
 - 🔄 Bulk operations
 - 🔄 Data analytics dashboard
@@ -308,6 +324,7 @@ The project maintains high code quality through:
 - 🔄 Enhanced accessibility features
 
 ### Phase 3 (Future)
+
 - 🔄 Firefox support
 - 🔄 Safari support
 - 🔄 Mobile companion app
@@ -328,6 +345,7 @@ The project maintains high code quality through:
 ## Cost Considerations
 
 The extension uses Supabase's free tier which includes:
+
 - 500MB database
 - 50,000 monthly active users
 - 2GB bandwidth
@@ -344,6 +362,7 @@ NOTE: supabase.min.js is Supabase's client library, it is not included in this l
 ## Support
 
 For issues, feature requests, or questions:
+
 1. Check the existing issues
 2. Create a new issue with detailed information
 3. Include browser version and extension version
@@ -353,4 +372,4 @@ For issues, feature requests, or questions:
 
 ---
 
-**ForgetfulMe** - Never forget what you've read! 📚 
+**ForgetfulMe** - Never forget what you've read! 📚

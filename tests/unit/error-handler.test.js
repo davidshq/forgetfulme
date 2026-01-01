@@ -346,9 +346,7 @@ describe('ErrorHandler', () => {
 
       const result = ErrorHandler.getUserMessage(errorInfo);
 
-      expect(result).toBe(
-        'Connection error. Please check your internet connection and try again.'
-      );
+      expect(result).toBe('Connection error. Please check your internet connection and try again.');
     });
 
     test('should return user-friendly auth error messages', () => {
@@ -367,8 +365,7 @@ describe('ErrorHandler', () => {
         },
         {
           message: 'Email not confirmed',
-          expected:
-            'Please check your email and click the verification link before signing in.',
+          expected: 'Please check your email and click the verification link before signing in.',
         },
         {
           message: 'User not authenticated',
@@ -429,6 +426,67 @@ describe('ErrorHandler', () => {
       const result = ErrorHandler.getUserMessage(errorInfo);
 
       expect(result).toBe('Authentication error. Please try signing in again.');
+    });
+
+    test('should return user-friendly database error message', () => {
+      const errorInfo = {
+        type: ErrorHandler.ERROR_TYPES.DATABASE,
+        message: 'Database connection failed',
+      };
+
+      const result = ErrorHandler.getUserMessage(errorInfo);
+
+      expect(result).toBe(
+        'Data error. Please try again or contact support if the problem persists.',
+      );
+    });
+
+    test('should return user-friendly config error messages', () => {
+      const testCases = [
+        {
+          message: 'Supabase client not loaded',
+          expected: 'Configuration error. Please check your Supabase settings.',
+        },
+        {
+          message: 'Config error',
+          expected: 'Configuration error. Please check your settings and try again.',
+        },
+      ];
+
+      testCases.forEach(({ message, expected }) => {
+        const errorInfo = {
+          type: ErrorHandler.ERROR_TYPES.CONFIG,
+          message,
+        };
+
+        const result = ErrorHandler.getUserMessage(errorInfo);
+
+        expect(result).toBe(expected);
+      });
+    });
+
+    test('should return user-friendly UI error message', () => {
+      const errorInfo = {
+        type: ErrorHandler.ERROR_TYPES.UI,
+        message: 'DOM element not found',
+      };
+
+      const result = ErrorHandler.getUserMessage(errorInfo);
+
+      expect(result).toBe('Interface error. Please refresh the page and try again.');
+    });
+
+    test('should return user-friendly unknown error message', () => {
+      const errorInfo = {
+        type: ErrorHandler.ERROR_TYPES.UNKNOWN,
+        message: 'Some unexpected error',
+      };
+
+      const result = ErrorHandler.getUserMessage(errorInfo);
+
+      expect(result).toBe(
+        'An unexpected error occurred. Please refresh the page and try again. If the problem persists, contact support.',
+      );
     });
   });
 
@@ -604,7 +662,7 @@ describe('ErrorHandler', () => {
       const result = ErrorHandler.createError(
         'Test error',
         ErrorHandler.ERROR_TYPES.NETWORK,
-        'test-context'
+        'test-context',
       );
 
       expect(result).toBeInstanceOf(Error);
@@ -627,9 +685,7 @@ describe('ErrorHandler', () => {
       const error = new Error('Operation failed');
       const operation = vi.fn().mockRejectedValue(error);
 
-      await expect(
-        ErrorHandler.handleAsync(operation, 'test-context')
-      ).rejects.toThrow();
+      await expect(ErrorHandler.handleAsync(operation, 'test-context')).rejects.toThrow();
     });
 
     test('should pass options to error handler', async () => {
@@ -637,9 +693,7 @@ describe('ErrorHandler', () => {
       const operation = vi.fn().mockRejectedValue(error);
       const options = { silent: true };
 
-      await expect(
-        ErrorHandler.handleAsync(operation, 'test-context', options)
-      ).rejects.toThrow();
+      await expect(ErrorHandler.handleAsync(operation, 'test-context', options)).rejects.toThrow();
     });
   });
 

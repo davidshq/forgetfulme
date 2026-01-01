@@ -8,6 +8,10 @@
  * @since 2024-01-01
  */
 
+import { categorizeError } from './error-categorizer.js';
+import { getUserMessage } from './error-messages.js';
+import { validateInput } from './error-validator.js';
+
 /**
  * Centralized Error Handler for ForgetfulMe Extension
  * @class ErrorHandler
@@ -68,9 +72,9 @@ class ErrorHandler {
    * @returns {Object} - Error information and user message
    */
   static handle(error, context = 'unknown', options = {}) {
-    const errorInfo = this.categorizeError(error, context);
+    const errorInfo = categorizeError(error, context);
     this.logError(errorInfo, options);
-    const userMessage = this.getUserMessage(errorInfo, options);
+    const userMessage = getUserMessage(errorInfo, options);
 
     return {
       errorInfo,
@@ -81,145 +85,15 @@ class ErrorHandler {
   }
 
   /**
-   * Categorize error based on error message and context
-   * @param {Error} error - The error object
-   * @param {string} context - Where the error occurred
-   * @returns {Object} - Categorized error information
-   */
-  static categorizeError(error, context) {
-    const message = error.message || error.toString();
-    // const stack = error.stack || '';
-
-    // Network errors
-    if (
-      message.includes('fetch') ||
-      message.includes('network') ||
-      message.includes('HTTP') ||
-      message.includes('timeout') ||
-      message.includes('Failed to fetch')
-    ) {
-      return {
-        type: this.ERROR_TYPES.NETWORK,
-        severity: this.SEVERITY.MEDIUM,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // Authentication errors
-    if (
-      message.includes('auth') ||
-      message.includes('login') ||
-      message.includes('sign') ||
-      message.includes('password') ||
-      message.includes('token') ||
-      message.includes('session') ||
-      message.includes('User not authenticated')
-    ) {
-      return {
-        type: this.ERROR_TYPES.AUTH,
-        severity: this.SEVERITY.HIGH,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // Validation errors
-    if (
-      message.includes('validation') ||
-      message.includes('invalid') ||
-      message.includes('required') ||
-      message.includes('format') ||
-      message.includes('Both URL and anon key are required') ||
-      message.includes('URL must start with https://') ||
-      message.includes('Invalid anon key format')
-    ) {
-      return {
-        type: this.ERROR_TYPES.VALIDATION,
-        severity: this.SEVERITY.LOW,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // Database errors
-    if (
-      message.includes('database') ||
-      message.includes('query') ||
-      message.includes('table') ||
-      message.includes('column') ||
-      message.includes('constraint') ||
-      message.includes('foreign key')
-    ) {
-      return {
-        type: this.ERROR_TYPES.DATABASE,
-        severity: this.SEVERITY.HIGH,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // Configuration errors
-    if (
-      message.includes('config') ||
-      message.includes('supabase') ||
-      message.includes('Supabase client not loaded') ||
-      message.includes('Supabase client not properly initialized')
-    ) {
-      return {
-        type: this.ERROR_TYPES.CONFIG,
-        severity: this.SEVERITY.MEDIUM,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // UI errors
-    if (
-      message.includes('DOM') ||
-      message.includes('element') ||
-      message.includes('null') ||
-      message.includes('undefined') ||
-      context.includes('ui') ||
-      context.includes('popup') ||
-      context.includes('options')
-    ) {
-      return {
-        type: this.ERROR_TYPES.UI,
-        severity: this.SEVERITY.MEDIUM,
-        message,
-        context,
-        originalError: error,
-      };
-    }
-
-    // Unknown error
-    return {
-      type: this.ERROR_TYPES.UNKNOWN,
-      severity: this.SEVERITY.MEDIUM,
-      message,
-      context,
-      originalError: error,
-    };
-  }
-
-  /**
    * Log error with appropriate level
    * @param {Object} errorInfo - Categorized error information
    * @param {Object} options - Additional options
    */
   static logError(errorInfo, options = {}) {
-    const { type, severity, message, context, originalError } = errorInfo;
+    const { severity } = errorInfo;
     const silent = options.silent || false;
 
     if (silent) return;
-
-    const logMessage = `[${type}] [${severity}] ${context}: ${message}`;
 
     // Log error based on severity level
     switch (severity) {
@@ -246,83 +120,40 @@ class ErrorHandler {
    * @returns {string} - User-friendly error message
    */
   static getUserMessage(errorInfo, options = {}) {
-    const { type, message } = errorInfo;
-    const showTechnical = options.showTechnical || false;
-
-    // If technical details are requested, return the original message
-    if (showTechnical) {
-      return message;
-    }
-
-    // User-friendly messages based on error type
-    switch (type) {
-      case this.ERROR_TYPES.NETWORK:
-        return 'Connection error. Please check your internet connection and try again.';
-
-      case this.ERROR_TYPES.AUTH:
-        if (message.includes('Invalid login credentials')) {
-          return 'Invalid email or password. Please try again.';
-        }
-        if (message.includes('User already registered')) {
-          return 'An account with this email already exists.';
-        }
-        if (message.includes('Password should be at least')) {
-          return 'Password must be at least 6 characters.';
-        }
-        if (message.includes('Email not confirmed')) {
-          return 'Please check your email and click the verification link before signing in.';
-        }
-        if (message.includes('User not authenticated')) {
-          return 'Please sign in to continue.';
-        }
-        return 'Authentication error. Please try signing in again.';
-
-      case this.ERROR_TYPES.VALIDATION:
-        if (message.includes('Both URL and anon key are required')) {
-          return 'Please enter both the Project URL and anon key.';
-        }
-        if (message.includes('URL must start with https://')) {
-          return 'Project URL must start with https://';
-        }
-        if (message.includes('Invalid anon key format')) {
-          return 'Please check your anon key format.';
-        }
-        if (message.includes('Please fill in all fields')) {
-          return 'Please fill in all required fields.';
-        }
-        return 'Please check your input and try again.';
-
-      case this.ERROR_TYPES.DATABASE:
-        return 'Data error. Please try again or contact support if the problem persists.';
-
-      case this.ERROR_TYPES.CONFIG:
-        if (message.includes('Supabase client not loaded')) {
-          return 'Configuration error. Please check your Supabase settings.';
-        }
-        return 'Configuration error. Please check your settings and try again.';
-
-      case this.ERROR_TYPES.UI:
-        return 'Interface error. Please refresh the page and try again.';
-
-      case this.ERROR_TYPES.UNKNOWN:
-      default:
-        return 'An unexpected error occurred. Please try again.';
-    }
+    return getUserMessage(errorInfo, options);
   }
 
   /**
-   * Determine if operation should be retried
-   * @param {Object} errorInfo - Categorized error information
-   * @returns {boolean} - Whether to retry
+   * Determine if operation should be retried.
+   * This method works with retry-utils.js to provide consistent retry behavior.
+   *
+   * **Retryable Errors:**
+   * - Network errors (connection failures, timeouts, fetch errors)
+   * - Database errors (transient database issues, connection problems)
+   * - Auth errors (token refresh failures, session expiration)
+   *
+   * **Non-Retryable Errors:**
+   * - Validation errors (invalid user input, data format issues)
+   * - Configuration errors (missing settings, invalid config)
+   * - UI errors (DOM manipulation failures)
+   *
+   * **Usage with retryWithBackoff:**
+   * ```javascript
+   * const errorResult = ErrorHandler.handle(error, context);
+   * if (errorResult.shouldRetry) {
+   *   await retryWithBackoff(() => operation());
+   * }
+   * ```
+   *
+   * @param {Object} errorInfo - Categorized error information from handle()
+   * @param {string} errorInfo.type - Error type (NETWORK, DATABASE, AUTH, etc.)
+   * @returns {boolean} - Whether to retry the operation
    */
   static shouldRetry(errorInfo) {
     const { type } = errorInfo;
 
     // Retry network errors and database errors
-    if (
-      type === this.ERROR_TYPES.NETWORK ||
-      type === this.ERROR_TYPES.DATABASE
-    ) {
+    if (type === this.ERROR_TYPES.NETWORK || type === this.ERROR_TYPES.DATABASE) {
       return true;
     }
 
@@ -386,11 +217,7 @@ class ErrorHandler {
    * @param {string} context - Error context
    * @returns {Error} - Standardized error object
    */
-  static createError(
-    message,
-    type = this.ERROR_TYPES.UNKNOWN,
-    context = 'unknown'
-  ) {
+  static createError(message, type = this.ERROR_TYPES.UNKNOWN, context = 'unknown') {
     const error = new Error(message);
     error.type = type;
     error.context = context;
@@ -413,11 +240,7 @@ class ErrorHandler {
 
       if (errorResult.shouldShowToUser) {
         // Re-throw with user-friendly message
-        throw this.createError(
-          errorResult.userMessage,
-          errorResult.errorInfo.type,
-          context
-        );
+        throw this.createError(errorResult.userMessage, errorResult.errorInfo.type, context);
       } else {
         // Log but don't show to user
         throw error;
@@ -462,49 +285,7 @@ class ErrorHandler {
    * @returns {Object} - Validation result
    */
   static validateInput(input, type = 'text') {
-    const trimmed = input.trim();
-
-    switch (type) {
-      case 'email': {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return {
-          isValid: emailRegex.test(trimmed),
-          message: emailRegex.test(trimmed)
-            ? null
-            : 'Please enter a valid email address.',
-        };
-      }
-
-      case 'url':
-        try {
-          new URL(trimmed);
-          return {
-            isValid: true,
-            message: null,
-          };
-        } catch {
-          return {
-            isValid: false,
-            message: 'Please enter a valid URL.',
-          };
-        }
-
-      case 'password':
-        return {
-          isValid: trimmed.length >= 6,
-          message:
-            trimmed.length >= 6
-              ? null
-              : 'Password must be at least 6 characters.',
-        };
-
-      case 'text':
-      default:
-        return {
-          isValid: trimmed.length > 0,
-          message: trimmed.length > 0 ? null : 'This field is required.',
-        };
-    }
+    return validateInput(input, type);
   }
 }
 

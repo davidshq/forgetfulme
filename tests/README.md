@@ -104,21 +104,25 @@ Provides specialized test instance creation:
 ## Running Tests
 
 ### All Tests
+
 ```bash
 npm test
 ```
 
 ### Unit Tests Only
+
 ```bash
 npm run test:unit
 ```
 
 ### Integration Tests Only
+
 ```bash
 npm run test:integration
 ```
 
 ### Specific Test File
+
 ```bash
 npm test tests/unit/error-handler.test.js
 ```
@@ -130,6 +134,7 @@ npm test tests/unit/error-handler.test.js
 #### 1. Choose the Right Test Type
 
 **Unit Tests** (for business logic):
+
 ```javascript
 // tests/unit/my-module.test.js
 import { describe, test, expect, beforeEach, vi } from 'vitest';
@@ -148,6 +153,7 @@ describe('MyModule', () => {
 ```
 
 **Integration Tests** (for UI workflows):
+
 ```javascript
 // tests/my-feature.test.js
 import { test, expect } from '@playwright/test';
@@ -192,7 +198,7 @@ describe('MyModule', () => {
   test('should handle errors correctly', async () => {
     mocks.errorHandler.handle.mockReturnValue({
       userMessage: 'Error occurred',
-      errorInfo: { type: 'NETWORK' }
+      errorInfo: { type: 'NETWORK' },
     });
 
     // Your test code here
@@ -210,7 +216,7 @@ describe('BookmarkService', () => {
       const bookmark = {
         url: 'https://example.com',
         title: 'Example',
-        readStatus: 'read'
+        readStatus: 'read',
       };
 
       // Execute
@@ -227,17 +233,13 @@ describe('BookmarkService', () => {
       await bookmarkService.saveBookmark(bookmark);
 
       // Execute & Assert
-      await expect(
-        bookmarkService.saveBookmark(bookmark)
-      ).rejects.toThrow('Duplicate URL');
+      await expect(bookmarkService.saveBookmark(bookmark)).rejects.toThrow('Duplicate URL');
     });
 
     test('should validate bookmark data', async () => {
       const invalidBookmark = { url: '' }; // Missing required fields
 
-      await expect(
-        bookmarkService.saveBookmark(invalidBookmark)
-      ).rejects.toThrow();
+      await expect(bookmarkService.saveBookmark(invalidBookmark)).rejects.toThrow();
     });
   });
 });
@@ -288,7 +290,7 @@ describe('Bookmark Operations', () => {
     // Override specific properties
     const customBookmark = createTestData.bookmark({
       url: 'https://custom.com',
-      title: 'Custom Title'
+      title: 'Custom Title',
     });
     expect(customBookmark.url).toBe('https://custom.com');
   });
@@ -302,7 +304,7 @@ describe('Bookmark Operations', () => {
   test('should create error objects', () => {
     const error = createTestData.error({
       type: 'NETWORK',
-      message: 'Connection failed'
+      message: 'Connection failed',
     });
     expect(error.type).toBe('NETWORK');
   });
@@ -317,24 +319,24 @@ const bookmark = createTestData.bookmark({
   url: 'https://example.com',
   title: 'Example Page',
   readStatus: 'good-reference',
-  tags: ['research', 'important']
+  tags: ['research', 'important'],
 });
 
 // User data
 const user = createTestData.user({
-  email: 'test@example.com'
+  email: 'test@example.com',
 });
 
 // Tab data (for Chrome tabs)
 const tab = createTestData.tab({
   url: 'https://example.com',
-  title: 'Example'
+  title: 'Example',
 });
 
 // Error data
 const error = createTestData.error({
   message: 'Custom error',
-  type: 'AUTH'
+  type: 'AUTH',
 });
 ```
 
@@ -351,7 +353,7 @@ export const createTestData = {
     readStatus: 'read',
     tags: ['tag1', 'tag2'],
     timestamp: new Date().toISOString(),
-    ...overrides
+    ...overrides,
   }),
 
   userWithPreferences: (overrides = {}) => ({
@@ -359,16 +361,16 @@ export const createTestData = {
     email: 'user@example.com',
     preferences: {
       theme: 'light',
-      notifications: true
+      notifications: true,
     },
-    ...overrides
-  })
+    ...overrides,
+  }),
 };
 
 // Usage in tests
 test('should handle tagged bookmarks', () => {
   const bookmark = createTestData.customBookmarkWithTags({
-    title: 'My Bookmark'
+    title: 'My Bookmark',
   });
   expect(bookmark.tags.length).toBeGreaterThan(0);
 });
@@ -390,23 +392,23 @@ describe('Error Handling', () => {
   test('should handle errors correctly', async () => {
     // Your test code
     assertionHelpers.assertErrorHandling('my-context');
-    
+
     // Verifies error was categorized and user message was shown
   });
 
   test('should show success message', async () => {
     // Your test code
     assertionHelpers.assertSuccessMessage('Bookmark saved');
-    
+
     // Verifies success message was displayed
   });
 
   test('should save bookmark', async () => {
     // Your test code
     assertionHelpers.assertBookmarkSaved({
-      url: 'https://example.com'
+      url: 'https://example.com',
     });
-    
+
     // Verifies bookmark save was called with expected data
   });
 });
@@ -431,12 +433,12 @@ describe('Chrome Storage', () => {
   test('should get items from storage', async () => {
     // Setup mock to return data
     mocks.chrome.storage.sync.get.mockResolvedValue({
-      'auth_session': { token: 'abc123' }
+      auth_session: { token: 'abc123' },
     });
 
     // Your code that uses chrome.storage.sync.get
     const result = await chrome.storage.sync.get(['auth_session']);
-    
+
     expect(result).toHaveProperty('auth_session');
   });
 
@@ -452,9 +454,7 @@ describe('Chrome Storage', () => {
     const error = new Error('Storage full');
     mocks.chrome.storage.sync.set.mockRejectedValue(error);
 
-    await expect(
-      chrome.storage.sync.set({ key: 'value' })
-    ).rejects.toThrow('Storage full');
+    await expect(chrome.storage.sync.set({ key: 'value' })).rejects.toThrow('Storage full');
   });
 });
 ```
@@ -473,17 +473,17 @@ describe('Chrome Runtime', () => {
     // Mock the response
     mocks.chrome.runtime.sendMessage.mockResolvedValue({
       success: true,
-      data: { result: 'processed' }
+      data: { result: 'processed' },
     });
 
     const response = await chrome.runtime.sendMessage({
-      type: 'GET_CONFIG'
+      type: 'GET_CONFIG',
     });
 
     expect(response).toHaveProperty('success');
     expect(mocks.chrome.runtime.sendMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'GET_CONFIG' }),
-      expect.any(Function)
+      expect.any(Function),
     );
   });
 
@@ -507,11 +507,13 @@ describe('Chrome Tabs', () => {
   });
 
   test('should query tabs', async () => {
-    const mockTabs = [{
-      id: 1,
-      url: 'https://example.com',
-      title: 'Example'
-    }];
+    const mockTabs = [
+      {
+        id: 1,
+        url: 'https://example.com',
+        title: 'Example',
+      },
+    ];
 
     mocks.chrome.tabs.query.mockResolvedValue(mockTabs);
 
@@ -524,7 +526,7 @@ describe('Chrome Tabs', () => {
   test('should handle tab updates', async () => {
     mocks.chrome.tabs.update.mockResolvedValue({
       id: 1,
-      url: 'https://updated.com'
+      url: 'https://updated.com',
     });
 
     const result = await chrome.tabs.update(1, { url: 'https://updated.com' });
@@ -547,17 +549,15 @@ describe('SupabaseService', () => {
     // Setup Supabase mock
     mocks.supabaseService.saveBookmark.mockResolvedValue({
       id: 'bookmark-123',
-      url: 'https://example.com'
+      url: 'https://example.com',
     });
 
-    mocks.supabaseService.getBookmarks.mockResolvedValue([
-      { id: '1', url: 'https://example.com' }
-    ]);
+    mocks.supabaseService.getBookmarks.mockResolvedValue([{ id: '1', url: 'https://example.com' }]);
   });
 
   test('should save bookmarks', async () => {
     const result = await mocks.supabaseService.saveBookmark({
-      url: 'https://example.com'
+      url: 'https://example.com',
     });
 
     expect(result.id).toBeDefined();
@@ -651,6 +651,7 @@ npm test -- --watch
 ### Configuration Files
 
 **vitest.config.js** - Unit test configuration:
+
 ```javascript
 export default {
   test: {
@@ -659,24 +660,23 @@ export default {
     setupFiles: ['./vitest.setup.js'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html']
-    }
-  }
+      reporter: ['text', 'json', 'html'],
+    },
+  },
 };
 ```
 
 **playwright.config.js** - Integration test configuration:
+
 ```javascript
 export default {
   testDir: './tests',
   testMatch: ['**/*.test.js'],
   use: {
     headless: true,
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
   },
-  projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } }
-  ]
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 };
 ```
 
@@ -690,7 +690,7 @@ export default {
 // Mock Chrome APIs
 const mockChrome = {
   storage: { sync: { get: vi.fn() } },
-  tabs: { query: vi.fn() }
+  tabs: { query: vi.fn() },
 };
 global.chrome = mockChrome;
 ```
@@ -784,6 +784,7 @@ describe('ExampleUtility', () => {
 ## Continuous Integration
 
 Tests run automatically on:
+
 - Pull requests
 - Main branch commits
 - Release tags
@@ -820,4 +821,4 @@ When adding new tests:
 
 - [ES Module Mocking Issue Documentation](../docs/ES_MODULE_MOCKING_ISSUE.md)
 - [Vitest Documentation](https://vitest.dev/)
-- [Playwright Documentation](https://playwright.dev/) 
+- [Playwright Documentation](https://playwright.dev/)

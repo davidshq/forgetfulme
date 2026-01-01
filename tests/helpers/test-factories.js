@@ -9,11 +9,7 @@
  */
 
 import { vi } from 'vitest';
-import {
-  setupTestWithMocks,
-  setupModuleMocks,
-  createMockElement,
-} from './test-utils.js';
+import { setupTestWithMocks, createMockElement } from './test-utils.js';
 
 /**
  * Test factories for creating specialized test instances
@@ -48,7 +44,7 @@ export const createAuthUITestInstance = async (customMocks = {}) => {
   const authUI = new AuthUI(
     mocks.supabaseConfig,
     vi.fn(), // onAuthSuccess
-    mocks.authStateManager
+    mocks.authStateManager,
   );
 
   return {
@@ -129,16 +125,10 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedContext - Expected error context
    */
   assertErrorHandling: (expectedContext = 'test') => {
-    expect(mocks.errorHandler.handle).toHaveBeenCalledWith(
-      expect.any(Error),
-      expectedContext
-    );
+    expect(mocks.errorHandler.handle).toHaveBeenCalledWith(expect.any(Error), expectedContext);
 
     const errorResult = mocks.errorHandler.handle.mock.results[0].value;
-    expect(mocks.uiMessages.error).toHaveBeenCalledWith(
-      errorResult.userMessage,
-      expect.anything()
-    );
+    expect(mocks.uiMessages.error).toHaveBeenCalledWith(errorResult.userMessage, expect.anything());
   },
 
   /**
@@ -146,10 +136,7 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedMessage - Expected success message
    */
   assertSuccessMessage: expectedMessage => {
-    expect(mocks.uiMessages.success).toHaveBeenCalledWith(
-      expectedMessage,
-      expect.anything()
-    );
+    expect(mocks.uiMessages.success).toHaveBeenCalledWith(expectedMessage, expect.anything());
   },
 
   /**
@@ -157,10 +144,7 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedMessage - Expected loading message
    */
   assertLoadingMessage: expectedMessage => {
-    expect(mocks.uiMessages.loading).toHaveBeenCalledWith(
-      expectedMessage,
-      expect.anything()
-    );
+    expect(mocks.uiMessages.loading).toHaveBeenCalledWith(expectedMessage, expect.anything());
   },
 
   /**
@@ -169,7 +153,7 @@ export const createAssertionHelpers = mocks => ({
    */
   assertBookmarkSaved: expectedBookmark => {
     expect(mocks.supabaseService.saveBookmark).toHaveBeenCalledWith(
-      expect.objectContaining(expectedBookmark)
+      expect.objectContaining(expectedBookmark),
     );
   },
 
@@ -181,7 +165,7 @@ export const createAssertionHelpers = mocks => ({
   assertBookmarkUpdated: (bookmarkId, expectedUpdates) => {
     expect(mocks.supabaseService.updateBookmark).toHaveBeenCalledWith(
       bookmarkId,
-      expect.objectContaining(expectedUpdates)
+      expect.objectContaining(expectedUpdates),
     );
   },
 });

@@ -1,0 +1,4 @@
+- Run through the commands in [review-code.md](review-code.md) if you haven't been called from that command.
+- Make sure you've documented the test functions according to the standards
+- Make sure you are following the best practices outlined in the various testing docs
+- Always rerun the test and any other affected tests after making changes to tests, mocks, fixtures, etc.

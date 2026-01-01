@@ -19,8 +19,7 @@ test.describe('ForgetfulMe Options Tests', () => {
 
   test('should display configuration interface when not configured', async () => {
     // Test that the configuration interface is shown
-    const configContainer =
-      await extensionHelper.isElementVisible('.config-container');
+    const configContainer = await extensionHelper.isElementVisible('.config-container');
     expect(configContainer).toBeTruthy();
 
     // Check for configuration form elements
@@ -31,9 +30,7 @@ test.describe('ForgetfulMe Options Tests', () => {
     expect(keyInput).toBeTruthy();
 
     // Check for save button
-    const saveBtn = await extensionHelper.isElementVisible(
-      'button[type="submit"]'
-    );
+    const saveBtn = await extensionHelper.isElementVisible('button[type="submit"]');
     expect(saveBtn).toBeTruthy();
   });
 
@@ -56,7 +53,7 @@ test.describe('ForgetfulMe Options Tests', () => {
     await extensionHelper.fillField('#supabaseUrl', 'https://test.supabase.co');
     await extensionHelper.fillField(
       '#supabaseAnonKey',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key',
     );
 
     // Submit the form
@@ -71,22 +68,15 @@ test.describe('ForgetfulMe Options Tests', () => {
     const messageVisible = await extensionHelper.waitForMessage('any');
 
     // Also check for text content that indicates form processing
-    const hasLoadingText =
-      (await page.locator('text=/Saving|saving|Loading|loading/').count()) > 0;
-    const hasSuccessText =
-      (await page.locator('text=/saved|success|Success/').count()) > 0;
-    const hasErrorText =
-      (await page.locator('text=/Error|error|invalid|Invalid/').count()) > 0;
+    const hasLoadingText = (await page.locator('text=/Saving|saving|Loading|loading/').count()) > 0;
+    const hasSuccessText = (await page.locator('text=/saved|success|Success/').count()) > 0;
+    const hasErrorText = (await page.locator('text=/Error|error|invalid|Invalid/').count()) > 0;
     const hasMessageElement = (await page.locator('.ui-message').count()) > 0;
 
     // Form submission should result in some feedback
     // If no message appears, at least verify the button was clicked and form processed
     const formProcessed =
-      messageVisible ||
-      hasLoadingText ||
-      hasSuccessText ||
-      hasErrorText ||
-      hasMessageElement;
+      messageVisible || hasLoadingText || hasSuccessText || hasErrorText || hasMessageElement;
     expect(formProcessed).toBeTruthy();
   });
 
@@ -119,9 +109,7 @@ test.describe('ForgetfulMe Options Tests', () => {
     // Check for the note about security
     const note = await page.locator('.config-note');
     expect(await note.isVisible()).toBeTruthy();
-    expect(await note.textContent()).toContain(
-      'Your credentials are stored securely'
-    );
+    expect(await note.textContent()).toContain('Your credentials are stored securely');
   });
 
   test('should handle errors gracefully', async ({ page }) => {

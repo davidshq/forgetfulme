@@ -46,16 +46,11 @@ class SupabaseConfigTemplate {
     try {
       // Check if Supabase client is available
       if (typeof window.supabase === 'undefined') {
-        throw new Error(
-          'Supabase client not loaded. Please include the Supabase library.'
-        );
+        throw new Error('Supabase client not loaded. Please include the Supabase library.');
       }
 
       // Use the globally available Supabase client
-      this.supabase = window.supabase.createClient(
-        this.supabaseUrl,
-        this.supabaseAnonKey
-      );
+      this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseAnonKey);
       this.auth = this.supabase.auth;
 
       // Check for existing session

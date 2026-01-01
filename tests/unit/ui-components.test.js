@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import UIComponents from '../../utils/ui-components.js';
 
 // Mock console methods
@@ -6,6 +6,12 @@ const mockConsole = {
   warn: vi.fn(),
   error: vi.fn(),
   log: vi.fn(),
+};
+
+// Helper functions to reduce nesting depth
+const expectIfExists = (element, assertion) => {
+  if (!element) return;
+  assertion();
 };
 
 describe('UIComponents', () => {
@@ -68,1342 +74,1228 @@ describe('UIComponents', () => {
     });
   });
 
-  describe('DOM Utilities', () => {
-    describe('isReady', () => {
-      test('should return true when DOM is complete', () => {
-        Object.defineProperty(document, 'readyState', {
-          value: 'complete',
-          writable: true,
-        });
-
-        expect(UIComponents.DOM.isReady()).toBe(true);
+  describe('DOM.isReady', () => {
+    test('should return true when DOM is complete', () => {
+      Object.defineProperty(document, 'readyState', {
+        value: 'complete',
+        writable: true,
       });
 
-      test('should return true when DOM is interactive', () => {
-        Object.defineProperty(document, 'readyState', {
-          value: 'interactive',
-          writable: true,
-        });
-
-        expect(UIComponents.DOM.isReady()).toBe(true);
-      });
-
-      test('should return false when DOM is loading', () => {
-        Object.defineProperty(document, 'readyState', {
-          value: 'loading',
-          writable: true,
-        });
-
-        expect(UIComponents.DOM.isReady()).toBe(false);
-      });
+      expect(UIComponents.DOM.isReady()).toBe(true);
     });
 
-    describe('ready', () => {
-      test('should resolve immediately when DOM is ready', async () => {
-        Object.defineProperty(document, 'readyState', {
-          value: 'complete',
-          writable: true,
-        });
-
-        await UIComponents.DOM.ready();
-        // Should resolve without delay
+    test('should return true when DOM is interactive', () => {
+      Object.defineProperty(document, 'readyState', {
+        value: 'interactive',
+        writable: true,
       });
 
-      test('should wait for DOMContentLoaded when DOM is not ready', async () => {
-        Object.defineProperty(document, 'readyState', {
-          value: 'loading',
-          writable: true,
-        });
-
-        const readyPromise = UIComponents.DOM.ready();
-
-        // Simulate DOMContentLoaded event
-        setTimeout(() => {
-          document.readyState = 'complete';
-          // The mock DOM implementation doesn't properly handle addEventListener
-          // so we'll just resolve the promise manually
-          readyPromise.then(() => {
-            // Test passes if we reach here
-          });
-        }, 10);
-
-        // Since the mock doesn't handle the event properly, we'll just verify the promise exists
-        expect(readyPromise).toBeInstanceOf(Promise);
-      });
+      expect(UIComponents.DOM.isReady()).toBe(true);
     });
 
-    describe('getElement', () => {
-      test('should get element by ID', () => {
-        const element = document.createElement('div');
-        element.id = 'test-element';
-        document.body.appendChild(element);
-
-        const result = UIComponents.DOM.getElement('test-element');
-
-        expect(result).toBe(element);
+    test('should return false when DOM is loading', () => {
+      Object.defineProperty(document, 'readyState', {
+        value: 'loading',
+        writable: true,
       });
 
-      test('should return null for non-existent element', () => {
-        const result = UIComponents.DOM.getElement('non-existent');
+      expect(UIComponents.DOM.isReady()).toBe(false);
+    });
+  });
 
-        expect(result).toBeNull();
+  describe('DOM.ready', () => {
+    test('should resolve immediately when DOM is ready', async () => {
+      Object.defineProperty(document, 'readyState', {
+        value: 'complete',
+        writable: true,
       });
 
-      test('should search in specified container', () => {
-        const container = document.createElement('div');
-        const element = document.createElement('span');
-        element.id = 'test-element';
-        container.appendChild(element);
-        document.body.appendChild(container);
-
-        // getElementById only works on document, not containers
-        const result = UIComponents.DOM.getElement('test-element', container);
-
-        expect(result).toBeNull();
-      });
-
-      test('should handle DOM access errors', () => {
-        // Mock getElementById to throw error
-        const originalGetElementById = document.getElementById;
-        document.getElementById = vi.fn().mockImplementation(() => {
-          throw new Error('DOM access error');
-        });
-
-        const result = UIComponents.DOM.getElement('test-element');
-
-        expect(result).toBeNull();
-        // ErrorHandler handles DOM access errors
-
-        // Restore original method
-        document.getElementById = originalGetElementById;
-      });
+      await UIComponents.DOM.ready();
+      // Should resolve without delay
     });
 
-    describe('querySelector', () => {
-      test('should get element by selector', () => {
-        const element = document.createElement('div');
-        element.className = 'test-class';
-        document.body.appendChild(element);
-
-        const result = UIComponents.DOM.querySelector('.test-class');
-
-        expect(result).toBe(element);
+    test('should wait for DOMContentLoaded when DOM is not ready', async () => {
+      Object.defineProperty(document, 'readyState', {
+        value: 'loading',
+        writable: true,
       });
 
-      test('should return null for non-existent element', () => {
-        const result = UIComponents.DOM.querySelector('.non-existent');
+      const readyPromise = UIComponents.DOM.ready();
 
-        expect(result).toBeNull();
-      });
-
-      test('should search in specified container', () => {
-        const container = document.createElement('div');
-        const element = document.createElement('span');
-        element.className = 'test-class';
-        container.appendChild(element);
-        document.body.appendChild(container);
-
-        const result = UIComponents.DOM.querySelector('.test-class', container);
-
-        expect(result).toBe(element);
-      });
-
-      test('should handle DOM access errors', () => {
-        // Mock querySelector to throw error
-        const originalQuerySelector = document.querySelector;
-        document.querySelector = vi.fn().mockImplementation(() => {
-          throw new Error('DOM access error');
-        });
-
-        const result = UIComponents.DOM.querySelector('.test-class');
-
-        expect(result).toBeNull();
-        // ErrorHandler handles DOM access errors
-
-        // Restore original method
-        document.querySelector = originalQuerySelector;
-      });
-    });
-
-    describe('querySelectorAll', () => {
-      test('should get elements by selector', () => {
-        const element1 = document.createElement('div');
-        const element2 = document.createElement('div');
-        element1.className = 'test-class';
-        element2.className = 'test-class';
-        document.body.appendChild(element1);
-        document.body.appendChild(element2);
-
-        const result = UIComponents.DOM.querySelectorAll('.test-class');
-
-        expect(result).toHaveLength(2);
-        expect(result[0]).toBe(element1);
-        expect(result[1]).toBe(element2);
-      });
-
-      test('should return empty NodeList for non-existent elements', () => {
-        const result = UIComponents.DOM.querySelectorAll('.non-existent');
-
-        expect(result).toHaveLength(0);
-      });
-
-      test('should handle DOM access errors', () => {
-        // Create a mock container that throws an error
-        const mockContainer = {
-          querySelectorAll: vi.fn().mockImplementation(() => {
-            throw new Error('DOM access error');
-          }),
+      // Simulate DOMContentLoaded event
+      const handleReady = () => {
+        document.readyState = 'complete';
+        // The mock DOM implementation doesn't properly handle addEventListener
+        // so we'll just resolve the promise manually
+        const onResolve = () => {
+          // Test passes if we reach here
         };
+        readyPromise.then(onResolve);
+      };
+      setTimeout(handleReady, 10);
 
-        const result = UIComponents.DOM.querySelectorAll(
-          '.test-class',
-          mockContainer
-        );
+      // Since the mock doesn't handle the event properly, we'll just verify the promise exists
+      expect(readyPromise).toBeInstanceOf(Promise);
+    });
+  });
 
-        expect(result).toHaveLength(0);
-        // ErrorHandler handles DOM access errors
-      });
+  describe('DOM.getElement', () => {
+    test('should get element by ID', () => {
+      const element = document.createElement('div');
+      element.id = 'test-element';
+      document.body.appendChild(element);
+
+      const result = UIComponents.DOM.getElement('test-element');
+
+      expect(result).toBe(element);
     });
 
-    describe('elementExists', () => {
-      test('should return true for existing element', () => {
+    test('should return null for non-existent element', () => {
+      const result = UIComponents.DOM.getElement('non-existent');
+
+      expect(result).toBeNull();
+    });
+
+    test('should search in specified container', () => {
+      const container = document.createElement('div');
+      const element = document.createElement('span');
+      element.id = 'test-element';
+      container.appendChild(element);
+      document.body.appendChild(container);
+
+      // getElementById only works on document, not containers
+      const result = UIComponents.DOM.getElement('test-element', container);
+
+      expect(result).toBeNull();
+    });
+
+    test('should handle DOM access errors', () => {
+      // Mock getElementById to throw error
+      const originalGetElementById = document.getElementById;
+      const mockErrorImplementation = () => {
+        throw new Error('DOM access error');
+      };
+      document.getElementById = vi.fn().mockImplementation(mockErrorImplementation);
+
+      const result = UIComponents.DOM.getElement('test-element');
+
+      expect(result).toBeNull();
+      // ErrorHandler handles DOM access errors
+
+      // Restore original method
+      document.getElementById = originalGetElementById;
+    });
+  });
+
+  describe('DOM.querySelector', () => {
+    test('should get element by selector', () => {
+      const element = document.createElement('div');
+      element.className = 'test-class';
+      document.body.appendChild(element);
+
+      const result = UIComponents.DOM.querySelector('.test-class');
+
+      expect(result).toBe(element);
+    });
+
+    test('should return null for non-existent element', () => {
+      const result = UIComponents.DOM.querySelector('.non-existent');
+
+      expect(result).toBeNull();
+    });
+
+    test('should search in specified container', () => {
+      const container = document.createElement('div');
+      const element = document.createElement('span');
+      element.className = 'test-class';
+      container.appendChild(element);
+      document.body.appendChild(container);
+
+      const result = UIComponents.DOM.querySelector('.test-class', container);
+
+      expect(result).toBe(element);
+    });
+
+    test('should handle DOM access errors', () => {
+      // Mock querySelector to throw error
+      const originalQuerySelector = document.querySelector;
+      const mockErrorImplementation = () => {
+        throw new Error('DOM access error');
+      };
+      document.querySelector = vi.fn().mockImplementation(mockErrorImplementation);
+
+      const result = UIComponents.DOM.querySelector('.test-class');
+
+      expect(result).toBeNull();
+      // ErrorHandler handles DOM access errors
+
+      // Restore original method
+      document.querySelector = originalQuerySelector;
+    });
+  });
+
+  describe('DOM.querySelectorAll', () => {
+    test('should get elements by selector', () => {
+      const element1 = document.createElement('div');
+      const element2 = document.createElement('div');
+      element1.className = 'test-class';
+      element2.className = 'test-class';
+      document.body.appendChild(element1);
+      document.body.appendChild(element2);
+
+      const result = UIComponents.DOM.querySelectorAll('.test-class');
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBe(element1);
+      expect(result[1]).toBe(element2);
+    });
+
+    test('should return empty NodeList for non-existent elements', () => {
+      const result = UIComponents.DOM.querySelectorAll('.non-existent');
+
+      expect(result).toHaveLength(0);
+    });
+
+    test('should handle DOM access errors', () => {
+      // Create a mock container that throws an error
+      const mockErrorImplementation = () => {
+        throw new Error('DOM access error');
+      };
+      const mockContainer = {
+        querySelectorAll: vi.fn().mockImplementation(mockErrorImplementation),
+      };
+
+      const result = UIComponents.DOM.querySelectorAll('.test-class', mockContainer);
+
+      expect(result).toHaveLength(0);
+      // ErrorHandler handles DOM access errors
+    });
+  });
+
+  describe('DOM.elementExists', () => {
+    test('should return true for existing element', () => {
+      const element = document.createElement('div');
+      element.id = 'test-element';
+      document.body.appendChild(element);
+
+      const result = UIComponents.DOM.elementExists('test-element');
+
+      expect(result).toBe(true);
+    });
+
+    test('should return false for non-existent element', () => {
+      const result = UIComponents.DOM.elementExists('non-existent');
+
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('DOM.waitForElement', () => {
+    test('should resolve immediately if element exists', async () => {
+      const element = document.createElement('div');
+      element.id = 'test-element';
+      document.body.appendChild(element);
+
+      const result = await UIComponents.DOM.waitForElement('test-element');
+
+      expect(result).toBe(element);
+    });
+
+    test('should wait for element to appear', async () => {
+      const waitPromise = UIComponents.DOM.waitForElement('test-element', 1000);
+
+      // Add element after a delay
+      const addElement = () => {
         const element = document.createElement('div');
         element.id = 'test-element';
         document.body.appendChild(element);
+      };
+      setTimeout(addElement, 50);
 
-        const result = UIComponents.DOM.elementExists('test-element');
+      const result = await waitPromise;
 
-        expect(result).toBe(true);
-      });
-
-      test('should return false for non-existent element', () => {
-        const result = UIComponents.DOM.elementExists('non-existent');
-
-        expect(result).toBe(false);
-      });
+      expect(result.id).toBe('test-element');
     });
 
-    describe('waitForElement', () => {
-      test('should resolve immediately if element exists', async () => {
-        const element = document.createElement('div');
-        element.id = 'test-element';
-        document.body.appendChild(element);
+    test('should reject if element does not appear within timeout', async () => {
+      await expect(UIComponents.DOM.waitForElement('non-existent', 10)).rejects.toThrow(
+        "Element with id 'non-existent' not found within 10ms",
+      );
+    });
+  });
 
-        const result = await UIComponents.DOM.waitForElement('test-element');
+  describe('DOM.addEventListener', () => {
+    test('should add event listener to existing element', () => {
+      const element = document.createElement('button');
+      element.id = 'test-button';
+      document.body.appendChild(element);
 
-        expect(result).toBe(element);
-      });
+      const mockHandler = vi.fn();
+      const result = UIComponents.DOM.addEventListener('test-button', 'click', mockHandler);
 
-      test('should wait for element to appear', async () => {
-        const waitPromise = UIComponents.DOM.waitForElement(
-          'test-element',
-          1000
-        );
+      expect(result).toBe(true);
 
-        // Add element after a delay
-        setTimeout(() => {
-          const element = document.createElement('div');
-          element.id = 'test-element';
-          document.body.appendChild(element);
-        }, 50);
-
-        const result = await waitPromise;
-
-        expect(result.id).toBe('test-element');
-      });
-
-      test('should reject if element does not appear within timeout', async () => {
-        await expect(
-          UIComponents.DOM.waitForElement('non-existent', 10)
-        ).rejects.toThrow(
-          "Element with id 'non-existent' not found within 10ms"
-        );
-      });
+      // Trigger event
+      element.click();
+      expect(mockHandler).toHaveBeenCalled();
     });
 
-    describe('addEventListener', () => {
-      test('should add event listener to existing element', () => {
-        const element = document.createElement('button');
-        element.id = 'test-button';
-        document.body.appendChild(element);
+    test('should return false for non-existent element', () => {
+      const mockHandler = vi.fn();
+      const result = UIComponents.DOM.addEventListener('non-existent', 'click', mockHandler);
 
-        const mockHandler = vi.fn();
-        const result = UIComponents.DOM.addEventListener(
-          'test-button',
-          'click',
-          mockHandler
-        );
+      expect(result).toBe(false);
+      // ErrorHandler handles missing element errors
+    });
+  });
 
-        expect(result).toBe(true);
+  describe('DOM.setValue', () => {
+    test('should set value on existing element', () => {
+      const input = document.createElement('input');
+      input.id = 'test-input';
+      document.body.appendChild(input);
 
-        // Trigger event
-        element.click();
-        expect(mockHandler).toHaveBeenCalled();
-      });
+      const result = UIComponents.DOM.setValue('test-input', 'test value');
 
-      test('should return false for non-existent element', () => {
-        const mockHandler = vi.fn();
-        const result = UIComponents.DOM.addEventListener(
-          'non-existent',
-          'click',
-          mockHandler
-        );
-
-        expect(result).toBe(false);
-        // ErrorHandler handles missing element errors
-      });
+      expect(result).toBe(true);
+      expect(input.value).toBe('test value');
     });
 
-    describe('setValue', () => {
-      test('should set value on existing element', () => {
-        const input = document.createElement('input');
-        input.id = 'test-input';
-        document.body.appendChild(input);
+    test('should return false for non-existent element', () => {
+      const result = UIComponents.DOM.setValue('non-existent', 'test value');
 
-        const result = UIComponents.DOM.setValue('test-input', 'test value');
+      expect(result).toBe(false);
+      // ErrorHandler handles missing element errors
+    });
+  });
 
-        expect(result).toBe(true);
-        expect(input.value).toBe('test value');
-      });
+  describe('DOM.getValue', () => {
+    test('should get value from existing element', () => {
+      const input = document.createElement('input');
+      input.id = 'test-input';
+      input.value = 'test value';
+      document.body.appendChild(input);
 
-      test('should return false for non-existent element', () => {
-        const result = UIComponents.DOM.setValue('non-existent', 'test value');
+      const result = UIComponents.DOM.getValue('test-input');
 
-        expect(result).toBe(false);
-        // ErrorHandler handles missing element errors
-      });
+      expect(result).toBe('test value');
     });
 
-    describe('getValue', () => {
-      test('should get value from existing element', () => {
-        const input = document.createElement('input');
-        input.id = 'test-input';
-        input.value = 'test value';
-        document.body.appendChild(input);
+    test('should return null for non-existent element', () => {
+      const result = UIComponents.DOM.getValue('non-existent');
 
-        const result = UIComponents.DOM.getValue('test-input');
+      expect(result).toBeNull();
+    });
+  });
 
-        expect(result).toBe('test value');
-      });
+  describe('DOM.initializeElements', () => {
+    test('should initialize elements from element map', () => {
+      const input1 = document.createElement('input');
+      const input2 = document.createElement('input');
+      input1.id = 'input1';
+      input2.id = 'input2';
+      document.body.appendChild(input1);
+      document.body.appendChild(input2);
 
-      test('should return null for non-existent element', () => {
-        const result = UIComponents.DOM.getValue('non-existent');
+      const elementMap = {
+        firstInput: 'input1',
+        secondInput: 'input2',
+      };
 
-        expect(result).toBeNull();
-      });
+      const result = UIComponents.DOM.initializeElements(elementMap);
+
+      expect(result.firstInput).toBe(input1);
+      expect(result.secondInput).toBe(input2);
     });
 
-    describe('initializeElements', () => {
-      test('should initialize elements from element map', () => {
-        const input1 = document.createElement('input');
-        const input2 = document.createElement('input');
-        input1.id = 'input1';
-        input2.id = 'input2';
-        document.body.appendChild(input1);
-        document.body.appendChild(input2);
+    test('should handle missing elements', () => {
+      const elementMap = {
+        existing: 'existing-element',
+        missing: 'missing-element',
+      };
 
-        const elementMap = {
-          firstInput: 'input1',
-          secondInput: 'input2',
-        };
+      const existingElement = document.createElement('div');
+      existingElement.id = 'existing-element';
+      document.body.appendChild(existingElement);
 
-        const result = UIComponents.DOM.initializeElements(elementMap);
+      const result = UIComponents.DOM.initializeElements(elementMap);
 
-        expect(result.firstInput).toBe(input1);
-        expect(result.secondInput).toBe(input2);
-      });
+      expect(result.existing).toBe(existingElement);
+      expect(result.missing).toBeNull();
+    });
+  });
 
-      test('should handle missing elements', () => {
-        const elementMap = {
-          existing: 'existing-element',
-          missing: 'missing-element',
-        };
+  describe('DOM.bindEvents', () => {
+    test('should bind events successfully', () => {
+      const button = document.createElement('button');
+      button.id = 'test-button';
+      document.body.appendChild(button);
 
-        const existingElement = document.createElement('div');
-        existingElement.id = 'existing-element';
-        document.body.appendChild(existingElement);
+      const mockHandler = vi.fn();
+      const eventBindings = [
+        {
+          elementId: 'test-button',
+          event: 'click',
+          handler: mockHandler,
+        },
+      ];
 
-        const result = UIComponents.DOM.initializeElements(elementMap);
+      const result = UIComponents.DOM.bindEvents(eventBindings);
 
-        expect(result.existing).toBe(existingElement);
-        expect(result.missing).toBeNull();
-      });
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty('element');
+      expect(result[0]).toHaveProperty('event');
+      expect(result[0]).toHaveProperty('handler');
+
+      // Trigger event
+      button.click();
+      expect(mockHandler).toHaveBeenCalled();
     });
 
-    describe('bindEvents', () => {
-      test('should bind events successfully', () => {
-        const button = document.createElement('button');
-        button.id = 'test-button';
-        document.body.appendChild(button);
+    test('should handle missing elements in event bindings', () => {
+      const eventBindings = [
+        {
+          elementId: 'non-existent',
+          event: 'click',
+          handler: vi.fn(),
+        },
+      ];
 
-        const mockHandler = vi.fn();
-        const eventBindings = [
-          {
-            elementId: 'test-button',
-            event: 'click',
-            handler: mockHandler,
-          },
-        ];
+      const result = UIComponents.DOM.bindEvents(eventBindings);
 
-        const result = UIComponents.DOM.bindEvents(eventBindings);
+      expect(result).toHaveLength(0);
+    });
+  });
 
-        expect(result).toHaveLength(1);
-        expect(result[0]).toHaveProperty('element');
-        expect(result[0]).toHaveProperty('event');
-        expect(result[0]).toHaveProperty('handler');
+  describe('createButton', () => {
+    test('should create button with text and click handler', () => {
+      const mockHandler = vi.fn();
+      const button = UIComponents.createButton('Test Button', mockHandler);
 
-        // Trigger event
-        button.click();
-        expect(mockHandler).toHaveBeenCalled();
+      expect(button.tagName).toBe('BUTTON');
+      expect(button.textContent).toBe('Test Button');
+      expect(button.type).toBe('button');
+
+      button.click();
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    test('should create button with custom class', () => {
+      const button = UIComponents.createButton('Test', vi.fn(), 'custom-class');
+
+      expect(button.className).toContain('custom-class');
+    });
+
+    test('should create button with options', () => {
+      const button = UIComponents.createButton('Test', vi.fn(), '', {
+        disabled: true,
+        type: 'submit',
       });
 
-      test('should handle missing elements in event bindings', () => {
-        const eventBindings = [
-          {
-            elementId: 'non-existent',
-            event: 'click',
-            handler: vi.fn(),
-          },
-        ];
+      expect(button.disabled).toBe(true);
+      expect(button.type).toBe('submit');
+    });
+  });
 
-        const result = UIComponents.DOM.bindEvents(eventBindings);
+  describe('createFormField', () => {
+    test('should create text input field', () => {
+      const field = UIComponents.createFormField('text', 'test-input', 'Test Label');
 
-        expect(result).toHaveLength(0);
+      expect(field.tagName).toBe('DIV');
+      expect(field.querySelector('label')).toBeTruthy();
+      expect(field.querySelector('input')).toBeTruthy();
+      expect(field.querySelector('label').textContent).toBe('Test Label');
+      expect(field.querySelector('input').type).toBe('text');
+      expect(field.querySelector('input').id).toBe('test-input');
+    });
+
+    test('should create select field', () => {
+      const options = ['option1', 'option2'];
+      const field = UIComponents.createFormField('select', 'test-select', 'Test Label', {
+        options,
+      });
+
+      expect(field.querySelector('select')).toBeTruthy();
+      expect(field.querySelectorAll('option')).toHaveLength(2);
+    });
+
+    test('should create textarea field', () => {
+      const field = UIComponents.createFormField('textarea', 'test-textarea', 'Test Label');
+
+      const input = field.querySelector('input');
+      expect(input).toBeTruthy();
+      expect(input.type).toBe('textarea');
+    });
+
+    test('should handle field with placeholder', () => {
+      const field = UIComponents.createFormField('text', 'test-input', 'Test Label', {
+        placeholder: 'Enter text...',
+      });
+
+      expect(field.querySelector('input').placeholder).toBe('Enter text...');
+    });
+
+    test('should handle required field', () => {
+      const field = UIComponents.createFormField('text', 'test-input', 'Test Label', {
+        required: true,
+      });
+
+      expect(field.querySelector('input').required).toBe(true);
+    });
+  });
+
+  describe('createForm', () => {
+    test('should create form with fields', () => {
+      const fields = [
+        { type: 'text', id: 'name', label: 'Name' },
+        { type: 'email', id: 'email', label: 'Email' },
+      ];
+
+      const mockSubmitHandler = vi.fn();
+      const form = UIComponents.createForm('test-form', mockSubmitHandler, fields);
+
+      expect(form.tagName).toBe('FORM');
+      expect(form.id).toBe('test-form');
+      expect(form.querySelectorAll('input')).toHaveLength(2);
+
+      // Test form submission
+      const submitEvent = new Event('submit');
+      form.dispatchEvent(submitEvent);
+
+      expect(mockSubmitHandler).toHaveBeenCalled();
+    });
+
+    test('should create form with custom class', () => {
+      const form = UIComponents.createForm('test-form', vi.fn(), [], {
+        className: 'custom-form',
+      });
+
+      expect(form.className).toContain('custom-form');
+    });
+  });
+
+  describe('createContainer', () => {
+    test('should create container with title', () => {
+      const container = UIComponents.createContainer('Test Title');
+
+      expect(container.tagName).toBe('DIV');
+      expect(container.querySelector('h2')).toBeTruthy();
+      expect(container.querySelector('h2').textContent).toBe('Test Title');
+    });
+
+    test('should create container with subtitle', () => {
+      const container = UIComponents.createContainer('Test Title', 'Test Subtitle');
+
+      expect(container.querySelector('p')).toBeTruthy();
+      expect(container.querySelector('p').textContent).toBe('Test Subtitle');
+    });
+
+    test('should create container with custom class', () => {
+      const container = UIComponents.createContainer('Test Title', '', 'custom-container');
+
+      expect(container.className).toContain('custom-container');
+    });
+  });
+
+  describe('createList', () => {
+    test('should create list element', () => {
+      const list = UIComponents.createList('test-list');
+
+      expect(list.tagName).toBe('DIV');
+      expect(list.id).toBe('test-list');
+      expect(list.className).toContain('list');
+    });
+
+    test('should create list with custom class', () => {
+      const list = UIComponents.createList('test-list', 'custom-list');
+
+      expect(list.className).toContain('custom-list');
+    });
+  });
+
+  describe('createListItem', () => {
+    test('should create list item with data', () => {
+      const data = { title: 'Test Item' };
+      const item = UIComponents.createListItem(data);
+
+      expect(item.tagName).toBe('DIV');
+      expect(item.className).toContain('list-item');
+      expect(item.querySelector('.item-title')).toBeTruthy();
+      expect(item.querySelector('.item-title').textContent).toBe('Test Item');
+    });
+
+    test('should create list item with custom template', () => {
+      const data = { title: 'Test Item' };
+      const template = data => data.title;
+      const item = UIComponents.createListItem(data, { template });
+
+      // The implementation doesn't support custom templates
+      expect(item.querySelector('span')).toBeFalsy();
+      expect(item.querySelector('.item-title')).toBeTruthy();
+      expect(item.querySelector('.item-title').textContent).toBe('Test Item');
+    });
+  });
+
+  describe('createSection', () => {
+    test('should create section with title', () => {
+      const section = UIComponents.createSection('Test Section');
+
+      expect(section.tagName).toBe('SECTION');
+      expect(section.className).toContain('section');
+      expect(section.querySelector('h3')).toBeTruthy();
+      expect(section.querySelector('h3').textContent).toBe('Test Section');
+    });
+
+    test('should create section with custom class', () => {
+      const section = UIComponents.createSection('Test Section', 'custom-section');
+
+      expect(section.className).toContain('custom-section');
+    });
+
+    test('should create card-like section when useCard option is true', () => {
+      const card = UIComponents.createSection('Test Card', '', {
+        useCard: true,
+      });
+
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('section');
+      // Check if header exists (it should)
+      const header = card.querySelector('header');
+      expectIfExists(header, () => {
+        expect(header.querySelector('h3')).toBeTruthy();
+        expect(header.querySelector('h3').textContent).toBe('Test Card');
       });
     });
   });
 
-  describe('Component Creation', () => {
-    describe('createButton', () => {
-      test('should create button with text and click handler', () => {
-        const mockHandler = vi.fn();
-        const button = UIComponents.createButton('Test Button', mockHandler);
+  describe('createCard', () => {
+    test('should have createCard method', () => {
+      expect(typeof UIComponents.createCard).toBe('function');
+    });
 
-        expect(button.tagName).toBe('BUTTON');
-        expect(button.textContent).toBe('Test Button');
-        expect(button.type).toBe('button');
+    test('should create card with title and content', () => {
+      const card = UIComponents.createCard('Test Card', '<p>Test content</p>');
 
-        button.click();
-        expect(mockHandler).toHaveBeenCalled();
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('card');
+      // Check if header exists (it should)
+      const header = card.querySelector('header');
+      expectIfExists(header, () => {
+        expect(header.querySelector('h3')).toBeTruthy();
+        expect(header.querySelector('h3').textContent).toBe('Test Card');
       });
+      expect(card.querySelector('div')).toBeTruthy();
+      expect(card.querySelector('div').innerHTML).toBe('<p>Test content</p>');
+    });
 
-      test('should create button with custom class', () => {
-        const button = UIComponents.createButton(
-          'Test',
-          vi.fn(),
-          'custom-class'
-        );
+    test('should create card without title', () => {
+      const card = UIComponents.createCard('', '<p>Test content</p>');
 
-        expect(button.className).toContain('custom-class');
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('card');
+      expect(card.querySelector('header')).toBeFalsy();
+      expect(card.querySelector('div')).toBeTruthy();
+    });
+
+    test('should create card with footer', () => {
+      const card = UIComponents.createCard('Test Card', '<p>Content</p>', '<p>Footer</p>');
+
+      expect(card.querySelector('footer')).toBeTruthy();
+      expect(card.querySelector('footer').innerHTML).toBe('<p>Footer</p>');
+    });
+
+    test('should create card with custom class', () => {
+      const card = UIComponents.createCard('Test Card', 'Content', '', 'custom-card');
+
+      expect(card.className).toContain('custom-card');
+    });
+  });
+
+  describe('createCardWithActions', () => {
+    test('should have createCardWithActions method', () => {
+      expect(typeof UIComponents.createCardWithActions).toBe('function');
+    });
+
+    test('should create card with actions in footer', () => {
+      const actions = [
+        { text: 'Action 1', onClick: vi.fn(), className: 'primary' },
+        { text: 'Action 2', onClick: vi.fn(), className: 'secondary' },
+      ];
+
+      const card = UIComponents.createCardWithActions('Test Card', '<p>Content</p>', actions);
+
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('card');
+      // Check if header exists (it should)
+      const header = card.querySelector('header');
+      expectIfExists(header, () => {
+        expect(header.querySelector('h3')).toBeTruthy();
       });
+      expect(card.querySelector('footer')).toBeTruthy();
+      expect(card.querySelector('footer').className).toBe('card-actions');
+      // Check if buttons exist (they should)
+      const buttons = card.querySelectorAll('footer button');
+      if (buttons.length > 0) {
+        expect(buttons).toHaveLength(2);
+      }
+    });
 
-      test('should create button with options', () => {
-        const button = UIComponents.createButton('Test', vi.fn(), '', {
-          disabled: true,
-          type: 'submit',
-        });
+    test('should create card without actions', () => {
+      const card = UIComponents.createCardWithActions('Test Card', '<p>Content</p>', []);
 
-        expect(button.disabled).toBe(true);
-        expect(button.type).toBe('submit');
+      expect(card.querySelector('footer')).toBeFalsy();
+    });
+  });
+
+  describe('createFormCard', () => {
+    test('should have createFormCard method', () => {
+      expect(typeof UIComponents.createFormCard).toBe('function');
+    });
+
+    test('should create card with form', () => {
+      const formFields = [
+        {
+          type: 'text',
+          id: 'test-field',
+          label: 'Test Field',
+          options: { placeholder: 'Test placeholder' },
+        },
+      ];
+
+      const onSubmit = vi.fn();
+      const card = UIComponents.createFormCard('Test Form', formFields, onSubmit, 'Submit');
+
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('form-card');
+      // Check if header exists (it should)
+      const header = card.querySelector('header');
+      expectIfExists(header, () => {
+        expect(header.querySelector('h3')).toBeTruthy();
+      });
+      expect(card.querySelector('form')).toBeTruthy();
+      expect(card.querySelector('form').className).toContain('card-form');
+    });
+  });
+
+  describe('createListCard', () => {
+    test('should have createListCard method', () => {
+      expect(typeof UIComponents.createListCard).toBe('function');
+    });
+
+    test('should create card with list items', () => {
+      const items = [
+        { title: 'Item 1', meta: { status: 'read' } },
+        { title: 'Item 2', meta: { status: 'good-reference' } },
+      ];
+
+      const card = UIComponents.createListCard('Test List', items);
+
+      expect(card.tagName).toBe('ARTICLE');
+      expect(card.className).toContain('list-card');
+      // Check if header exists (it should)
+      const header = card.querySelector('header');
+      expectIfExists(header, () => {
+        expect(header.querySelector('h3')).toBeTruthy();
+      });
+      expect(card.querySelector('.card-list')).toBeTruthy();
+      expect(card.querySelectorAll('.list-item')).toHaveLength(2);
+    });
+  });
+
+  describe('createNavigation', () => {
+    test('should have createNavigation method', () => {
+      expect(typeof UIComponents.createNavigation).toBe('function');
+    });
+
+    test('should create navigation with links', () => {
+      const items = [
+        { text: 'Home', href: '/', active: true },
+        { text: 'About', href: '/about' },
+      ];
+
+      const nav = UIComponents.createNavigation(items, 'Main navigation');
+
+      expect(nav.tagName).toBe('NAV');
+      // Check if aria-label exists (may be set by mock or implementation)
+      const ariaLabel = nav.getAttribute('aria-label');
+      expectIfExists(ariaLabel, () => {
+        expect(ariaLabel).toBe('Main navigation');
+      });
+      expect(nav.querySelector('ul')).toBeTruthy();
+      expect(nav.querySelectorAll('li')).toHaveLength(2);
+      expect(nav.querySelectorAll('a')).toHaveLength(2);
+      // Check if active link exists
+      const activeLink = nav.querySelector('a[aria-current="page"]');
+      expectIfExists(activeLink, () => {
+        expect(activeLink).toBeTruthy();
       });
     });
 
-    describe('createFormField', () => {
-      test('should create text input field', () => {
-        const field = UIComponents.createFormField(
-          'text',
-          'test-input',
-          'Test Label'
-        );
+    test('should create navigation with buttons', () => {
+      const items = [
+        { text: 'Settings', onClick: vi.fn(), className: 'outline' },
+        { text: 'Help', onClick: vi.fn(), className: 'secondary' },
+      ];
 
-        expect(field.tagName).toBe('DIV');
-        expect(field.querySelector('label')).toBeTruthy();
-        expect(field.querySelector('input')).toBeTruthy();
-        expect(field.querySelector('label').textContent).toBe('Test Label');
-        expect(field.querySelector('input').type).toBe('text');
-        expect(field.querySelector('input').id).toBe('test-input');
+      const nav = UIComponents.createNavigation(items, 'Action navigation');
+
+      expect(nav.tagName).toBe('NAV');
+      // Check if aria-label exists (may be set by mock or implementation)
+      const ariaLabel = nav.getAttribute('aria-label');
+      if (ariaLabel) {
+        expect(ariaLabel).toBe('Action navigation');
+      }
+      expect(nav.querySelector('ul')).toBeTruthy();
+      expect(nav.querySelectorAll('li')).toHaveLength(2);
+      expect(nav.querySelectorAll('button')).toHaveLength(2);
+    });
+  });
+
+  describe('createBreadcrumb', () => {
+    test('should have createBreadcrumb method', () => {
+      expect(typeof UIComponents.createBreadcrumb).toBe('function');
+    });
+
+    test('should create breadcrumb navigation', () => {
+      const items = [
+        { text: 'Home', href: '/' },
+        { text: 'Products', href: '/products' },
+        { text: 'Current Page' },
+      ];
+
+      const breadcrumb = UIComponents.createBreadcrumb(items);
+
+      expect(breadcrumb.tagName).toBe('NAV');
+      // Check if aria-label exists (may be set by mock or implementation)
+      const ariaLabel = breadcrumb.getAttribute('aria-label');
+      expectIfExists(ariaLabel, () => {
+        expect(ariaLabel).toBe('Breadcrumb');
+      });
+      expect(breadcrumb.className).toContain('breadcrumb');
+      expect(breadcrumb.querySelector('ol')).toBeTruthy();
+      expect(breadcrumb.querySelectorAll('li')).toHaveLength(3);
+      expect(breadcrumb.querySelectorAll('a')).toHaveLength(2);
+      // Check if current page span exists
+      const currentSpan = breadcrumb.querySelector('span[aria-current="page"]');
+      expectIfExists(currentSpan, () => {
+        expect(currentSpan).toBeTruthy();
+      });
+    });
+  });
+
+  describe('createNavMenu', () => {
+    test('should have createNavMenu method', () => {
+      expect(typeof UIComponents.createNavMenu).toBe('function');
+    });
+
+    test('should create navigation menu with dropdown', () => {
+      const items = [
+        { text: 'Home', href: '/' },
+        {
+          text: 'Settings',
+          dropdown: [
+            { text: 'Profile', href: '/profile' },
+            { text: 'Preferences', href: '/preferences' },
+          ],
+        },
+      ];
+
+      const navMenu = UIComponents.createNavMenu(items, 'Navigation menu');
+
+      expect(navMenu.tagName).toBe('NAV');
+      // Check if aria-label exists (may be set by mock or implementation)
+      const ariaLabel = navMenu.getAttribute('aria-label');
+      expectIfExists(ariaLabel, () => {
+        expect(ariaLabel).toBe('Navigation menu');
+      });
+      expect(navMenu.className).toContain('nav-menu');
+      expect(navMenu.querySelector('ul')).toBeTruthy();
+      // Check for main navigation items (should be 2)
+      const mainNavItems = navMenu.querySelector('ul').children;
+      expect(mainNavItems.length).toBeGreaterThanOrEqual(2);
+      // Check if dropdown exists
+      const dropdown = navMenu.querySelector('details.dropdown');
+      expectIfExists(dropdown, () => {
+        expect(dropdown).toBeTruthy();
+      });
+      // Check if summary exists
+      const summary = navMenu.querySelector('summary');
+      expectIfExists(summary, () => {
+        expect(summary).toBeTruthy();
+      });
+    });
+  });
+
+  describe('createHeaderWithNav', () => {
+    test('should have createHeaderWithNav method', () => {
+      expect(typeof UIComponents.createHeaderWithNav).toBe('function');
+    });
+
+    test('should create header with navigation', () => {
+      const navItems = [
+        { text: 'Settings', onClick: vi.fn(), className: 'outline' },
+        { text: 'Help', onClick: vi.fn(), className: 'secondary' },
+      ];
+
+      const header = UIComponents.createHeaderWithNav('Test Page', navItems, {
+        titleId: 'test-title',
+        navAriaLabel: 'Page navigation',
       });
 
-      test('should create select field', () => {
-        const options = ['option1', 'option2'];
-        const field = UIComponents.createFormField(
-          'select',
-          'test-select',
-          'Test Label',
-          {
-            options,
-          }
-        );
-
-        expect(field.querySelector('select')).toBeTruthy();
-        expect(field.querySelectorAll('option')).toHaveLength(2);
+      expect(header.tagName).toBe('HEADER');
+      // Check if role exists (may be set by mock or implementation)
+      const role = header.getAttribute('role');
+      expectIfExists(role, () => {
+        expect(role).toBe('banner');
       });
-
-      test('should create textarea field', () => {
-        const field = UIComponents.createFormField(
-          'textarea',
-          'test-textarea',
-          'Test Label'
-        );
-
-        const input = field.querySelector('input');
-        expect(input).toBeTruthy();
-        expect(input.type).toBe('textarea');
+      expect(header.querySelector('h1')).toBeTruthy();
+      expect(header.querySelector('h1').textContent).toBe('Test Page');
+      const titleId = header.querySelector('h1').getAttribute('id');
+      expectIfExists(titleId, () => {
+        expect(titleId).toBe('test-title');
       });
-
-      test('should handle field with placeholder', () => {
-        const field = UIComponents.createFormField(
-          'text',
-          'test-input',
-          'Test Label',
-          {
-            placeholder: 'Enter text...',
-          }
-        );
-
-        expect(field.querySelector('input').placeholder).toBe('Enter text...');
-      });
-
-      test('should handle required field', () => {
-        const field = UIComponents.createFormField(
-          'text',
-          'test-input',
-          'Test Label',
-          {
-            required: true,
-          }
-        );
-
-        expect(field.querySelector('input').required).toBe(true);
+      expect(header.querySelector('nav')).toBeTruthy();
+      const navAriaLabel = header.querySelector('nav').getAttribute('aria-label');
+      expectIfExists(navAriaLabel, () => {
+        expect(navAriaLabel).toBe('Page navigation');
       });
     });
 
-    describe('createForm', () => {
-      test('should create form with fields', () => {
-        const fields = [
-          { type: 'text', id: 'name', label: 'Name' },
-          { type: 'email', id: 'email', label: 'Email' },
-        ];
+    test('should create header without navigation', () => {
+      const header = UIComponents.createHeaderWithNav('Test Page');
 
-        const mockSubmitHandler = vi.fn();
-        const form = UIComponents.createForm(
-          'test-form',
-          mockSubmitHandler,
-          fields
-        );
+      expect(header.tagName).toBe('HEADER');
+      expect(header.querySelector('h1')).toBeTruthy();
+      expect(header.querySelector('h1').textContent).toBe('Test Page');
+      expect(header.querySelector('nav')).toBeFalsy();
+    });
+  });
 
-        expect(form.tagName).toBe('FORM');
-        expect(form.id).toBe('test-form');
-        expect(form.querySelectorAll('input')).toHaveLength(2);
+  describe('createModal', () => {
+    test('should create modal with dialog element', () => {
+      const content = document.createElement('div');
+      content.textContent = 'Modal content';
+      const modal = UIComponents.createModal('Test Modal', content);
 
-        // Test form submission
-        const submitEvent = new Event('submit');
-        form.dispatchEvent(submitEvent);
+      expect(modal.tagName).toBe('DIALOG');
+      expect(modal.querySelector('article')).toBeTruthy();
+      expect(modal.querySelector('header')).toBeTruthy();
+      expect(modal.querySelector('h3')).toBeTruthy();
+      expect(modal.querySelector('h3').textContent).toBe('Test Modal');
+      expect(modal.querySelector('div')).toBeTruthy();
+    });
 
-        expect(mockSubmitHandler).toHaveBeenCalled();
+    test('should create modal with actions', () => {
+      const content = 'Modal content';
+      const actions = [
+        {
+          text: 'Save',
+          onClick: vi.fn(),
+          className: 'primary',
+        },
+        {
+          text: 'Cancel',
+          onClick: vi.fn(),
+          className: 'secondary',
+        },
+      ];
+
+      const modal = UIComponents.createModal('Test Modal', content, actions);
+
+      expect(modal.tagName).toBe('DIALOG');
+      expect(modal.querySelector('footer')).toBeTruthy();
+      // Check for buttons (actions + close button)
+      const buttons = modal.querySelectorAll('button');
+      expect(buttons.length).toBeGreaterThanOrEqual(2);
+      // Check if primary and secondary buttons exist
+      const primaryBtn = modal.querySelector('button.primary');
+      const secondaryBtn = modal.querySelector('button.secondary');
+      expectIfExists(primaryBtn, () => {
+        expect(primaryBtn).toBeTruthy();
       });
-
-      test('should create form with custom class', () => {
-        const form = UIComponents.createForm('test-form', vi.fn(), [], {
-          className: 'custom-form',
-        });
-
-        expect(form.className).toContain('custom-form');
+      expectIfExists(secondaryBtn, () => {
+        expect(secondaryBtn).toBeTruthy();
       });
     });
 
-    describe('createContainer', () => {
-      test('should create container with title', () => {
-        const container = UIComponents.createContainer('Test Title');
-
-        expect(container.tagName).toBe('DIV');
-        expect(container.querySelector('h2')).toBeTruthy();
-        expect(container.querySelector('h2').textContent).toBe('Test Title');
+    test('should create modal without close button', () => {
+      const content = 'Modal content';
+      const modal = UIComponents.createModal('Test Modal', content, [], {
+        showClose: false,
       });
 
-      test('should create container with subtitle', () => {
-        const container = UIComponents.createContainer(
-          'Test Title',
-          'Test Subtitle'
-        );
+      expect(modal.tagName).toBe('DIALOG');
+      expect(modal.querySelector('button[aria-label="Close modal"]')).toBeFalsy();
+    });
+  });
 
-        expect(container.querySelector('p')).toBeTruthy();
-        expect(container.querySelector('p').textContent).toBe('Test Subtitle');
-      });
+  describe('createConfirmDialog', () => {
+    test('should create confirm dialog with dialog element', () => {
+      const mockConfirm = vi.fn();
+      const mockCancel = vi.fn();
+      const dialog = UIComponents.createConfirmDialog('Are you sure?', mockConfirm, mockCancel);
 
-      test('should create container with custom class', () => {
-        const container = UIComponents.createContainer(
-          'Test Title',
-          '',
-          'custom-container'
-        );
-
-        expect(container.className).toContain('custom-container');
-      });
+      expect(dialog.tagName).toBe('DIALOG');
+      expect(dialog.className).toContain('confirm-dialog');
+      expect(dialog.querySelector('article')).toBeTruthy();
+      expect(dialog.querySelector('header')).toBeTruthy();
+      expect(dialog.querySelector('h3').textContent).toBe('Confirm');
+      // Check for content div (may be empty in mock)
+      const contentDiv = dialog.querySelector('div');
+      if (contentDiv && contentDiv.textContent) {
+        expect(contentDiv.textContent).toBe('Are you sure?');
+      }
+      expect(dialog.querySelector('footer')).toBeTruthy();
+      // Check for action buttons
+      const buttons = dialog.querySelectorAll('button');
+      expect(buttons.length).toBeGreaterThanOrEqual(2);
     });
 
-    describe('createList', () => {
-      test('should create list element', () => {
-        const list = UIComponents.createList('test-list');
-
-        expect(list.tagName).toBe('DIV');
-        expect(list.id).toBe('test-list');
-        expect(list.className).toContain('list');
+    test('should create confirm dialog with custom options', () => {
+      const mockConfirm = vi.fn();
+      const mockCancel = vi.fn();
+      const dialog = UIComponents.createConfirmDialog('Are you sure?', mockConfirm, mockCancel, {
+        confirmText: 'Yes',
+        cancelText: 'No',
+        title: 'Custom Title',
       });
 
-      test('should create list with custom class', () => {
-        const list = UIComponents.createList('test-list', 'custom-list');
+      expect(dialog.tagName).toBe('DIALOG');
+      expect(dialog.querySelector('h3').textContent).toBe('Custom Title');
+      const buttons = dialog.querySelectorAll('button');
+      const hasEnoughButtons = buttons.length >= 2;
+      if (hasEnoughButtons) {
+        expect(buttons[0].textContent).toBe('Yes');
+        expect(buttons[1].textContent).toBe('No');
+      }
+    });
+  });
 
-        expect(list.className).toContain('custom-list');
-      });
+  describe('showModal and closeModal', () => {
+    test('should show and hide dialog modal', () => {
+      const content = document.createElement('div');
+      const modal = UIComponents.createModal('Test Modal', content);
+
+      // Mock showModal and close methods
+      const mockShowModal = vi.fn();
+      const mockClose = vi.fn();
+      modal.showModal = mockShowModal;
+      modal.close = mockClose;
+
+      UIComponents.showModal(modal);
+      expect(mockShowModal).toHaveBeenCalled();
+
+      UIComponents.closeModal(modal);
+      expect(mockClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('createProgressIndicator', () => {
+    test('should create Pico progress indicator', () => {
+      const progress = UIComponents.createProgressIndicator('Loading');
+
+      expect(progress.tagName).toBe('PROGRESS');
+      expect(progress.getAttribute('aria-label')).toBe('Loading');
+      expect(progress.className).toBe('');
     });
 
-    describe('createListItem', () => {
-      test('should create list item with data', () => {
-        const data = { title: 'Test Item' };
-        const item = UIComponents.createListItem(data);
+    test('should create progress indicator with custom class', () => {
+      const progress = UIComponents.createProgressIndicator('Loading', 'custom-progress');
 
-        expect(item.tagName).toBe('DIV');
-        expect(item.className).toContain('list-item');
-        expect(item.querySelector('.item-title')).toBeTruthy();
-        expect(item.querySelector('.item-title').textContent).toBe('Test Item');
-      });
+      expect(progress.tagName).toBe('PROGRESS');
+      expect(progress.getAttribute('aria-label')).toBe('Loading');
+      expect(progress.className).toBe('custom-progress');
+    });
+  });
 
-      test('should create list item with custom template', () => {
-        const data = { title: 'Test Item' };
-        const template = data => data.title;
-        const item = UIComponents.createListItem(data, { template });
+  describe('createProgressBar', () => {
+    test('should create progress bar with value', () => {
+      const progress = UIComponents.createProgressBar(50, 100, 'Progress');
 
-        // The implementation doesn't support custom templates
-        expect(item.querySelector('span')).toBeFalsy();
-        expect(item.querySelector('.item-title')).toBeTruthy();
-        expect(item.querySelector('.item-title').textContent).toBe('Test Item');
-      });
+      expect(progress.tagName).toBe('PROGRESS');
+      expect(progress.value).toBe(50);
+      expect(progress.max).toBe(100);
+      expect(progress.getAttribute('aria-label')).toBe('Progress');
     });
 
-    describe('createSection', () => {
-      test('should create section with title', () => {
-        const section = UIComponents.createSection('Test Section');
+    test('should clamp value to valid range', () => {
+      const progress = UIComponents.createProgressBar(150, 100, 'Progress');
 
-        expect(section.tagName).toBe('SECTION');
-        expect(section.className).toContain('section');
-        expect(section.querySelector('h3')).toBeTruthy();
-        expect(section.querySelector('h3').textContent).toBe('Test Section');
-      });
-
-      test('should create section with custom class', () => {
-        const section = UIComponents.createSection(
-          'Test Section',
-          'custom-section'
-        );
-
-        expect(section.className).toContain('custom-section');
-      });
-
-      test('should create card-like section when useCard option is true', () => {
-        const card = UIComponents.createSection('Test Card', '', {
-          useCard: true,
-        });
-
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('section');
-        // Check if header exists (it should)
-        const header = card.querySelector('header');
-        if (header) {
-          expect(header.querySelector('h3')).toBeTruthy();
-          expect(header.querySelector('h3').textContent).toBe('Test Card');
-        }
-      });
+      expect(progress.value).toBe(100);
+      expect(progress.max).toBe(100);
     });
 
-    describe('createCard', () => {
-      test('should have createCard method', () => {
-        expect(typeof UIComponents.createCard).toBe('function');
-      });
+    test('should handle negative values', () => {
+      const progress = UIComponents.createProgressBar(-10, 100, 'Progress');
 
-      test('should create card with title and content', () => {
-        const card = UIComponents.createCard(
-          'Test Card',
-          '<p>Test content</p>'
-        );
+      expect(progress.value).toBe(0);
+      expect(progress.max).toBe(100);
+    });
+  });
 
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('card');
-        // Check if header exists (it should)
-        const header = card.querySelector('header');
-        if (header) {
-          expect(header.querySelector('h3')).toBeTruthy();
-          expect(header.querySelector('h3').textContent).toBe('Test Card');
-        }
-        expect(card.querySelector('div')).toBeTruthy();
-        expect(card.querySelector('div').innerHTML).toBe('<p>Test content</p>');
-      });
+  describe('createLoadingState', () => {
+    test('should create loading state with Pico progress', () => {
+      const loading = UIComponents.createLoadingState('Loading...');
 
-      test('should create card without title', () => {
-        const card = UIComponents.createCard('', '<p>Test content</p>');
-
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('card');
-        expect(card.querySelector('header')).toBeFalsy();
-        expect(card.querySelector('div')).toBeTruthy();
-      });
-
-      test('should create card with footer', () => {
-        const card = UIComponents.createCard(
-          'Test Card',
-          '<p>Content</p>',
-          '<p>Footer</p>'
-        );
-
-        expect(card.querySelector('footer')).toBeTruthy();
-        expect(card.querySelector('footer').innerHTML).toBe('<p>Footer</p>');
-      });
-
-      test('should create card with custom class', () => {
-        const card = UIComponents.createCard(
-          'Test Card',
-          'Content',
-          '',
-          'custom-card'
-        );
-
-        expect(card.className).toContain('custom-card');
-      });
+      expect(loading.tagName).toBe('DIV');
+      expect(loading.className).toContain('loading-state');
+      expect(loading.querySelector('progress')).toBeTruthy();
+      expect(loading.querySelector('.loading-text')).toBeTruthy();
+      expect(loading.querySelector('.loading-text').textContent).toBe('Loading...');
     });
 
-    describe('createCardWithActions', () => {
-      test('should have createCardWithActions method', () => {
-        expect(typeof UIComponents.createCardWithActions).toBe('function');
-      });
+    test('should create loading state without text', () => {
+      const loading = UIComponents.createLoadingState('');
 
-      test('should create card with actions in footer', () => {
-        const actions = [
-          { text: 'Action 1', onClick: vi.fn(), className: 'primary' },
-          { text: 'Action 2', onClick: vi.fn(), className: 'secondary' },
-        ];
-
-        const card = UIComponents.createCardWithActions(
-          'Test Card',
-          '<p>Content</p>',
-          actions
-        );
-
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('card');
-        // Check if header exists (it should)
-        const header = card.querySelector('header');
-        if (header) {
-          expect(header.querySelector('h3')).toBeTruthy();
-        }
-        expect(card.querySelector('footer')).toBeTruthy();
-        expect(card.querySelector('footer').className).toBe('card-actions');
-        // Check if buttons exist (they should)
-        const buttons = card.querySelectorAll('footer button');
-        if (buttons.length > 0) {
-          expect(buttons).toHaveLength(2);
-        }
-      });
-
-      test('should create card without actions', () => {
-        const card = UIComponents.createCardWithActions(
-          'Test Card',
-          '<p>Content</p>',
-          []
-        );
-
-        expect(card.querySelector('footer')).toBeFalsy();
-      });
+      expect(loading.tagName).toBe('DIV');
+      expect(loading.className).toContain('loading-state');
+      expect(loading.querySelector('progress')).toBeTruthy();
+      expect(loading.querySelector('.loading-text')).toBeFalsy();
     });
 
-    describe('createFormCard', () => {
-      test('should have createFormCard method', () => {
-        expect(typeof UIComponents.createFormCard).toBe('function');
-      });
+    test('should create loading state with custom class', () => {
+      const loading = UIComponents.createLoadingState('Loading...', 'custom-loading');
 
-      test('should create card with form', () => {
-        const formFields = [
-          {
-            type: 'text',
-            id: 'test-field',
-            label: 'Test Field',
-            options: { placeholder: 'Test placeholder' },
-          },
-        ];
+      expect(loading.className).toContain('custom-loading');
+    });
+  });
 
-        const onSubmit = vi.fn();
-        const card = UIComponents.createFormCard(
-          'Test Form',
-          formFields,
-          onSubmit,
-          'Submit'
-        );
+  describe('setBusyState', () => {
+    test('should set busy state to true', () => {
+      const element = document.createElement('div');
+      UIComponents.setBusyState(element, true);
 
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('form-card');
-        // Check if header exists (it should)
-        const header = card.querySelector('header');
-        if (header) {
-          expect(header.querySelector('h3')).toBeTruthy();
-        }
-        expect(card.querySelector('form')).toBeTruthy();
-        expect(card.querySelector('form').className).toContain('card-form');
-      });
+      expect(element.getAttribute('aria-busy')).toBe('true');
     });
 
-    describe('createListCard', () => {
-      test('should have createListCard method', () => {
-        expect(typeof UIComponents.createListCard).toBe('function');
-      });
+    test('should remove busy state when false', () => {
+      const element = document.createElement('div');
+      element.setAttribute('aria-busy', 'true');
+      UIComponents.setBusyState(element, false);
 
-      test('should create card with list items', () => {
-        const items = [
-          { title: 'Item 1', meta: { status: 'read' } },
-          { title: 'Item 2', meta: { status: 'good-reference' } },
-        ];
+      expect(element.hasAttribute('aria-busy')).toBe(false);
+    });
+  });
 
-        const card = UIComponents.createListCard('Test List', items);
+  describe('createLoadingState', () => {
+    test('should create loading state using Pico progress', () => {
+      const loadingState = UIComponents.createLoadingState('Loading...');
 
-        expect(card.tagName).toBe('ARTICLE');
-        expect(card.className).toContain('list-card');
-        // Check if header exists (it should)
-        const header = card.querySelector('header');
-        if (header) {
-          expect(header.querySelector('h3')).toBeTruthy();
-        }
-        expect(card.querySelector('.card-list')).toBeTruthy();
-        expect(card.querySelectorAll('.list-item')).toHaveLength(2);
-      });
+      expect(loadingState.tagName).toBe('DIV');
+      expect(loadingState.className).toContain('loading-state');
+      expect(loadingState.querySelector('progress')).toBeTruthy();
+      expect(loadingState.querySelector('.loading-text')).toBeTruthy();
+      expect(loadingState.querySelector('.loading-text').textContent).toBe('Loading...');
     });
 
-    describe('createNavigation', () => {
-      test('should have createNavigation method', () => {
-        expect(typeof UIComponents.createNavigation).toBe('function');
-      });
+    test('should create loading state with custom class', () => {
+      const loadingState = UIComponents.createLoadingState('Loading...', 'custom-loading');
 
-      test('should create navigation with links', () => {
-        const items = [
-          { text: 'Home', href: '/', active: true },
-          { text: 'About', href: '/about' },
-        ];
+      expect(loadingState.className).toContain('custom-loading');
+    });
+  });
 
-        const nav = UIComponents.createNavigation(items, 'Main navigation');
+  describe('createStatusIndicator', () => {
+    test('should create status indicator', () => {
+      const indicator = UIComponents.createStatusIndicator('success', 'Success!');
 
-        expect(nav.tagName).toBe('NAV');
-        // Check if aria-label exists (may be set by mock or implementation)
-        const ariaLabel = nav.getAttribute('aria-label');
-        if (ariaLabel) {
-          expect(ariaLabel).toBe('Main navigation');
-        }
-        expect(nav.querySelector('ul')).toBeTruthy();
-        expect(nav.querySelectorAll('li')).toHaveLength(2);
-        expect(nav.querySelectorAll('a')).toHaveLength(2);
-        // Check if active link exists
-        const activeLink = nav.querySelector('a[aria-current="page"]');
-        if (activeLink) {
-          expect(activeLink).toBeTruthy();
-        }
-      });
-
-      test('should create navigation with buttons', () => {
-        const items = [
-          { text: 'Settings', onClick: vi.fn(), className: 'outline' },
-          { text: 'Help', onClick: vi.fn(), className: 'secondary' },
-        ];
-
-        const nav = UIComponents.createNavigation(items, 'Action navigation');
-
-        expect(nav.tagName).toBe('NAV');
-        // Check if aria-label exists (may be set by mock or implementation)
-        const ariaLabel = nav.getAttribute('aria-label');
-        if (ariaLabel) {
-          expect(ariaLabel).toBe('Action navigation');
-        }
-        expect(nav.querySelector('ul')).toBeTruthy();
-        expect(nav.querySelectorAll('li')).toHaveLength(2);
-        expect(nav.querySelectorAll('button')).toHaveLength(2);
-      });
+      expect(indicator.tagName).toBe('DIV');
+      expect(indicator.className).toContain('status-indicator');
+      expect(indicator.className).toContain('status-success');
+      expect(indicator.querySelector('.status-icon')).toBeTruthy();
     });
 
-    describe('createBreadcrumb', () => {
-      test('should have createBreadcrumb method', () => {
-        expect(typeof UIComponents.createBreadcrumb).toBe('function');
+    test('should create status indicator with icon', () => {
+      const indicator = UIComponents.createStatusIndicator('warning', 'Warning!', {
+        icon: '⚠️',
       });
 
-      test('should create breadcrumb navigation', () => {
-        const items = [
-          { text: 'Home', href: '/' },
-          { text: 'Products', href: '/products' },
-          { text: 'Current Page' },
-        ];
+      expect(indicator.querySelector('.status-icon')).toBeTruthy();
+      expect(indicator.querySelector('.status-icon').textContent).toBe('⚠');
+    });
+  });
 
-        const breadcrumb = UIComponents.createBreadcrumb(items);
+  describe('createTabs', () => {
+    test('should create tabs', () => {
+      const tabs = [
+        { title: 'Tab 1', content: 'Content 1' },
+        { title: 'Tab 2', content: 'Content 2' },
+      ];
 
-        expect(breadcrumb.tagName).toBe('NAV');
-        // Check if aria-label exists (may be set by mock or implementation)
-        const ariaLabel = breadcrumb.getAttribute('aria-label');
-        if (ariaLabel) {
-          expect(ariaLabel).toBe('Breadcrumb');
-        }
-        expect(breadcrumb.className).toContain('breadcrumb');
-        expect(breadcrumb.querySelector('ol')).toBeTruthy();
-        expect(breadcrumb.querySelectorAll('li')).toHaveLength(3);
-        expect(breadcrumb.querySelectorAll('a')).toHaveLength(2);
-        // Check if current page span exists
-        const currentSpan = breadcrumb.querySelector(
-          'span[aria-current="page"]'
-        );
-        if (currentSpan) {
-          expect(currentSpan).toBeTruthy();
-        }
-      });
+      const tabContainer = UIComponents.createTabs(tabs);
+
+      expect(tabContainer.tagName).toBe('DIV');
+      expect(tabContainer.className).toBe('tab-container');
+      expect(tabContainer.querySelector('.tab-list')).toBeTruthy();
+      expect(tabContainer.querySelectorAll('.tab-button')).toHaveLength(2);
+      expect(tabContainer.querySelectorAll('.tab-panel')).toHaveLength(2);
     });
 
-    describe('createNavMenu', () => {
-      test('should have createNavMenu method', () => {
-        expect(typeof UIComponents.createNavMenu).toBe('function');
+    test('should create tabs with custom options', () => {
+      const tabs = [{ title: 'Tab 1', content: 'Content 1' }];
+      const tabContainer = UIComponents.createTabs(tabs, {
+        activeIndex: 0,
+        className: 'custom-tabs',
       });
 
-      test('should create navigation menu with dropdown', () => {
-        const items = [
-          { text: 'Home', href: '/' },
-          {
-            text: 'Settings',
-            dropdown: [
-              { text: 'Profile', href: '/profile' },
-              { text: 'Preferences', href: '/preferences' },
-            ],
-          },
-        ];
+      // The implementation doesn't support custom options, so it uses defaults
+      expect(tabContainer.className).toBe('tab-container');
+      expect(tabContainer.querySelector('.tab-button')).toBeTruthy();
 
-        const navMenu = UIComponents.createNavMenu(items, 'Navigation menu');
+      // Check that the first tab is active by default
+      const firstButton = tabContainer.querySelector('.tab-button');
+      expect(firstButton.className).toContain('active');
+    });
+  });
 
-        expect(navMenu.tagName).toBe('NAV');
-        // Check if aria-label exists (may be set by mock or implementation)
-        const ariaLabel = navMenu.getAttribute('aria-label');
-        if (ariaLabel) {
-          expect(ariaLabel).toBe('Navigation menu');
-        }
-        expect(navMenu.className).toContain('nav-menu');
-        expect(navMenu.querySelector('ul')).toBeTruthy();
-        // Check for main navigation items (should be 2)
-        const mainNavItems = navMenu.querySelector('ul').children;
-        expect(mainNavItems.length).toBeGreaterThanOrEqual(2);
-        // Check if dropdown exists
-        const dropdown = navMenu.querySelector('details.dropdown');
-        if (dropdown) {
-          expect(dropdown).toBeTruthy();
-        }
-        // Check if summary exists
-        const summary = navMenu.querySelector('summary');
-        if (summary) {
-          expect(summary).toBeTruthy();
-        }
-      });
+  describe('switchTab', () => {
+    test('should switch to specified tab', () => {
+      const tabs = [
+        { title: 'Tab 1', content: 'Content 1' },
+        { title: 'Tab 2', content: 'Content 2' },
+      ];
+
+      const tabContainer = UIComponents.createTabs(tabs);
+      UIComponents.switchTab(tabContainer, 1);
+
+      const navItems = tabContainer.querySelectorAll('.tab-button');
+      const contents = tabContainer.querySelectorAll('.tab-panel');
+
+      expect(navItems.length).toBe(2);
+      expect(contents.length).toBe(2);
+
+      // The mock DOM implementation doesn't properly handle classList.toggle
+      // so we can't test the actual switching, but we can verify the structure
+      expect(navItems.length).toBe(2);
+      expect(contents.length).toBe(2);
+    });
+  });
+
+  describe('createTooltip', () => {
+    test('should create tooltip', () => {
+      const element = document.createElement('button');
+      element.textContent = 'Hover me';
+      document.body.appendChild(element);
+
+      UIComponents.createTooltip(element, 'Tooltip text');
+
+      // The implementation doesn't return the tooltip element
+      expect(element).toBeDefined();
+      expect(element.textContent).toBe('Hover me');
     });
 
-    describe('createHeaderWithNav', () => {
-      test('should have createHeaderWithNav method', () => {
-        expect(typeof UIComponents.createHeaderWithNav).toBe('function');
-      });
-
-      test('should create header with navigation', () => {
-        const navItems = [
-          { text: 'Settings', onClick: vi.fn(), className: 'outline' },
-          { text: 'Help', onClick: vi.fn(), className: 'secondary' },
-        ];
-
-        const header = UIComponents.createHeaderWithNav('Test Page', navItems, {
-          titleId: 'test-title',
-          navAriaLabel: 'Page navigation',
-        });
-
-        expect(header.tagName).toBe('HEADER');
-        // Check if role exists (may be set by mock or implementation)
-        const role = header.getAttribute('role');
-        if (role) {
-          expect(role).toBe('banner');
-        }
-        expect(header.querySelector('h1')).toBeTruthy();
-        expect(header.querySelector('h1').textContent).toBe('Test Page');
-        const titleId = header.querySelector('h1').getAttribute('id');
-        if (titleId) {
-          expect(titleId).toBe('test-title');
-        }
-        expect(header.querySelector('nav')).toBeTruthy();
-        const navAriaLabel = header
-          .querySelector('nav')
-          .getAttribute('aria-label');
-        if (navAriaLabel) {
-          expect(navAriaLabel).toBe('Page navigation');
-        }
-      });
-
-      test('should create header without navigation', () => {
-        const header = UIComponents.createHeaderWithNav('Test Page');
-
-        expect(header.tagName).toBe('HEADER');
-        expect(header.querySelector('h1')).toBeTruthy();
-        expect(header.querySelector('h1').textContent).toBe('Test Page');
-        expect(header.querySelector('nav')).toBeFalsy();
-      });
-    });
-
-    describe('createModal', () => {
-      test('should create modal with dialog element', () => {
-        const content = document.createElement('div');
-        content.textContent = 'Modal content';
-        const modal = UIComponents.createModal('Test Modal', content);
-
-        expect(modal.tagName).toBe('DIALOG');
-        expect(modal.querySelector('article')).toBeTruthy();
-        expect(modal.querySelector('header')).toBeTruthy();
-        expect(modal.querySelector('h3')).toBeTruthy();
-        expect(modal.querySelector('h3').textContent).toBe('Test Modal');
-        expect(modal.querySelector('div')).toBeTruthy();
-      });
-
-      test('should create modal with actions', () => {
-        const content = 'Modal content';
-        const actions = [
-          {
-            text: 'Save',
-            onClick: vi.fn(),
-            className: 'primary',
-          },
-          {
-            text: 'Cancel',
-            onClick: vi.fn(),
-            className: 'secondary',
-          },
-        ];
-
-        const modal = UIComponents.createModal('Test Modal', content, actions);
-
-        expect(modal.tagName).toBe('DIALOG');
-        expect(modal.querySelector('footer')).toBeTruthy();
-        // Check for buttons (actions + close button)
-        const buttons = modal.querySelectorAll('button');
-        expect(buttons.length).toBeGreaterThanOrEqual(2);
-        // Check if primary and secondary buttons exist
-        const primaryBtn = modal.querySelector('button.primary');
-        const secondaryBtn = modal.querySelector('button.secondary');
-        if (primaryBtn) {
-          expect(primaryBtn).toBeTruthy();
-        }
-        if (secondaryBtn) {
-          expect(secondaryBtn).toBeTruthy();
-        }
-      });
-
-      test('should create modal without close button', () => {
-        const content = 'Modal content';
-        const modal = UIComponents.createModal('Test Modal', content, [], {
-          showClose: false,
-        });
-
-        expect(modal.tagName).toBe('DIALOG');
-        expect(
-          modal.querySelector('button[aria-label="Close modal"]')
-        ).toBeFalsy();
-      });
-    });
-
-    describe('createConfirmDialog', () => {
-      test('should create confirm dialog with dialog element', () => {
-        const mockConfirm = vi.fn();
-        const mockCancel = vi.fn();
-        const dialog = UIComponents.createConfirmDialog(
-          'Are you sure?',
-          mockConfirm,
-          mockCancel
-        );
-
-        expect(dialog.tagName).toBe('DIALOG');
-        expect(dialog.className).toContain('confirm-dialog');
-        expect(dialog.querySelector('article')).toBeTruthy();
-        expect(dialog.querySelector('header')).toBeTruthy();
-        expect(dialog.querySelector('h3').textContent).toBe('Confirm');
-        // Check for content div (may be empty in mock)
-        const contentDiv = dialog.querySelector('div');
-        if (contentDiv && contentDiv.textContent) {
-          expect(contentDiv.textContent).toBe('Are you sure?');
-        }
-        expect(dialog.querySelector('footer')).toBeTruthy();
-        // Check for action buttons
-        const buttons = dialog.querySelectorAll('button');
-        expect(buttons.length).toBeGreaterThanOrEqual(2);
-      });
-
-      test('should create confirm dialog with custom options', () => {
-        const mockConfirm = vi.fn();
-        const mockCancel = vi.fn();
-        const dialog = UIComponents.createConfirmDialog(
-          'Are you sure?',
-          mockConfirm,
-          mockCancel,
-          {
-            confirmText: 'Yes',
-            cancelText: 'No',
-            title: 'Custom Title',
-          }
-        );
-
-        expect(dialog.tagName).toBe('DIALOG');
-        expect(dialog.querySelector('h3').textContent).toBe('Custom Title');
-        const buttons = dialog.querySelectorAll('button');
-        if (buttons.length >= 2) {
-          expect(buttons[0].textContent).toBe('Yes');
-          expect(buttons[1].textContent).toBe('No');
-        }
-      });
-    });
-
-    describe('showModal and closeModal', () => {
-      test('should show and hide dialog modal', () => {
-        const content = document.createElement('div');
-        const modal = UIComponents.createModal('Test Modal', content);
-
-        // Mock showModal and close methods
-        const mockShowModal = vi.fn();
-        const mockClose = vi.fn();
-        modal.showModal = mockShowModal;
-        modal.close = mockClose;
-
-        UIComponents.showModal(modal);
-        expect(mockShowModal).toHaveBeenCalled();
-
-        UIComponents.closeModal(modal);
-        expect(mockClose).toHaveBeenCalled();
-      });
-    });
-
-    describe('createProgressIndicator', () => {
-      test('should create Pico progress indicator', () => {
-        const progress = UIComponents.createProgressIndicator('Loading');
-
-        expect(progress.tagName).toBe('PROGRESS');
-        expect(progress.getAttribute('aria-label')).toBe('Loading');
-        expect(progress.className).toBe('');
-      });
-
-      test('should create progress indicator with custom class', () => {
-        const progress = UIComponents.createProgressIndicator(
-          'Loading',
-          'custom-progress'
-        );
-
-        expect(progress.tagName).toBe('PROGRESS');
-        expect(progress.getAttribute('aria-label')).toBe('Loading');
-        expect(progress.className).toBe('custom-progress');
-      });
-    });
-
-    describe('createProgressBar', () => {
-      test('should create progress bar with value', () => {
-        const progress = UIComponents.createProgressBar(50, 100, 'Progress');
-
-        expect(progress.tagName).toBe('PROGRESS');
-        expect(progress.value).toBe(50);
-        expect(progress.max).toBe(100);
-        expect(progress.getAttribute('aria-label')).toBe('Progress');
-      });
-
-      test('should clamp value to valid range', () => {
-        const progress = UIComponents.createProgressBar(150, 100, 'Progress');
-
-        expect(progress.value).toBe(100);
-        expect(progress.max).toBe(100);
-      });
-
-      test('should handle negative values', () => {
-        const progress = UIComponents.createProgressBar(-10, 100, 'Progress');
-
-        expect(progress.value).toBe(0);
-        expect(progress.max).toBe(100);
-      });
-    });
-
-    describe('createLoadingState', () => {
-      test('should create loading state with Pico progress', () => {
-        const loading = UIComponents.createLoadingState('Loading...');
-
-        expect(loading.tagName).toBe('DIV');
-        expect(loading.className).toContain('loading-state');
-        expect(loading.querySelector('progress')).toBeTruthy();
-        expect(loading.querySelector('.loading-text')).toBeTruthy();
-        expect(loading.querySelector('.loading-text').textContent).toBe(
-          'Loading...'
-        );
-      });
-
-      test('should create loading state without text', () => {
-        const loading = UIComponents.createLoadingState('');
-
-        expect(loading.tagName).toBe('DIV');
-        expect(loading.className).toContain('loading-state');
-        expect(loading.querySelector('progress')).toBeTruthy();
-        expect(loading.querySelector('.loading-text')).toBeFalsy();
-      });
-
-      test('should create loading state with custom class', () => {
-        const loading = UIComponents.createLoadingState(
-          'Loading...',
-          'custom-loading'
-        );
-
-        expect(loading.className).toContain('custom-loading');
-      });
-    });
-
-    describe('setBusyState', () => {
-      test('should set busy state to true', () => {
-        const element = document.createElement('div');
-        UIComponents.setBusyState(element, true);
-
-        expect(element.getAttribute('aria-busy')).toBe('true');
-      });
-
-      test('should remove busy state when false', () => {
-        const element = document.createElement('div');
-        element.setAttribute('aria-busy', 'true');
-        UIComponents.setBusyState(element, false);
-
-        expect(element.hasAttribute('aria-busy')).toBe(false);
-      });
-    });
-
-    describe('createLoadingState', () => {
-      test('should create loading state using Pico progress', () => {
-        const loadingState = UIComponents.createLoadingState('Loading...');
-
-        expect(loadingState.tagName).toBe('DIV');
-        expect(loadingState.className).toContain('loading-state');
-        expect(loadingState.querySelector('progress')).toBeTruthy();
-        expect(loadingState.querySelector('.loading-text')).toBeTruthy();
-        expect(loadingState.querySelector('.loading-text').textContent).toBe(
-          'Loading...'
-        );
-      });
-
-      test('should create loading state with custom class', () => {
-        const loadingState = UIComponents.createLoadingState(
-          'Loading...',
-          'custom-loading'
-        );
-
-        expect(loadingState.className).toContain('custom-loading');
-      });
-    });
-
-    describe('createStatusIndicator', () => {
-      test('should create status indicator', () => {
-        const indicator = UIComponents.createStatusIndicator(
-          'success',
-          'Success!'
-        );
-
-        expect(indicator.tagName).toBe('DIV');
-        expect(indicator.className).toContain('status-indicator');
-        expect(indicator.className).toContain('status-success');
-        expect(indicator.querySelector('.status-icon')).toBeTruthy();
-      });
-
-      test('should create status indicator with icon', () => {
-        const indicator = UIComponents.createStatusIndicator(
-          'warning',
-          'Warning!',
-          {
-            icon: '⚠️',
-          }
-        );
-
-        expect(indicator.querySelector('.status-icon')).toBeTruthy();
-        expect(indicator.querySelector('.status-icon').textContent).toBe('⚠');
-      });
-    });
-
-    describe('createTabs', () => {
-      test('should create tabs', () => {
-        const tabs = [
-          { title: 'Tab 1', content: 'Content 1' },
-          { title: 'Tab 2', content: 'Content 2' },
-        ];
-
-        const tabContainer = UIComponents.createTabs(tabs);
-
-        expect(tabContainer.tagName).toBe('DIV');
-        expect(tabContainer.className).toBe('tab-container');
-        expect(tabContainer.querySelector('.tab-list')).toBeTruthy();
-        expect(tabContainer.querySelectorAll('.tab-button')).toHaveLength(2);
-        expect(tabContainer.querySelectorAll('.tab-panel')).toHaveLength(2);
-      });
-
-      test('should create tabs with custom options', () => {
-        const tabs = [{ title: 'Tab 1', content: 'Content 1' }];
-        const tabContainer = UIComponents.createTabs(tabs, {
-          activeIndex: 0,
-          className: 'custom-tabs',
-        });
-
-        // The implementation doesn't support custom options, so it uses defaults
-        expect(tabContainer.className).toBe('tab-container');
-        expect(tabContainer.querySelector('.tab-button')).toBeTruthy();
-
-        // Check that the first tab is active by default
-        const firstButton = tabContainer.querySelector('.tab-button');
-        expect(firstButton.className).toContain('active');
-      });
-    });
-
-    describe('switchTab', () => {
-      test('should switch to specified tab', () => {
-        const tabs = [
-          { title: 'Tab 1', content: 'Content 1' },
-          { title: 'Tab 2', content: 'Content 2' },
-        ];
-
-        const tabContainer = UIComponents.createTabs(tabs);
-        UIComponents.switchTab(tabContainer, 1);
-
-        const navItems = tabContainer.querySelectorAll('.tab-button');
-        const contents = tabContainer.querySelectorAll('.tab-panel');
-
-        expect(navItems.length).toBe(2);
-        expect(contents.length).toBe(2);
-
-        // The mock DOM implementation doesn't properly handle classList.toggle
-        // so we can't test the actual switching, but we can verify the structure
-        expect(navItems.length).toBe(2);
-        expect(contents.length).toBe(2);
-      });
-    });
-
-    describe('createTooltip', () => {
-      test('should create tooltip', () => {
-        const element = document.createElement('button');
-        element.textContent = 'Hover me';
-        document.body.appendChild(element);
-
-        UIComponents.createTooltip(element, 'Tooltip text');
-
-        // The implementation doesn't return the tooltip element
-        expect(element).toBeDefined();
-        expect(element.textContent).toBe('Hover me');
-      });
-
-      test('should position tooltip', () => {
-        const element = document.createElement('button');
-        element.textContent = 'Hover me';
-        document.body.appendChild(element);
-
-        const tooltip = document.createElement('div');
-        tooltip.className = 'tooltip';
-        tooltip.textContent = 'Tooltip text';
-        UIComponents.positionTooltip(element, tooltip);
-
-        expect(tooltip.style.top).toBeDefined();
-        expect(tooltip.style.left).toBeDefined();
-      });
+    test('should position tooltip', () => {
+      const element = document.createElement('button');
+      element.textContent = 'Hover me';
+      document.body.appendChild(element);
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.textContent = 'Tooltip text';
+      UIComponents.positionTooltip(element, tooltip);
+
+      expect(tooltip.style.top).toBeDefined();
+      expect(tooltip.style.left).toBeDefined();
     });
   });
 });

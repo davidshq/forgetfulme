@@ -114,10 +114,7 @@ class SupabaseConfig {
 
       return result;
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'supabase-config.setConfiguration'
-      );
+      const errorResult = ErrorHandler.handle(error, 'supabase-config.setConfiguration');
       return { success: false, message: errorResult.userMessage };
     }
   }
@@ -140,24 +137,39 @@ class SupabaseConfig {
       let attempts = 0;
       const maxAttempts = 10;
 
-      while (typeof supabase === 'undefined' && attempts < maxAttempts) {
+      // Check for supabase in global scope (window or global)
+      const getSupabase = () => {
+        if (typeof window !== 'undefined' && window.supabase) {
+          return window.supabase;
+        }
+        if (typeof globalThis !== 'undefined' && globalThis.supabase) {
+          return globalThis.supabase;
+        }
+        // Check for global supabase variable (loaded via script tag)
+
+        if (typeof supabase !== 'undefined') {
+          // eslint-disable-next-line no-undef
+          return supabase;
+        }
+        return null;
+      };
+
+      while (!getSupabase() && attempts < maxAttempts) {
         // Waiting for Supabase library to load...
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }
 
       // Check if Supabase client is available
-      if (typeof supabase === 'undefined') {
+      const supabaseClient = getSupabase();
+      if (!supabaseClient) {
         // Supabase client not loaded after waiting
         return false;
       }
 
       // Use the globally available Supabase client
       // Creating Supabase client
-      this.supabase = supabase.createClient(
-        this.supabaseUrl,
-        this.supabaseAnonKey
-      );
+      this.supabase = supabaseClient.createClient(this.supabaseUrl, this.supabaseAnonKey);
       this.auth = this.supabase.auth;
 
       // Verify the client was created properly
@@ -189,7 +201,7 @@ class SupabaseConfig {
         throw ErrorHandler.createError(
           'Supabase not initialized',
           ErrorHandler.ERROR_TYPES.CONFIG,
-          'supabase-config.signIn'
+          'supabase-config.signIn',
         );
       }
 
@@ -208,7 +220,7 @@ class SupabaseConfig {
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'supabase-config.signIn'
+        'supabase-config.signIn',
       );
     }
   }
@@ -219,7 +231,7 @@ class SupabaseConfig {
         throw ErrorHandler.createError(
           'Supabase not initialized',
           ErrorHandler.ERROR_TYPES.CONFIG,
-          'supabase-config.signUp'
+          'supabase-config.signUp',
         );
       }
 
@@ -236,7 +248,7 @@ class SupabaseConfig {
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'supabase-config.signUp'
+        'supabase-config.signUp',
       );
     }
   }
@@ -255,7 +267,7 @@ class SupabaseConfig {
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'supabase-config.signOut'
+        'supabase-config.signOut',
       );
     }
   }

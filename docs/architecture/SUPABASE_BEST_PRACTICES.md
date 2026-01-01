@@ -44,21 +44,23 @@ This document provides comprehensive guidance on implementing Supabase as a back
 ### 1. API Key Management
 
 **❌ Avoid:**
+
 ```javascript
 // Never expose in client-side code
-const supabase = createClient('https://your-project.supabase.co', 'public-anon-key')
+const supabase = createClient('https://your-project.supabase.co', 'public-anon-key');
 ```
 
 **✅ Best Practice:**
+
 ```javascript
 // Use environment variables and secure key rotation
-const supabaseUrl = process.env.SUPABASE_URL
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 // For extensions, consider using chrome.storage for sensitive config
-chrome.storage.sync.get(['supabaseConfig'], (result) => {
-  const supabase = createClient(result.supabaseConfig.url, result.supabaseConfig.anonKey)
-})
+chrome.storage.sync.get(['supabaseConfig'], result => {
+  const supabase = createClient(result.supabaseConfig.url, result.supabaseConfig.anonKey);
+});
 ```
 
 ### 2. Row Level Security (RLS)
@@ -82,16 +84,16 @@ CREATE POLICY "Users can only insert own bookmarks" ON bookmarks
 
 ```javascript
 // Encrypt sensitive data before storing
-import { encrypt, decrypt } from './crypto-utils'
+import { encrypt, decrypt } from './crypto-utils';
 
-const encryptBookmark = async (bookmark) => {
-  const encryptedData = await encrypt(JSON.stringify(bookmark), userKey)
+const encryptBookmark = async bookmark => {
+  const encryptedData = await encrypt(JSON.stringify(bookmark), userKey);
   return {
     ...bookmark,
     encrypted_content: encryptedData,
-    content: null // Remove plain text
-  }
-}
+    content: null, // Remove plain text
+  };
+};
 ```
 
 ## Data Modeling
@@ -157,50 +159,52 @@ CREATE INDEX idx_bookmarks_user_created ON bookmarks(user_id, created_at DESC);
 // auth.js - Authentication management
 class SupabaseAuth {
   constructor() {
-    this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    this.user = null
-    this.session = null
+    this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    this.user = null;
+    this.session = null;
   }
 
   async initialize() {
     // Check for existing session
-    const { data: { session } } = await this.supabase.auth.getSession()
+    const {
+      data: { session },
+    } = await this.supabase.auth.getSession();
     if (session) {
-      this.session = session
-      this.user = session.user
-      return true
+      this.session = session;
+      this.user = session.user;
+      return true;
     }
-    return false
+    return false;
   }
 
   async signIn(email, password) {
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email,
-      password
-    })
-    
-    if (error) throw error
-    
-    this.session = data.session
-    this.user = data.user
-    return data
+      password,
+    });
+
+    if (error) throw error;
+
+    this.session = data.session;
+    this.user = data.user;
+    return data;
   }
 
   async signUp(email, password) {
     const { data, error } = await this.supabase.auth.signUp({
       email,
-      password
-    })
-    
-    if (error) throw error
-    
-    return data
+      password,
+    });
+
+    if (error) throw error;
+
+    return data;
   }
 
   async signOut() {
-    await this.supabase.auth.signOut()
-    this.session = null
-    this.user = null
+    await this.supabase.auth.signOut();
+    this.session = null;
+    this.user = null;
   }
 }
 ```
@@ -211,17 +215,17 @@ class SupabaseAuth {
 // popup.js - Auth UI
 class AuthUI {
   constructor() {
-    this.auth = new SupabaseAuth()
-    this.initializeAuth()
+    this.auth = new SupabaseAuth();
+    this.initializeAuth();
   }
 
   async initializeAuth() {
-    const isAuthenticated = await this.auth.initialize()
-    
+    const isAuthenticated = await this.auth.initialize();
+
     if (isAuthenticated) {
-      this.showMainInterface()
+      this.showMainInterface();
     } else {
-      this.showLoginForm()
+      this.showLoginForm();
     }
   }
 
@@ -236,8 +240,8 @@ class AuthUI {
         </form>
         <p>Don't have an account? <a href="#" id="signupLink">Sign up</a></p>
       </div>
-    `
-    document.getElementById('app').innerHTML = loginHTML
+    `;
+    document.getElementById('app').innerHTML = loginHTML;
   }
 }
 ```
@@ -250,8 +254,8 @@ class AuthUI {
 // realtime.js - Real-time data sync
 class RealtimeManager {
   constructor(supabase) {
-    this.supabase = supabase
-    this.subscriptions = new Map()
+    this.supabase = supabase;
+    this.subscriptions = new Map();
   }
 
   subscribeToBookmarks(userId, callback) {
@@ -263,23 +267,23 @@ class RealtimeManager {
           event: '*',
           schema: 'public',
           table: 'bookmarks',
-          filter: `user_id=eq.${userId}`
+          filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
-          callback(payload)
-        }
+        payload => {
+          callback(payload);
+        },
       )
-      .subscribe()
+      .subscribe();
 
-    this.subscriptions.set('bookmarks', subscription)
-    return subscription
+    this.subscriptions.set('bookmarks', subscription);
+    return subscription;
   }
 
   unsubscribe(channelName) {
-    const subscription = this.subscriptions.get(channelName)
+    const subscription = this.subscriptions.get(channelName);
     if (subscription) {
-      this.supabase.removeChannel(subscription)
-      this.subscriptions.delete(channelName)
+      this.supabase.removeChannel(subscription);
+      this.subscriptions.delete(channelName);
     }
   }
 }
@@ -291,39 +295,39 @@ class RealtimeManager {
 // background.js - Background sync
 class BackgroundSync {
   constructor() {
-    this.pendingOperations = []
-    this.isOnline = navigator.onLine
-    this.setupEventListeners()
+    this.pendingOperations = [];
+    this.isOnline = navigator.onLine;
+    this.setupEventListeners();
   }
 
   setupEventListeners() {
     window.addEventListener('online', () => {
-      this.isOnline = true
-      this.processPendingOperations()
-    })
+      this.isOnline = true;
+      this.processPendingOperations();
+    });
 
     window.addEventListener('offline', () => {
-      this.isOnline = false
-    })
+      this.isOnline = false;
+    });
   }
 
   async addBookmark(bookmark) {
     if (this.isOnline) {
       try {
-        await this.supabase.from('bookmarks').insert(bookmark)
+        await this.supabase.from('bookmarks').insert(bookmark);
       } catch (error) {
         this.pendingOperations.push({
           type: 'insert',
           data: bookmark,
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        });
       }
     } else {
       this.pendingOperations.push({
         type: 'insert',
         data: bookmark,
-        timestamp: Date.now()
-      })
+        timestamp: Date.now(),
+      });
     }
   }
 
@@ -331,12 +335,12 @@ class BackgroundSync {
     for (const operation of this.pendingOperations) {
       try {
         if (operation.type === 'insert') {
-          await this.supabase.from('bookmarks').insert(operation.data)
+          await this.supabase.from('bookmarks').insert(operation.data);
         }
         // Remove processed operation
-        this.pendingOperations = this.pendingOperations.filter(op => op !== operation)
+        this.pendingOperations = this.pendingOperations.filter(op => op !== operation);
       } catch (error) {
-        console.error('Failed to process pending operation:', error)
+        console.error('Failed to process pending operation:', error);
       }
     }
   }
@@ -351,52 +355,46 @@ class BackgroundSync {
 // Optimized bookmark queries
 class BookmarkService {
   constructor(supabase) {
-    this.supabase = supabase
+    this.supabase = supabase;
   }
 
   async getBookmarks(userId, options = {}) {
-    const {
-      page = 1,
-      limit = 50,
-      status = null,
-      search = null,
-      tags = null
-    } = options
+    const { page = 1, limit = 50, status = null, search = null, tags = null } = options;
 
     let query = this.supabase
       .from('bookmarks')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1)
+      .range((page - 1) * limit, page * limit - 1);
 
     if (status) {
-      query = query.eq('read_status', status)
+      query = query.eq('read_status', status);
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`)
+      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
     }
 
     if (tags && tags.length > 0) {
-      query = query.overlaps('tags', tags)
+      query = query.overlaps('tags', tags);
     }
 
-    return await query
+    return await query;
   }
 
   async getBookmarkStats(userId) {
     const { data, error } = await this.supabase
       .from('bookmarks')
       .select('read_status')
-      .eq('user_id', userId)
+      .eq('user_id', userId);
 
-    if (error) throw error
+    if (error) throw error;
 
     return data.reduce((stats, bookmark) => {
-      stats[bookmark.read_status] = (stats[bookmark.read_status] || 0) + 1
-      return stats
-    }, {})
+      stats[bookmark.read_status] = (stats[bookmark.read_status] || 0) + 1;
+      return stats;
+    }, {});
   }
 }
 ```
@@ -407,48 +405,49 @@ class BookmarkService {
 // cache.js - Local caching
 class CacheManager {
   constructor() {
-    this.cache = new Map()
-    this.maxSize = 1000
+    this.cache = new Map();
+    this.maxSize = 1000;
   }
 
-  set(key, value, ttl = 300000) { // 5 minutes default
+  set(key, value, ttl = 300000) {
+    // 5 minutes default
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
-      ttl
-    })
+      ttl,
+    });
 
     // Evict old entries if cache is full
     if (this.cache.size > this.maxSize) {
-      this.evictOldest()
+      this.evictOldest();
     }
   }
 
   get(key) {
-    const entry = this.cache.get(key)
-    if (!entry) return null
+    const entry = this.cache.get(key);
+    if (!entry) return null;
 
     if (Date.now() - entry.timestamp > entry.ttl) {
-      this.cache.delete(key)
-      return null
+      this.cache.delete(key);
+      return null;
     }
 
-    return entry.value
+    return entry.value;
   }
 
   evictOldest() {
-    let oldestKey = null
-    let oldestTime = Date.now()
+    let oldestKey = null;
+    let oldestTime = Date.now();
 
     for (const [key, entry] of this.cache) {
       if (entry.timestamp < oldestTime) {
-        oldestTime = entry.timestamp
-        oldestKey = key
+        oldestTime = entry.timestamp;
+        oldestKey = key;
       }
     }
 
     if (oldestKey) {
-      this.cache.delete(oldestKey)
+      this.cache.delete(oldestKey);
     }
   }
 }
@@ -468,41 +467,41 @@ class ErrorHandler {
       details: error.details,
       hint: error.hint,
       operation,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
 
     // Log error for debugging
-    console.error('Supabase Error:', errorInfo)
+    console.error('Supabase Error:', errorInfo);
 
     // Handle specific error types
     switch (error.code) {
       case 'PGRST116':
         // JWT expired
-        await this.handleAuthError()
-        break
+        await this.handleAuthError();
+        break;
       case 'PGRST301':
         // Row Level Security violation
-        await this.handleSecurityError()
-        break
+        await this.handleSecurityError();
+        break;
       case 'PGRST301':
         // Network error
-        await this.handleNetworkError()
-        break
+        await this.handleNetworkError();
+        break;
       default:
-        await this.handleGenericError(errorInfo)
+        await this.handleGenericError(errorInfo);
     }
 
-    return errorInfo
+    return errorInfo;
   }
 
   static async handleAuthError() {
     // Redirect to login
-    chrome.runtime.sendMessage({ type: 'AUTH_REQUIRED' })
+    chrome.runtime.sendMessage({ type: 'AUTH_REQUIRED' });
   }
 
   static async handleNetworkError() {
     // Store operation for retry when online
-    await this.storeForRetry(operation)
+    await this.storeForRetry(operation);
   }
 }
 ```
@@ -513,59 +512,59 @@ class ErrorHandler {
 // offline-manager.js
 class OfflineManager {
   constructor() {
-    this.db = null
-    this.initializeIndexedDB()
+    this.db = null;
+    this.initializeIndexedDB();
   }
 
   async initializeIndexedDB() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('ForgetfulMe', 1)
+      const request = indexedDB.open('ForgetfulMe', 1);
 
-      request.onerror = () => reject(request.error)
+      request.onerror = () => reject(request.error);
       request.onsuccess = () => {
-        this.db = request.result
-        resolve()
-      }
+        this.db = request.result;
+        resolve();
+      };
 
-      request.onupgradeneeded = (event) => {
-        const db = event.target.result
-        
+      request.onupgradeneeded = event => {
+        const db = event.target.result;
+
         // Create bookmarks store
         if (!db.objectStoreNames.contains('bookmarks')) {
-          const store = db.createObjectStore('bookmarks', { keyPath: 'id' })
-          store.createIndex('user_id', 'user_id', { unique: false })
-          store.createIndex('url', 'url', { unique: false })
+          const store = db.createObjectStore('bookmarks', { keyPath: 'id' });
+          store.createIndex('user_id', 'user_id', { unique: false });
+          store.createIndex('url', 'url', { unique: false });
         }
 
         // Create pending operations store
         if (!db.objectStoreNames.contains('pending_operations')) {
-          db.createObjectStore('pending_operations', { keyPath: 'id', autoIncrement: true })
+          db.createObjectStore('pending_operations', { keyPath: 'id', autoIncrement: true });
         }
-      }
-    })
+      };
+    });
   }
 
   async storeBookmark(bookmark) {
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['bookmarks'], 'readwrite')
-      const store = transaction.objectStore('bookmarks')
-      const request = store.put(bookmark)
+      const transaction = this.db.transaction(['bookmarks'], 'readwrite');
+      const store = transaction.objectStore('bookmarks');
+      const request = store.put(bookmark);
 
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
   }
 
   async getBookmarks(userId) {
     return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(['bookmarks'], 'readonly')
-      const store = transaction.objectStore('bookmarks')
-      const index = store.index('user_id')
-      const request = index.getAll(userId)
+      const transaction = this.db.transaction(['bookmarks'], 'readonly');
+      const store = transaction.objectStore('bookmarks');
+      const index = store.index('user_id');
+      const request = index.getAll(userId);
 
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
   }
 }
 ```
@@ -575,6 +574,7 @@ class OfflineManager {
 ### Option 1: Pure Supabase (Recommended for Cross-Browser)
 
 **Pros:**
+
 - Full cross-browser compatibility
 - Real-time synchronization
 - Built-in authentication
@@ -582,6 +582,7 @@ class OfflineManager {
 - Automatic backups and scaling
 
 **Cons:**
+
 - Requires user accounts
 - Network dependency
 - Potential privacy concerns
@@ -592,12 +593,14 @@ class OfflineManager {
 ### Option 2: Hybrid Approach (Chrome Sync + Supabase)
 
 **Pros:**
+
 - Best of both worlds
 - Chrome users get native experience
 - Firefox/Safari users get full functionality
 - Graceful fallback options
 
 **Cons:**
+
 - More complex implementation
 - Data synchronization challenges
 - Higher maintenance overhead
@@ -607,12 +610,14 @@ class OfflineManager {
 ### Option 3: Supabase with Local Caching
 
 **Pros:**
+
 - Offline-first experience
 - Reduced API calls
 - Better performance
 - Lower costs
 
 **Cons:**
+
 - Complex cache invalidation
 - Potential data inconsistency
 - Larger extension size
@@ -662,7 +667,7 @@ The extension supports data import/export functionality for user data portabilit
 async exportData() {
   const bookmarks = await this.supabaseService.getBookmarks({ limit: 10000 })
   const preferences = await this.supabaseService.getUserPreferences()
-  
+
   return {
     bookmarks: bookmarks,
     preferences: preferences,
@@ -674,17 +679,17 @@ async exportData() {
 // Data import functionality
 async importData(importData) {
   const userId = this.config.getCurrentUser().id
-  
+
   if (importData.bookmarks && importData.bookmarks.length > 0) {
     const transformedBookmarks = BookmarkTransformer.transformMultiple(
-      importData.bookmarks, 
-      userId, 
+      importData.bookmarks,
+      userId,
       { preserveTimestamps: true, setDefaults: false }
     )
-    
+
     await this.supabase.from('bookmarks').insert(transformedBookmarks)
   }
-  
+
   if (importData.preferences) {
     await this.saveUserPreferences(importData.preferences)
   }
@@ -697,34 +702,34 @@ async importData(importData) {
 // export-import.js
 class DataPortability {
   constructor(supabase) {
-    this.supabase = supabase
+    this.supabase = supabase;
   }
 
   async exportData(userId) {
     const { data: bookmarks } = await this.supabase
       .from('bookmarks')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', userId);
 
     const exportData = {
       version: '1.0',
       exported_at: new Date().toISOString(),
-      bookmarks: bookmarks
-    }
+      bookmarks: bookmarks,
+    };
 
-    return exportData
+    return exportData;
   }
 
   async importData(userId, importData) {
-    const { data, error } = await this.supabase
-      .from('bookmarks')
-      .insert(importData.bookmarks.map(bookmark => ({
+    const { data, error } = await this.supabase.from('bookmarks').insert(
+      importData.bookmarks.map(bookmark => ({
         ...bookmark,
-        user_id: userId
-      })))
+        user_id: userId,
+      })),
+    );
 
-    if (error) throw error
-    return data
+    if (error) throw error;
+    return data;
   }
 }
 ```
@@ -739,4 +744,4 @@ Supabase provides an excellent foundation for web extension backend storage, off
 - **Security-first approach** with RLS and encryption
 - **Cost-effective solution** with generous free tier
 
-The implementation should prioritize security, performance, and user experience while maintaining flexibility for future enhancements and cross-platform expansion. 
+The implementation should prioritize security, performance, and user experience while maintaining flexibility for future enhancements and cross-platform expansion.

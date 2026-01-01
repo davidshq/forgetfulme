@@ -94,9 +94,7 @@ describe('ConfigManager', () => {
 
       expect(configManager.initialized).toBe(true);
       expect(configManager.config.supabase).toEqual(mockSupabaseConfig);
-      expect(configManager.config.preferences.customStatusTypes).toEqual(
-        mockStatusTypes
-      );
+      expect(configManager.config.preferences.customStatusTypes).toEqual(mockStatusTypes);
       expect(configManager.config.auth).toEqual(mockAuthSession);
     });
 
@@ -120,7 +118,7 @@ describe('ConfigManager', () => {
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.'
+        'An unexpected error occurred. Please try again.',
       );
       // ErrorHandler handles errors internally
     });
@@ -138,7 +136,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.'
+        'An unexpected error occurred. Please try again.',
       );
     });
 
@@ -155,7 +153,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Please check your anon key format.'
+        'Please check your anon key format.',
       );
     });
 
@@ -203,7 +201,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Configuration error. Please check your settings and try again.'
+        'Configuration error. Please check your settings and try again.',
       );
     });
 
@@ -219,7 +217,7 @@ describe('ConfigManager', () => {
       });
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'Configuration error. Please check your settings and try again.'
+        'Configuration error. Please check your settings and try again.',
       );
     });
 
@@ -280,32 +278,26 @@ describe('ConfigManager', () => {
     });
 
     test('should reject setting Supabase config with missing URL', async () => {
-      await expect(
-        configManager.setSupabaseConfig('', 'valid-key')
-      ).rejects.toThrow('Both URL and anon key are required');
+      await expect(configManager.setSupabaseConfig('', 'valid-key')).rejects.toThrow(
+        'Both URL and anon key are required',
+      );
     });
 
     test('should reject setting Supabase config with missing anon key', async () => {
       await expect(
-        configManager.setSupabaseConfig('https://example.supabase.co', '')
+        configManager.setSupabaseConfig('https://example.supabase.co', ''),
       ).rejects.toThrow('Both URL and anon key are required');
     });
 
     test('should reject setting Supabase config with invalid URL', async () => {
       await expect(
-        configManager.setSupabaseConfig(
-          'http://example.supabase.co',
-          'valid-key'
-        )
+        configManager.setSupabaseConfig('http://example.supabase.co', 'valid-key'),
       ).rejects.toThrow('URL must start with https://');
     });
 
     test('should reject setting Supabase config with invalid anon key', async () => {
       await expect(
-        configManager.setSupabaseConfig(
-          'https://example.supabase.co',
-          'invalid-key'
-        )
+        configManager.setSupabaseConfig('https://example.supabase.co', 'invalid-key'),
       ).rejects.toThrow('Invalid anon key format');
     });
 
@@ -335,12 +327,7 @@ describe('ConfigManager', () => {
       const result = await configManager.getPreferences();
 
       expect(result).toEqual({
-        customStatusTypes: [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
-        ],
+        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
       });
     });
 
@@ -364,12 +351,7 @@ describe('ConfigManager', () => {
     test('should get custom status types', async () => {
       const result = await configManager.getCustomStatusTypes();
 
-      expect(result).toEqual([
-        'read',
-        'good-reference',
-        'low-value',
-        'revisit-later',
-      ]);
+      expect(result).toEqual(['read', 'good-reference', 'low-value', 'revisit-later']);
     });
 
     test('should set custom status types', async () => {
@@ -377,34 +359,24 @@ describe('ConfigManager', () => {
 
       await configManager.setCustomStatusTypes(statusTypes);
 
-      expect(configManager.config.preferences.customStatusTypes).toEqual(
-        statusTypes
-      );
+      expect(configManager.config.preferences.customStatusTypes).toEqual(statusTypes);
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: statusTypes,
       });
     });
 
     test('should reject setting non-array status types', async () => {
-      await expect(
-        configManager.setCustomStatusTypes('not-an-array')
-      ).rejects.toThrow('Status types must be an array');
+      await expect(configManager.setCustomStatusTypes('not-an-array')).rejects.toThrow(
+        'Status types must be an array',
+      );
     });
 
     test('should add custom status type', async () => {
       await configManager.addCustomStatusType('new-status');
 
-      expect(configManager.config.preferences.customStatusTypes).toContain(
-        'new-status'
-      );
+      expect(configManager.config.preferences.customStatusTypes).toContain('new-status');
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
-        customStatusTypes: [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
-          'new-status',
-        ],
+        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later', 'new-status'],
       });
     });
 
@@ -423,20 +395,18 @@ describe('ConfigManager', () => {
 
     test('should reject adding invalid status type', async () => {
       await expect(configManager.addCustomStatusType('')).rejects.toThrow(
-        'Status type must be a non-empty string'
+        'Status type must be a non-empty string',
       );
 
       await expect(configManager.addCustomStatusType(null)).rejects.toThrow(
-        'Status type must be a non-empty string'
+        'Status type must be a non-empty string',
       );
     });
 
     test('should remove custom status type', async () => {
       await configManager.removeCustomStatusType('read');
 
-      expect(configManager.config.preferences.customStatusTypes).not.toContain(
-        'read'
-      );
+      expect(configManager.config.preferences.customStatusTypes).not.toContain('read');
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
         customStatusTypes: ['good-reference', 'low-value', 'revisit-later'],
       });
@@ -479,9 +449,7 @@ describe('ConfigManager', () => {
       await configManager.clearAuthSession();
 
       expect(configManager.config.auth).toBeNull();
-      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith([
-        'auth_session',
-      ]);
+      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith(['auth_session']);
     });
 
     test('should check if authenticated', async () => {
@@ -652,7 +620,7 @@ describe('ConfigManager', () => {
       await configManager.initialize();
 
       expect(mockChrome.storage.sync.set).not.toHaveBeenCalledWith(
-        expect.objectContaining({ configVersion: 1 })
+        expect.objectContaining({ configVersion: 1 }),
       );
     });
 
@@ -663,9 +631,7 @@ describe('ConfigManager', () => {
         auth_session: null,
         configVersion: 0,
       });
-      mockChrome.storage.sync.set.mockRejectedValue(
-        new Error('Migration error')
-      );
+      mockChrome.storage.sync.set.mockRejectedValue(new Error('Migration error'));
 
       // Should not throw error
       await configManager.initialize();
@@ -721,7 +687,7 @@ describe('ConfigManager', () => {
 
       expect(configManager.config.supabase).toEqual(importData.supabase);
       expect(configManager.config.preferences.customStatusTypes).toEqual(
-        importData.preferences.customStatusTypes
+        importData.preferences.customStatusTypes,
       );
       // The import process calls setSupabaseConfig and setPreferences separately
       // which each call storage.sync.set with their own parameters
@@ -745,9 +711,9 @@ describe('ConfigManager', () => {
         version: 1,
       };
 
-      await expect(
-        configManager.importConfig(invalidImportData)
-      ).rejects.toThrow('URL must start with https://');
+      await expect(configManager.importConfig(invalidImportData)).rejects.toThrow(
+        'URL must start with https://',
+      );
     });
   });
 });

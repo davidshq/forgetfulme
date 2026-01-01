@@ -1,0 +1,11 @@
+- Did you introduce any bugs or errors?
+- What about bad practices?
+- Was any functionality lost?
+- Do we need to DRY things up?
+- Run linting and formatting.
+- Are there any critical path tests we need to create or update?
+- Did you learn any important lessons during working with this code? If so, update the docs accordingly or create a new doc if an appropriate doc does not exist.
+- Are there any TODOs that we should add to TODO.md or to FUTURE.md
+  - TODO.md is more immediately needed/important fixes
+  - FUTURE.md is for functionality that would be nice but isn't essential
+- If this is a test, mock, fixture, etc. and you haven't been called from the [review-for-tests](review-for-tests.md) command, run that command.

@@ -13,10 +13,8 @@ export const EXTENSION_PATH = extensionPath;
 
 const test = base.extend({
   // Launch a persistent context with the extension loaded so background service workers stay alive
-  context: async ({}, use) => {
-    const userDataDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), 'forgetfulme-e2e-')
-    );
+  context: async (_params, use) => {
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'forgetfulme-e2e-'));
 
     // Ensure extension path is absolute
     const absExtensionPath = path.resolve(extensionPath);

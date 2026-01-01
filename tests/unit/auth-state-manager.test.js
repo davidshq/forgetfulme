@@ -63,9 +63,7 @@ describe('AuthStateManager', () => {
 
       expect(authManager.initialized).toBe(true);
       expect(authManager.authState).toBeNull();
-      expect(mockChrome.storage.sync.get).toHaveBeenCalledWith([
-        'auth_session',
-      ]);
+      expect(mockChrome.storage.sync.get).toHaveBeenCalledWith(['auth_session']);
       expect(mockChrome.storage.onChanged.addListener).toHaveBeenCalled();
       // ErrorHandler doesn't log success messages
     });
@@ -97,7 +95,7 @@ describe('AuthStateManager', () => {
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
       await expect(authManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.'
+        'An unexpected error occurred. Please try again.',
       );
       // ErrorHandler handles errors internally
     });
@@ -160,9 +158,7 @@ describe('AuthStateManager', () => {
 
     test('should handle runtime message errors gracefully', async () => {
       mockChrome.storage.sync.get.mockResolvedValue({ auth_session: null });
-      mockChrome.runtime.sendMessage.mockRejectedValue(
-        new Error('No listeners')
-      );
+      mockChrome.runtime.sendMessage.mockRejectedValue(new Error('No listeners'));
       await authManager.initialize();
 
       const mockSession = { user: { id: '123' } };
@@ -183,9 +179,7 @@ describe('AuthStateManager', () => {
       await authManager.clearAuthState();
 
       expect(authManager.authState).toBeNull();
-      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith([
-        'auth_session',
-      ]);
+      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith(['auth_session']);
       expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith({
         type: 'AUTH_STATE_CHANGED',
         session: null,

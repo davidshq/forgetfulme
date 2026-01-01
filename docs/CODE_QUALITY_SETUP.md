@@ -21,6 +21,7 @@ The ESLint configuration includes:
 ### Prettier Configuration (`.prettierrc`)
 
 Prettier is configured with:
+
 - Single quotes
 - Semicolons
 - 80 character line width
@@ -64,6 +65,7 @@ npm run check
 ## Chrome Extension Specific Configuration
 
 The ESLint configuration includes globals for:
+
 - Chrome Extension APIs (`chrome`, `browser`)
 - DOM APIs (`window`, `document`, `console`)
 - Browser APIs (`URL`, `Blob`, `requestAnimationFrame`)
@@ -74,6 +76,7 @@ The ESLint configuration includes globals for:
 ### Pre-commit Hooks (Recommended)
 
 Consider adding pre-commit hooks to automatically run:
+
 ```bash
 npm run lint:fix && npm run format
 ```
@@ -81,6 +84,7 @@ npm run lint:fix && npm run format
 ### IDE Integration
 
 Most IDEs can be configured to:
+
 - Show ESLint errors and warnings in real-time
 - Auto-format on save with Prettier
 - Auto-fix ESLint issues on save
@@ -112,4 +116,4 @@ If Prettier and ESLint conflict, ensure `eslint-config-prettier` is included in 
 
 ### Custom Globals
 
-If you add new global variables or classes, add them to the `globals` section in `eslint.config.js`. 
+If you add new global variables or classes, add them to the `globals` section in `eslint.config.js`.

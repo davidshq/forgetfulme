@@ -9,10 +9,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  createTestData,
-  createAssertionHelpers,
-} from '../helpers/test-factories.js';
+import { createTestData, createAssertionHelpers } from '../helpers/test-factories.js';
 
 /**
  * Enhanced Test Utilities Example
@@ -147,10 +144,7 @@ describe('Enhanced Test Utilities Example', () => {
       });
 
       mocks.errorHandler.handle(error, 'test-context');
-      mocks.uiMessages.error(
-        'User friendly error',
-        document.createElement('div')
-      );
+      mocks.uiMessages.error('User friendly error', document.createElement('div'));
 
       assertions.assertErrorHandling('test-context');
     });
@@ -165,7 +159,7 @@ describe('Enhanced Test Utilities Example', () => {
             createTestData.bookmark({
               id: 'custom-id',
               url: 'https://custom.com',
-            })
+            }),
           ),
         },
         uiMessages: {
@@ -180,9 +174,7 @@ describe('Enhanced Test Utilities Example', () => {
       expect(result.url).toBe('https://custom.com');
 
       customMocks.uiMessages.success('Test message');
-      expect(customMocks.uiMessages.success).toHaveBeenCalledWith(
-        'Test message'
-      );
+      expect(customMocks.uiMessages.success).toHaveBeenCalledWith('Test message');
     });
   });
 });

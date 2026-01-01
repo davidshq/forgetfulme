@@ -7,6 +7,20 @@
  * @version 1.0.0
  * @since 2024-01-01
  */
+
+import { MESSAGE_TYPES } from './constants.js';
+import ErrorHandler from './error-handler.js';
+import { validateSupabaseConfig, validatePreferences } from './config-validator.js';
+import { migrateConfig } from './config-migration.js';
+import {
+  loadAllConfig as loadConfigFromStorage,
+  saveSupabaseConfig,
+  saveCustomStatusTypes,
+  saveAuthSession,
+  clearAuthSession as clearAuthSessionFromStorage,
+  initializeDefaultSettings,
+} from './config-storage.js';
+
 /**
  * Unified Configuration Manager for ForgetfulMe Extension
  * @class ConfigManager
@@ -16,13 +30,6 @@
  * const configManager = new ConfigManager();
  * await configManager.initialize();
  */
-
-/**
- * Configuration constants for ConfigManager
- */
-const CONFIG = {
-  MIGRATION_VERSION: 1,
-};
 
 class ConfigManager {
   /**
@@ -57,159 +64,27 @@ class ConfigManager {
 
     try {
       // Load all configuration from storage
-      await this.loadAllConfig();
+      const loadedConfig = await loadConfigFromStorage();
+      this.config.supabase = loadedConfig.supabase;
+      this.config.preferences = loadedConfig.preferences;
+      this.config.auth = loadedConfig.auth;
 
       // Validate configuration
-      await this.validateConfig();
+      validateSupabaseConfig(this.config.supabase);
+      this.config.preferences = validatePreferences(this.config.preferences);
 
       // Set up migration if needed
-      await this.migrateConfig();
+      await migrateConfig();
 
       this.initialized = true;
       this.notifyListeners('initialized');
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-manager.initialize'
-      );
+      const errorResult = ErrorHandler.handle(error, 'config-manager.initialize');
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'config-manager.initialize'
+        'config-manager.initialize',
       );
-    }
-  }
-
-  /**
-   * Load all configuration from storage
-   * @description Retrieves all configuration data from Chrome sync storage
-   */
-  async loadAllConfig() {
-    try {
-      const result = await chrome.storage.sync.get([
-        'supabaseConfig',
-        'customStatusTypes',
-        'auth_session',
-      ]);
-
-      this.config.supabase = result.supabaseConfig || null;
-      this.config.preferences = {
-        customStatusTypes: result.customStatusTypes || [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
-        ],
-      };
-      this.config.auth = result.auth_session || null;
-    } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-manager.loadAllConfig'
-      );
-      throw ErrorHandler.createError(
-        errorResult.userMessage,
-        errorResult.errorInfo.type,
-        'config-manager.loadAllConfig'
-      );
-    }
-  }
-
-  /**
-   * Validate configuration
-   * @description Validates loaded configuration data
-   */
-  async validateConfig() {
-    // Validate Supabase configuration if present
-    if (this.config.supabase) {
-      if (!this.config.supabase.url || !this.config.supabase.anonKey) {
-        throw ErrorHandler.createError(
-          'Invalid Supabase configuration: missing URL or anon key',
-          ErrorHandler.ERROR_TYPES.VALIDATION,
-          'config-manager.validateConfig'
-        );
-      }
-
-      if (!this.config.supabase.url.startsWith('https://')) {
-        throw ErrorHandler.createError(
-          'Invalid Supabase URL: must start with https://',
-          ErrorHandler.ERROR_TYPES.VALIDATION,
-          'config-manager.validateConfig'
-        );
-      }
-
-      if (!this.config.supabase.anonKey.startsWith('eyJ')) {
-        throw ErrorHandler.createError(
-          'Invalid anon key format',
-          ErrorHandler.ERROR_TYPES.VALIDATION,
-          'config-manager.validateConfig'
-        );
-      }
-    }
-
-    // Validate preferences
-    if (!Array.isArray(this.config.preferences.customStatusTypes)) {
-      this.config.preferences.customStatusTypes = [
-        'read',
-        'good-reference',
-        'low-value',
-        'revisit-later',
-      ];
-    }
-  }
-
-  /**
-   * Migrate configuration to latest version
-   * @description Handles configuration migration between versions
-   */
-  async migrateConfig() {
-    try {
-      // Check if migration is needed
-      const migrationVersion = await this.getMigrationVersion();
-
-      if (migrationVersion < CONFIG.MIGRATION_VERSION) {
-        // Migrate to version 1
-        await this.migrateToVersion1();
-        await this.setMigrationVersion(CONFIG.MIGRATION_VERSION);
-      }
-    } catch (error) {
-      ErrorHandler.handle(error, 'config-manager.migrateConfig');
-      // Don't throw - migration errors shouldn't break the app
-    }
-  }
-
-  /**
-   * Migrate to version 1 configuration
-   * @description Performs migration to version 1 format
-   */
-  async migrateToVersion1() {
-    // Migration logic for version 1
-    // This is where we'd handle any breaking changes in configuration format
-    // Migrating configuration to version 1
-  }
-
-  /**
-   * Get current migration version
-   * @returns {Promise<number>} Current migration version
-   */
-  async getMigrationVersion() {
-    try {
-      const result = await chrome.storage.sync.get(['configVersion']);
-      return result.configVersion || 0;
-    } catch {
-      return 0;
-    }
-  }
-
-  /**
-   * Set migration version
-   * @param {number} version - Version number to set
-   */
-  async setMigrationVersion(version) {
-    try {
-      await chrome.storage.sync.set({ configVersion: version });
-    } catch (error) {
-      // Error setting migration version
     }
   }
 
@@ -236,7 +111,7 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'Both URL and anon key are required',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig'
+        'config-manager.setSupabaseConfig',
       );
     }
 
@@ -244,7 +119,7 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'URL must start with https://',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig'
+        'config-manager.setSupabaseConfig',
       );
     }
 
@@ -252,7 +127,7 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'Invalid anon key format',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig'
+        'config-manager.setSupabaseConfig',
       );
     }
 
@@ -260,9 +135,7 @@ class ConfigManager {
     this.config.supabase = { url, anonKey };
 
     // Save to storage
-    await chrome.storage.sync.set({
-      supabaseConfig: this.config.supabase,
-    });
+    await saveSupabaseConfig(this.config.supabase);
 
     this.notifyListeners('supabaseConfigChanged', this.config.supabase);
 
@@ -302,9 +175,7 @@ class ConfigManager {
     };
 
     // Save to storage
-    await chrome.storage.sync.set({
-      customStatusTypes: this.config.preferences.customStatusTypes,
-    });
+    await saveCustomStatusTypes(this.config.preferences.customStatusTypes);
 
     this.notifyListeners('preferencesChanged', this.config.preferences);
   }
@@ -330,16 +201,14 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'Status types must be an array',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setCustomStatusTypes'
+        'config-manager.setCustomStatusTypes',
       );
     }
 
     this.config.preferences.customStatusTypes = statusTypes;
 
     // Save to storage
-    await chrome.storage.sync.set({
-      customStatusTypes: statusTypes,
-    });
+    await saveCustomStatusTypes(statusTypes);
 
     this.notifyListeners('statusTypesChanged', statusTypes);
   }
@@ -356,7 +225,7 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'Status type must be a non-empty string',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.addCustomStatusType'
+        'config-manager.addCustomStatusType',
       );
     }
 
@@ -400,9 +269,7 @@ class ConfigManager {
     this.config.auth = session;
 
     // Save to storage
-    await chrome.storage.sync.set({
-      auth_session: session,
-    });
+    await saveAuthSession(session);
 
     this.notifyListeners('authSessionChanged', session);
 
@@ -410,7 +277,7 @@ class ConfigManager {
     try {
       chrome.runtime
         .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
+          type: MESSAGE_TYPES.AUTH_STATE_CHANGED,
           session: session,
         })
         .catch(error => {
@@ -431,7 +298,7 @@ class ConfigManager {
     this.config.auth = null;
 
     // Remove from storage
-    await chrome.storage.sync.remove(['auth_session']);
+    await clearAuthSessionFromStorage();
 
     this.notifyListeners('authSessionChanged', null);
 
@@ -439,7 +306,7 @@ class ConfigManager {
     try {
       chrome.runtime
         .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
+          type: MESSAGE_TYPES.AUTH_STATE_CHANGED,
           session: null,
         })
         .catch(error => {
@@ -465,30 +332,18 @@ class ConfigManager {
    */
   async initializeDefaultSettings() {
     try {
-      const defaultSettings = {
-        customStatusTypes: [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
-        ],
-      };
-
-      await chrome.storage.sync.set(defaultSettings);
+      const defaultSettings = await initializeDefaultSettings();
 
       // Update local config
       this.config.preferences = defaultSettings;
 
       // Default settings initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-manager.initializeDefaultSettings'
-      );
+      const errorResult = ErrorHandler.handle(error, 'config-manager.initializeDefaultSettings');
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'config-manager.initializeDefaultSettings'
+        'config-manager.initializeDefaultSettings',
       );
     }
   }
@@ -522,16 +377,13 @@ class ConfigManager {
       throw ErrorHandler.createError(
         'Invalid configuration data',
         ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.importConfig'
+        'config-manager.importConfig',
       );
     }
 
     // Validate imported data
     if (configData.supabase) {
-      await this.setSupabaseConfig(
-        configData.supabase.url,
-        configData.supabase.anonKey
-      );
+      await this.setSupabaseConfig(configData.supabase.url, configData.supabase.anonKey);
     }
 
     if (configData.preferences) {
@@ -581,7 +433,7 @@ class ConfigManager {
       if (listener.event === event) {
         try {
           listener.callback(data);
-        } catch (error) {
+        } catch (_error) {
           // Error in config listener
         }
       }
@@ -603,19 +455,14 @@ class ConfigManager {
    * @description Clears all configuration and resets to defaults
    */
   async reset() {
-    try {
-      await chrome.storage.sync.clear();
-      this.config = {
-        supabase: null,
-        preferences: null,
-        auth: null,
-      };
-      this.initialized = false;
-      this.notifyListeners('configReset');
-    } catch (error) {
-      // Error resetting configuration
-      throw error;
-    }
+    await chrome.storage.sync.clear();
+    this.config = {
+      supabase: null,
+      preferences: null,
+      auth: null,
+    };
+    this.initialized = false;
+    this.notifyListeners('configReset');
   }
 
   /**

@@ -9,6 +9,7 @@
  */
 
 import ErrorHandler from './error-handler.js';
+import { MESSAGE_TYPES } from './constants.js';
 
 /**
  * Authentication State Manager for ForgetfulMe extension
@@ -61,14 +62,11 @@ class AuthStateManager {
       this.initialized = true;
       // AuthStateManager initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'auth-state-manager.initialize'
-      );
+      const errorResult = ErrorHandler.handle(error, 'auth-state-manager.initialize');
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
-        'auth-state-manager.initialize'
+        'auth-state-manager.initialize',
       );
     }
   }
@@ -159,14 +157,11 @@ class AuthStateManager {
     try {
       chrome.runtime
         .sendMessage({
-          type: 'AUTH_STATE_CHANGED',
+          type: MESSAGE_TYPES.AUTH_STATE_CHANGED,
           session: session,
         })
         .catch(error => {
-          ErrorHandler.handle(
-            error,
-            'auth-state-manager.notifyAllContexts.runtime'
-          );
+          ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts.runtime');
         });
     } catch (error) {
       ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts');

@@ -8,7 +8,8 @@
  * @since 2024-01-01
  */
 
-import ErrorHandler from './error-handler.js';
+// ErrorHandler imported but not used - kept for potential future error handling
+// import ErrorHandler from './error-handler.js';
 
 /**
  * BookmarkTransformer - Unified bookmark data transformation utility
@@ -151,8 +152,17 @@ class BookmarkTransformer {
       errors.push('Invalid URL format');
     }
 
-    if (!bookmark.title) {
-      errors.push('Title is required');
+    if (
+      !bookmark.title ||
+      typeof bookmark.title !== 'string' ||
+      bookmark.title.trim().length === 0
+    ) {
+      errors.push('Title is required and must be non-empty');
+    }
+
+    const readStatus = bookmark.readStatus || bookmark.status || bookmark.read_status;
+    if (!readStatus || typeof readStatus !== 'string' || readStatus.trim().length === 0) {
+      errors.push('Read status is required and must be non-empty');
     }
 
     if (bookmark.tags && !Array.isArray(bookmark.tags)) {
@@ -207,9 +217,7 @@ class BookmarkTransformer {
    * @returns {Array} Array of transformed bookmarks
    */
   static transformMultiple(bookmarks, userId, options = {}) {
-    return bookmarks.map(bookmark =>
-      this.toSupabaseFormat(bookmark, userId, options)
-    );
+    return bookmarks.map(bookmark => this.toSupabaseFormat(bookmark, userId, options));
   }
 
   /**

@@ -6,18 +6,30 @@ package-lock.json
 dist/
 build/
 
-# Test results
+# Test results and reports
 playwright-report/
 test-results/
+coverage/
 
-# External libraries
+# External libraries (minified)
+*.min.js
 supabase-js.min.js
 
-# Icons and assets
+# Icons and assets (binary files)
 icons/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
 
-# Documentation
-*.md
+# Generated files
+*.crx
+*.pem
+*.zip
 
-# Configuration files
-manifest.json 
+# Lock files (formatting can break them)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

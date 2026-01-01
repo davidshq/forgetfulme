@@ -8,9 +8,8 @@
  * @since 2024-01-01
  */
 
-import path from "path";
-import { fileURLToPath } from "url";
-import crypto from "crypto";
+import path from 'path';
+import crypto from 'crypto';
 
 // Extension path will be passed from fixtures
 
@@ -44,13 +43,13 @@ class ExtensionHelper {
     this.extensionPath = extensionPath ? path.resolve(extensionPath) : null;
 
     // Surface browser console output to aid debugging
-    this.page.on("console", (msg) => {
+    this.page.on('console', msg => {
       console.log(`[page ${msg.type()}] ${msg.text()}`);
     });
 
     // Surface runtime errors for visibility
-    this.page.on("pageerror", (error) => {
-      console.error("[page error]", error?.message || error);
+    this.page.on('pageerror', error => {
+      console.error('[page error]', error?.message || error);
     });
   }
 
@@ -77,15 +76,12 @@ class ExtensionHelper {
     const absolutePath = path.resolve(extensionPath);
     // Normalize path separators for consistency (Windows vs Unix)
     // Chrome expects forward slashes and removes trailing slashes
-    let normalizedPath = absolutePath.replace(/\\/g, "/");
+    let normalizedPath = absolutePath.replace(/\\/g, '/');
     // Remove trailing slash if present
-    normalizedPath = normalizedPath.replace(/\/$/, "");
+    normalizedPath = normalizedPath.replace(/\/$/, '');
     // Chrome uses SHA256 hash of the UTF-8 encoded path
     // Takes first 32 hex characters (which are already lowercase)
-    const hash = crypto
-      .createHash("sha256")
-      .update(normalizedPath, "utf8")
-      .digest("hex");
+    const hash = crypto.createHash('sha256').update(normalizedPath, 'utf8').digest('hex');
     return hash.substring(0, 32);
   }
 
@@ -104,12 +100,10 @@ class ExtensionHelper {
     // Wait for service worker to be available (with timeout)
     try {
       await Promise.race([
-        this.context
-          .waitForEvent("serviceworker", { timeout: 5000 })
-          .catch(() => null),
-        new Promise((resolve) => setTimeout(resolve, 2000)),
+        this.context.waitForEvent('serviceworker', { timeout: 5000 }).catch(() => null),
+        new Promise(resolve => setTimeout(resolve, 2000)),
       ]);
-    } catch (error) {
+    } catch {
       // Continue even if service worker event doesn't fire
     }
 
@@ -150,7 +144,7 @@ class ExtensionHelper {
             break;
           }
         }
-      } catch (error) {
+      } catch {
         // Ignore errors
       }
     }
@@ -159,12 +153,12 @@ class ExtensionHelper {
     if (!extensionId) {
       try {
         // Navigate to a blank page first
-        await this.page.goto("about:blank");
+        await this.page.goto('about:blank');
         await this.page.waitForTimeout(1000);
 
         // Try to access chrome.runtime.id via injected script
         const id = await this.page.evaluate(() => {
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             if (chrome && chrome.runtime && chrome.runtime.id) {
               resolve(chrome.runtime.id);
             } else {
@@ -177,7 +171,7 @@ class ExtensionHelper {
         if (id && /^[a-z]{32}$/.test(id)) {
           extensionId = id;
         }
-      } catch (error) {
+      } catch {
         // This won't work in extension pages, but worth trying
       }
     }
@@ -189,12 +183,12 @@ class ExtensionHelper {
 
         // Try Target.getTargets first - this should work even if service workers aren't running
         try {
-          const targets = await client.send("Target.getTargets");
+          const targets = await client.send('Target.getTargets');
           // Check all targets, not just service workers
           for (const target of targets.targetInfos) {
-            const url = target.url || "";
+            const url = target.url || '';
             // Check for any extension-related target
-            if (url.includes("chrome-extension://")) {
+            if (url.includes('chrome-extension://')) {
               const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
               if (match) {
                 extensionId = match[1];
@@ -203,11 +197,11 @@ class ExtensionHelper {
             }
             // Also check target type
             if (
-              target.type === "service_worker" ||
-              target.type === "background_page" ||
-              target.type === "page" // Extension pages might be type 'page'
+              target.type === 'service_worker' ||
+              target.type === 'background_page' ||
+              target.type === 'page' // Extension pages might be type 'page'
             ) {
-              const url = target.url || "";
+              const url = target.url || '';
               const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
               if (match) {
                 extensionId = match[1];
@@ -217,7 +211,7 @@ class ExtensionHelper {
           }
         } catch (targetError) {
           // Target.getTargets might not be available
-          console.warn("Target.getTargets failed:", targetError.message);
+          console.warn('Target.getTargets failed:', targetError.message);
         }
 
         // Try to get extension ID from Runtime domain by creating a page and injecting script
@@ -225,11 +219,11 @@ class ExtensionHelper {
           try {
             // Create a temporary page and try to access chrome.runtime
             const tempPage = await this.context.newPage();
-            await tempPage.goto("about:blank");
+            await tempPage.goto('about:blank');
 
             // Try to inject a script that accesses chrome.runtime.id
             // This won't work in regular pages, but let's try
-            const result = await client.send("Runtime.evaluate", {
+            const result = await client.send('Runtime.evaluate', {
               expression: `
                 (function() {
                   try {
@@ -242,21 +236,17 @@ class ExtensionHelper {
               `,
               returnByValue: true,
             });
-            if (
-              result.result &&
-              result.result.value &&
-              /^[a-z]{32}$/.test(result.result.value)
-            ) {
+            if (result.result && result.result.value && /^[a-z]{32}$/.test(result.result.value)) {
               extensionId = result.result.value;
             }
             await tempPage.close();
-          } catch (evalError) {
+          } catch {
             // Ignore
           }
         }
       } catch (error) {
         // CDP might not be available, continue
-        console.warn("CDP method failed:", error.message);
+        console.warn('CDP method failed:', error?.message || 'Unknown error');
       }
     }
 
@@ -267,7 +257,7 @@ class ExtensionHelper {
       const serviceWorkersRetry = this.context.serviceWorkers();
       for (const worker of serviceWorkersRetry) {
         const url = worker.url();
-        if (url.includes("background.js") || url.includes("service_worker")) {
+        if (url.includes('background.js') || url.includes('service_worker')) {
           const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
           if (match) {
             extensionId = match[1];
@@ -284,8 +274,8 @@ class ExtensionHelper {
         const testPage = await this.context.newPage();
 
         // Navigate to a page that might trigger the extension
-        await testPage.goto("https://example.com", {
-          waitUntil: "domcontentloaded",
+        await testPage.goto('https://example.com', {
+          waitUntil: 'domcontentloaded',
           timeout: 5000,
         });
         await testPage.waitForTimeout(3000);
@@ -302,7 +292,7 @@ class ExtensionHelper {
         }
 
         await testPage.close();
-      } catch (error) {
+      } catch {
         // Ignore errors
       }
     }
@@ -348,7 +338,7 @@ class ExtensionHelper {
                 break;
               }
             }
-          } catch (error) {
+          } catch {
             // Ignore
           }
         }
@@ -365,11 +355,11 @@ class ExtensionHelper {
         // Note: Browser domain might not be available in all contexts
         try {
           // Try to get all targets and find extension-related ones
-          const targets = await client.send("Target.getTargets");
+          const targets = await client.send('Target.getTargets');
           for (const target of targets.targetInfos) {
-            const url = target.url || "";
+            const url = target.url || '';
             // Check if this is an extension target
-            if (url.includes("chrome-extension://")) {
+            if (url.includes('chrome-extension://')) {
               const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
               if (match) {
                 extensionId = match[1];
@@ -377,10 +367,10 @@ class ExtensionHelper {
               }
             }
             // Also check targetId which might contain extension info
-            if (target.targetId && target.targetId.includes("extension")) {
+            if (target.targetId && target.targetId.includes('extension')) {
               // Try to get more info about this target
               try {
-                const targetInfo = await client.send("Target.getTargetInfo", {
+                const targetInfo = await client.send('Target.getTargetInfo', {
                   targetId: target.targetId,
                 });
                 if (targetInfo.targetInfo && targetInfo.targetInfo.url) {
@@ -392,15 +382,15 @@ class ExtensionHelper {
                     break;
                   }
                 }
-              } catch (e) {
+              } catch {
                 // Ignore
               }
             }
           }
-        } catch (browserError) {
+        } catch {
           // Browser domain might not be available
         }
-      } catch (error) {
+      } catch {
         // CDP might not be available
       }
     }
@@ -412,8 +402,8 @@ class ExtensionHelper {
         // Create a new page and try to navigate to a web page
         // This might trigger the extension's service worker
         const triggerPage = await this.context.newPage();
-        await triggerPage.goto("http://example.com", {
-          waitUntil: "networkidle",
+        await triggerPage.goto('http://example.com', {
+          waitUntil: 'networkidle',
           timeout: 10000,
         });
         await triggerPage.waitForTimeout(2000);
@@ -429,7 +419,7 @@ class ExtensionHelper {
           }
         }
         await triggerPage.close();
-      } catch (error) {
+      } catch {
         // Ignore
       }
     }
@@ -441,8 +431,8 @@ class ExtensionHelper {
         console.log(`[extension-id] Computed from path: ${extensionId}`);
       } catch (error) {
         console.warn(
-          "[extension-id] Failed to compute from path:",
-          error.message,
+          '[extension-id] Failed to compute from path:',
+          error?.message || 'Unknown error',
         );
       }
     }
@@ -451,11 +441,11 @@ class ExtensionHelper {
       const swCount = this.context.serviceWorkers().length;
       const bgCount = this.context.backgroundPages().length;
       const pageCount = this.context.pages().length;
-      const hasPath = this.extensionPath ? "yes" : "no";
+      const hasPath = this.extensionPath ? 'yes' : 'no';
       throw new Error(
         `Could not determine extensionId. Service workers: ${swCount}, Background pages: ${bgCount}, Pages: ${pageCount}, Extension path provided: ${hasPath}. ` +
-          "Make sure the extension is loaded correctly. The extension may not be loading in headless mode. " +
-          "Try running with headless: false to debug.",
+          'Make sure the extension is loaded correctly. The extension may not be loading in headless mode. ' +
+          'Try running with headless: false to debug.',
       );
     }
 
@@ -479,7 +469,7 @@ class ExtensionHelper {
       const response = await testPage.goto(manifestUrl, { timeout: 5000 });
       await testPage.close();
       return response && response.ok();
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -493,20 +483,18 @@ class ExtensionHelper {
     // Verify extension is loaded before trying to navigate
     const isLoaded = await this.verifyExtensionLoaded(extensionId);
     if (!isLoaded) {
-      console.warn(
-        `[nav] Extension may not be loaded. Computed ID: ${extensionId}`,
-      );
+      console.warn(`[nav] Extension may not be loaded. Computed ID: ${extensionId}`);
       // Continue anyway - navigation might still work
     }
 
     try {
       await this.page.goto(url, {
-        waitUntil: "domcontentloaded",
+        waitUntil: 'domcontentloaded',
         timeout: 15000,
       });
       // Wait for element to exist, not necessarily visible (element might be hidden initially)
-      await this.page.waitForSelector("#app", {
-        state: "attached",
+      await this.page.waitForSelector('#app', {
+        state: 'attached',
         timeout: 10000,
       });
     } catch (error) {
@@ -526,12 +514,12 @@ class ExtensionHelper {
     const url = `chrome-extension://${extensionId}/options.html`;
     console.log(`[nav] Opening options: ${url}`);
     await this.page.goto(url, {
-      waitUntil: "domcontentloaded",
+      waitUntil: 'domcontentloaded',
       timeout: 15000,
     });
     // Wait for element to exist, not necessarily visible
-    await this.page.waitForSelector("#app", {
-      state: "attached",
+    await this.page.waitForSelector('#app', {
+      state: 'attached',
       timeout: 10000,
     });
   }
@@ -541,8 +529,8 @@ class ExtensionHelper {
    */
   async waitForExtensionReady() {
     // Wait for the main app container to be present (attached, not necessarily visible)
-    await this.page.waitForSelector("#app", {
-      state: "attached",
+    await this.page.waitForSelector('#app', {
+      state: 'attached',
       timeout: 10000,
     });
 
@@ -558,7 +546,7 @@ class ExtensionHelper {
     try {
       // Wait for element to be attached first, then check visibility
       await this.page.waitForSelector(selector, {
-        state: "attached",
+        state: 'attached',
         timeout: 5000,
       });
       // Check if visible, with a longer timeout to allow for rendering
@@ -628,16 +616,16 @@ class ExtensionHelper {
   /**
    * Wait for a message to appear (success/error)
    */
-  async waitForMessage(messageType = "any") {
+  async waitForMessage(messageType = 'any') {
     try {
-      if (messageType === "success") {
-        await this.page.waitForSelector(".ui-message.success", {
+      if (messageType === 'success') {
+        await this.page.waitForSelector('.ui-message.success', {
           timeout: 5000,
         });
-      } else if (messageType === "error") {
-        await this.page.waitForSelector(".ui-message.error", { timeout: 5000 });
+      } else if (messageType === 'error') {
+        await this.page.waitForSelector('.ui-message.error', { timeout: 5000 });
       } else {
-        await this.page.waitForSelector(".ui-message", { timeout: 5000 });
+        await this.page.waitForSelector('.ui-message', { timeout: 5000 });
       }
       return true;
     } catch {
@@ -651,7 +639,7 @@ class ExtensionHelper {
   async mockChromeAPI() {
     await this.page.addInitScript(() => {
       // Mock chrome.storage API
-      if (typeof chrome === "undefined") {
+      if (typeof chrome === 'undefined') {
         window.chrome = {};
       }
 
@@ -662,8 +650,8 @@ class ExtensionHelper {
               // Mock storage data
               const mockData = {
                 auth_session: null,
-                supabase_url: "https://test.supabase.co",
-                supabase_anon_key: "test-key",
+                supabase_url: 'https://test.supabase.co',
+                supabase_anon_key: 'test-key',
               };
               callback(mockData);
             },
@@ -718,8 +706,8 @@ class ExtensionHelper {
           query: (queryInfo, callback) => {
             callback([
               {
-                url: "https://example.com",
-                title: "Test Page",
+                url: 'https://example.com',
+                title: 'Test Page',
               },
             ]);
           },

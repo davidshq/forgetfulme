@@ -11,13 +11,11 @@
 import UIComponents from './utils/ui-components.js';
 import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
-import ConfigManager from './utils/config-manager.js';
-import SupabaseConfig from './supabase-config.js';
-import SupabaseService from './supabase-service.js';
-import AuthUI from './auth-ui.js';
-import AuthStateManager from './utils/auth-state-manager.js';
-import ConfigUI from './config-ui.js';
-import { formatStatus, formatTime } from './utils/formatters.js';
+import { initializeServices } from './utils/service-initializer.js';
+import { initializeApp as initializeAppUtil } from './utils/app-initializer.js';
+import { MESSAGE_TYPES } from './utils/constants.js';
+import { renderMainInterface } from './utils/options-ui-renderer.js';
+import { loadStatistics, loadStatusTypes } from './utils/options-data-manager.js';
 
 /**
  * Options page class for ForgetfulMe extension
@@ -35,22 +33,17 @@ class ForgetfulMeOptions {
    * @description Sets up the options page with configuration, authentication, and service dependencies
    */
   constructor() {
-    /** @type {ConfigManager} Configuration manager for user preferences */
-    this.configManager = new ConfigManager();
-    /** @type {AuthStateManager} Authentication state manager */
-    this.authStateManager = new AuthStateManager();
-    /** @type {SupabaseConfig} Supabase configuration manager */
-    this.supabaseConfig = new SupabaseConfig();
-    /** @type {SupabaseService} Supabase service for data operations */
-    this.supabaseService = new SupabaseService(this.supabaseConfig);
-    /** @type {AuthUI} Authentication UI manager */
-    this.authUI = new AuthUI(
-      this.supabaseConfig,
-      () => this.onAuthSuccess(),
-      this.authStateManager
-    );
-    /** @type {ConfigUI} Configuration UI manager */
-    this.configUI = new ConfigUI(this.supabaseConfig);
+    // Initialize services using utility
+    const services = initializeServices({
+      onAuthSuccess: () => this.onAuthSuccess(),
+      includeConfigUI: true,
+    });
+    this.configManager = services.configManager;
+    this.authStateManager = services.authStateManager;
+    this.supabaseConfig = services.supabaseConfig;
+    this.supabaseService = services.supabaseService;
+    this.authUI = services.authUI;
+    this.configUI = services.configUI;
 
     // Initialize after DOM is ready
     this.initializeAsync();
@@ -88,13 +81,11 @@ class ForgetfulMeOptions {
       });
 
       // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener(
-        (message, _sender, _sendResponse) => {
-          if (message.type === 'AUTH_STATE_CHANGED') {
-            this.handleAuthStateChange(message.session);
-          }
+      chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
+        if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
+          this.handleAuthStateChange(message.session);
         }
-      );
+      });
 
       // Auth state initialized successfully
     } catch (error) {
@@ -189,50 +180,19 @@ class ForgetfulMeOptions {
    * @description Checks configuration, initializes Supabase, and shows appropriate interface
    */
   async initializeApp() {
-    try {
-      // Check if Supabase is configured
-      if (!(await this.supabaseConfig.isConfigured())) {
-        this.showConfigInterface();
-        return;
-      }
-
-      // Initialize Supabase with retry mechanism
-      let retryCount = 0;
-      const maxRetries = 3;
-
-      while (retryCount < maxRetries) {
-        try {
-          await this.supabaseService.initialize();
-          break; // Success, exit the retry loop
-        } catch (error) {
-          retryCount++;
-          // Supabase initialization attempt failed, retrying...
-
-          if (retryCount >= maxRetries) {
-            throw error; // Re-throw if we've exhausted retries
-          }
-
-          // Wait a bit before retrying
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      }
-
-      // Check if user is authenticated using auth state manager
-      const isAuthenticated = await this.authStateManager.isAuthenticated();
-
-      if (isAuthenticated) {
+    await initializeAppUtil({
+      supabaseConfig: this.supabaseConfig,
+      supabaseService: this.supabaseService,
+      authStateManager: this.authStateManager,
+      onConfigured: () => this.showConfigInterface(),
+      onAuthenticated: () => {
         this.showMainInterface();
         this.loadData();
-      } else {
-        this.showAuthInterface();
-      }
-    } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'options.initializeApp');
-      if (errorResult.shouldShowToUser) {
-        UIMessages.error(errorResult.userMessage, this.appContainer);
-      }
-      this.showConfigInterface();
-    }
+      },
+      onUnauthenticated: () => this.showAuthInterface(),
+      appContainer: this.appContainer,
+      context: 'options.initializeApp',
+    });
   }
 
   /**
@@ -268,160 +228,19 @@ class ForgetfulMeOptions {
    * @description Creates and displays the main options interface with all cards
    */
   showMainInterface() {
-    // Create main container
-    const mainContainer = UIComponents.createContainer(
-      'ForgetfulMe Settings',
-      '',
-      'main-container'
-    );
-
-    // Create config card
-    const configCard = UIComponents.createCard(
-      'Supabase Configuration',
-      '<div id="config-status-container"></div>',
-      '',
-      'config-card'
-    );
-    mainContainer.appendChild(configCard);
-
-    // Create stats card
-    const statsGrid = UIComponents.createGrid(
-      [
-        { text: 'Total Entries:', className: 'stat-item' },
-        { text: 'Status Types:', className: 'stat-item' },
-        { text: 'Most Used Status:', className: 'stat-item' },
-      ],
-      { className: 'stats-grid' }
-    );
-
-    // Add stat values safely
-    const statItems = statsGrid.querySelectorAll('.grid-item');
-    if (statItems.length >= 3) {
-      statItems[0].innerHTML =
-        '<span class="stat-label">Total Entries:</span><span id="total-entries" class="stat-value">-</span>';
-      statItems[1].innerHTML =
-        '<span class="stat-label">Status Types:</span><span id="status-types-count" class="stat-value">-</span>';
-      statItems[2].innerHTML =
-        '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>';
-    }
-
-    const statsCard = UIComponents.createCard(
-      'Statistics',
-      statsGrid.outerHTML,
-      '',
-      'stats-card'
-    );
-    mainContainer.appendChild(statsCard);
-
-    // Create status types card
-    const addStatusContainer = document.createElement('div');
-    addStatusContainer.className = 'add-status';
-
-    const addStatusForm = UIComponents.createForm(
-      'add-status-form',
-      e => {
-        e.preventDefault();
-        this.addCustomStatus();
-      },
-      [
-        {
-          type: 'text',
-          id: 'new-status-name',
-          label: 'Status Name:',
-          options: {
-            placeholder: 'e.g., Important, Reference',
-            required: true,
-          },
-        },
-        {
-          type: 'text',
-          id: 'new-status-description',
-          label: 'Description:',
-          options: {
-            placeholder: 'Brief description of this status',
-          },
-        },
-      ],
-      {
-        submitText: 'Add Status',
-        className: 'add-status-form',
-      }
-    );
-
-    addStatusContainer.appendChild(addStatusForm);
-
-    const statusListContainer = document.createElement('div');
-    statusListContainer.id = 'status-list-container';
-    statusListContainer.className = 'status-list';
-
-    addStatusContainer.appendChild(statusListContainer);
-
-    const statusCard = UIComponents.createCard(
-      'Custom Status Types',
-      addStatusContainer.outerHTML,
-      '',
-      'status-card'
-    );
-    mainContainer.appendChild(statusCard);
-
-    // Create data management card
-    const dataActions = [
-      {
-        text: 'Export All Data',
-        onClick: () => this.exportAllData(),
-        className: 'secondary',
-      },
-      {
-        text: 'Import Data',
-        onClick: () => this.importData(),
-        className: 'secondary',
-      },
-      {
-        text: 'Clear All Data',
-        onClick: () => this.clearAllData(),
-        className: 'contrast',
-      },
-    ];
-
-    const dataCard = UIComponents.createCardWithActions(
-      'Data Management',
-      '<p>Export your bookmarks to JSON format, import data from a backup, or clear all stored data.</p>',
-      dataActions,
-      'data-card'
-    );
-    mainContainer.appendChild(dataCard);
-
-    // Create bookmark management card
-    const manageBookmarksBtn = UIComponents.createButton(
-      '📚 Manage Bookmarks',
-      () => this.openBookmarkManagement(),
-      'secondary',
-      {
-        id: 'manage-bookmarks-btn',
-        title: 'Open bookmark management interface',
-      }
-    );
-
-    const bookmarkCard = UIComponents.createCard(
-      'Bookmark Management',
-      '<p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>',
-      manageBookmarksBtn.outerHTML,
-      'bookmark-card'
-    );
-    mainContainer.appendChild(bookmarkCard);
-
-    // Assemble the interface
-    this.appContainer.innerHTML = '';
-    this.appContainer.appendChild(mainContainer);
+    const { configStatusContainer } = renderMainInterface(this.appContainer, {
+      addCustomStatus: () => this.addCustomStatus(),
+      exportAllData: () => this.exportAllData(),
+      importData: () => this.importData(),
+      clearAllData: () => this.clearAllData(),
+      openBookmarkManagement: () => this.openBookmarkManagement(),
+    });
 
     // Re-initialize elements after DOM update
     this.initializeElements();
     this.bindEvents();
 
     // Show configuration status
-    const configStatusContainer = document.getElementById(
-      'config-status-container'
-    );
     if (configStatusContainer) {
       this.configUI.showConfigStatus(configStatusContainer);
     }
@@ -439,57 +258,12 @@ class ForgetfulMeOptions {
         this.configManager.getCustomStatusTypes(),
       ]);
 
-      this.loadStatusTypes(customStatusTypes);
-      this.loadStatistics(bookmarks, customStatusTypes);
+      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
+      loadStatistics(bookmarks, customStatusTypes);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.loadData');
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
-  }
-
-  /**
-   * Load status types into the UI
-   * @param {Array} statusTypes - Array of custom status types
-   * @description Populates the status types list with current data
-   */
-  loadStatusTypes(statusTypes) {
-    const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
-    if (!statusTypesListEl) return;
-
-    statusTypesListEl.innerHTML = '';
-
-    if (statusTypes.length === 0) {
-      const emptyItem = UIComponents.createListItem(
-        {
-          title: 'No custom status types defined',
-          meta: {
-            status: 'info',
-            statusText: 'No status types',
-          },
-        },
-        { className: 'status-type-item empty' }
-      );
-      statusTypesListEl.appendChild(emptyItem);
-      return;
-    }
-
-    statusTypes.forEach(status => {
-      const listItem = UIComponents.createListItem(
-        {
-          title: formatStatus(status),
-          actions: [
-            {
-              text: 'Remove',
-              onClick: () => this.removeStatusType(status),
-              className: 'ui-btn-danger ui-btn-small',
-            },
-          ],
-        },
-        { className: 'status-type-item' }
-      );
-
-      statusTypesListEl.appendChild(listItem);
-    });
   }
 
   /**
@@ -519,7 +293,7 @@ class ForgetfulMeOptions {
       UIComponents.DOM.setValue('new-status', '');
 
       const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      this.loadStatusTypes(customStatusTypes);
+      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
       UIMessages.success('Status type added successfully', this.appContainer);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.addStatusType');
@@ -538,55 +312,11 @@ class ForgetfulMeOptions {
       await this.configManager.removeCustomStatusType(status);
 
       const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      this.loadStatusTypes(customStatusTypes);
+      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
       UIMessages.success('Status type removed successfully', this.appContainer);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'options.removeStatusType'
-      );
+      const errorResult = ErrorHandler.handle(error, 'options.removeStatusType');
       UIMessages.error(errorResult.userMessage, this.appContainer);
-    }
-  }
-
-  /**
-   * Load statistics into the UI
-   * @param {Array} bookmarks - Array of bookmark objects
-   * @param {Array} statusTypes - Array of status type objects
-   * @description Updates statistics display with current data
-   */
-  loadStatistics(bookmarks, statusTypes) {
-    // Safely update statistics using DOM utilities
-    const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
-    const statusTypesCountEl =
-      UIComponents.DOM.getElement('status-types-count');
-    const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
-
-    if (totalEntriesEl) {
-      totalEntriesEl.textContent = bookmarks.length;
-    }
-
-    if (statusTypesCountEl) {
-      statusTypesCountEl.textContent = statusTypes.length;
-    }
-
-    // Most used status
-    const statusCounts = {};
-    bookmarks.forEach(bookmark => {
-      statusCounts[bookmark.read_status] =
-        (statusCounts[bookmark.read_status] || 0) + 1;
-    });
-
-    const mostUsed = Object.entries(statusCounts).sort(
-      ([, a], [, b]) => b - a
-    )[0];
-
-    if (mostUsedStatusEl) {
-      if (mostUsed) {
-        mostUsedStatusEl.textContent = formatStatus(mostUsed[0]);
-      } else {
-        mostUsedStatusEl.textContent = 'None';
-      }
     }
   }
 
@@ -661,10 +391,7 @@ class ForgetfulMeOptions {
             await this.supabaseService.deleteBookmark(bookmark.id);
           }
 
-          UIMessages.success(
-            'All data cleared successfully',
-            this.appContainer
-          );
+          UIMessages.success('All data cleared successfully', this.appContainer);
           this.loadData(); // Refresh the data
         } catch (error) {
           const errorResult = ErrorHandler.handle(error, 'options.clearData');
@@ -674,7 +401,7 @@ class ForgetfulMeOptions {
       () => {
         // User cancelled
       },
-      this.appContainer
+      this.appContainer,
     );
   }
 

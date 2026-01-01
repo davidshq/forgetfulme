@@ -128,9 +128,7 @@ describe('Formatters', () => {
         const formattedTime = formatTime(time);
 
         expect(formattedStatus).toMatch(/^[A-Z][a-z]+(\s[A-Z][a-z]+)*$/);
-        expect(formattedTime).toMatch(
-          /^(Just now|\d+[mhd] ago|\d+\/\d+\/\d+)$/
-        );
+        expect(formattedTime).toMatch(/^(Just now|\d+[mhd] ago|\d+\/\d+\/\d+)$/);
       });
     });
   });

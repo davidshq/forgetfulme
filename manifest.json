@@ -3,15 +3,8 @@
   "name": "ForgetfulMe",
   "version": "1.0.0",
   "description": "Mark sites as viewed for research purposes with customizable read status types and tags",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "tabs",
-    "notifications"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "permissions": ["storage", "activeTab", "tabs", "notifications"],
+  "host_permissions": ["<all_urls>"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "ForgetfulMe - Mark as Read",
@@ -47,4 +40,4 @@
       "matches": ["<all_urls>"]
     }
   ]
-} 
+}

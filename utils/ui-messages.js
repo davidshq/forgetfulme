@@ -9,6 +9,7 @@
  */
 
 import ErrorHandler from './error-handler.js';
+import UIComponents from './ui-components.js';
 
 /**
  * UI Message Handler for ForgetfulMe Extension
@@ -233,6 +234,7 @@ class UIMessages {
 
     if (retryFunction) {
       // Use UIComponents if available, otherwise fall back to manual creation
+
       if (typeof UIComponents !== 'undefined') {
         const retryBtn = UIComponents.createButton(
           'Retry',
@@ -242,7 +244,7 @@ class UIMessages {
             }
             retryFunction();
           },
-          'ui-message-retry-btn'
+          'ui-message-retry-btn',
         );
         messageEl.appendChild(retryBtn);
       } else {
@@ -272,13 +274,10 @@ class UIMessages {
    */
   static confirm(message, onConfirm, onCancel, container, options = {}) {
     // Use UIComponents if available, otherwise fall back to manual creation
+
     if (typeof UIComponents !== 'undefined') {
-      const confirmEl = UIComponents.createConfirmDialog(
-        message,
-        onConfirm,
-        onCancel,
-        options
-      );
+      const confirmEl = UIComponents.createConfirmDialog(message, onConfirm, onCancel, options);
+
       UIComponents.showModal(confirmEl);
       return confirmEl;
     }
@@ -332,7 +331,7 @@ class UIMessages {
    */
   static toast(message, type = 'info', options = {}) {
     // Create toast container if it doesn't exist
-    let toastContainer = document.getElementById('toast-container');
+    let toastContainer = UIComponents.DOM.getElement('toast-container');
     if (!toastContainer) {
       toastContainer = document.createElement('div');
       toastContainer.id = 'toast-container';

@@ -200,9 +200,7 @@ describe('ForgetfulMeOptions', () => {
       options.openBookmarkManagement();
 
       // Verify chrome.runtime.getURL was called
-      expect(chrome.runtime.getURL).toHaveBeenCalledWith(
-        'bookmark-management.html'
-      );
+      expect(chrome.runtime.getURL).toHaveBeenCalledWith('bookmark-management.html');
     });
   });
 

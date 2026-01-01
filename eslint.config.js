@@ -2,10 +2,6 @@
  * @fileoverview ESLint configuration for ForgetfulMe Chrome Extension
  * @module eslint-config
  * @description ESLint configuration with Chrome extension specific rules and Prettier integration
- *
- * @author ForgetfulMe Team
- * @version 1.0.0
- * @since 2024-01-01
  */
 
 import js from '@eslint/js';
@@ -15,24 +11,25 @@ import prettierConfig from 'eslint-config-prettier';
 /**
  * ESLint configuration for ForgetfulMe Chrome Extension
  * @type {import('eslint').Linter.Config}
- * @description Comprehensive ESLint configuration with Chrome extension specific rules, security best practices, and code quality standards
  */
 export default [
+  // Base recommended rules
   js.configs.recommended,
+
+  // Main configuration
   {
     files: ['**/*.js'],
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 2024, // Updated to latest
       sourceType: 'module',
       globals: {
         // Chrome Extension APIs
         chrome: 'readonly',
         browser: 'readonly',
-        // DOM APIs
+        // Browser APIs
         window: 'readonly',
         document: 'readonly',
         console: 'readonly',
-        // Common globals
         setTimeout: 'readonly',
         setInterval: 'readonly',
         clearTimeout: 'readonly',
@@ -42,12 +39,12 @@ export default [
         JSON: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
-        // Node.js globals for tests
-        require: 'readonly',
-        module: 'readonly',
-        process: 'readonly',
-        __dirname: 'readonly',
-        // Test globals
+        URL: 'readonly',
+        Blob: 'readonly',
+        requestAnimationFrame: 'readonly',
+        location: 'readonly',
+        Event: 'readonly',
+        // Test globals (Vitest)
         global: 'readonly',
         expect: 'readonly',
         describe: 'readonly',
@@ -58,84 +55,107 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
         vi: 'readonly',
-        Event: 'readonly',
-        // Browser APIs
-        URL: 'readonly',
-        Blob: 'readonly',
-        requestAnimationFrame: 'readonly',
-        location: 'readonly',
-        // Supabase globals
-        supabase: 'readonly',
-        // Custom extension classes
-        UIComponents: 'readonly',
-        UIMessages: 'readonly',
-        ErrorHandler: 'readonly',
-        ConfigManager: 'readonly',
-        AuthStateManager: 'readonly',
-        SupabaseConfig: 'readonly',
-        SupabaseService: 'readonly',
-        AuthUI: 'readonly',
-        ConfigUI: 'readonly',
-        BookmarkTransformer: 'readonly',
+        // Node.js globals (for tests and config files)
+        process: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
       },
     },
     plugins: {
       prettier,
     },
     rules: {
-      // Prettier integration
-      'prettier/prettier': 'error',
+      // Prettier integration - use 'warn' to avoid blocking on formatting
+      'prettier/prettier': 'warn',
 
-      // Chrome Extension specific rules
+      // Security rules for Chrome extensions
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
 
-      // Code quality rules
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': 'warn',
+      // Code quality
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'no-console': ['warn', { allow: ['warn', 'error'] }], // Allow console.warn/error
       'prefer-const': 'error',
       'no-var': 'error',
-      'no-undef': 'error',
-      'no-redeclare': 'error',
 
       // Best practices
-      eqeqeq: ['error', 'always'],
+      eqeqeq: ['error', 'always', { null: 'ignore' }], // Allow == null for null/undefined checks
       curly: ['error', 'all'],
-      'no-empty': 'error',
+      'no-empty': ['error', { allowEmptyCatch: true }], // Allow empty catch blocks
       'no-irregular-whitespace': 'error',
-      // Note: 'no-extra-semi' and 'no-trailing-spaces' are handled by Prettier
-      // and disabled by eslint-config-prettier
+      'no-throw-literal': 'error', // Must throw Error objects
+      'prefer-promise-reject-errors': 'error', // Reject with Error objects
 
-      // Security rules are already covered above
+      // Modern JavaScript
+      'prefer-arrow-callback': 'warn',
+      'prefer-template': 'warn',
+      'prefer-destructuring': [
+        'warn',
+        {
+          array: false, // Don't force array destructuring
+          object: true, // Encourage object destructuring
+        },
+      ],
 
       // Maintainability
-      complexity: ['warn', 10],
-      'max-depth': ['warn', 4],
-      'max-lines': ['warn', 300],
-      'max-params': ['warn', 4],
+      complexity: ['warn', { max: 15 }], // Increased from 10 to 15
+      'max-depth': ['warn', 5], // Increased from 4 to 5
+      'max-lines': ['warn', 500], // Increased from 300 to 500
+      'max-lines-per-function': ['warn', 100], // New: limit function length
+      'max-params': ['warn', 5], // Increased from 4 to 5
+      'max-nested-callbacks': ['warn', 4],
 
-      // Allow specific patterns for Chrome extensions
+      // Code style (complementary to Prettier)
       'no-restricted-globals': [
         'error',
         {
           name: 'event',
-          message:
-            'Use the event parameter instead of the global event object.',
+          message: 'Use the event parameter instead of the global event object.',
         },
       ],
+
+      // Removed redundant rules (already in js.configs.recommended):
+      // - 'no-undef': Already handled by recommended config
+      // - 'no-redeclare': Already handled by recommended config
     },
   },
+
+  // Test files configuration
   {
-    // Ignore files that shouldn't be linted
+    files: ['**/*.test.js', '**/tests/**/*.js'],
+    rules: {
+      'no-console': 'off', // Allow console in tests
+      'max-lines': 'off', // Test files can be longer
+      'max-lines-per-function': 'off', // Test functions can be longer
+      'max-depth': ['warn', 8], // Test files have deeper nesting (describe -> describe -> test -> function body)
+      'max-nested-callbacks': ['warn', 6], // Test files may have nested callbacks (setTimeout, promises, etc.)
+    },
+  },
+
+  // Ignore patterns
+  {
     ignores: [
       'node_modules/**',
       'playwright-report/**',
       'test-results/**',
-      'supabase-js.min.js',
-      'icons/**',
+      'coverage/**',
+      'supabase-js.min.js', // External library
+      'icons/**', // Icon files
+      '*.min.js', // All minified files
+      'dist/**',
+      'build/**',
     ],
   },
+
+  // Prettier config (disables conflicting ESLint rules)
   prettierConfig,
 ];

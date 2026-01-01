@@ -60,6 +60,7 @@ If you want to keep email verification:
 3. **Run the query** to create all tables, indexes, and policies
 
 The schema includes:
+
 - `bookmarks` table for storing user bookmarks
 - `user_profiles` table for user preferences
 - `tags` table for organizing bookmarks
@@ -100,8 +101,8 @@ The schema automatically sets up RLS policies, but verify they're enabled:
    ```
 2. **Edit `supabase-config.local.js`** with your credentials:
    ```javascript
-   this.supabaseUrl = 'https://your-project-id.supabase.co'
-   this.supabaseAnonKey = 'your-anon-public-key-here'
+   this.supabaseUrl = 'https://your-project-id.supabase.co';
+   this.supabaseAnonKey = 'your-anon-public-key-here';
    ```
 3. **Update HTML files** to include the local config:
    ```html
@@ -113,6 +114,7 @@ The schema automatically sets up RLS policies, but verify they're enabled:
 ### Method 3: Environment Variables (For Advanced Users)
 
 Set environment variables in your development environment:
+
 ```bash
 export SUPABASE_URL="https://your-project-id.supabase.co"
 export SUPABASE_ANON_KEY="your-anon-public-key-here"
@@ -149,22 +151,26 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 ## Enhanced Security Features
 
 ### Row Level Security (RLS)
+
 - **User isolation**: Each user can only access their own data
 - **Automatic filtering**: Queries are automatically filtered by user ID
 - **Policy enforcement**: Database-level security prevents unauthorized access
 
 ### Authentication Security
+
 - **JWT tokens**: Secure session management
 - **Token refresh**: Automatic token renewal
 - **Session validation**: Proper session state management
 
 ### Data Protection
+
 - **Encrypted transmission**: All data transmitted over HTTPS
 - **Secure storage**: Credentials stored in Chrome sync storage
 - **Input validation**: Comprehensive input sanitization
 - **Error handling**: Secure error messages without data leakage
 
 ### CSP Compliance
+
 - **Self-contained**: No external scripts loaded
 - **Inline policies**: All functionality contained within extension
 - **Secure defaults**: Content Security Policy compliant by design
@@ -174,24 +180,29 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 ### Common Issues
 
 **"Invalid response" error with email verification**
+
 - **Solution**: Disable email confirmation in Supabase Auth settings
 - **Alternative**: Configure custom email templates with proper redirect URLs
 
 **"Row Level Security" errors**
+
 - **Solution**: Ensure RLS policies are properly set up in the database schema
 - **Check**: Verify policies exist for all tables and operations
 
 **"Network error" or "Connection failed"**
+
 - **Solution**: Check your Project URL and anon key are correct
 - **Alternative**: Verify your Supabase project is active and not paused
 - **Debug**: Use the built-in connection test in the extension settings
 
 **"User not authenticated" errors**
+
 - **Solution**: Sign in through the extension's authentication interface
 - **Alternative**: Check if the user account was created successfully
 - **Debug**: Check browser console for detailed error messages
 
 **"Configuration validation failed"**
+
 - **Solution**: Ensure URL format is correct (https://project-id.supabase.co)
 - **Alternative**: Verify anon key format (starts with eyJ...)
 - **Debug**: Use the configuration test feature
@@ -199,11 +210,13 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 ### Email Verification Issues
 
 Browser extensions cannot handle email verification links properly because:
+
 - Chrome blocks `chrome-extension://` URLs in email links
 - Extension popups cannot open external verification pages
 - Email clients often block extension URLs for security
 
 **Recommended solutions**:
+
 1. **Disable email confirmation** (easiest and most secure)
 2. **Use custom email templates** with web redirects
 3. **Implement manual verification** through the extension UI
@@ -211,34 +224,40 @@ Browser extensions cannot handle email verification links properly because:
 ### Testing Issues
 
 **Unit test failures**
+
 - **Solution**: Ensure all dependencies are installed (`npm install`)
 - **Debug**: Run tests with verbose output (`npm test -- --reporter=verbose`)
 
 **Integration test failures**
+
 - **Solution**: Install Playwright browsers (`npm run install-browsers`)
 - **Debug**: Run tests in headed mode (`npm run test:playwright:headed`)
 
 ## Security Best Practices
 
 ### Credential Management
+
 1. **Never commit credentials** to version control
 2. **Use the anon key only** (never the service role key)
 3. **Store credentials securely** in Chrome sync storage
 4. **Validate configuration** before saving
 
 ### Database Security
+
 1. **Enable RLS** on all tables
 2. **Review policies regularly** for proper access control
 3. **Monitor database access** in Supabase dashboard
 4. **Use prepared statements** (handled automatically by Supabase)
 
 ### Extension Security
+
 1. **Follow CSP guidelines** - no external scripts
 2. **Validate all inputs** before processing
 3. **Handle errors securely** - no sensitive data in error messages
 4. **Regular security audits** of the codebase
 
 ### Development Security
+
 1. **Use separate Supabase projects** for development and production
 2. **Never share service role keys** in code or documentation
 3. **Test security features** thoroughly
@@ -247,6 +266,7 @@ Browser extensions cannot handle email verification links properly because:
 ## Cost Considerations
 
 Supabase's free tier includes:
+
 - 500MB database
 - 50,000 monthly active users
 - 2GB bandwidth
@@ -255,6 +275,7 @@ Supabase's free tier includes:
 This should be sufficient for most users. Monitor your usage in the Supabase dashboard.
 
 ### Monitoring Usage
+
 1. **Check Supabase dashboard** regularly for usage metrics
 2. **Monitor database size** and query performance
 3. **Track bandwidth usage** for API calls
@@ -263,6 +284,7 @@ This should be sufficient for most users. Monitor your usage in the Supabase das
 ## Development Workflow
 
 ### Local Development
+
 1. **Set up development environment** with Node.js 18+
 2. **Install dependencies**: `npm install`
 3. **Configure Supabase** using local development method
@@ -270,12 +292,14 @@ This should be sufficient for most users. Monitor your usage in the Supabase das
 5. **Check code quality**: `npm run check`
 
 ### Testing Strategy
+
 1. **Unit tests**: Test individual utility modules
 2. **Integration tests**: Test end-to-end workflows
 3. **Manual testing**: Test in actual browser environment
 4. **Security testing**: Verify all security features work correctly
 
 ### Deployment Preparation
+
 1. **Run all tests** successfully
 2. **Check code quality** passes
 3. **Verify security features** work correctly
@@ -313,4 +337,4 @@ If you encounter issues:
 
 ---
 
-Your Supabase backend is now ready to power the ForgetfulMe extension! 🎉 
+Your Supabase backend is now ready to power the ForgetfulMe extension! 🎉

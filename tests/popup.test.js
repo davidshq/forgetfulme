@@ -17,23 +17,17 @@ test.describe('ForgetfulMe Popup Tests', () => {
     await extensionHelper.waitForExtensionReady();
   });
 
-  test('should display setup interface when not configured', async ({
-    page,
-  }) => {
+  test('should display setup interface when not configured', async ({ page: _page }) => {
     // Test that the setup interface is shown
-    const setupContainer =
-      await extensionHelper.isElementVisible('.setup-container');
+    const setupContainer = await extensionHelper.isElementVisible('.setup-container');
     expect(setupContainer).toBeTruthy();
 
     // Check for welcome message in the container header
-    const welcomeText = await extensionHelper.getElementText(
-      '.ui-container-header h2'
-    );
+    const welcomeText = await extensionHelper.getElementText('.ui-container-header h2');
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
     // Check for setup instructions
-    const setupSection =
-      await extensionHelper.isElementVisible('.setup-section');
+    const setupSection = await extensionHelper.isElementVisible('.setup-section');
     expect(setupSection).toBeTruthy();
 
     // Check for settings button
@@ -41,18 +35,14 @@ test.describe('ForgetfulMe Popup Tests', () => {
     expect(settingsBtn).toBeTruthy();
   });
 
-  test('should have settings button that calls openOptionsPage', async ({
-    page,
-  }) => {
+  test('should have settings button that calls openOptionsPage', async ({ page }) => {
     // Ensure the flag is initialized
     await page.evaluate(() => {
       window.optionsPageOpened = false;
     });
 
     // Find and click the settings button
-    const settingsButton = await page
-      .locator('button')
-      .filter({ hasText: 'Open Settings' });
+    const settingsButton = await page.locator('button').filter({ hasText: 'Open Settings' });
     expect(await settingsButton.isVisible()).toBeTruthy();
 
     // Click the settings button
@@ -62,9 +52,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
     await page.waitForTimeout(1000);
 
     // Check that the openOptionsPage function was called
-    const optionsPageOpened = await page.evaluate(
-      () => window.optionsPageOpened
-    );
+    const optionsPageOpened = await page.evaluate(() => window.optionsPageOpened);
     expect(optionsPageOpened).toBeTruthy();
   });
 
