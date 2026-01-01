@@ -1,11 +1,11 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, EXTENSION_PATH } from './helpers/fixtures.js';
 import ExtensionHelper from './helpers/extension-helper.js';
 
 test.describe('ForgetfulMe Popup Tests', () => {
   let extensionHelper;
 
   test.beforeEach(async ({ page, context }) => {
-    extensionHelper = new ExtensionHelper(page, context);
+    extensionHelper = new ExtensionHelper(page, context, EXTENSION_PATH);
 
     // Mock Chrome API before loading the page
     await extensionHelper.mockChromeAPI();
@@ -18,7 +18,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
   });
 
   test('should display setup interface when not configured', async ({
-    _page,
+    page,
   }) => {
     // Test that the setup interface is shown
     const setupContainer =
@@ -44,14 +44,9 @@ test.describe('ForgetfulMe Popup Tests', () => {
   test('should have settings button that calls openOptionsPage', async ({
     page,
   }) => {
-    // Mock the chrome.runtime.openOptionsPage function
-    await page.addInitScript(() => {
-      if (chrome.runtime) {
-        chrome.runtime.openOptionsPage = () => {
-          // Set a flag to indicate the function was called
-          window.optionsPageOpened = true;
-        };
-      }
+    // Ensure the flag is initialized
+    await page.evaluate(() => {
+      window.optionsPageOpened = false;
     });
 
     // Find and click the settings button

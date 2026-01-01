@@ -31,11 +31,13 @@ vi.mock('../../utils/ui-components.js', () => ({
 }));
 
 vi.mock('../../utils/auth-state-manager.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    isAuthenticated: vi.fn().mockResolvedValue(true),
-    addListener: vi.fn(),
-  })),
+  default: class MockAuthStateManager {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.isAuthenticated = vi.fn().mockResolvedValue(true);
+      this.addListener = vi.fn();
+    }
+  },
 }));
 
 vi.mock('../../utils/error-handler.js', () => ({
@@ -69,10 +71,12 @@ vi.mock('../../utils/ui-messages.js', () => ({
 }));
 
 vi.mock('../../utils/config-manager.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-  })),
+  default: class MockConfigManager {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.getCustomStatusTypes = vi.fn().mockResolvedValue([]);
+    }
+  },
 }));
 
 vi.mock('../../utils/bookmark-transformer.js', () => ({
@@ -83,22 +87,26 @@ vi.mock('../../utils/bookmark-transformer.js', () => ({
 }));
 
 vi.mock('../../supabase-config.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    isConfigured: vi.fn().mockResolvedValue(true),
-    initialize: vi.fn().mockResolvedValue(),
-    getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
-  })),
+  default: class MockSupabaseConfig {
+    constructor() {
+      this.isConfigured = vi.fn().mockResolvedValue(true);
+      this.initialize = vi.fn().mockResolvedValue();
+      this.getCurrentUser = vi.fn().mockReturnValue({ id: 'test-user-id' });
+    }
+  },
 }));
 
 vi.mock('../../supabase-service.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    saveBookmark: vi.fn(),
-    getBookmarks: vi.fn(),
-    updateBookmark: vi.fn(),
-    deleteBookmark: vi.fn(),
-    getBookmarkById: vi.fn(),
-  })),
+  default: class MockSupabaseService {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.saveBookmark = vi.fn();
+      this.getBookmarks = vi.fn();
+      this.updateBookmark = vi.fn();
+      this.deleteBookmark = vi.fn();
+      this.getBookmarkById = vi.fn();
+    }
+  },
 }));
 
 // Mock chrome API

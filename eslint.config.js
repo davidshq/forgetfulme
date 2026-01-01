@@ -104,9 +104,9 @@ export default [
       eqeqeq: ['error', 'always'],
       curly: ['error', 'all'],
       'no-empty': 'error',
-      'no-extra-semi': 'error',
       'no-irregular-whitespace': 'error',
-      'no-trailing-spaces': 'error',
+      // Note: 'no-extra-semi' and 'no-trailing-spaces' are handled by Prettier
+      // and disabled by eslint-config-prettier
 
       // Security rules are already covered above
 

@@ -78,12 +78,14 @@ vi.mock('../../utils/ui-messages.js', () => ({
 }));
 
 vi.mock('../../utils/config-manager.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-    addCustomStatusType: vi.fn().mockResolvedValue(),
-    removeCustomStatusType: vi.fn().mockResolvedValue(),
-  })),
+  default: class MockConfigManager {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.getCustomStatusTypes = vi.fn().mockResolvedValue([]);
+      this.addCustomStatusType = vi.fn().mockResolvedValue();
+      this.removeCustomStatusType = vi.fn().mockResolvedValue();
+    }
+  },
 }));
 
 vi.mock('../../utils/bookmark-transformer.js', () => ({
@@ -93,35 +95,43 @@ vi.mock('../../utils/bookmark-transformer.js', () => ({
 }));
 
 vi.mock('../../supabase-config.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    isConfigured: vi.fn().mockResolvedValue(true),
-    session: null,
-  })),
+  default: class MockSupabaseConfig {
+    constructor() {
+      this.isConfigured = vi.fn().mockResolvedValue(true);
+      this.session = null;
+    }
+  },
 }));
 
 vi.mock('../../supabase-service.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    getBookmarks: vi.fn().mockResolvedValue([]),
-    exportData: vi.fn().mockResolvedValue({}),
-    importData: vi.fn().mockResolvedValue(),
-    deleteBookmark: vi.fn().mockResolvedValue(),
-  })),
+  default: class MockSupabaseService {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.getBookmarks = vi.fn().mockResolvedValue([]);
+      this.exportData = vi.fn().mockResolvedValue({});
+      this.importData = vi.fn().mockResolvedValue();
+      this.deleteBookmark = vi.fn().mockResolvedValue();
+    }
+  },
 }));
 
 vi.mock('../../auth-ui.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    showLoginForm: vi.fn(),
-  })),
+  default: class MockAuthUI {
+    constructor() {
+      this.showLoginForm = vi.fn();
+    }
+  },
 }));
 
 vi.mock('../../utils/auth-state-manager.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    initialize: vi.fn().mockResolvedValue(),
-    isAuthenticated: vi.fn().mockResolvedValue(true),
-    addListener: vi.fn(),
-    setAuthState: vi.fn(),
-  })),
+  default: class MockAuthStateManager {
+    constructor() {
+      this.initialize = vi.fn().mockResolvedValue();
+      this.isAuthenticated = vi.fn().mockResolvedValue(true);
+      this.addListener = vi.fn();
+      this.setAuthState = vi.fn();
+    }
+  },
 }));
 
 vi.mock('../../config-ui.js', () => ({
