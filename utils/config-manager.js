@@ -7,15 +7,22 @@
  * @version 1.0.0
  * @since 2024-01-01
  */
-
-import ErrorHandler from './error-handler.js';
-
 /**
  * Unified Configuration Manager for ForgetfulMe Extension
  * @class ConfigManager
  * @description Consolidates all configuration logic and storage operations
  *
  * @example
+ * const configManager = new ConfigManager();
+ * await configManager.initialize();
+ */
+
+/**
+ * Configuration constants for ConfigManager
+ */
+const CONFIG = {
+  MIGRATION_VERSION: 1,
+};
  * const configManager = new ConfigManager();
  * await configManager.initialize();
  *
@@ -154,10 +161,10 @@ class ConfigManager {
       // Check if migration is needed
       const migrationVersion = await this.getMigrationVersion();
 
-      if (migrationVersion < 1) {
+      if (migrationVersion < CONFIG.MIGRATION_VERSION) {
         // Migrate to version 1
         await this.migrateToVersion1();
-        await this.setMigrationVersion(1);
+        await this.setMigrationVersion(CONFIG.MIGRATION_VERSION);
       }
     } catch (error) {
       ErrorHandler.handle(error, 'config-manager.migrateConfig');

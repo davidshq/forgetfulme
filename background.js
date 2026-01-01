@@ -100,13 +100,20 @@ class ForgetfulMeBackground {
    * @constructor
    * @description Sets up event listeners and initializes authentication state
    */
+  /**
+   * Configuration constants for background service
+   */
+  static CONFIG = {
+    CACHE_TIMEOUT_MS: 5 * 60 * 1000, // 5 minutes
+  };
+
   constructor() {
     /** @type {Object|null} Current authentication state */
     this.authState = null;
     /** @type {Object} Cache for URL status to avoid repeated database calls */
     this.urlStatusCache = new Map();
-    /** @type {number} Cache timeout in milliseconds (5 minutes) */
-    this.cacheTimeout = 5 * 60 * 1000;
+    /** @type {number} Cache timeout in milliseconds */
+    this.cacheTimeout = this.constructor.CONFIG.CACHE_TIMEOUT_MS;
 
     this.initializeEventListeners();
     this.initializeAuthState();
