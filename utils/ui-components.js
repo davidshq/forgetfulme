@@ -593,7 +593,9 @@ class UIComponents {
    */
   static createSection(title, className = '', options = {}) {
     // Use article element for card-like sections when specified
-    const element = options.useCard ? document.createElement('article') : document.createElement('section');
+    const element = options.useCard
+      ? document.createElement('article')
+      : document.createElement('section');
     element.className = `section ${className}`.trim();
 
     if (title) {
@@ -620,10 +622,16 @@ class UIComponents {
    * @param {Object} _options - Card options (unused)
    * @returns {HTMLElement}
    */
-  static createCard(title, content, footer = '', className = '', _options = {}) {
+  static createCard(
+    title,
+    content,
+    footer = '',
+    className = '',
+    _options = {}
+  ) {
     const article = document.createElement('article');
     article.className = `card ${className}`.trim();
-    
+
     // Add header if title is provided
     if (title) {
       const header = document.createElement('header');
@@ -632,7 +640,7 @@ class UIComponents {
       header.appendChild(titleEl);
       article.appendChild(header);
     }
-    
+
     // Add main content
     const mainContent = document.createElement('div');
     if (typeof content === 'string') {
@@ -641,7 +649,7 @@ class UIComponents {
       mainContent.appendChild(content);
     }
     article.appendChild(mainContent);
-    
+
     // Add footer if provided
     if (footer) {
       const footerElement = document.createElement('footer');
@@ -652,7 +660,7 @@ class UIComponents {
       }
       article.appendChild(footerElement);
     }
-    
+
     return article;
   }
 
@@ -667,7 +675,7 @@ class UIComponents {
   static createCardWithActions(title, content, actions = [], className = '') {
     const article = document.createElement('article');
     article.className = `card ${className}`.trim();
-    
+
     // Add header
     if (title) {
       const header = document.createElement('header');
@@ -676,7 +684,7 @@ class UIComponents {
       header.appendChild(titleEl);
       article.appendChild(header);
     }
-    
+
     // Add main content
     const mainContent = document.createElement('div');
     if (typeof content === 'string') {
@@ -685,12 +693,12 @@ class UIComponents {
       mainContent.appendChild(content);
     }
     article.appendChild(mainContent);
-    
+
     // Add footer with actions
     if (actions.length > 0) {
       const footer = document.createElement('footer');
       footer.className = 'card-actions';
-      
+
       actions.forEach(action => {
         const button = this.createButton(
           action.text,
@@ -699,10 +707,10 @@ class UIComponents {
         );
         footer.appendChild(button);
       });
-      
+
       article.appendChild(footer);
     }
-    
+
     return article;
   }
 
@@ -715,10 +723,16 @@ class UIComponents {
    * @param {string} className - Additional CSS classes
    * @returns {HTMLElement}
    */
-  static createFormCard(title, formFields, onSubmit, submitText = 'Submit', className = '') {
+  static createFormCard(
+    title,
+    formFields,
+    onSubmit,
+    submitText = 'Submit',
+    className = ''
+  ) {
     const article = document.createElement('article');
     article.className = `card form-card ${className}`.trim();
-    
+
     // Add header
     if (title) {
       const header = document.createElement('header');
@@ -727,14 +741,14 @@ class UIComponents {
       header.appendChild(titleEl);
       article.appendChild(header);
     }
-    
+
     // Add form content
     const form = this.createForm('card-form', onSubmit, formFields, {
       submitText,
-      className: 'card-form'
+      className: 'card-form',
     });
     article.appendChild(form);
-    
+
     return article;
   }
 
@@ -749,7 +763,7 @@ class UIComponents {
   static createListCard(title, items, options = {}, className = '') {
     const article = document.createElement('article');
     article.className = `card list-card ${className}`.trim();
-    
+
     // Add header
     if (title) {
       const header = document.createElement('header');
@@ -758,18 +772,18 @@ class UIComponents {
       header.appendChild(titleEl);
       article.appendChild(header);
     }
-    
+
     // Add list content
     const listContainer = document.createElement('div');
     listContainer.className = 'card-list';
-    
+
     items.forEach(item => {
       const listItem = this.createListItem(item, options);
       listContainer.appendChild(listItem);
     });
-    
+
     article.appendChild(listContainer);
-    
+
     return article;
   }
 
@@ -913,7 +927,12 @@ class UIComponents {
    * @param {string} className - Additional CSS classes
    * @returns {HTMLElement}
    */
-  static createProgressBar(value, max = 100, ariaLabel = 'Progress', className = '') {
+  static createProgressBar(
+    value,
+    max = 100,
+    ariaLabel = 'Progress',
+    className = ''
+  ) {
     const progress = document.createElement('progress');
     progress.value = Math.min(Math.max(value, 0), max);
     progress.max = max;
@@ -932,7 +951,10 @@ class UIComponents {
     const container = document.createElement('div');
     container.className = `loading-state ${className}`.trim();
 
-    const progress = this.createProgressIndicator('Loading', 'loading-progress');
+    const progress = this.createProgressIndicator(
+      'Loading',
+      'loading-progress'
+    );
     container.appendChild(progress);
 
     if (text && text.trim()) {
@@ -1069,7 +1091,7 @@ class UIComponents {
 
     // Create article container for Pico styling
     const article = document.createElement('article');
-    
+
     // Add header if title is provided
     if (title) {
       const header = document.createElement('header');
@@ -1222,7 +1244,11 @@ class UIComponents {
    * @param {string} className - Additional CSS classes
    * @returns {HTMLElement}
    */
-  static createNavigation(items, ariaLabel = 'Main navigation', className = '') {
+  static createNavigation(
+    items,
+    ariaLabel = 'Main navigation',
+    className = ''
+  ) {
     const nav = document.createElement('nav');
     nav.setAttribute('aria-label', ariaLabel);
     nav.className = className.trim();
@@ -1230,7 +1256,7 @@ class UIComponents {
     const ul = document.createElement('ul');
     items.forEach(item => {
       const li = document.createElement('li');
-      
+
       if (item.href) {
         const a = document.createElement('a');
         a.href = item.href;
@@ -1254,7 +1280,7 @@ class UIComponents {
         );
         li.appendChild(button);
       }
-      
+
       ul.appendChild(li);
     });
 
@@ -1276,7 +1302,7 @@ class UIComponents {
     const ol = document.createElement('ol');
     items.forEach((item, index) => {
       const li = document.createElement('li');
-      
+
       if (index === items.length - 1) {
         // Last item (current page)
         const span = document.createElement('span');
@@ -1290,7 +1316,7 @@ class UIComponents {
         a.textContent = item.text;
         li.appendChild(a);
       }
-      
+
       ol.appendChild(li);
     });
 
@@ -1313,19 +1339,19 @@ class UIComponents {
     const ul = document.createElement('ul');
     items.forEach(item => {
       const li = document.createElement('li');
-      
+
       if (item.dropdown) {
         // Create dropdown menu
         const details = document.createElement('details');
         details.className = 'dropdown';
-        
+
         const summary = document.createElement('summary');
         summary.textContent = item.text;
         if (item.title) {
           summary.title = item.title;
         }
         details.appendChild(summary);
-        
+
         const dropdownUl = document.createElement('ul');
         item.dropdown.forEach(dropdownItem => {
           const dropdownLi = document.createElement('li');
@@ -1338,7 +1364,7 @@ class UIComponents {
           dropdownLi.appendChild(dropdownA);
           dropdownUl.appendChild(dropdownLi);
         });
-        
+
         details.appendChild(dropdownUl);
         li.appendChild(details);
       } else {
@@ -1364,7 +1390,7 @@ class UIComponents {
           li.appendChild(button);
         }
       }
-      
+
       ul.appendChild(li);
     });
 

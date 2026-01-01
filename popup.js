@@ -318,15 +318,11 @@ class ForgetfulMePopup {
       },
     ];
 
-    const header = UIComponents.createHeaderWithNav(
-      'ForgetfulMe',
-      navItems,
-      {
-        titleId: 'popup-title',
-        navAriaLabel: 'Extension actions',
-        navClassName: 'header-nav',
-      }
-    );
+    const header = UIComponents.createHeaderWithNav('ForgetfulMe', navItems, {
+      titleId: 'popup-title',
+      navAriaLabel: 'Extension actions',
+      navClassName: 'header-nav',
+    });
 
     // Create main content container
     const mainContent = document.createElement('div');
@@ -562,9 +558,7 @@ class ForgetfulMePopup {
 
     // Add time
     const timeSpan = document.createElement('small');
-    timeSpan.textContent = formatTime(
-      new Date(bookmark.created_at).getTime()
-    );
+    timeSpan.textContent = formatTime(new Date(bookmark.created_at).getTime());
     timeSpan.setAttribute(
       'aria-label',
       `Created ${formatTime(new Date(bookmark.created_at).getTime())}`
@@ -610,8 +604,6 @@ class ForgetfulMePopup {
       // Don't show user for this error as it's not critical
     }
   }
-
-
 
   showMessage(message, type) {
     // Use the centralized UIMessages system

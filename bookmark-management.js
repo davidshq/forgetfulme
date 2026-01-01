@@ -254,7 +254,10 @@ class BookmarkManagementPage {
       { text: 'Bookmark Management' }, // Current page
     ];
 
-    const breadcrumb = UIComponents.createBreadcrumb(breadcrumbItems, 'page-breadcrumb');
+    const breadcrumb = UIComponents.createBreadcrumb(
+      breadcrumbItems,
+      'page-breadcrumb'
+    );
 
     // Create header with navigation
     const navItems = [
@@ -512,22 +515,20 @@ class BookmarkManagementPage {
     // Add status badge
     const statusSpan = document.createElement('span');
     statusSpan.className = `bookmark-status status-${bookmark.status}`;
-          statusSpan.textContent = formatStatus(bookmark.status);
+    statusSpan.textContent = formatStatus(bookmark.status);
     statusSpan.setAttribute(
       'aria-label',
-              `Status: ${formatStatus(bookmark.status)}`
+      `Status: ${formatStatus(bookmark.status)}`
     );
     metaDiv.appendChild(statusSpan);
 
     // Add time
     const timeSpan = document.createElement('span');
     timeSpan.className = 'bookmark-time';
-          timeSpan.textContent = formatTime(
-      new Date(bookmark.created_at).getTime()
-    );
+    timeSpan.textContent = formatTime(new Date(bookmark.created_at).getTime());
     timeSpan.setAttribute(
       'aria-label',
-              `Created ${formatTime(new Date(bookmark.created_at).getTime())}`
+      `Created ${formatTime(new Date(bookmark.created_at).getTime())}`
     );
     metaDiv.appendChild(timeSpan);
 
@@ -980,8 +981,6 @@ class BookmarkManagementPage {
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
-
-
 
   /**
    * Open settings page

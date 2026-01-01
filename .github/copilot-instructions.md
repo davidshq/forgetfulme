@@ -27,11 +27,11 @@
 
 | Service | Purpose | Location |
 |---------|---------|----------|
-| **SupabaseService** | Database ops (CRUD), real-time subscriptions | [supabase-service.js](..](supabase-service.js) |
-| **ConfigManager** | Unified config/storage management, validates settings | [utils/config-manager.js](utils/config-manager.js) |
-| **ErrorHandler** | Centralized error categorization & user messages | [utils/error-handler.js](utils/error-handler.js) |
-| **BookmarkTransformer** | Normalizes data between UI and database formats | [utils/bookmark-transformer.js](utils/bookmark-transformer.js) |
-| **AuthStateManager** | Tracks user session state across contexts | [utils/auth-state-manager.js](utils/auth-state-manager.js) |
+| **SupabaseService** | Database ops (CRUD), real-time subscriptions | [supabase-service.js](../supabase-service.js) |
+| **ConfigManager** | Unified config/storage management, validates settings | [utils/config-manager.js](../utils/config-manager.js) |
+| **ErrorHandler** | Centralized error categorization & user messages | [utils/error-handler.js](../utils/error-handler.js) |
+| **BookmarkTransformer** | Normalizes data between UI and database formats | [utils/bookmark-transformer.js](../utils/bookmark-transformer.js) |
+| **AuthStateManager** | Tracks user session state across contexts | [utils/auth-state-manager.js](../utils/auth-state-manager.js) |
 
 ## Critical Patterns & Conventions
 
@@ -48,7 +48,7 @@ try {
 ```
 - **Never** show raw errors to users
 - Error types in `ErrorHandler.ERROR_TYPES` determine retry logic and messaging
-- See [utils/error-handler.js](utils/error-handler.js#L18-L35) for all types
+- See [utils/error-handler.js](../utils/error-handler.js) for all types
 
 ### Configuration Flow - Secure Defaults
 ```javascript
@@ -94,14 +94,14 @@ Bookmarks normalize to this structure (applies across UI, DB, messages):
   description: string,   // Optional user notes
 }
 ```
-Use **BookmarkTransformer** to convert between formats (see [utils/bookmark-transformer.js](utils/bookmark-transformer.js)).
+Use **BookmarkTransformer** to convert between formats (see [utils/bookmark-transformer.js](../utils/bookmark-transformer.js)).
 
 ## Testing & Quality
 
 ### Test Structure
 - **Unit tests**: `tests/unit/**/*.test.js` with Vitest + jsdom
 - **Integration tests**: `tests/popup.test.js`, `tests/options.test.js` (Playwright)
-- **Setup file**: [vitest.setup.js](..](vitest.setup.js) - mocks Chrome APIs and Supabase
+- **Setup file**: [vitest.setup.js](../vitest.setup.js) - mocks Chrome APIs and Supabase
 
 ### Test Utilities
 - [tests/helpers/test-utils.js](../tests/helpers/test-utils.js) - Mock Chrome storage, auth, messaging
@@ -133,25 +133,25 @@ npm run format:check      # Prettier format check
 npm run format            # Auto-format all files
 npm run check             # Run lint + format:check
 ```
-**Both ESLint and Prettier are enforced** - config in [eslint.config.js](..](eslint.config.js) and `.prettierrc` (if exists).
+**Both ESLint and Prettier are enforced** - config in [../eslint.config.js](../eslint.config.js) and `.prettierrc` (if exists).
 
 ### Common Development Patterns
 
 **Adding a new bookmark field**:
-1. Update [supabase-schema.sql](supabase-schema.sql) with migration
+1. Update [supabase-schema.sql](../supabase-schema.sql) with migration
 2. Update BookmarkTransformer converter methods
 3. Add validation in ConfigManager or ErrorHandler
-4. Update UI component in [utils/ui-components.js](utils/ui-components.js) if needed
+4. Update UI component in [utils/ui-components.js](../utils/ui-components.js) if needed
 5. Add unit test for new field handling
 
 **Adding a new settings option**:
-1. Add to [options.html](options.html) form
+1. Add to [options.html](../options.html) form
 2. Update ConfigManager storage keys
-3. Add initialization in [options.js](..](options.js) 
+3. Add initialization in [options.js](../options.js)
 4. Test persistence via `chrome.storage.sync` mock
 
 **Fixing a Supabase sync issue**:
-- Check RealtimeManager in [supabase-service.js](..](supabase-service.js) - manages subscriptions
+- Check RealtimeManager in [supabase-service.js](../supabase-service.js) - manages subscriptions
 - Verify user is authenticated via AuthStateManager before any DB call
 - See [RACE_CONDITION_FIXES.md](../docs/cursor-reports/RACE_CONDITION_FIXES.md) for common timing issues
 
@@ -161,7 +161,7 @@ npm run check             # Run lint + format:check
 - **Auth**: Email/password via Supabase Auth (session stored in ConfigManager)
 - **Database**: `bookmarks` table (url unique per user), `user_preferences` table
 - **Real-time**: Supabase Realtime listens for changes across all devices
-- **Setup guide**: [SUPABASE_SETUP.md](..](SUPABASE_SETUP.md)
+- **Setup guide**: [SUPABASE_SETUP.md](../SUPABASE_SETUP.md)
 
 ### Chrome APIs Used
 - `chrome.storage.sync` - Config persistence across devices
@@ -192,7 +192,7 @@ npm run check             # Run lint + format:check
 ## Key Documentation Files
 
 - [docs/architecture/DESIGN.md](../docs/architecture/DESIGN.md) - Original design requirements
-- [SUPABASE_SETUP.md](..](SUPABASE_SETUP.md) - Backend setup for contributors
+- [SUPABASE_SETUP.md](../SUPABASE_SETUP.md) - Backend setup for contributors
 - [docs/cursor-reports/](../docs/cursor-reports/) - Detailed analysis of specific features:
   - `BOOKMARK_MANAGEMENT_IMPLEMENTATION.md` - CRUD patterns
   - `RACE_CONDITION_FIXES.md` - Timing/sync issues resolved
@@ -203,10 +203,10 @@ npm run check             # Run lint + format:check
 
 | File | Purpose |
 |------|---------|
-| [popup.js](..](popup.js) | Main UI for marking pages + quick actions |
-| [options.js](..](options.js) | Settings page (custom status types, tags, auth) |
-| [background.js](..](background.js) | Message router, keyboard shortcuts, IPC hub |
-| [auth-ui.js](..](auth-ui.js) | Shared login/logout UI component |
-| [config-ui.js](..](config-ui.js) | Shared Supabase config UI component |
-| [utils/](utils/) | All service classes (Config, Error, Auth, Bookmark, UI) |
+| [popup.js](../popup.js) | Main UI for marking pages + quick actions |
+| [options.js](../options.js) | Settings page (custom status types, tags, auth) |
+| [background.js](../background.js) | Message router, keyboard shortcuts, IPC hub |
+| [auth-ui.js](../auth-ui.js) | Shared login/logout UI component |
+| [config-ui.js](../config-ui.js) | Shared Supabase config UI component |
+| [utils/](../utils/) | All service classes (Config, Error, Auth, Bookmark, UI) |
 

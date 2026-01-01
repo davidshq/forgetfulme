@@ -96,7 +96,9 @@ describe('AuthStateManager', () => {
       const error = new Error('Storage error');
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
-      await expect(authManager.initialize()).rejects.toThrow('An unexpected error occurred. Please try again.');
+      await expect(authManager.initialize()).rejects.toThrow(
+        'An unexpected error occurred. Please try again.'
+      );
       // ErrorHandler handles errors internally
     });
   });

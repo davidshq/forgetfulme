@@ -198,9 +198,13 @@ describe('UIMessages', () => {
       expect(messageEl.className).toContain('ui-message-loading');
       expect(messageEl.getAttribute('aria-busy')).toBe('true');
       expect(messageEl.querySelector('progress')).toBeTruthy();
-      expect(messageEl.querySelector('progress').getAttribute('aria-label')).toBe('Loading');
+      expect(
+        messageEl.querySelector('progress').getAttribute('aria-label')
+      ).toBe('Loading');
       expect(messageEl.querySelector('.ui-message-text')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-text').textContent).toBe('Please wait...');
+      expect(messageEl.querySelector('.ui-message-text').textContent).toBe(
+        'Please wait...'
+      );
     });
 
     test('should not auto-remove loading message', async () => {
@@ -226,7 +230,9 @@ describe('UIMessages', () => {
 
     test('should handle null container gracefully', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleLogSpy = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
 
       const result = UIMessages.loading('Loading...', null);
 

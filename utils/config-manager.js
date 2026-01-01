@@ -23,15 +23,16 @@
 const CONFIG = {
   MIGRATION_VERSION: 1,
 };
- * const configManager = new ConfigManager();
- * await configManager.initialize();
- *
- * // Get Supabase configuration
- * const supabaseConfig = await configManager.getSupabaseConfig();
- *
- * // Set custom status types
- * await configManager.setCustomStatusTypes(['read', 'important', 'review']);
- */
+
+const configManager = new ConfigManager();
+await configManager.initialize();
+
+// Get Supabase configuration
+const supabaseConfig = await configManager.getSupabaseConfig();
+
+// Set custom status types
+await configManager.setCustomStatusTypes(['read', 'important', 'review']);
+
 class ConfigManager {
   /**
    * Initialize the configuration manager
@@ -76,8 +77,15 @@ class ConfigManager {
       this.initialized = true;
       this.notifyListeners('initialized');
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initialize');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initialize');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initialize'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.initialize'
+      );
     }
   }
 
@@ -104,8 +112,15 @@ class ConfigManager {
       };
       this.config.auth = result.auth_session || null;
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.loadAllConfig');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.loadAllConfig');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.loadAllConfig'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.loadAllConfig'
+      );
     }
   }
 
@@ -475,8 +490,15 @@ class ConfigManager {
 
       // Default settings initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initializeDefaultSettings');
-      throw ErrorHandler.createError(errorResult.userMessage, errorResult.errorInfo.type, 'config-manager.initializeDefaultSettings');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initializeDefaultSettings'
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.initializeDefaultSettings'
+      );
     }
   }
 

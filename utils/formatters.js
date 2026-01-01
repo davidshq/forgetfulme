@@ -41,4 +41,4 @@ export function formatTime(timestamp) {
   if (days < 7) return `${days}d ago`;
 
   return new Date(timestamp).toLocaleDateString();
-} 
+}
