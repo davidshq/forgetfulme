@@ -93,3 +93,7 @@ node_modules/
 # Other Test Results
 playwright-report/
 test-results/
+
+# Branch comparison reports (auto-generated)
+branch-comparison-*.md
+branch-comparison-*.json
