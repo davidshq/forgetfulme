@@ -9,6 +9,7 @@
  */
 
 import path from 'path';
+import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 
 // Extension path will be passed from fixtures
@@ -81,7 +82,10 @@ class ExtensionHelper {
     normalizedPath = normalizedPath.replace(/\/$/, '');
     // Chrome uses SHA256 hash of the UTF-8 encoded path
     // Takes first 32 hex characters (which are already lowercase)
-    const hash = crypto.createHash('sha256').update(normalizedPath, 'utf8').digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(normalizedPath, 'utf8')
+      .digest('hex');
     return hash.substring(0, 32);
   }
 
@@ -100,10 +104,12 @@ class ExtensionHelper {
     // Wait for service worker to be available (with timeout)
     try {
       await Promise.race([
-        this.context.waitForEvent('serviceworker', { timeout: 5000 }).catch(() => null),
+        this.context
+          .waitForEvent('serviceworker', { timeout: 5000 })
+          .catch(() => null),
         new Promise(resolve => setTimeout(resolve, 2000)),
       ]);
-    } catch {
+    } catch (error) {
       // Continue even if service worker event doesn't fire
     }
 
@@ -144,7 +150,7 @@ class ExtensionHelper {
             break;
           }
         }
-      } catch {
+      } catch (error) {
         // Ignore errors
       }
     }
@@ -171,7 +177,7 @@ class ExtensionHelper {
         if (id && /^[a-z]{32}$/.test(id)) {
           extensionId = id;
         }
-      } catch {
+      } catch (error) {
         // This won't work in extension pages, but worth trying
       }
     }
@@ -236,17 +242,21 @@ class ExtensionHelper {
               `,
               returnByValue: true,
             });
-            if (result.result && result.result.value && /^[a-z]{32}$/.test(result.result.value)) {
+            if (
+              result.result &&
+              result.result.value &&
+              /^[a-z]{32}$/.test(result.result.value)
+            ) {
               extensionId = result.result.value;
             }
             await tempPage.close();
-          } catch {
+          } catch (evalError) {
             // Ignore
           }
         }
       } catch (error) {
         // CDP might not be available, continue
-        console.warn('CDP method failed:', error?.message || 'Unknown error');
+        console.warn('CDP method failed:', error.message);
       }
     }
 
@@ -292,7 +302,7 @@ class ExtensionHelper {
         }
 
         await testPage.close();
-      } catch {
+      } catch (error) {
         // Ignore errors
       }
     }
@@ -338,7 +348,7 @@ class ExtensionHelper {
                 break;
               }
             }
-          } catch {
+          } catch (error) {
             // Ignore
           }
         }
@@ -375,22 +385,22 @@ class ExtensionHelper {
                 });
                 if (targetInfo.targetInfo && targetInfo.targetInfo.url) {
                   const match = targetInfo.targetInfo.url.match(
-                    /chrome-extension:\/\/([a-z]{32})\//,
+                    /chrome-extension:\/\/([a-z]{32})\//
                   );
                   if (match) {
                     extensionId = match[1];
                     break;
                   }
                 }
-              } catch {
+              } catch (e) {
                 // Ignore
               }
             }
           }
-        } catch {
+        } catch (browserError) {
           // Browser domain might not be available
         }
-      } catch {
+      } catch (error) {
         // CDP might not be available
       }
     }
@@ -419,7 +429,7 @@ class ExtensionHelper {
           }
         }
         await triggerPage.close();
-      } catch {
+      } catch (error) {
         // Ignore
       }
     }
@@ -432,7 +442,7 @@ class ExtensionHelper {
       } catch (error) {
         console.warn(
           '[extension-id] Failed to compute from path:',
-          error?.message || 'Unknown error',
+          error.message
         );
       }
     }
@@ -445,7 +455,7 @@ class ExtensionHelper {
       throw new Error(
         `Could not determine extensionId. Service workers: ${swCount}, Background pages: ${bgCount}, Pages: ${pageCount}, Extension path provided: ${hasPath}. ` +
           'Make sure the extension is loaded correctly. The extension may not be loading in headless mode. ' +
-          'Try running with headless: false to debug.',
+          'Try running with headless: false to debug.'
       );
     }
 
@@ -469,7 +479,7 @@ class ExtensionHelper {
       const response = await testPage.goto(manifestUrl, { timeout: 5000 });
       await testPage.close();
       return response && response.ok();
-    } catch {
+    } catch (error) {
       return false;
     }
   }
@@ -483,7 +493,9 @@ class ExtensionHelper {
     // Verify extension is loaded before trying to navigate
     const isLoaded = await this.verifyExtensionLoaded(extensionId);
     if (!isLoaded) {
-      console.warn(`[nav] Extension may not be loaded. Computed ID: ${extensionId}`);
+      console.warn(
+        `[nav] Extension may not be loaded. Computed ID: ${extensionId}`
+      );
       // Continue anyway - navigation might still work
     }
 
