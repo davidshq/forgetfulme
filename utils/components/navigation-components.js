@@ -17,7 +17,7 @@ import { createButton } from './button-components.js';
  * @param {string} className - Additional CSS classes
  * @returns {HTMLElement}
  */
-export function createNavigation(
+function createNavigation(
   items,
   ariaLabel = 'Main navigation',
   className = '',

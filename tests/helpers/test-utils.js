@@ -11,8 +11,6 @@
 import { vi } from 'vitest';
 import { createStubUIComponents } from './mocks/ui-components.js';
 
-export { createStubUIComponents };
-
 /**
  * Enhanced test utilities for ForgetfulMe extension tests
  * @description Provides centralized mock creation and test environment setup
@@ -24,7 +22,7 @@ export { createStubUIComponents };
  * @returns {Object} Mock Chrome API with all extension methods
  * @description Creates a comprehensive mock of Chrome extension APIs for testing
  */
-export const createMockChrome = () => ({
+const createMockChrome = () => ({
   storage: {
     sync: {
       get: vi.fn(),
@@ -74,7 +72,7 @@ export const createMockChrome = () => ({
  * @returns {Object} Mock console with all methods
  * @description Creates a mock console object with tracked methods for testing
  */
-export const createMockConsole = () => ({
+const createMockConsole = () => ({
   error: vi.fn(),
   warn: vi.fn(),
   info: vi.fn(),
@@ -88,7 +86,7 @@ export const createMockConsole = () => ({
  * @returns {Object} Mock ErrorHandler with all methods and constants
  * @description Creates a mock ErrorHandler with predefined responses for testing
  */
-export const createMockErrorHandler = () => ({
+const createMockErrorHandler = () => ({
   handle: vi.fn().mockReturnValue({
     errorInfo: {
       type: 'UNKNOWN',
@@ -126,7 +124,7 @@ export const createMockErrorHandler = () => ({
 });
 
 // Mock UIMessages
-export const createMockUIMessages = () => ({
+const createMockUIMessages = () => ({
   success: vi.fn(),
   error: vi.fn(),
   warning: vi.fn(),
@@ -148,7 +146,7 @@ export const createMockUIMessages = () => ({
 });
 
 // Mock SupabaseService
-export const createMockSupabaseService = () => ({
+const createMockSupabaseService = () => ({
   initialize: vi.fn().mockResolvedValue(),
   saveBookmark: vi.fn(),
   getBookmarks: vi.fn(),
@@ -158,7 +156,7 @@ export const createMockSupabaseService = () => ({
 });
 
 // Mock ConfigManager
-export const createMockConfigManager = () => ({
+const createMockConfigManager = () => ({
   initialize: vi.fn().mockResolvedValue(),
   getCustomStatusTypes: vi.fn().mockResolvedValue([]),
   getSupabaseConfig: vi.fn(),
@@ -176,7 +174,7 @@ export const createMockConfigManager = () => ({
 });
 
 // Mock AuthStateManager
-export const createMockAuthStateManager = () => ({
+const createMockAuthStateManager = () => ({
   initialize: vi.fn().mockResolvedValue(),
   isAuthenticated: vi.fn().mockResolvedValue(true),
   getAuthState: vi.fn(),
@@ -189,7 +187,7 @@ export const createMockAuthStateManager = () => ({
 });
 
 // Mock SupabaseConfig
-export const createMockSupabaseConfig = () => ({
+const createMockSupabaseConfig = () => ({
   isConfigured: vi.fn().mockResolvedValue(true),
   initialize: vi.fn().mockResolvedValue(),
   getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
@@ -200,7 +198,7 @@ export const createMockSupabaseConfig = () => ({
 });
 
 // Mock AuthUI
-export const createMockAuthUI = () => ({
+const createMockAuthUI = () => ({
   showLoginForm: vi.fn(),
   showSignupForm: vi.fn(),
   handleLogin: vi.fn(),
@@ -210,7 +208,7 @@ export const createMockAuthUI = () => ({
 });
 
 // Mock BookmarkTransformer
-export const createMockBookmarkTransformer = () => ({
+const createMockBookmarkTransformer = () => ({
   toUIFormat: vi.fn(),
   fromCurrentTab: vi.fn(),
   fromBookmarkData: vi.fn(),
@@ -223,7 +221,7 @@ export const createMockBookmarkTransformer = () => ({
  * @param {Object} customMocks - Custom mocks to override defaults
  * @returns {Object} Complete test environment with all mocks
  */
-export const createTestEnvironment = (customMocks = {}) => {
+const createTestEnvironment = (customMocks = {}) => {
   const mocks = {
     chrome: createMockChrome(),
     console: createMockConsole(),
@@ -280,161 +278,6 @@ export const setupTestWithMocks = (customMocks = {}) => {
       vi.restoreAllMocks();
     },
   };
-};
-
-/**
- * Sets up module mocks using vi.mock() for ES modules
- * Note: This function should be called at the top level of test files
- * due to Vitest's hoisting behavior
- */
-export const setupModuleMocks = () => {
-  // Mock all utility modules with factory functions
-  vi.mock('../../utils/error-handler.js', () => ({
-    default: {
-      handle: vi.fn().mockReturnValue({
-        errorInfo: {
-          type: 'UNKNOWN',
-          severity: 'MEDIUM',
-          message: 'Test error message',
-          context: 'test',
-          originalError: new Error('Test error message'),
-        },
-        userMessage: 'Test error message',
-        shouldRetry: false,
-        shouldShowToUser: true,
-        technicalMessage: 'Test error message',
-      }),
-      createError: vi.fn((message, type, context) => {
-        const error = new Error(message);
-        error.type = type;
-        error.context = context;
-        return error;
-      }),
-      ERROR_TYPES: {
-        NETWORK: 'NETWORK',
-        AUTH: 'AUTH',
-        VALIDATION: 'VALIDATION',
-        DATABASE: 'DATABASE',
-        CONFIG: 'CONFIG',
-        UI: 'UI',
-        UNKNOWN: 'UNKNOWN',
-      },
-      SEVERITY: {
-        LOW: 'LOW',
-        MEDIUM: 'MEDIUM',
-        HIGH: 'HIGH',
-        CRITICAL: 'CRITICAL',
-      },
-    },
-  }));
-
-  vi.mock('../../utils/ui-components.js', () => ({
-    default: createStubUIComponents(),
-  }));
-
-  vi.mock('../../utils/ui-messages.js', () => ({
-    default: {
-      success: vi.fn(),
-      error: vi.fn(),
-      warning: vi.fn(),
-      info: vi.fn(),
-      loading: vi.fn(),
-      clear: vi.fn(),
-      show: vi.fn(),
-      showWithRetry: vi.fn(),
-      confirm: vi.fn(),
-      toast: vi.fn(),
-      getDefaultTimeout: vi.fn(),
-      MESSAGE_TYPES: {
-        SUCCESS: 'success',
-        ERROR: 'error',
-        WARNING: 'warning',
-        INFO: 'info',
-        LOADING: 'loading',
-      },
-    },
-  }));
-
-  vi.mock('../../utils/config-manager.js', () => ({
-    default: vi.fn().mockImplementation(() => ({
-      initialize: vi.fn().mockResolvedValue(),
-      getCustomStatusTypes: vi.fn().mockResolvedValue([]),
-      getSupabaseConfig: vi.fn(),
-      setSupabaseConfig: vi.fn(),
-      getPreferences: vi.fn(),
-      setPreferences: vi.fn(),
-      getAuthSession: vi.fn(),
-      setAuthSession: vi.fn(),
-      clearAuthSession: vi.fn(),
-      isAuthenticated: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      reset: vi.fn(),
-      getConfigSummary: vi.fn(),
-    })),
-  }));
-
-  vi.mock('../../utils/auth-state-manager.js', () => ({
-    default: vi.fn().mockImplementation(() => ({
-      initialize: vi.fn().mockResolvedValue(),
-      isAuthenticated: vi.fn().mockResolvedValue(true),
-      getAuthState: vi.fn(),
-      setAuthState: vi.fn(),
-      clearAuthState: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      getAuthSummary: vi.fn(),
-      notifyAllContexts: vi.fn(),
-    })),
-  }));
-
-  vi.mock('../../supabase-config.js', () => ({
-    default: vi.fn().mockImplementation(() => ({
-      isConfigured: vi.fn().mockResolvedValue(true),
-      initialize: vi.fn().mockResolvedValue(),
-      getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
-      signIn: vi.fn(),
-      signUp: vi.fn(),
-      signOut: vi.fn(),
-      session: null,
-    })),
-  }));
-
-  vi.mock('../../supabase-service.js', () => ({
-    default: vi.fn().mockImplementation(() => ({
-      initialize: vi.fn().mockResolvedValue(),
-      saveBookmark: vi.fn(),
-      getBookmarks: vi.fn(),
-      updateBookmark: vi.fn(),
-      getBookmarkByUrl: vi.fn(),
-      deleteBookmark: vi.fn(),
-    })),
-  }));
-
-  vi.mock('../../auth-ui.js', () => ({
-    default: vi.fn().mockImplementation(() => ({
-      showLoginForm: vi.fn(),
-      showSignupForm: vi.fn(),
-      handleLogin: vi.fn(),
-      handleSignup: vi.fn(),
-      handleSignOut: vi.fn(),
-    })),
-  }));
-
-  vi.mock('../../utils/bookmark-transformer.js', () => ({
-    default: {
-      toUIFormat: vi.fn(),
-      fromCurrentTab: vi.fn(),
-      toSupabaseFormat: vi.fn(),
-      fromImportData: vi.fn(),
-      normalizeTags: vi.fn(),
-      validate: vi.fn(),
-      isValidUrl: vi.fn(),
-      toExportFormat: vi.fn(),
-      transformMultiple: vi.fn(),
-      getDefaultStructure: vi.fn(),
-    },
-  }));
 };
 
 /**

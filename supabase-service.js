@@ -8,7 +8,7 @@
  * @since 2024-01-01
  */
 
-import ErrorHandler from './utils/error-handler.js';
+import { requireSupabaseAuth } from './utils/supabase-request-utils.js';
 import { RealtimeManager } from './utils/realtime-manager.js';
 import { BookmarkOperations } from './utils/supabase-bookmark-operations.js';
 import { UserOperations } from './utils/supabase-user-operations.js';
@@ -206,13 +206,7 @@ class SupabaseService {
    * @throws {Error} When user is not authenticated
    */
   subscribeToBookmarks(callback) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.subscribeToBookmarks',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.subscribeToBookmarks');
 
     const userId = this.config.getCurrentUser().id;
     return this.realtimeManager.subscribeToBookmarks(userId, callback);

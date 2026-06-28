@@ -6,6 +6,7 @@
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { BookmarkOperations } from '../../utils/supabase-bookmark-operations.js';
+import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 
 // Mock dependencies
 vi.mock('../../utils/error-handler.js', () => ({
@@ -42,25 +43,41 @@ describe('BookmarkOperations', () => {
   let mockPendingRequests;
   let mockTokenRefreshHandler;
 
+  const setQueryResult = (chain, result) => {
+    chain.then = (onFulfilled, onRejected) =>
+      Promise.resolve(result).then(onFulfilled, onRejected);
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Mock Supabase client with proper chaining
-    // Methods that return promises: select, single, range (after chain)
-    // Methods that return chain: from, insert, update, delete, eq, order, or, overlaps
+    BookmarkTransformer.validate.mockReturnValue({ isValid: true, errors: [] });
+    BookmarkTransformer.toSupabaseFormat.mockImplementation(
+      (bookmark, userId) => ({
+        ...bookmark,
+        user_id: userId,
+      }),
+    );
+
+    // Mock Supabase client with proper chaining (thenable builder pattern)
     const createChainableMock = () => {
       const chain = {
         from: vi.fn(() => chain),
-        select: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        select: vi.fn(() => chain),
         insert: vi.fn(() => chain),
         update: vi.fn(() => chain),
         delete: vi.fn(() => chain),
         eq: vi.fn(() => chain),
         single: vi.fn(() => Promise.resolve({ data: null, error: null })),
         order: vi.fn(() => chain),
-        range: vi.fn(() => Promise.resolve({ data: [], error: null })),
+        range: vi.fn(() => chain),
         or: vi.fn(() => chain),
         overlaps: vi.fn(() => chain),
+        then: (onFulfilled, onRejected) =>
+          Promise.resolve({ data: [], error: null }).then(
+            onFulfilled,
+            onRejected,
+          ),
       };
       return chain;
     };
@@ -117,9 +134,6 @@ describe('BookmarkOperations', () => {
     });
 
     test('should throw error when validation fails', async () => {
-      const BookmarkTransformer = (
-        await import('../../utils/bookmark-transformer.js')
-      ).default;
       BookmarkTransformer.validate.mockReturnValue({
         isValid: false,
         errors: ['URL is required'],
@@ -163,8 +177,10 @@ describe('BookmarkOperations', () => {
         data: [{ id: 'new-id', url: 'https://example.com' }],
         error: null,
       });
-      mockSupabase.single = vi.fn(() => singlePromise);
-      mockSupabase.select = vi.fn(() => selectPromise);
+      mockSupabase.single.mockImplementation(() => singlePromise);
+      mockSupabase.select
+        .mockReturnValueOnce(mockSupabase)
+        .mockImplementationOnce(() => selectPromise);
 
       const bookmark = {
         url: 'https://example.com',
@@ -184,10 +200,14 @@ describe('BookmarkOperations', () => {
         data: null,
         error: { code: 'PGRST116' },
       });
-      mockSupabase.select.mockResolvedValue({
-        data: null,
-        error: new Error('Database error'),
-      });
+      mockSupabase.select
+        .mockReturnValueOnce(mockSupabase)
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            data: null,
+            error: new Error('Database error'),
+          }),
+        );
 
       await expect(
         bookmarkOps.saveBookmark({
@@ -209,11 +229,10 @@ describe('BookmarkOperations', () => {
     });
 
     test('should get bookmarks with default options', async () => {
-      const promise = Promise.resolve({
+      setQueryResult(mockSupabase, {
         data: [{ id: '1' }, { id: '2' }],
         error: null,
       });
-      mockSupabase.range = vi.fn(() => promise);
 
       const result = await bookmarkOps.getBookmarks();
 
@@ -227,11 +246,10 @@ describe('BookmarkOperations', () => {
     });
 
     test('should filter by status', async () => {
-      const promise = Promise.resolve({
+      setQueryResult(mockSupabase, {
         data: [],
         error: null,
       });
-      mockSupabase.range = vi.fn(() => promise);
 
       await bookmarkOps.getBookmarks({ status: 'read' });
 
@@ -239,61 +257,32 @@ describe('BookmarkOperations', () => {
     });
 
     test('should filter by search', async () => {
-      const promise = Promise.resolve({
+      setQueryResult(mockSupabase, {
         data: [],
         error: null,
       });
-      // Create a new chain for this test
-      const searchChain = {
-        from: vi.fn(() => searchChain),
-        select: vi.fn(() => searchChain),
-        eq: vi.fn(() => searchChain),
-        order: vi.fn(() => searchChain),
-        or: vi.fn(() => searchChain),
-        range: vi.fn(() => promise),
-      };
-      mockSupabase = searchChain;
-      bookmarkOps = new BookmarkOperations(
-        mockSupabase,
-        mockConfig,
-        mockPendingRequests,
-        mockTokenRefreshHandler,
-      );
 
       await bookmarkOps.getBookmarks({ search: 'test' });
 
-      expect(searchChain.or).toHaveBeenCalled();
+      expect(mockSupabase.or).toHaveBeenCalled();
     });
 
     test('should filter by tags', async () => {
-      const promise = Promise.resolve({
+      setQueryResult(mockSupabase, {
         data: [],
         error: null,
       });
-      // Create a new chain for this test
-      const tagsChain = {
-        from: vi.fn(() => tagsChain),
-        select: vi.fn(() => tagsChain),
-        eq: vi.fn(() => tagsChain),
-        order: vi.fn(() => tagsChain),
-        overlaps: vi.fn(() => tagsChain),
-        range: vi.fn(() => promise),
-      };
-      mockSupabase = tagsChain;
-      bookmarkOps = new BookmarkOperations(
-        mockSupabase,
-        mockConfig,
-        mockPendingRequests,
-        mockTokenRefreshHandler,
-      );
 
       await bookmarkOps.getBookmarks({ tags: ['tag1', 'tag2'] });
 
-      expect(tagsChain.overlaps).toHaveBeenCalledWith('tags', ['tag1', 'tag2']);
+      expect(mockSupabase.overlaps).toHaveBeenCalledWith('tags', [
+        'tag1',
+        'tag2',
+      ]);
     });
 
     test('should handle pagination', async () => {
-      mockSupabase.range.mockResolvedValue({
+      setQueryResult(mockSupabase, {
         data: [],
         error: null,
       });
@@ -304,7 +293,7 @@ describe('BookmarkOperations', () => {
     });
 
     test('should handle errors', async () => {
-      mockSupabase.range.mockResolvedValue({
+      setQueryResult(mockSupabase, {
         data: null,
         error: new Error('Query error'),
       });
@@ -517,10 +506,11 @@ describe('BookmarkOperations', () => {
       let callCount = 0;
       mockSupabase.range.mockImplementation(() => {
         callCount++;
-        return Promise.resolve({
+        setQueryResult(mockSupabase, {
           data: [{ id: callCount }],
           error: null,
         });
+        return mockSupabase;
       });
 
       const promise1 = bookmarkOps.getBookmarks();
@@ -531,6 +521,24 @@ describe('BookmarkOperations', () => {
       // Should only call once due to deduplication
       expect(callCount).toBe(1);
       expect(result1).toEqual(result2);
+    });
+
+    test('should remove failed requests from pending map', async () => {
+      setQueryResult(mockSupabase, {
+        data: null,
+        error: new Error('Query error'),
+      });
+
+      await expect(bookmarkOps.getBookmarks()).rejects.toThrow('Query error');
+
+      setQueryResult(mockSupabase, {
+        data: [{ id: '1' }],
+        error: null,
+      });
+
+      const result = await bookmarkOps.getBookmarks();
+
+      expect(result).toEqual([{ id: '1' }]);
     });
   });
 });

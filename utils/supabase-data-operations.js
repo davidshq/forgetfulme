@@ -6,6 +6,7 @@
 
 import ErrorHandler from './error-handler.js';
 import BookmarkTransformer from './bookmark-transformer.js';
+import { requireSupabaseAuth } from './supabase-request-utils.js';
 
 /**
  * Data operations for Supabase service
@@ -34,13 +35,7 @@ export class DataOperations {
    * @throws {Error} When user is not authenticated
    */
   async exportData() {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.exportData',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.exportData');
 
     try {
       const bookmarks = await this.bookmarkOperations.getBookmarks({
@@ -67,13 +62,7 @@ export class DataOperations {
    * @throws {Error} When user is not authenticated or import fails
    */
   async importData(importData) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.importData',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.importData');
 
     try {
       const userId = this.config.getCurrentUser().id;

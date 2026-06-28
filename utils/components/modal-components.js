@@ -60,7 +60,7 @@ export function createConfirmDialog(
  * @param {Object} options - Modal options
  * @returns {HTMLElement}
  */
-export function createModal(title, content, actions = [], options = {}) {
+function createModal(title, content, actions = [], options = {}) {
   const dialog = document.createElement('dialog');
   dialog.className = options.className || '';
 
@@ -128,7 +128,7 @@ export function createModal(title, content, actions = [], options = {}) {
  * Close a modal dialog
  * @param {HTMLElement} modal - Modal element
  */
-export function closeModal(modal) {
+function closeModal(modal) {
   if (modal && modal.tagName === 'DIALOG') {
     modal.close();
   }

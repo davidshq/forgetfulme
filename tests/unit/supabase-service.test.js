@@ -4,7 +4,24 @@ import ErrorHandler from '../../utils/error-handler.js';
 import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 
 // Mock dependencies
-vi.mock('../../utils/error-handler.js');
+vi.mock('../../utils/error-handler.js', () => ({
+  default: {
+    createError: vi.fn((message, type, context) => {
+      const error = new Error(message);
+      error.type = type;
+      error.context = context;
+      return error;
+    }),
+    handle: vi.fn(),
+    ERROR_TYPES: {
+      AUTH: 'AUTH',
+      VALIDATION: 'VALIDATION',
+      DATABASE: 'DATABASE',
+      NETWORK: 'NETWORK',
+      UNKNOWN: 'UNKNOWN',
+    },
+  },
+}));
 vi.mock('../../utils/bookmark-transformer.js');
 
 describe('SupabaseService', () => {
@@ -16,6 +33,8 @@ describe('SupabaseService', () => {
     // Reset mocks
     vi.clearAllMocks();
 
+    chrome.storage.sync.get.mockResolvedValue({});
+
     // Mock SupabaseConfig
     mockSupabaseConfig = {
       initialize: vi.fn().mockResolvedValue(),
@@ -24,7 +43,7 @@ describe('SupabaseService', () => {
       getCurrentUser: vi.fn().mockReturnValue({ id: 'test-user-id' }),
     };
 
-    // Mock Supabase client
+    // Mock Supabase client (thenable builder for getBookmarks)
     mockSupabaseClient = {
       from: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
@@ -37,6 +56,11 @@ describe('SupabaseService', () => {
       range: vi.fn().mockReturnThis(),
       or: vi.fn().mockReturnThis(),
       overlaps: vi.fn().mockReturnThis(),
+      then: (onFulfilled, onRejected) =>
+        Promise.resolve({ data: [], error: null }).then(
+          onFulfilled,
+          onRejected,
+        ),
     };
 
     mockSupabaseConfig.getSupabaseClient.mockReturnValue(mockSupabaseClient);
@@ -62,6 +86,7 @@ describe('SupabaseService', () => {
     ErrorHandler.handle.mockReturnValue({
       userMessage: 'Test error message',
       shouldShowToUser: true,
+      errorInfo: { type: 'DATABASE' },
     });
 
     supabaseService = new SupabaseService(mockSupabaseConfig);
@@ -152,10 +177,11 @@ describe('SupabaseService', () => {
         tags: ['test'],
       };
 
-      // Mock getBookmarkByUrl to return existing bookmark
-      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(
-        existingBookmark,
-      );
+      // saveBookmark delegates to bookmarkOperations, not service.getBookmarkByUrl
+      vi.spyOn(
+        supabaseService.bookmarkOperations,
+        'getBookmarkByUrl',
+      ).mockResolvedValue(existingBookmark);
 
       const bookmark = {
         url: 'https://example.com',
@@ -170,9 +196,9 @@ describe('SupabaseService', () => {
         ...existingBookmark,
         isDuplicate: true,
       });
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
-        'https://example.com',
-      );
+      expect(
+        supabaseService.bookmarkOperations.getBookmarkByUrl,
+      ).toHaveBeenCalledWith('https://example.com');
       expect(mockSupabaseClient.insert).not.toHaveBeenCalled();
     });
 
@@ -186,8 +212,10 @@ describe('SupabaseService', () => {
         tags: ['test'],
       };
 
-      // Mock getBookmarkByUrl to return null (no existing bookmark)
-      vi.spyOn(supabaseService, 'getBookmarkByUrl').mockResolvedValue(null);
+      vi.spyOn(
+        supabaseService.bookmarkOperations,
+        'getBookmarkByUrl',
+      ).mockResolvedValue(null);
 
       // Mock the insert chain properly
       const mockInsertChain = {
@@ -208,9 +236,9 @@ describe('SupabaseService', () => {
       const result = await supabaseService.saveBookmark(bookmark);
 
       expect(result).toEqual(newBookmark);
-      expect(supabaseService.getBookmarkByUrl).toHaveBeenCalledWith(
-        'https://example.com',
-      );
+      expect(
+        supabaseService.bookmarkOperations.getBookmarkByUrl,
+      ).toHaveBeenCalledWith('https://example.com');
       expect(mockSupabaseClient.insert).toHaveBeenCalled();
     });
 
@@ -267,10 +295,12 @@ describe('SupabaseService', () => {
       let callCount = 0;
       mockSupabaseClient.range.mockImplementation(() => {
         callCount++;
-        return Promise.resolve({
-          data: mockBookmarks,
-          error: null,
-        });
+        mockSupabaseClient.then = (onFulfilled, onRejected) =>
+          Promise.resolve({ data: mockBookmarks, error: null }).then(
+            onFulfilled,
+            onRejected,
+          );
+        return mockSupabaseClient;
       });
 
       const options = { page: 1, limit: 50 };
@@ -327,9 +357,19 @@ describe('SupabaseService', () => {
       mockSupabaseClient.range.mockImplementation(() => {
         callCount++;
         if (callCount === 1) {
-          return Promise.resolve({ data: mockBookmarks1, error: null });
+          mockSupabaseClient.then = (onFulfilled, onRejected) =>
+            Promise.resolve({ data: mockBookmarks1, error: null }).then(
+              onFulfilled,
+              onRejected,
+            );
+        } else {
+          mockSupabaseClient.then = (onFulfilled, onRejected) =>
+            Promise.resolve({ data: mockBookmarks2, error: null }).then(
+              onFulfilled,
+              onRejected,
+            );
         }
-        return Promise.resolve({ data: mockBookmarks2, error: null });
+        return mockSupabaseClient;
       });
 
       const [result1, result2] = await Promise.all([
@@ -344,34 +384,21 @@ describe('SupabaseService', () => {
       expect(callCount).toBe(2);
     });
 
-    it('should handle errors and remove from pending requests', async () => {
-      const mockError = new Error('Database error');
-      let callCount = 0;
-
-      mockSupabaseClient.range.mockImplementation(() => {
-        callCount++;
-        return Promise.resolve({
-          data: null,
-          error: mockError,
-        });
-      });
-
+    it('should retry after a failed deduplicated request', async () => {
       const options = { page: 1, limit: 50 };
+      const getBookmarksSpy = vi
+        .spyOn(supabaseService.bookmarkOperations, 'getBookmarks')
+        .mockRejectedValueOnce(new Error('Database error'))
+        .mockResolvedValueOnce([{ id: '1' }]);
 
-      // First call should fail
-      await expect(supabaseService.getBookmarks(options)).rejects.toThrow();
-
-      // Second call should make a new request (not deduplicated from failed one)
-      mockSupabaseClient.range.mockResolvedValue({
-        data: [{ id: '1' }],
-        error: null,
-      });
+      await expect(supabaseService.getBookmarks(options)).rejects.toThrow(
+        'Database error',
+      );
 
       const result = await supabaseService.getBookmarks(options);
-      expect(result).toEqual([{ id: '1' }]);
 
-      // Should make two separate calls (one failed, one succeeded)
-      expect(callCount).toBeGreaterThanOrEqual(1);
+      expect(result).toEqual([{ id: '1' }]);
+      expect(getBookmarksSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

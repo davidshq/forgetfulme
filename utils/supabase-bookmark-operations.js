@@ -6,6 +6,11 @@
 
 import ErrorHandler from './error-handler.js';
 import BookmarkTransformer from './bookmark-transformer.js';
+import {
+  deduplicateRequest,
+  getRequestKey,
+  requireSupabaseAuth,
+} from './supabase-request-utils.js';
 
 /**
  * Bookmark operations for Supabase service
@@ -26,56 +31,6 @@ export class BookmarkOperations {
     this.config = config;
     this.pendingRequests = pendingRequests;
     this.tokenRefreshHandler = tokenRefreshHandler;
-  }
-
-  /**
-   * Generate a unique key for request deduplication
-   * @private
-   * @param {string} methodName - Name of the method being called
-   * @param {any} params - Parameters for the method
-   * @param {string} [userId] - Optional user ID to include in key
-   * @returns {string} Unique request key
-   */
-  _getRequestKey(methodName, params, userId = null) {
-    const paramKey = JSON.stringify(params || {});
-    const userKey =
-      userId ||
-      (this.config.isAuthenticated()
-        ? this.config.getCurrentUser()?.id
-        : 'anonymous');
-    return `${methodName}:${userKey}:${paramKey}`;
-  }
-
-  /**
-   * Deduplicate a request by checking for in-flight requests with the same key
-   * @private
-   * @param {string} requestKey - Unique key for the request
-   * @param {Function} requestFn - Function that performs the actual API call
-   * @returns {Promise<any>} Promise that resolves with the request result
-   */
-  async _deduplicateRequest(requestKey, requestFn) {
-    // Check if a request with this key is already in progress
-    const existingRequest = this.pendingRequests.get(requestKey);
-    if (existingRequest) {
-      return existingRequest;
-    }
-
-    // Create new request promise
-    const requestPromise = requestFn()
-      .then(result => {
-        // Remove from pending requests on success
-        this.pendingRequests.delete(requestKey);
-        return result;
-      })
-      .catch(error => {
-        // Remove from pending requests on error
-        this.pendingRequests.delete(requestKey);
-        throw error;
-      });
-
-    // Store the promise for deduplication
-    this.pendingRequests.set(requestKey, requestPromise);
-    return requestPromise;
   }
 
   /**
@@ -104,13 +59,7 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated or validation fails
    */
   async saveBookmark(bookmark) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.saveBookmark',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.saveBookmark');
 
     // Validate bookmark data before transformation
     const validation = BookmarkTransformer.validate(bookmark);
@@ -168,19 +117,18 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async getBookmarks(options = {}) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.getBookmarks',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.getBookmarks');
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey('getBookmarks', options, userId);
+      const requestKey = getRequestKey(
+        'getBookmarks',
+        options,
+        this.config,
+        userId,
+      );
 
-      return this._deduplicateRequest(requestKey, async () => {
+      return deduplicateRequest(this.pendingRequests, requestKey, async () => {
         const {
           page = 1,
           limit = 50,
@@ -232,23 +180,18 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async getBookmarkByUrl(url) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.getBookmarkByUrl',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.getBookmarkByUrl');
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey(
+      const requestKey = getRequestKey(
         'getBookmarkByUrl',
         { url },
+        this.config,
         userId,
       );
 
-      return this._deduplicateRequest(requestKey, async () => {
+      return deduplicateRequest(this.pendingRequests, requestKey, async () => {
         try {
           const { data, error } = await this.supabase
             .from('bookmarks')
@@ -282,13 +225,7 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async updateBookmark(bookmarkId, updates) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.updateBookmark',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.updateBookmark');
 
     return this._executeWithTokenRefresh(async () => {
       try {
@@ -318,13 +255,7 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async deleteBookmark(bookmarkId) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.deleteBookmark',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.deleteBookmark');
 
     return this._executeWithTokenRefresh(async () => {
       try {
@@ -350,23 +281,18 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async getBookmarkById(bookmarkId) {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.getBookmarkById',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.getBookmarkById');
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey(
+      const requestKey = getRequestKey(
         'getBookmarkById',
         { bookmarkId },
+        this.config,
         userId,
       );
 
-      return this._deduplicateRequest(requestKey, async () => {
+      return deduplicateRequest(this.pendingRequests, requestKey, async () => {
         try {
           const { data, error } = await this.supabase
             .from('bookmarks')
@@ -398,19 +324,18 @@ export class BookmarkOperations {
    * @throws {Error} When user is not authenticated
    */
   async getBookmarkStats() {
-    if (!this.config.isAuthenticated()) {
-      throw ErrorHandler.createError(
-        'User not authenticated',
-        ErrorHandler.ERROR_TYPES.AUTH,
-        'supabase-service.getBookmarkStats',
-      );
-    }
+    requireSupabaseAuth(this.config, 'supabase-service.getBookmarkStats');
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey('getBookmarkStats', {}, userId);
+      const requestKey = getRequestKey(
+        'getBookmarkStats',
+        {},
+        this.config,
+        userId,
+      );
 
-      return this._deduplicateRequest(requestKey, async () => {
+      return deduplicateRequest(this.pendingRequests, requestKey, async () => {
         try {
           const { data, error } = await this.supabase
             .from('bookmarks')

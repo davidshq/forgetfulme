@@ -58,7 +58,7 @@ ErrorHandler utility mocks:
 UIComponents mocks split into modular files. **`createMockUIComponents(document)`** mirrors the public `utils/ui-components.js` facade — it does not expose internal helpers such as `createNavigation` or `createModal`.
 
 - **`ui-components.js`** - Main entry point (`createMockUIComponents`, `createStubUIComponents`)
-- **`ui-components-constants.js`** - `COMPONENT_TYPES`, `BUTTON_STYLES`, `FIELD_TYPES`, and the public member list
+- **`ui-components-constants.js`** - `COMPONENT_TYPES`, `BUTTON_STYLES`, `FIELD_TYPES` (internal; consumed by `ui-components.js`)
 - **`ui-components-basic.js`** - Container, form, formField, button, listItem
 - **`ui-components-cards.js`** - Section, card, cardWithActions, formCard, listCard
 - **`ui-components-layout.js`** - Grid layout (`createGrid`)

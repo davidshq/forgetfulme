@@ -84,13 +84,13 @@ These mocks are automatically set up in `vitest.setup.js` and can also be import
 
 Provides centralized mock creation and test environment setup:
 
-- `createTestEnvironment()` - Complete test environment with all mocks
 - `setupTestWithMocks()` - Test setup with mocks and cleanup
-- `createMockChrome()` - Chrome extension API mocks
-- `createMockErrorHandler()` - Error handler mocks
-- `createStubUIComponents()` - UI component stubs (`vi.fn()`; import from `test-utils.js` or `mocks/ui-components.js`)
-- `createMockUIComponents(document)` - UI component mocks with DOM implementations (`mocks/ui-components.js` only)
-- And more...
+- `createMockElement()` - Lightweight DOM element helper for tests that use `setupTestWithMocks`
+
+For Chrome API, console, error handler, and UI component mocks, import from `helpers/mocks/` (see `helpers/mocks/README.md`):
+
+- `createMockUIComponents(document)` - UI component mocks with DOM implementations
+- `createStubUIComponents()` - UI component stubs (`vi.fn()`)
 
 ### Test Factories (`test-factories.js`)
 

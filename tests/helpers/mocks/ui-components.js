@@ -13,7 +13,6 @@ import {
   BUTTON_STYLES,
   COMPONENT_TYPES,
   FIELD_TYPES,
-  UI_COMPONENTS_PUBLIC_MEMBERS,
 } from './ui-components-constants.js';
 import { createBasicComponents } from './ui-components-basic.js';
 import { createCardComponents } from './ui-components-cards.js';
@@ -73,13 +72,3 @@ export const createMockUIComponents = document => ({
   ...createModalComponents(document),
   ...createDOMUtilities(document),
 });
-
-/**
- * Asserts a mock object exposes only the public UIComponents surface.
- * @param {Object} mock - Mock UIComponents object
- * @returns {string[]} Unexpected member names, if any
- */
-export const getUnexpectedUIComponentMembers = mock => {
-  const allowed = new Set(UI_COMPONENTS_PUBLIC_MEMBERS);
-  return Object.keys(mock).filter(key => !allowed.has(key));
-};

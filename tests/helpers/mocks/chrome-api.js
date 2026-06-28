@@ -34,6 +34,10 @@ export const createMockChrome = () => ({
       remove: vi.fn(),
       clear: vi.fn(),
     },
+    onChanged: {
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    },
   },
   runtime: {
     sendMessage: vi.fn(),

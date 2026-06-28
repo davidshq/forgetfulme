@@ -41,26 +41,3 @@ export const FIELD_TYPES = {
   CHECKBOX: 'checkbox',
   RADIO: 'radio',
 };
-
-/** Public static members on UIComponents (must stay in sync with utils/ui-components.js) */
-export const UI_COMPONENTS_PUBLIC_MEMBERS = [
-  'COMPONENT_TYPES',
-  'BUTTON_STYLES',
-  'FIELD_TYPES',
-  'DOM',
-  'createButton',
-  'createFormField',
-  'createForm',
-  'createContainer',
-  'createSection',
-  'createListItem',
-  'createCard',
-  'createCardWithActions',
-  'createFormCard',
-  'createListCard',
-  'createGrid',
-  'createConfirmDialog',
-  'showModal',
-  'createBreadcrumb',
-  'createHeaderWithNav',
-];

@@ -1,0 +1,26 @@
+---
+description: Markdown table formatting — minimal separator rows
+alwaysApply: true
+---
+
+# Markdown Tables
+
+Use **minimal** separator rows. Do not pad `---` dashes to match column width.
+
+```markdown
+<!-- ❌ BAD — padded separators -->
+| Module | Symbol | Evidence | Recommendation |
+|--------|--------|----------|----------------|
+| `foo.js` | `bar` | Tests only | Remove |
+
+<!-- ✅ GOOD — three dashes per column is enough -->
+| Module | Symbol | Evidence | Recommendation |
+|---|---|---|---|
+| `foo.js` | `bar` | Tests only | Remove |
+```
+
+Rules:
+
+- Separator cells: `---` only (or `:---` / `---:` / `:---:` for alignment)
+- Never stretch dashes to align with the longest cell in each column
+- Column content width does not need to match header or separator width
