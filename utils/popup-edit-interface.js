@@ -5,7 +5,7 @@
  */
 
 import { createBookmarkEditView } from '../components/bookmark-edit-view.js';
-import { DEFAULT_STATUS_TYPES } from './constants.js';
+import { resolveStatusTypes } from './formatters.js';
 
 /**
  * Edit interface manager for popup
@@ -31,9 +31,9 @@ export class PopupEditInterface {
   async showEditInterface(existingBookmark) {
     this.popup.currentBookmarkUrl = existingBookmark.url;
 
-    const statusTypes =
-      (await this.popup.configManager.getCustomStatusTypes()) ||
-      DEFAULT_STATUS_TYPES;
+    const statusTypes = resolveStatusTypes(
+      await this.popup.configManager.getCustomStatusTypes(),
+    );
 
     createBookmarkEditView(existingBookmark, this.popup.appContainer, {
       backLabel: '← Back',

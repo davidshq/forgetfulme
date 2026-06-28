@@ -13,6 +13,7 @@ import {
   getBookmarkEditFormData,
 } from './bookmark-edit-view.js';
 import { DEFAULT_STATUS_TYPES } from '../utils/constants.js';
+import { resolveStatusTypes } from '../utils/formatters.js';
 
 /**
  * Bookmark editor component
@@ -40,7 +41,7 @@ export class BookmarkEditor {
    * @param {HTMLElement} container - Container element to render into
    */
   async showEditInterface(existingBookmark, container) {
-    const statusTypes = await this.getStatusTypes();
+    const statusTypes = resolveStatusTypes(await this.getStatusTypes());
 
     createBookmarkEditView(existingBookmark, container, {
       backLabel: '← Back to List',

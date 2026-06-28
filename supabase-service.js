@@ -1,15 +1,13 @@
 /**
  * @fileoverview Supabase service for ForgetfulMe extension
  * @module supabase-service
- * @description Handles all Supabase database operations and real-time subscriptions
+ * @description Handles all Supabase database operations
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
  * @since 2024-01-01
  */
 
-import { requireSupabaseAuth } from './utils/supabase-request-utils.js';
-import { RealtimeManager } from './utils/realtime-manager.js';
 import { BookmarkOperations } from './utils/supabase-bookmark-operations.js';
 import { UserOperations } from './utils/supabase-user-operations.js';
 import { DataOperations } from './utils/supabase-data-operations.js';
@@ -20,7 +18,6 @@ import AuthStateManager from './utils/auth-state-manager.js';
  * Supabase service for ForgetfulMe extension
  * @class SupabaseService
  * @description Manages all Supabase database operations including bookmarks, user preferences,
- * and real-time subscriptions
  *
  * @example
  * const supabaseConfig = new SupabaseConfig();
@@ -39,15 +36,13 @@ class SupabaseService {
    * Initialize the Supabase service with configuration
    * @constructor
    * @param {SupabaseConfig} supabaseConfig - The Supabase configuration instance
-   * @description Sets up the service with Supabase configuration and real-time manager
+   * @description Sets up the service with Supabase configuration
    */
   constructor(supabaseConfig) {
     /** @type {SupabaseConfig} Supabase configuration instance */
     this.config = supabaseConfig;
     /** @type {Object|null} Supabase client instance */
     this.supabase = null;
-    /** @type {RealtimeManager|null} Real-time subscription manager */
-    this.realtimeManager = null;
     /** @type {Map<string, Promise>} Map of pending requests for deduplication */
     this.pendingRequests = new Map();
     /** @type {BookmarkOperations|null} Bookmark operations instance */
@@ -62,15 +57,13 @@ class SupabaseService {
 
   /**
    * Initialize the Supabase service
-   * @description Initializes the Supabase configuration and sets up the client and real-time manager
+   * @description Initializes the Supabase configuration and sets up the client
    * @throws {Error} When initialization fails
    */
   async initialize() {
     // Initializing SupabaseService...
     await this.config.initialize();
     this.supabase = this.config.getSupabaseClient();
-    // Supabase client initialized successfully
-    this.realtimeManager = new RealtimeManager(this.supabase);
 
     // Initialize auth state manager and token refresh handler
     const authStateManager = new AuthStateManager();
@@ -197,28 +190,6 @@ class SupabaseService {
    */
   async getUserPreferences() {
     return this.userOperations.getUserPreferences();
-  }
-
-  /**
-   * Subscribe to bookmark changes
-   * @param {Function} callback - Callback function for bookmark changes
-   * @returns {Object} Subscription object
-   * @throws {Error} When user is not authenticated
-   */
-  subscribeToBookmarks(callback) {
-    requireSupabaseAuth(this.config, 'supabase-service.subscribeToBookmarks');
-
-    const userId = this.config.getCurrentUser().id;
-    return this.realtimeManager.subscribeToBookmarks(userId, callback);
-  }
-
-  /**
-   * Unsubscribe from real-time channel
-   * @param {string} channelName - Name of the channel to unsubscribe from
-   * @description Removes subscription and cleans up resources
-   */
-  unsubscribe(channelName) {
-    this.realtimeManager.unsubscribe(channelName);
   }
 
   /**

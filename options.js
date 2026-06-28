@@ -20,6 +20,7 @@ import {
   loadStatistics,
   loadStatusTypes,
 } from './utils/options-data-manager.js';
+import { downloadJson } from './utils/download.js';
 
 /**
  * Options page class for ForgetfulMe extension
@@ -48,6 +49,7 @@ class ForgetfulMeOptions {
     this.supabaseService = services.supabaseService;
     this.authUI = services.authUI;
     this.configUI = services.configUI;
+    this.lastBookmarks = null;
 
     // Initialize after DOM is ready
     this.initializeAsync();
@@ -68,9 +70,6 @@ class ForgetfulMeOptions {
       context: 'options.initializeAsync',
     });
   }
-
-  /** @deprecated Auth wiring handled by initializePage() */
-  async initializeAuthState() {}
 
   /**
    * Handle authentication state changes
@@ -237,14 +236,30 @@ class ForgetfulMeOptions {
         this.configManager.getCustomStatusTypes(),
       ]);
 
-      loadStatusTypes(customStatusTypes, status =>
-        this.removeStatusType(status),
-      );
-      loadStatistics(bookmarks, customStatusTypes);
+      this.lastBookmarks = bookmarks;
+      await this.refreshStatusTypesUI(customStatusTypes);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.loadData');
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
+  }
+
+  /**
+   * Refresh the custom status types list and related stats.
+   * @param {string[]} [statusTypes] - Optional pre-fetched status types
+   * @returns {Promise<string[]>}
+   */
+  async refreshStatusTypesUI(statusTypes) {
+    const customStatusTypes =
+      statusTypes ?? (await this.configManager.getCustomStatusTypes());
+
+    loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
+
+    if (this.lastBookmarks) {
+      loadStatistics(this.lastBookmarks, customStatusTypes);
+    }
+
+    return customStatusTypes;
   }
 
   /**
@@ -273,10 +288,7 @@ class ForgetfulMeOptions {
       // Clear input safely
       UIComponents.DOM.setValue('new-status', '');
 
-      const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      loadStatusTypes(customStatusTypes, status =>
-        this.removeStatusType(status),
-      );
+      await this.refreshStatusTypesUI();
       UIMessages.success('Status type added successfully', this.appContainer);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.addStatusType');
@@ -294,10 +306,7 @@ class ForgetfulMeOptions {
       await this.configManager.initialize();
       await this.configManager.removeCustomStatusType(status);
 
-      const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      loadStatusTypes(customStatusTypes, status =>
-        this.removeStatusType(status),
-      );
+      await this.refreshStatusTypesUI();
       UIMessages.success('Status type removed successfully', this.appContainer);
     } catch (error) {
       const errorResult = ErrorHandler.handle(
@@ -316,18 +325,10 @@ class ForgetfulMeOptions {
     try {
       const exportData = await this.supabaseService.exportData();
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `forgetfulme-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      downloadJson(
+        exportData,
+        `forgetfulme-export-${new Date().toISOString().split('T')[0]}.json`,
+      );
 
       UIMessages.success('Data exported successfully', this.appContainer);
     } catch (error) {

@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { formatStatus, formatTime } from '../../utils/formatters.js';
+import {
+  formatStatus,
+  formatTime,
+  resolveStatusTypes,
+} from '../../utils/formatters.js';
+import { DEFAULT_STATUS_TYPES } from '../../utils/constants.js';
 
 /**
  * @fileoverview Unit tests for shared formatters module
@@ -132,6 +137,21 @@ describe('Formatters', () => {
           /^(Just now|\d+[mhd] ago|\d+\/\d+\/\d+)$/,
         );
       });
+    });
+  });
+
+  describe('resolveStatusTypes', () => {
+    it('returns defaults when custom list is empty or missing', () => {
+      expect(resolveStatusTypes([])).toEqual(DEFAULT_STATUS_TYPES);
+      expect(resolveStatusTypes(null)).toEqual(DEFAULT_STATUS_TYPES);
+      expect(resolveStatusTypes(undefined)).toEqual(DEFAULT_STATUS_TYPES);
+    });
+
+    it('returns custom types when non-empty', () => {
+      expect(resolveStatusTypes(['archived', 'read'])).toEqual([
+        'archived',
+        'read',
+      ]);
     });
   });
 });

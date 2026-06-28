@@ -111,13 +111,6 @@ class ForgetfulMePopup {
   }
 
   /**
-   * @deprecated Kept for test compatibility; use page-controller wiring instead.
-   */
-  async initializeAuthState() {
-    // Auth wiring handled by initializePage()
-  }
-
-  /**
    * Handle authentication state changes and update UI accordingly
    * @method handleAuthStateChange
    * @param {Object|null} session - The current session object or null if not authenticated
@@ -128,16 +121,9 @@ class ForgetfulMePopup {
    * popup.handleAuthStateChange(session);
    */
   handleAuthStateChange(session) {
-    // Auth state changed - update UI accordingly
-
-    // Update UI based on auth state
     if (session) {
-      // User is authenticated - show main interface
-      this.showMainInterface();
-      this.loadRecentEntries();
-      this.loadCustomStatusTypes();
+      this.refreshAuthenticatedUI();
     } else {
-      // User is not authenticated - show auth interface
       this.showAuthInterface();
     }
   }
@@ -164,10 +150,7 @@ class ForgetfulMePopup {
       authStateManager: this.authStateManager,
       onConfigured: () => this.showSetupInterface(),
       onAuthenticated: async () => {
-        this.showMainInterface();
-        this.loadRecentEntries();
-        this.loadCustomStatusTypes();
-        // Check current tab URL status
+        this.refreshAuthenticatedUI();
         await this.checkCurrentTabUrlStatus();
       },
       onUnauthenticated: () => this.showAuthInterface(),
@@ -185,11 +168,17 @@ class ForgetfulMePopup {
   }
 
   onAuthSuccess() {
-    // Update auth state in the manager
+    // UI refresh runs via authStateChanged listener after setAuthState completes
     this.authStateManager.setAuthState(this.supabaseConfig.session);
+  }
 
+  /**
+   * Show the main popup UI and reload recent entries and status types.
+   * @method refreshAuthenticatedUI
+   * @description Called after auth succeeds or when an authenticated session is detected.
+   */
+  refreshAuthenticatedUI() {
     this.showMainInterface();
-    this.loadRecentEntries();
     this.loadCustomStatusTypes();
   }
 
@@ -398,7 +387,7 @@ class ForgetfulMePopup {
         // Error notifying background about updated bookmark
       }
 
-      // Return to main interface after a short delay
+      // Status types unchanged after edit; only rebuild main UI and recent list.
       setTimeout(() => {
         this.showMainInterface();
         this.loadRecentEntries();

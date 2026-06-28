@@ -1,8 +1,9 @@
 /**
  * @fileoverview Registers shared vi.mock() modules for page-level unit tests
  * @module register-page-mocks
- * @description Import this file before the module under test in popup, options,
- * and bookmark-management unit tests. Mock paths are relative to this file.
+ * @description Side-effect import for popup.test.js and options.test.js.
+ * bookmark-management.test.js reuses the same dependency mocks and adds local
+ * component mocks. Mock paths are relative to this file.
  */
 
 vi.mock('../../utils/ui-components.js', async () =>

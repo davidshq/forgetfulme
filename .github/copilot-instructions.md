@@ -9,7 +9,6 @@
 - No DOM access in background scripts
 - All shared logic uses ES modules
 - Configuration loaded from `chrome.storage.sync`
-- Real-time updates via Supabase subscriptions
 
 ## Architecture Overview
 
@@ -24,13 +23,12 @@
 **Data Flow**:
 
 - UI scripts → Message API → `background.js` → Services → Supabase
-- Supabase real-time events → `RealtimeManager` → broadcast to all tabs via port messaging
 
 ### Key Services
 
 | Service                 | Purpose                                               | Location                                                          |
 | ----------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- |
-| **SupabaseService**     | Database ops (CRUD), real-time subscriptions          | [supabase-service.js](../supabase-service.js)                     |
+| **SupabaseService**     | Database ops (CRUD)                                   | [supabase-service.js](../supabase-service.js)                     |
 | **ConfigManager**       | Unified config/storage management, validates settings | [utils/config-manager.js](../utils/config-manager.js)             |
 | **ErrorHandler**        | Centralized error categorization & user messages      | [utils/error-handler.js](../utils/error-handler.js)               |
 | **BookmarkTransformer** | Normalizes data between UI and database formats       | [utils/bookmark-transformer.js](../utils/bookmark-transformer.js) |
@@ -123,9 +121,10 @@ Use **BookmarkTransformer** to convert between formats (see [utils/bookmark-tran
 
 ### Test Utilities
 
-- [tests/helpers/test-utils.js](../tests/helpers/test-utils.js) - Mock Chrome storage, auth, messaging
-- [tests/helpers/test-factories.js](../tests/helpers/test-factories.js) - Factory functions for test data
-- [tests/helpers/extension-helper.js](../tests/helpers/extension-helper.js) - Extension-specific mocks
+- [tests/helpers/register-page-mocks.js](../tests/helpers/register-page-mocks.js) - Shared `vi.mock()` registration for popup and options unit tests
+- [tests/helpers/vi-module-mocks.js](../tests/helpers/vi-module-mocks.js) - Mock module factories and `configureUIComponentStubs`
+- [tests/helpers/mocks/](../tests/helpers/mocks/) - Chrome API, DOM, and UI component mock factories (also used by `vitest.setup.js`)
+- [tests/helpers/extension-helper.js](../tests/helpers/extension-helper.js) - Playwright extension helper
 
 ### Running Tests
 
@@ -177,7 +176,6 @@ npm run check             # Run lint + format:check
 
 **Fixing a Supabase sync issue**:
 
-- Check RealtimeManager in [supabase-service.js](../supabase-service.js) - manages subscriptions
 - Verify user is authenticated via AuthStateManager before any DB call
 - See [RACE_CONDITION_FIXES.md](../docs/cursor-reports/RACE_CONDITION_FIXES.md) for common timing issues
 
@@ -187,7 +185,6 @@ npm run check             # Run lint + format:check
 
 - **Auth**: Email/password via Supabase Auth (session stored in ConfigManager)
 - **Database**: `bookmarks` table (url unique per user), `user_preferences` table
-- **Real-time**: Supabase Realtime listens for changes across all devices
 - **Setup guide**: [SUPABASE_SETUP.md](../SUPABASE_SETUP.md)
 
 ### Chrome APIs Used
@@ -201,7 +198,7 @@ npm run check             # Run lint + format:check
 
 ### External Libraries
 
-- **supabase-js.min.js** - Supabase client (included as local file, not npm)
+- **supabase-js.min.js** - Supabase client bundled as ESM from `@supabase/supabase-js` (`npm run bundle:supabase`); imported by `supabase-config.js`
 - **pico.min.css** - CSS framework (minimal styling, in `libs/`)
 
 ## Important Gotchas
@@ -215,8 +212,6 @@ npm run check             # Run lint + format:check
 4. **Configuration Must Initialize**: Never skip `configManager.initialize()` - it validates Supabase credentials and auth state. Many errors stem from uninitialized config.
 
 5. **Error Messages Are User-Facing**: Text in error messages displays in notifications and UI. Keep them clear and actionable, not technical.
-
-6. **Real-time Subscriptions**: Must manually unsubscribe from RealtimeManager when component unmounts to prevent memory leaks and duplicate events.
 
 ## Key Documentation Files
 

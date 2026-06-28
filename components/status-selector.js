@@ -9,7 +9,7 @@
  */
 
 import UIComponents from '../utils/ui-components.js';
-import { formatStatus } from '../utils/formatters.js';
+import { buildStatusSelectOptions } from '../utils/formatters.js';
 
 /**
  * Status selector component
@@ -36,13 +36,13 @@ export class StatusSelector {
       return;
     }
 
-    // Clear default options and add custom ones
     readStatusSelectEl.innerHTML = '';
-    customStatusTypes.forEach(status => {
-      const option = document.createElement('option');
-      option.value = status;
-      option.textContent = formatStatus(status);
-      readStatusSelectEl.appendChild(option);
+
+    buildStatusSelectOptions(customStatusTypes).forEach(option => {
+      const optionEl = document.createElement('option');
+      optionEl.value = option.value;
+      optionEl.textContent = option.text;
+      readStatusSelectEl.appendChild(optionEl);
     });
   }
 }

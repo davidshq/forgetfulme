@@ -27,9 +27,9 @@ tests/
 │   ├── auth-ui.test.js
 │   ├── supabase-service.test.js
 │   └── background.test.js
-├── helpers/                 # Test utilities and factories
-│   ├── test-utils.js       # Core test utilities
-│   ├── test-factories.js   # Specialized test factories
+├── helpers/                 # Test utilities and mocks
+│   ├── vi-module-mocks.js   # Shared vi.mock module factories
+│   ├── register-page-mocks.js # Page-level vi.mock registration
 │   ├── extension-helper.js  # Playwright extension helper
 │   └── mocks/              # Modular mock implementations
 │       ├── dom.js          # DOM element, document, window mocks
@@ -80,31 +80,15 @@ The test mocks are organized into modular files for better maintainability:
 
 These mocks are automatically set up in `vitest.setup.js` and can also be imported individually in test files. See `helpers/mocks/README.md` for detailed documentation.
 
-### Core Utilities (`test-utils.js`)
-
-Provides centralized mock creation and test environment setup:
-
-- `setupTestWithMocks()` - Test setup with mocks and cleanup
-- `createMockElement()` - Lightweight DOM element helper for tests that use `setupTestWithMocks`
-
-For Chrome API, console, error handler, and UI component mocks, import from `helpers/mocks/` (see `helpers/mocks/README.md`):
-
-- `createMockUIComponents(document)` - UI component mocks with DOM implementations
-- `createStubUIComponents()` - UI component stubs (`vi.fn()`)
-
-### Test Factories (`test-factories.js`)
-
-Provides shared test data and assertion helpers:
-
-- `createTestData` — bookmark, user, tab, and error fixtures
-- `createAssertionHelpers(mocks)` — common assertions for errors, messages, and bookmark saves
-
 ### Page-level ES module mocks
 
-Popup, options, and bookmark-management unit tests share dependency mocks via:
+Popup and options unit tests share dependency mocks via:
 
 - `helpers/vi-module-mocks.js` — factory functions (`mockErrorHandlerModule`, `configureUIComponentStubs`, etc.)
 - `helpers/register-page-mocks.js` — side-effect import that registers shared `vi.mock()` calls
+
+`bookmark-management.test.js` imports the same shared mocks, then adds local
+component mocks for list/search/bulk/editor modules.
 
 ```javascript
 import '../helpers/register-page-mocks.js';
@@ -187,30 +171,21 @@ test.describe('My Feature', () => {
 
 #### 2. Set Up Your Test Environment
 
-Use test helpers for consistent setup:
+Utility module tests rely on global mocks from `vitest.setup.js`. Page unit tests import shared module mocks:
 
 ```javascript
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { setupTestWithMocks } from './helpers/test-utils.js';
+import '../helpers/register-page-mocks.js';
+import { PAGE_ERROR_HANDLER_RESULT } from '../helpers/vi-module-mocks.js';
+import ErrorHandler from '../../utils/error-handler.js';
 import MyModule from '../../utils/my-module.js';
 
 describe('MyModule', () => {
-  let mocks, cleanup;
-
   beforeEach(() => {
-    ({ mocks, cleanup } = setupTestWithMocks());
-  });
-
-  afterEach(() => {
-    cleanup();
+    ErrorHandler.handle = vi.fn().mockReturnValue(PAGE_ERROR_HANDLER_RESULT);
   });
 
   test('should handle errors correctly', async () => {
-    mocks.errorHandler.handle.mockReturnValue({
-      userMessage: 'Error occurred',
-      errorInfo: { type: 'NETWORK' },
-    });
-
     // Your test code here
   });
 });
@@ -283,195 +258,53 @@ test('should load data', () => {
 
 ---
 
-## Test Data Factories Usage
+## Test Data
 
-### What Are Test Factories?
-
-Test factories create consistent, reusable test data objects. They're located in `tests/helpers/test-factories.js`.
-
-### Using Built-in Factories
+Define inline fixtures in each test file, or extract shared objects into a helper only when multiple tests reuse them:
 
 ```javascript
-import {
-  createTestData,
-  createAssertionHelpers,
-} from './helpers/test-factories.js';
-
-describe('Bookmark Operations', () => {
-  test('should create bookmarks with factory', () => {
-    // Create a bookmark with default values
-    const bookmark = createTestData.bookmark();
-    expect(bookmark).toHaveProperty('url');
-    expect(bookmark).toHaveProperty('title');
-
-    // Override specific properties
-    const customBookmark = createTestData.bookmark({
-      url: 'https://custom.com',
-      title: 'Custom Title',
-    });
-    expect(customBookmark.url).toBe('https://custom.com');
-  });
-
-  test('should create user data', () => {
-    const user = createTestData.user();
-    expect(user.id).toBeDefined();
-    expect(user.email).toBeDefined();
-  });
-
-  test('should create error objects', () => {
-    const error = createTestData.error({
-      type: 'NETWORK',
-      message: 'Connection failed',
-    });
-    expect(error.type).toBe('NETWORK');
-  });
-});
-```
-
-### Common Test Data Objects
-
-```javascript
-// Bookmark data
-const bookmark = createTestData.bookmark({
+const bookmark = {
+  id: 'test-bookmark-id',
   url: 'https://example.com',
   title: 'Example Page',
-  readStatus: 'good-reference',
-  tags: ['research', 'important'],
-});
-
-// User data
-const user = createTestData.user({
-  email: 'test@example.com',
-});
-
-// Tab data (for Chrome tabs)
-const tab = createTestData.tab({
-  url: 'https://example.com',
-  title: 'Example',
-});
-
-// Error data
-const error = createTestData.error({
-  message: 'Custom error',
-  type: 'AUTH',
-});
-```
-
-### Creating Custom Factories
-
-```javascript
-// tests/helpers/test-factories.js - Add custom factory
-export const createTestData = {
-  // ... existing factories ...
-
-  customBookmarkWithTags: (overrides = {}) => ({
-    url: 'https://example.com',
-    title: 'Tagged Bookmark',
-    readStatus: 'read',
-    tags: ['tag1', 'tag2'],
-    timestamp: new Date().toISOString(),
-    ...overrides,
-  }),
-
-  userWithPreferences: (overrides = {}) => ({
-    id: 'user-123',
-    email: 'user@example.com',
-    preferences: {
-      theme: 'light',
-      notifications: true,
-    },
-    ...overrides,
-  }),
+  read_status: 'read',
+  tags: ['research'],
 };
-
-// Usage in tests
-test('should handle tagged bookmarks', () => {
-  const bookmark = createTestData.customBookmarkWithTags({
-    title: 'My Bookmark',
-  });
-  expect(bookmark.tags.length).toBeGreaterThan(0);
-});
-```
-
-### Using Assertion Helpers
-
-```javascript
-import { createAssertionHelpers } from './helpers/test-factories.js';
-
-describe('Error Handling', () => {
-  let mocks, assertionHelpers;
-
-  beforeEach(() => {
-    ({ mocks, cleanup } = setupTestWithMocks());
-    assertionHelpers = createAssertionHelpers(mocks);
-  });
-
-  test('should handle errors correctly', async () => {
-    // Your test code
-    assertionHelpers.assertErrorHandling('my-context');
-
-    // Verifies error was categorized and user message was shown
-  });
-
-  test('should show success message', async () => {
-    // Your test code
-    assertionHelpers.assertSuccessMessage('Bookmark saved');
-
-    // Verifies success message was displayed
-  });
-
-  test('should save bookmark', async () => {
-    // Your test code
-    assertionHelpers.assertBookmarkSaved({
-      url: 'https://example.com',
-    });
-
-    // Verifies bookmark save was called with expected data
-  });
-});
 ```
 
 ---
 
 ## Mocking Patterns for Chrome APIs
 
+`vitest.setup.js` provides a global `chrome` mock. Configure return values per test:
+
 ### Chrome Storage Mock
 
 ```javascript
-import { setupTestWithMocks } from './helpers/test-utils.js';
-
 describe('Chrome Storage', () => {
-  let mocks;
-
-  beforeEach(() => {
-    ({ mocks } = setupTestWithMocks());
-  });
-
   test('should get items from storage', async () => {
-    // Setup mock to return data
-    mocks.chrome.storage.sync.get.mockResolvedValue({
+    chrome.storage.sync.get.mockResolvedValue({
       auth_session: { token: 'abc123' },
     });
 
-    // Your code that uses chrome.storage.sync.get
     const result = await chrome.storage.sync.get(['auth_session']);
 
     expect(result).toHaveProperty('auth_session');
   });
 
   test('should set items in storage', async () => {
-    mocks.chrome.storage.sync.set.mockResolvedValue();
+    chrome.storage.sync.set.mockResolvedValue();
 
     await chrome.storage.sync.set({ key: 'value' });
 
-    expect(mocks.chrome.storage.sync.set).toHaveBeenCalledWith({
+    expect(chrome.storage.sync.set).toHaveBeenCalledWith({
       key: 'value',
     });
   });
 
   test('should handle storage errors', async () => {
     const error = new Error('Storage full');
-    mocks.chrome.storage.sync.set.mockRejectedValue(error);
+    chrome.storage.sync.set.mockRejectedValue(error);
 
     await expect(chrome.storage.sync.set({ key: 'value' })).rejects.toThrow(
       'Storage full',
@@ -484,15 +317,8 @@ describe('Chrome Storage', () => {
 
 ```javascript
 describe('Chrome Runtime', () => {
-  let mocks;
-
-  beforeEach(() => {
-    ({ mocks } = setupTestWithMocks());
-  });
-
   test('should send messages', async () => {
-    // Mock the response
-    mocks.chrome.runtime.sendMessage.mockResolvedValue({
+    chrome.runtime.sendMessage.mockResolvedValue({
       success: true,
       data: { result: 'processed' },
     });
@@ -502,7 +328,7 @@ describe('Chrome Runtime', () => {
     });
 
     expect(response).toHaveProperty('success');
-    expect(mocks.chrome.runtime.sendMessage).toHaveBeenCalledWith(
+    expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'GET_CONFIG' }),
       expect.any(Function),
     );
@@ -510,11 +336,9 @@ describe('Chrome Runtime', () => {
 
   test('should handle message listeners', () => {
     const listener = vi.fn();
-    mocks.chrome.runtime.onMessage.addListener(listener);
+    chrome.runtime.onMessage.addListener(listener);
 
-    expect(mocks.chrome.runtime.onMessage.addListener).toHaveBeenCalledWith(
-      listener,
-    );
+    expect(chrome.runtime.onMessage.addListener).toHaveBeenCalledWith(listener);
   });
 });
 ```
@@ -523,12 +347,6 @@ describe('Chrome Runtime', () => {
 
 ```javascript
 describe('Chrome Tabs', () => {
-  let mocks;
-
-  beforeEach(() => {
-    ({ mocks } = setupTestWithMocks());
-  });
-
   test('should query tabs', async () => {
     const mockTabs = [
       {
@@ -538,7 +356,7 @@ describe('Chrome Tabs', () => {
       },
     ];
 
-    mocks.chrome.tabs.query.mockResolvedValue(mockTabs);
+    chrome.tabs.query.mockResolvedValue(mockTabs);
 
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
 
@@ -547,7 +365,7 @@ describe('Chrome Tabs', () => {
   });
 
   test('should handle tab updates', async () => {
-    mocks.chrome.tabs.update.mockResolvedValue({
+    chrome.tabs.update.mockResolvedValue({
       id: 1,
       url: 'https://updated.com',
     });
@@ -559,36 +377,12 @@ describe('Chrome Tabs', () => {
 });
 ```
 
-### Service Mock Pattern
+### Page module mock pattern
 
-```javascript
-// For mocking complex services like Supabase
-describe('SupabaseService', () => {
-  let mocks;
-
-  beforeEach(() => {
-    ({ mocks } = setupTestWithMocks());
-
-    // Setup Supabase mock
-    mocks.supabaseService.saveBookmark.mockResolvedValue({
-      id: 'bookmark-123',
-      url: 'https://example.com',
-    });
-
-    mocks.supabaseService.getBookmarks.mockResolvedValue([
-      { id: '1', url: 'https://example.com' },
-    ]);
-  });
-
-  test('should save bookmarks', async () => {
-    const result = await mocks.supabaseService.saveBookmark({
-      url: 'https://example.com',
-    });
-
-    expect(result.id).toBeDefined();
-  });
-});
-```
+For popup and options unit tests, use `register-page-mocks.js` and
+`configureUIComponentStubs` instead of inline shared `vi.mock()` blocks.
+`bookmark-management.test.js` reuses `register-page-mocks.js` and keeps
+page-specific component mocks local. See `helpers/README.md`.
 
 ---
 
@@ -712,37 +506,16 @@ export default {
 ### 1. Mock Dependencies Properly
 
 ```javascript
-// Mock Chrome APIs
-const mockChrome = {
-  storage: { sync: { get: vi.fn() } },
-  tabs: { query: vi.fn() },
-};
-global.chrome = mockChrome;
+// Global chrome mock from vitest.setup.js — configure per test
+chrome.storage.sync.get.mockResolvedValue({ key: 'value' });
+chrome.tabs.query.mockResolvedValue([{ url: 'https://example.com' }]);
 ```
 
-### 2. Use Test Factories for Complex Setup
+### 2. Use Shared Page Mocks for UI Tests
 
 ```javascript
-import { setupTestWithMocks } from './helpers/test-utils.js';
-import { createTestData } from './helpers/test-factories.js';
-
-describe('BookmarkService', () => {
-  let mocks;
-  let cleanup;
-
-  beforeEach(() => {
-    ({ mocks, cleanup } = setupTestWithMocks());
-  });
-
-  afterEach(() => {
-    cleanup();
-  });
-
-  test('saves bookmark fixtures from createTestData', async () => {
-    const bookmark = createTestData.bookmark({ title: 'Example' });
-    // ...
-  });
-});
+import '../helpers/register-page-mocks.js';
+import { configureUIComponentStubs } from '../helpers/vi-module-mocks.js';
 ```
 
 ### 3. Test Business Logic, Not Implementation Details

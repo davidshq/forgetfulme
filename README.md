@@ -61,10 +61,11 @@ Before using the extension, you need to set up a Supabase backend:
    npm install
    ```
 3. **Set up Supabase** following the setup guide
-4. **Build the background service worker** (required after clone or background changes):
+4. **Build bundled assets** (required after clone or when changing background/Supabase client):
    ```bash
-   npm run build:background
+   npm run build
    ```
+   This produces `dist/background.js` and `supabase-js.min.js`. To rebuild only the Supabase client after upgrading `@supabase/supabase-js`, run `npm run bundle:supabase`.
 5. **Configure your extension** with your credentials (see Configuration section below)
 6. **Open Chrome** and navigate to `chrome://extensions/`
 7. **Enable Developer mode** (toggle in top right)
@@ -120,8 +121,8 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 
 ### Technical Notes
 
-- **Local Supabase Client**: The extension includes a custom Supabase client (`supabase-client.js`) that works within Chrome's Content Security Policy restrictions
-- **No External Dependencies**: All Supabase functionality is implemented using native fetch API
+- **Local Supabase Client**: `@supabase/supabase-js` is bundled to `supabase-js.min.js` (`npm run bundle:supabase`) and imported as ESM by `supabase-config.js`
+- **No CDN Dependencies**: Supabase runs from a local bundled module; network calls use the browser fetch API
 - **CSP Compliant**: No external CDN scripts are loaded, ensuring compatibility with Chrome extension security policies
 
 ### Security Notes
@@ -142,16 +143,18 @@ forgetfulme/
 ├── manifest.json          # Extension configuration
 ├── popup.html            # Main popup interface
 ├── popup.js              # Popup functionality
-├── background.js          # Background service worker
 ├── options.html          # Settings page
 ├── options.js            # Settings functionality
-├── supabase-client.js    # Local Supabase client (CSP compliant)
+├── supabase-js.min.js    # Bundled Supabase client (ESM, imported by supabase-config.js)
 ├── supabase-config.js    # Supabase configuration (secure)
 ├── supabase-service.js   # Supabase service layer
 ├── auth-ui.js            # Authentication UI
 ├── config-ui.js          # Configuration UI
 ├── supabase-schema.sql   # Database schema
 ├── supabase-config.template.js  # Template for local config
+├── background/           # Service worker source (bundled to dist/)
+├── dist/                 # Bundled MV3 artifacts (background.js)
+├── scripts/              # Build scripts (bundle-supabase, build-background)
 ├── utils/                # Utility modules
 │   ├── auth-state-manager.js
 │   ├── bookmark-transformer.js

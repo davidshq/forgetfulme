@@ -94,9 +94,6 @@ class BookmarkManagementPage {
     });
   }
 
-  /** @deprecated Auth wiring handled by initializePage() */
-  async initializeAuthState() {}
-
   /**
    * Handle authentication state changes
    * @param {Object|null} session - The current session object or null if not authenticated

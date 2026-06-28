@@ -8,6 +8,7 @@
  * @since 2024-01-01
  */
 
+import { createClient } from './supabase-js.min.js';
 import ConfigManager from './utils/config-manager.js';
 import ErrorHandler from './utils/error-handler.js';
 
@@ -136,51 +137,11 @@ class SupabaseConfig {
         return false; // Not configured, but not an error
       }
 
-      // Wait for Supabase client to be available
-      let attempts = 0;
-      const maxAttempts = 10;
-
-      // Check for supabase in global scope (window or global)
-      const getSupabase = () => {
-        if (typeof window !== 'undefined' && window.supabase) {
-          return window.supabase;
-        }
-        if (typeof globalThis !== 'undefined' && globalThis.supabase) {
-          return globalThis.supabase;
-        }
-        // Check for global supabase variable (loaded via script tag)
-
-        if (typeof supabase !== 'undefined') {
-          // eslint-disable-next-line no-undef
-          return supabase;
-        }
-        return null;
-      };
-
-      while (!getSupabase() && attempts < maxAttempts) {
-        // Waiting for Supabase library to load...
-        await new Promise(resolve => setTimeout(resolve, 100));
-        attempts++;
-      }
-
-      // Check if Supabase client is available
-      const supabaseClient = getSupabase();
-      if (!supabaseClient) {
-        // Supabase client not loaded after waiting
-        return false;
-      }
-
-      // Use the globally available Supabase client
-      // Creating Supabase client
-      this.supabase = supabaseClient.createClient(
-        this.supabaseUrl,
-        this.supabaseAnonKey,
-      );
+      this.supabase = createClient(this.supabaseUrl, this.supabaseAnonKey);
       this.auth = this.supabase.auth;
 
       // Verify the client was created properly
       if (!this.supabase || typeof this.supabase.from !== 'function') {
-        // Supabase client not properly initialized
         return false;
       }
 

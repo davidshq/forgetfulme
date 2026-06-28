@@ -44,11 +44,15 @@ vi.mock('../../utils/ui-components.js', () => ({
   },
 }));
 
-vi.mock('../../utils/formatters.js', () => ({
-  formatStatus: vi.fn(status => status),
-  formatTime: vi.fn(timestamp => new Date(timestamp).toLocaleString()),
-  buildStatusSelectOptions: vi.fn(() => [{ value: 'read', text: 'Read' }]),
-}));
+vi.mock('../../utils/formatters.js', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    formatStatus: vi.fn(status => status),
+    formatTime: vi.fn(timestamp => new Date(timestamp).toLocaleString()),
+    buildStatusSelectOptions: vi.fn(() => [{ value: 'read', text: 'Read' }]),
+  };
+});
 
 describe('PopupEditInterface', () => {
   let popupEditInterface;

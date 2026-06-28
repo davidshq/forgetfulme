@@ -10,6 +10,7 @@
 
 import UIComponents from '../utils/ui-components.js';
 import BookmarkTransformer from '../utils/bookmark-transformer.js';
+import { downloadJson } from '../utils/download.js';
 
 /**
  * Bulk actions component
@@ -173,17 +174,9 @@ export class BulkActions {
    * @param {Object} exportData - The export data to download
    */
   downloadExport(exportData) {
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `forgetfulme-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadJson(
+      exportData,
+      `forgetfulme-bookmarks-${new Date().toISOString().split('T')[0]}.json`,
+    );
   }
 }

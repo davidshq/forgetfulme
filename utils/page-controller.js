@@ -71,5 +71,6 @@ export async function initializePage({
     });
   } catch (error) {
     ErrorHandler.handle(error, context);
+    throw error;
   }
 }

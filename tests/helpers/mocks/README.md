@@ -66,7 +66,7 @@ UIComponents mocks split into modular files. **`createMockUIComponents(document)
 - **`ui-components-modals.js`** - Confirm dialog and showModal
 - **`ui-components-dom.js`** - DOM utility methods (ready, getElement, querySelector, setValue, etc.)
 
-**`createStubUIComponents()`** - Returns the same public shape with `vi.fn()` stubs for tests that override behavior (used in `test-utils.js`).
+**`createStubUIComponents()`** - Returns the same public shape with `vi.fn()` stubs for tests that override behavior (used by `vi-module-mocks.js` and page unit tests).
 
 ## Usage
 

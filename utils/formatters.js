@@ -7,6 +7,15 @@
 import { DEFAULT_STATUS_TYPES } from './constants.js';
 
 /**
+ * Use custom status types when non-empty; otherwise fall back to defaults.
+ * @param {string[]|null|undefined} statusTypes
+ * @returns {string[]}
+ */
+export function resolveStatusTypes(statusTypes) {
+  return statusTypes?.length ? statusTypes : DEFAULT_STATUS_TYPES;
+}
+
+/**
  * Format status string for display
  * @param {string} status - The status string to format (e.g., 'good-reference')
  * @returns {string} The formatted status (e.g., 'Good Reference')

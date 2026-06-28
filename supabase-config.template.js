@@ -9,6 +9,8 @@
  * @warning This file should NOT be committed to version control
  */
 
+import { createClient } from './supabase-js.min.js';
+
 /**
  * Template for Supabase configuration
  * @class SupabaseConfigTemplate
@@ -44,18 +46,7 @@ class SupabaseConfigTemplate {
 
   async initialize() {
     try {
-      // Check if Supabase client is available
-      if (typeof window.supabase === 'undefined') {
-        throw new Error(
-          'Supabase client not loaded. Please include the Supabase library.',
-        );
-      }
-
-      // Use the globally available Supabase client
-      this.supabase = window.supabase.createClient(
-        this.supabaseUrl,
-        this.supabaseAnonKey,
-      );
+      this.supabase = createClient(this.supabaseUrl, this.supabaseAnonKey);
       this.auth = this.supabase.auth;
 
       // Check for existing session
