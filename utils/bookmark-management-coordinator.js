@@ -7,6 +7,7 @@
 import UIComponents from './ui-components.js';
 import ErrorHandler from './error-handler.js';
 import UIMessages from './ui-messages.js';
+import { BOOKMARK_LIST_LIMIT } from './constants.js';
 
 /**
  * Bookmark management coordinator
@@ -33,7 +34,7 @@ export class BookmarkManagementCoordinator {
   async loadAllBookmarks() {
     try {
       const bookmarks = await this.page.supabaseService.getBookmarks({
-        limit: 100,
+        limit: BOOKMARK_LIST_LIMIT,
       });
       this.displayBookmarks(bookmarks);
     } catch (error) {

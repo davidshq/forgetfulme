@@ -26,8 +26,21 @@ vi.mock('../../utils/ui-components.js', () => ({
       card.appendChild(heading);
       if (content) {
         const contentDiv = document.createElement('div');
-        contentDiv.innerHTML = content;
+        if (typeof content === 'string') {
+          contentDiv.innerHTML = content;
+        } else {
+          contentDiv.appendChild(content);
+        }
         card.appendChild(contentDiv);
+      }
+      if (footer) {
+        const footerDiv = document.createElement('footer');
+        if (typeof footer === 'string') {
+          footerDiv.innerHTML = footer;
+        } else {
+          footerDiv.appendChild(footer);
+        }
+        card.appendChild(footerDiv);
       }
       return card;
     }),
@@ -104,10 +117,10 @@ describe('OptionsUIRenderer', () => {
 
     appContainer = document.createElement('div');
     callbacks = {
-      addCustomStatus: vi.fn(),
-      exportAllData: vi.fn(),
-      importData: vi.fn(),
-      clearAllData: vi.fn(),
+      addStatusType: vi.fn(),
+      exportData: vi.fn(),
+      openImportDialog: vi.fn(),
+      clearData: vi.fn(),
       openBookmarkManagement: vi.fn(),
     };
   });
@@ -174,75 +187,6 @@ describe('OptionsUIRenderer', () => {
       expect(appContainer.innerHTML).not.toContain('Old content');
     });
 
-    test('should return configStatusContainer reference', () => {
-      const result = renderMainInterface(appContainer, callbacks);
-
-      expect(result.configStatusContainer).toBeTruthy();
-      expect(result.configStatusContainer.id).toBe('config-status-container');
-    });
-
-    test('should wire up addCustomStatus callback', () => {
-      renderMainInterface(appContainer, callbacks);
-
-      const form = appContainer.querySelector('#add-status-form');
-      expect(form).toBeTruthy();
-
-      const submitEvent = new Event('submit', { cancelable: true });
-      form.dispatchEvent(submitEvent);
-
-      expect(callbacks.addCustomStatus).toHaveBeenCalled();
-    });
-
-    test('should wire up exportAllData callback', () => {
-      renderMainInterface(appContainer, callbacks);
-
-      const exportButton = Array.from(
-        appContainer.querySelectorAll('button'),
-      ).find(btn => btn.textContent === 'Export All Data');
-      expect(exportButton).toBeTruthy();
-
-      exportButton.click();
-
-      expect(callbacks.exportAllData).toHaveBeenCalled();
-    });
-
-    test('should wire up importData callback', () => {
-      renderMainInterface(appContainer, callbacks);
-
-      const importButton = Array.from(
-        appContainer.querySelectorAll('button'),
-      ).find(btn => btn.textContent === 'Import Data');
-      expect(importButton).toBeTruthy();
-
-      importButton.click();
-
-      expect(callbacks.importData).toHaveBeenCalled();
-    });
-
-    test('should wire up clearAllData callback', () => {
-      renderMainInterface(appContainer, callbacks);
-
-      const clearButton = Array.from(
-        appContainer.querySelectorAll('button'),
-      ).find(btn => btn.textContent === 'Clear All Data');
-      expect(clearButton).toBeTruthy();
-
-      clearButton.click();
-
-      expect(callbacks.clearAllData).toHaveBeenCalled();
-    });
-
-    test('should wire up openBookmarkManagement callback', () => {
-      renderMainInterface(appContainer, callbacks);
-
-      const manageButton = Array.from(
-        appContainer.querySelectorAll('button'),
-      ).find(btn => btn.textContent.includes('Manage Bookmarks'));
-      expect(manageButton).toBeTruthy();
-
-      manageButton.click();
-
-      expect(callbacks.openBookmarkManagement).toHaveBeenCalled();
-    });
+    // Callback wiring is covered by options-page-integration.test.js
   });
 });

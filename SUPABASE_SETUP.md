@@ -93,32 +93,11 @@ The schema automatically sets up RLS policies, but verify they're enabled:
 5. **Save the configuration**
 6. **Test the connection** using the built-in test feature
 
-### Method 2: Local Development
+### Method 2: Environment Variables (Vitest / Node only)
 
-1. **Copy the template file**:
-   ```bash
-   cp supabase-config.template.js supabase-config.local.js
-   ```
-2. **Edit `supabase-config.local.js`** with your credentials:
-   ```javascript
-   this.supabaseUrl = 'https://your-project-id.supabase.co';
-   this.supabaseAnonKey = 'your-anon-public-key-here';
-   ```
-3. **Update HTML files** to include the local config:
-   ```html
-   <script src="supabase-config.local.js"></script>
-   <!-- Comment out or remove the original supabase-config.js -->
-   <!-- <script src="supabase-config.js"></script> -->
-   ```
-
-### Method 3: Environment Variables (For Advanced Users)
-
-Set environment variables in your development environment:
-
-```bash
-export SUPABASE_URL="https://your-project-id.supabase.co"
-export SUPABASE_ANON_KEY="your-anon-public-key-here"
-```
+For unit tests, `supabase-config.js` can fall back to `SUPABASE_URL` and
+`SUPABASE_ANON_KEY` when Chrome storage is empty. Configure the loaded
+extension via Method 1 (options page).
 
 ## Step 7: Test Your Setup
 

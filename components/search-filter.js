@@ -10,7 +10,10 @@
 
 import UIComponents from '../utils/ui-components.js';
 import { buildStatusSelectOptions } from '../utils/formatters.js';
-import { DEFAULT_STATUS_TYPES } from '../utils/constants.js';
+import {
+  BOOKMARK_LIST_LIMIT,
+  DEFAULT_STATUS_TYPES,
+} from '../utils/constants.js';
 
 /**
  * Search and filter component
@@ -126,7 +129,7 @@ export class SearchFilter {
     const searchQuery = this.getSearchQuery();
     const statusFilter = this.getStatusFilter();
 
-    const filters = { limit: 100 };
+    const filters = { limit: BOOKMARK_LIST_LIMIT };
 
     if (searchQuery.trim()) {
       filters.search = searchQuery.trim();

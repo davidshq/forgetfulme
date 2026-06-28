@@ -77,79 +77,30 @@ class ForgetfulMeOptions {
    * @description Updates UI based on authentication state
    */
   handleAuthStateChange(session) {
-    // Auth state changed - update UI accordingly
-
-    // Update UI based on auth state
     if (session) {
-      // User is authenticated - show main interface
       this.showMainInterface();
       this.loadData();
     } else {
-      // User is not authenticated - show auth interface
       this.showAuthInterface();
     }
   }
 
   /**
-   * Initialize DOM elements
-   * @description Sets up references to DOM elements for event binding
+   * Initialize DOM element references after render
+   * @description Sets up references used by event binding
    */
   initializeElements() {
-    // Initialize elements that exist in the initial HTML
     this.appContainer = UIComponents.DOM.getElement('app');
-
-    // Re-initialize dynamically created elements with safe access
-    this.statusTypesList = UIComponents.DOM.getElement('status-types-list');
-    this.newStatusInput = UIComponents.DOM.getElement('new-status');
-    this.addStatusBtn = UIComponents.DOM.getElement('add-status-btn');
-    this.exportDataBtn = UIComponents.DOM.getElement('export-data-btn');
-    this.importDataBtn = UIComponents.DOM.getElement('import-data-btn');
     this.importFile = UIComponents.DOM.getElement('import-file');
-    this.clearDataBtn = UIComponents.DOM.getElement('clear-data-btn');
-
-    // Stats elements
-    this.totalEntries = UIComponents.DOM.getElement('total-entries');
-    this.statusTypesCount = UIComponents.DOM.getElement('status-types-count');
-    this.mostUsedStatus = UIComponents.DOM.getElement('most-used-status');
   }
 
   /**
-   * Bind event listeners to DOM elements
-   * @description Sets up click and keyboard event handlers
+   * Bind event listeners to dynamically rendered elements
+   * @description Wires the hidden import file input to import handling
    */
   bindEvents() {
-    // Only bind events if elements exist using safe DOM utilities
-    if (this.addStatusBtn) {
-      this.addStatusBtn.addEventListener('click', () => this.addStatusType());
-    }
-
-    if (this.newStatusInput) {
-      this.newStatusInput.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          this.addStatusType();
-        }
-      });
-    }
-
-    if (this.exportDataBtn) {
-      this.exportDataBtn.addEventListener('click', () => this.exportData());
-    }
-
-    if (this.importDataBtn) {
-      this.importDataBtn.addEventListener('click', () => {
-        const importFileEl = UIComponents.DOM.getElement('import-file');
-        if (importFileEl) {
-          importFileEl.click();
-        }
-      });
-    }
-
     if (this.importFile) {
       this.importFile.addEventListener('change', e => this.importData(e));
-    }
-
-    if (this.clearDataBtn) {
-      this.clearDataBtn.addEventListener('click', () => this.clearData());
     }
   }
 
@@ -194,7 +145,6 @@ class ForgetfulMeOptions {
    * @description Updates auth state and shows main interface
    */
   onAuthSuccess() {
-    // Update auth state in the manager
     this.authStateManager.setAuthState(this.supabaseConfig.session);
 
     this.showMainInterface();
@@ -207,20 +157,28 @@ class ForgetfulMeOptions {
    */
   showMainInterface() {
     const { configStatusContainer } = renderMainInterface(this.appContainer, {
-      addCustomStatus: () => this.addCustomStatus(),
-      exportAllData: () => this.exportAllData(),
-      importData: () => this.importData(),
-      clearAllData: () => this.clearAllData(),
+      addStatusType: () => this.addStatusType(),
+      exportData: () => this.exportData(),
+      openImportDialog: () => this.openImportDialog(),
+      clearData: () => this.clearData(),
       openBookmarkManagement: () => this.openBookmarkManagement(),
     });
 
-    // Re-initialize elements after DOM update
     this.initializeElements();
     this.bindEvents();
 
-    // Show configuration status
     if (configStatusContainer) {
       this.configUI.showConfigStatus(configStatusContainer);
+    }
+  }
+
+  /**
+   * Open the hidden file picker for JSON import
+   */
+  openImportDialog() {
+    const importFileEl = UIComponents.DOM.getElement('import-file');
+    if (importFileEl) {
+      importFileEl.click();
     }
   }
 
@@ -267,7 +225,6 @@ class ForgetfulMeOptions {
    * @description Validates input and adds new custom status type
    */
   async addStatusType() {
-    // Safely get the status input value
     const statusValue = UIComponents.DOM.getValue('new-status');
     if (!statusValue) {
       UIMessages.error('Please enter a status type', this.appContainer);
@@ -285,7 +242,6 @@ class ForgetfulMeOptions {
       await this.configManager.initialize();
       await this.configManager.addCustomStatusType(status);
 
-      // Clear input safely
       UIComponents.DOM.setValue('new-status', '');
 
       await this.refreshStatusTypesUI();
@@ -353,13 +309,12 @@ class ForgetfulMeOptions {
       await this.supabaseService.importData(importData);
 
       UIMessages.success('Data imported successfully', this.appContainer);
-      this.loadData(); // Refresh the data
+      this.loadData();
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.importData');
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
 
-    // Clear the file input
     event.target.value = '';
   }
 
@@ -384,15 +339,13 @@ class ForgetfulMeOptions {
             'All data cleared successfully',
             this.appContainer,
           );
-          this.loadData(); // Refresh the data
+          this.loadData();
         } catch (error) {
           const errorResult = ErrorHandler.handle(error, 'options.clearData');
           UIMessages.error(errorResult.userMessage, this.appContainer);
         }
       },
-      () => {
-        // User cancelled
-      },
+      () => {},
       this.appContainer,
     );
   }

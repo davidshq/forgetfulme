@@ -19,7 +19,11 @@ import { initializePage } from './utils/page-controller.js';
 import { showSetupInterface } from './utils/setup-interface.js';
 import { openBookmarkManagementTab } from './utils/navigation-utils.js';
 import { isRestrictedUrl } from './utils/url-utils.js';
-import { MESSAGE_TYPES } from './utils/constants.js';
+import {
+  MESSAGE_TYPES,
+  STORAGE_KEYS,
+  PENDING_MARK_AS_READ_TTL_MS,
+} from './utils/constants.js';
 import { QuickAdd } from './components/quick-add.js';
 import { RecentList } from './components/recent-list.js';
 import { StatusSelector } from './components/status-selector.js';
@@ -152,6 +156,7 @@ class ForgetfulMePopup {
       onAuthenticated: async () => {
         this.refreshAuthenticatedUI();
         await this.checkCurrentTabUrlStatus();
+        await this.consumePendingMarkAsRead();
       },
       onUnauthenticated: () => this.showAuthInterface(),
       appContainer: this.appContainer,
@@ -179,7 +184,6 @@ class ForgetfulMePopup {
    */
   refreshAuthenticatedUI() {
     this.showMainInterface();
-    this.loadCustomStatusTypes();
   }
 
   showMainInterface() {
@@ -224,10 +228,15 @@ class ForgetfulMePopup {
     this.appContainer.appendChild(header);
     this.appContainer.appendChild(mainContent);
 
-    // Load recent entries
+    // Load recent entries and custom status types into the rebuilt form
     this.loadRecentEntries();
+    this.loadCustomStatusTypes();
   }
 
+  /**
+   * Save the current tab as a bookmark.
+   * @returns {Promise<'saved'|'duplicate'|'restricted'|'error'>}
+   */
   async markAsRead() {
     try {
       // Get form values using component
@@ -244,7 +253,7 @@ class ForgetfulMePopup {
           'Cannot mark browser pages as read',
           this.appContainer,
         );
-        return;
+        return 'restricted';
       }
 
       const bookmark = BookmarkTransformer.fromCurrentTab(
@@ -258,32 +267,36 @@ class ForgetfulMePopup {
       if (result.isDuplicate) {
         // Show edit interface for existing bookmark
         await this.editInterface.showEditInterface(result);
-      } else {
-        UIMessages.success('Page marked as read!', this.appContainer);
-
-        // Clear form using component
-        this.quickAdd.clearForm();
-
-        this.loadRecentEntries();
-
-        // Notify background script about saved bookmark
-        try {
-          await chrome.runtime.sendMessage({
-            type: MESSAGE_TYPES.BOOKMARK_SAVED,
-            data: { url: bookmark.url },
-          });
-        } catch (_error) {
-          // Error notifying background about saved bookmark
-        }
-
-        // Close popup after a short delay
-        setTimeout(() => {
-          window.close();
-        }, 1500);
+        return 'duplicate';
       }
+
+      UIMessages.success('Page marked as read!', this.appContainer);
+
+      // Clear form using component
+      this.quickAdd.clearForm();
+
+      this.loadRecentEntries();
+
+      // Notify background script about saved bookmark
+      try {
+        await chrome.runtime.sendMessage({
+          type: MESSAGE_TYPES.BOOKMARK_SAVED,
+          data: { url: bookmark.url },
+        });
+      } catch (_error) {
+        // Error notifying background about saved bookmark
+      }
+
+      // Close popup after a short delay
+      setTimeout(() => {
+        window.close();
+      }, 1500);
+
+      return 'saved';
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.markAsRead');
       UIMessages.error(errorResult.userMessage, this.appContainer);
+      return 'error';
     }
   }
 
@@ -325,6 +338,44 @@ class ForgetfulMePopup {
    */
   showBookmarkManagement() {
     openBookmarkManagementTab();
+  }
+
+  /**
+   * Run a mark-as-read queued by the keyboard shortcut (background worker).
+   * @async
+   */
+  async consumePendingMarkAsRead() {
+    try {
+      const result = await chrome.storage.session.get(
+        STORAGE_KEYS.PENDING_MARK_AS_READ,
+      );
+      const pending = result[STORAGE_KEYS.PENDING_MARK_AS_READ];
+      if (!pending) {
+        return;
+      }
+
+      if (Date.now() - pending.requestedAt > PENDING_MARK_AS_READ_TTL_MS) {
+        await chrome.storage.session.remove(STORAGE_KEYS.PENDING_MARK_AS_READ);
+        return;
+      }
+
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      if (!tab?.url || tab.url !== pending.url) {
+        return;
+      }
+
+      const outcome = await this.markAsRead();
+      if (outcome === 'saved') {
+        await chrome.storage.session.remove(STORAGE_KEYS.PENDING_MARK_AS_READ);
+      }
+    } catch (error) {
+      ErrorHandler.handle(error, 'popup.consumePendingMarkAsRead', {
+        silent: true,
+      });
+    }
   }
 
   /**
@@ -387,10 +438,8 @@ class ForgetfulMePopup {
         // Error notifying background about updated bookmark
       }
 
-      // Status types unchanged after edit; only rebuild main UI and recent list.
       setTimeout(() => {
         this.showMainInterface();
-        this.loadRecentEntries();
       }, 1500);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.updateBookmark');

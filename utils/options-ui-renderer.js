@@ -94,24 +94,16 @@ function createStatusTypesCard(callbacks) {
     'add-status-form',
     e => {
       e.preventDefault();
-      callbacks.addCustomStatus();
+      callbacks.addStatusType();
     },
     [
       {
         type: 'text',
-        id: 'new-status-name',
+        id: 'new-status',
         label: 'Status Name:',
         options: {
-          placeholder: 'e.g., Important, Reference',
+          placeholder: 'e.g., important, reference',
           required: true,
-        },
-      },
-      {
-        type: 'text',
-        id: 'new-status-description',
-        label: 'Description:',
-        options: {
-          placeholder: 'Brief description of this status',
         },
       },
     ],
@@ -124,14 +116,14 @@ function createStatusTypesCard(callbacks) {
   addStatusContainer.appendChild(addStatusForm);
 
   const statusListContainer = document.createElement('div');
-  statusListContainer.id = 'status-list-container';
+  statusListContainer.id = 'status-types-list';
   statusListContainer.className = 'status-list';
 
   addStatusContainer.appendChild(statusListContainer);
 
   return UIComponents.createCard(
     'Custom Status Types',
-    addStatusContainer.outerHTML,
+    addStatusContainer,
     '',
     'status-card',
   );
@@ -146,27 +138,36 @@ function createDataManagementCard(callbacks) {
   const dataActions = [
     {
       text: 'Export All Data',
-      onClick: () => callbacks.exportAllData(),
+      onClick: () => callbacks.exportData(),
       className: 'secondary',
     },
     {
       text: 'Import Data',
-      onClick: () => callbacks.importData(),
+      onClick: () => callbacks.openImportDialog(),
       className: 'secondary',
     },
     {
       text: 'Clear All Data',
-      onClick: () => callbacks.clearAllData(),
+      onClick: () => callbacks.clearData(),
       className: 'contrast',
     },
   ];
 
-  return UIComponents.createCardWithActions(
+  const card = UIComponents.createCardWithActions(
     'Data Management',
     '<p>Export your bookmarks to JSON format, import data from a backup, or clear all stored data.</p>',
     dataActions,
     'data-card',
   );
+
+  const importFileInput = document.createElement('input');
+  importFileInput.type = 'file';
+  importFileInput.id = 'import-file';
+  importFileInput.accept = '.json,application/json';
+  importFileInput.hidden = true;
+  card.appendChild(importFileInput);
+
+  return card;
 }
 
 /**
@@ -185,10 +186,14 @@ function createBookmarkManagementCard(callbacks) {
     },
   );
 
+  const description = document.createElement('p');
+  description.textContent =
+    'Access the full bookmark management interface to search, filter, and manage your bookmarks.';
+
   return UIComponents.createCard(
     'Bookmark Management',
-    '<p>Access the full bookmark management interface to search, filter, and manage your bookmarks.</p>',
-    manageBookmarksBtn.outerHTML,
+    description,
+    manageBookmarksBtn,
     'bookmark-card',
   );
 }

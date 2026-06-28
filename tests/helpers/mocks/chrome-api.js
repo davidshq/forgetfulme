@@ -34,6 +34,11 @@ export const createMockChrome = () => ({
       remove: vi.fn(),
       clear: vi.fn(),
     },
+    session: {
+      get: vi.fn().mockResolvedValue({}),
+      set: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+    },
     onChanged: {
       addListener: vi.fn(),
       removeListener: vi.fn(),

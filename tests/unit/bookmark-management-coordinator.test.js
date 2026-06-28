@@ -6,6 +6,10 @@
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { BookmarkManagementCoordinator } from '../../utils/bookmark-management-coordinator.js';
+import { BOOKMARK_LIST_LIMIT } from '../../utils/constants.js';
+
+import UIComponents from '../../utils/ui-components.js';
+import UIMessages from '../../utils/ui-messages.js';
 
 // Mock dependencies
 vi.mock('../../utils/ui-components.js', () => ({
@@ -23,7 +27,7 @@ vi.mock('../../utils/ui-components.js', () => ({
 
 vi.mock('../../utils/error-handler.js', () => ({
   default: {
-    handle: vi.fn((error, context) => ({
+    handle: vi.fn((_error, _context) => ({
       userMessage: 'Error message',
       shouldShowToUser: true,
     })),
@@ -34,11 +38,11 @@ vi.mock('../../utils/ui-messages.js', () => ({
   default: {
     error: vi.fn(),
     success: vi.fn(),
-    confirm: vi.fn((message, onConfirm, onCancel, container) => {
-      // Simulate user confirming
+    confirm: vi.fn((_message, onConfirm, _onCancel, _container) => {
       if (onConfirm) {
-        onConfirm();
+        return onConfirm();
       }
+      return undefined;
     }),
   },
 }));
@@ -47,8 +51,21 @@ describe('BookmarkManagementCoordinator', () => {
   let coordinator;
   let mockPage;
 
+  async function waitForConfirmCallback() {
+    const confirmResult = UIMessages.confirm.mock.results.at(-1)?.value;
+    if (confirmResult) {
+      await confirmResult;
+    }
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
+    UIComponents.DOM.getElement.mockImplementation(id => {
+      if (id === 'bookmarks-list') {
+        return document.createElement('ul');
+      }
+      return null;
+    });
 
     // Create a mock page object
     mockPage = {
@@ -58,7 +75,11 @@ describe('BookmarkManagementCoordinator', () => {
         getBookmarkById: vi.fn(),
       },
       searchFilter: {
-        getFilters: vi.fn(() => ({ search: 'test', status: 'read' })),
+        getFilters: vi.fn(() => ({
+          search: 'test',
+          status: 'read',
+          limit: BOOKMARK_LIST_LIMIT,
+        })),
       },
       bookmarkList: {
         displayBookmarks: vi.fn(),
@@ -94,11 +115,11 @@ describe('BookmarkManagementCoordinator', () => {
       await coordinator.loadAllBookmarks();
 
       expect(mockPage.supabaseService.getBookmarks).toHaveBeenCalledWith({
-        limit: 100,
+        limit: BOOKMARK_LIST_LIMIT,
       });
       expect(mockPage.bookmarkList.displayBookmarks).toHaveBeenCalledWith(
         mockBookmarks,
-        expect.any(HTMLElement),
+        expect.anything(),
       );
       expect(mockPage.bulkActions.updateBulkActions).toHaveBeenCalled();
     });
@@ -126,15 +147,13 @@ describe('BookmarkManagementCoordinator', () => {
 
       expect(mockPage.bookmarkList.displayBookmarks).toHaveBeenCalledWith(
         bookmarks,
-        expect.any(HTMLElement),
+        expect.anything(),
       );
       expect(mockPage.bulkActions.updateBulkActions).toHaveBeenCalled();
     });
 
-    test('should handle missing bookmarks list element', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      UIComponents.DOM.getElement.mockReturnValue(null);
+    test('should handle missing bookmarks list element', () => {
+      UIComponents.DOM.getElement.mockReturnValueOnce(null);
 
       const bookmarks = [{ id: '1', title: 'Bookmark 1' }];
 
@@ -156,6 +175,7 @@ describe('BookmarkManagementCoordinator', () => {
       expect(mockPage.supabaseService.getBookmarks).toHaveBeenCalledWith({
         search: 'test',
         status: 'read',
+        limit: BOOKMARK_LIST_LIMIT,
       });
       expect(mockPage.bookmarkList.displayBookmarks).toHaveBeenCalled();
     });
@@ -177,9 +197,8 @@ describe('BookmarkManagementCoordinator', () => {
       mockPage.bulkActions.getSelectedIds.mockReturnValue(['id1', 'id2']);
       mockPage.supabaseService.deleteBookmark.mockResolvedValue(true);
 
-      const UIMessages = (await import('../../utils/ui-messages.js')).default;
-
       await coordinator.deleteSelectedBookmarks();
+      await waitForConfirmCallback();
 
       expect(UIMessages.confirm).toHaveBeenCalled();
       expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledTimes(2);
@@ -206,9 +225,8 @@ describe('BookmarkManagementCoordinator', () => {
       const mockError = new Error('Delete failed');
       mockPage.supabaseService.deleteBookmark.mockRejectedValue(mockError);
 
-      const UIMessages = (await import('../../utils/ui-messages.js')).default;
-
       await coordinator.deleteSelectedBookmarks();
+      await waitForConfirmCallback();
 
       expect(UIMessages.error).toHaveBeenCalled();
     });
@@ -218,6 +236,7 @@ describe('BookmarkManagementCoordinator', () => {
       mockPage.supabaseService.deleteBookmark.mockResolvedValue(true);
 
       await coordinator.deleteSelectedBookmarks();
+      await waitForConfirmCallback();
 
       expect(mockPage.bulkActions.updateBulkActions).toHaveBeenCalled();
     });

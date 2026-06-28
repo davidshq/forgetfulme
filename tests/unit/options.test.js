@@ -28,6 +28,11 @@ const mockAppContainer = {
 
 import ForgetfulMeOptions from '../../options.js';
 import UIComponents from '../../utils/ui-components.js';
+import { renderMainInterface } from '../../utils/options-ui-renderer.js';
+
+vi.mock('../../utils/options-ui-renderer.js', () => ({
+  renderMainInterface: vi.fn(() => ({ configStatusContainer: null })),
+}));
 
 describe('ForgetfulMeOptions', () => {
   let options;
@@ -107,6 +112,48 @@ describe('ForgetfulMeOptions', () => {
 
       expect(options.supabaseService.getBookmarks).toHaveBeenCalled();
       expect(options.configManager.getCustomStatusTypes).toHaveBeenCalled();
+    });
+  });
+
+  describe('showMainInterface', () => {
+    it('should wire renderer callbacks to controller methods', () => {
+      options.appContainer = mockAppContainer;
+      options.configUI = { showConfigStatus: vi.fn() };
+
+      const exportSpy = vi
+        .spyOn(options, 'exportData')
+        .mockResolvedValue(undefined);
+      const clearSpy = vi
+        .spyOn(options, 'clearData')
+        .mockResolvedValue(undefined);
+      const addSpy = vi
+        .spyOn(options, 'addStatusType')
+        .mockResolvedValue(undefined);
+      const importSpy = vi.spyOn(options, 'openImportDialog');
+
+      options.showMainInterface();
+
+      expect(renderMainInterface).toHaveBeenCalledWith(
+        mockAppContainer,
+        expect.objectContaining({
+          addStatusType: expect.any(Function),
+          exportData: expect.any(Function),
+          openImportDialog: expect.any(Function),
+          clearData: expect.any(Function),
+          openBookmarkManagement: expect.any(Function),
+        }),
+      );
+
+      const callbacks = renderMainInterface.mock.calls[0][1];
+      callbacks.exportData();
+      callbacks.clearData();
+      callbacks.addStatusType();
+      callbacks.openImportDialog();
+
+      expect(exportSpy).toHaveBeenCalled();
+      expect(clearSpy).toHaveBeenCalled();
+      expect(addSpy).toHaveBeenCalled();
+      expect(importSpy).toHaveBeenCalled();
     });
   });
 });

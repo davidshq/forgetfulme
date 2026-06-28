@@ -17,7 +17,7 @@ import AuthStateManager from './utils/auth-state-manager.js';
 /**
  * Supabase service for ForgetfulMe extension
  * @class SupabaseService
- * @description Manages all Supabase database operations including bookmarks, user preferences,
+ * @description Manages all Supabase database operations including bookmarks and user preferences
  *
  * @example
  * const supabaseConfig = new SupabaseConfig();

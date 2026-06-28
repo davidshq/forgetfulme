@@ -111,7 +111,6 @@ describe('ConfigManager', () => {
       await configManager.initialize();
 
       // The second initialize() should not call loadAllConfig() again
-      // but the first call may make multiple storage calls for migration, etc.
       expect(configManager.initialized).toBe(true);
     });
 
@@ -604,55 +603,6 @@ describe('ConfigManager', () => {
         statusTypesCount: 2,
         initialized: true,
       });
-    });
-  });
-
-  describe('Migration', () => {
-    test('should handle migration version 0', async () => {
-      mockChrome.storage.sync.get.mockResolvedValue({
-        supabaseConfig: null,
-        customStatusTypes: null,
-        auth_session: null,
-        configVersion: 0,
-      });
-
-      await configManager.initialize();
-
-      expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
-        configVersion: 1,
-      });
-    });
-
-    test('should not migrate if already at current version', async () => {
-      mockChrome.storage.sync.get.mockResolvedValue({
-        supabaseConfig: null,
-        customStatusTypes: null,
-        auth_session: null,
-        configVersion: 1,
-      });
-
-      await configManager.initialize();
-
-      expect(mockChrome.storage.sync.set).not.toHaveBeenCalledWith(
-        expect.objectContaining({ configVersion: 1 }),
-      );
-    });
-
-    test('should handle migration errors gracefully', async () => {
-      mockChrome.storage.sync.get.mockResolvedValue({
-        supabaseConfig: null,
-        customStatusTypes: null,
-        auth_session: null,
-        configVersion: 0,
-      });
-      mockChrome.storage.sync.set.mockRejectedValue(
-        new Error('Migration error'),
-      );
-
-      // Should not throw error
-      await configManager.initialize();
-
-      // ErrorHandler handles migration errors
     });
   });
 

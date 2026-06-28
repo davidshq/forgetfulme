@@ -199,62 +199,18 @@ class UIMessages {
    * @param {string} message - Confirmation message
    * @param {Function} onConfirm - Function to call on confirm
    * @param {Function} onCancel - Function to call on cancel
-   * @param {HTMLElement} container - Container element
+   * @param {HTMLElement} [_container] - Unused; kept for call-site compatibility
    * @param {Object} options - Additional options
    */
-  static confirm(message, onConfirm, onCancel, container, options = {}) {
-    // Use UIComponents if available, otherwise fall back to manual creation
+  static confirm(message, onConfirm, onCancel, _container, options = {}) {
+    const confirmEl = UIComponents.createConfirmDialog(
+      message,
+      onConfirm,
+      onCancel,
+      options,
+    );
 
-    if (typeof UIComponents !== 'undefined') {
-      const confirmEl = UIComponents.createConfirmDialog(
-        message,
-        onConfirm,
-        onCancel,
-        options,
-      );
-
-      UIComponents.showModal(confirmEl);
-      return confirmEl;
-    }
-
-    // Fallback to manual creation (legacy support)
-    const confirmEl = document.createElement('div');
-    confirmEl.className = 'ui-confirm';
-
-    const messageEl = document.createElement('div');
-    messageEl.className = 'ui-confirm-message';
-    messageEl.textContent = message;
-
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'ui-confirm-buttons';
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = options.confirmText || 'Confirm';
-    confirmBtn.className = 'ui-confirm-btn ui-confirm-btn-primary';
-    confirmBtn.addEventListener('click', () => {
-      if (confirmEl.parentNode) {
-        confirmEl.parentNode.removeChild(confirmEl);
-      }
-      if (onConfirm) onConfirm();
-    });
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = options.cancelText || 'Cancel';
-    cancelBtn.className = 'ui-confirm-btn ui-confirm-btn-secondary';
-    cancelBtn.addEventListener('click', () => {
-      if (confirmEl.parentNode) {
-        confirmEl.parentNode.removeChild(confirmEl);
-      }
-      if (onCancel) onCancel();
-    });
-
-    buttonContainer.appendChild(confirmBtn);
-    buttonContainer.appendChild(cancelBtn);
-    confirmEl.appendChild(messageEl);
-    confirmEl.appendChild(buttonContainer);
-
-    container.appendChild(confirmEl);
-
+    UIComponents.showModal(confirmEl);
     return confirmEl;
   }
 }

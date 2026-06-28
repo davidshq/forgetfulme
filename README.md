@@ -92,32 +92,11 @@ The extension uses a secure configuration system that prevents sensitive credent
 4. **Enter your Project URL and anon public key**
 5. **Save the configuration**
 
-#### Option 2: Local Development (For Developers)
+#### Option 2: Environment Variables (Vitest / Node only)
 
-1. **Copy the template file**:
-   ```bash
-   cp supabase-config.template.js supabase-config.local.js
-   ```
-2. **Edit `supabase-config.local.js`** with your credentials:
-   ```javascript
-   this.supabaseUrl = 'https://your-project.supabase.co';
-   this.supabaseAnonKey = 'your-anon-public-key-here';
-   ```
-3. **Update HTML files** to include the local config:
-   ```html
-   <script src="supabase-config.local.js"></script>
-   <!-- Comment out or remove the original supabase-config.js -->
-   <!-- <script src="supabase-config.js"></script> -->
-   ```
-
-#### Option 3: Environment Variables (For Advanced Users)
-
-Set environment variables in your development environment:
-
-```bash
-export SUPABASE_URL="https://your-project.supabase.co"
-export SUPABASE_ANON_KEY="your-anon-public-key-here"
-```
+For unit tests, `supabase-config.js` can fall back to `SUPABASE_URL` and
+`SUPABASE_ANON_KEY` when Chrome storage is empty. This does not apply to the
+loaded extension — use Option 1 there.
 
 ### Technical Notes
 
@@ -132,7 +111,7 @@ export SUPABASE_ANON_KEY="your-anon-public-key-here"
 - ✅ **Configuration is validated** before saving
 - ✅ **Connection is tested** after configuration
 - ✅ **CSP compliant** - no external scripts loaded
-- ⚠️ **Never commit** `supabase-config.local.js` or `.env` files
+- ⚠️ **Never commit** `.env` files or real credentials
 
 ## Development
 
@@ -151,7 +130,6 @@ forgetfulme/
 ├── auth-ui.js            # Authentication UI
 ├── config-ui.js          # Configuration UI
 ├── supabase-schema.sql   # Database schema
-├── supabase-config.template.js  # Template for local config
 ├── background/           # Service worker source (bundled to dist/)
 ├── dist/                 # Bundled MV3 artifacts (background.js)
 ├── scripts/              # Build scripts (bundle-supabase, build-background)

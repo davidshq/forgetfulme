@@ -65,9 +65,14 @@ class BookmarkManagementPage {
 
     this.bookmarkEditor = new BookmarkEditor({
       onUpdate: id => this.updateBookmark(id),
-      onCancel: () => this.showMainInterface(),
+      onCancel: () => {
+        void this.showListView(this.savedListState);
+      },
       getStatusTypes: () => this.configManager.getCustomStatusTypes(),
     });
+
+    /** @type {{ searchQuery: string, statusFilter: string }|null} */
+    this.savedListState = null;
 
     // Initialize coordinator
     this.coordinator = new BookmarkManagementCoordinator(this);
@@ -156,13 +161,40 @@ class BookmarkManagementPage {
    * @description Displays authentication interface when user is not authenticated
    */
   showAuthInterface() {
-    this.appContainer.innerHTML = `
-      <div class="auth-container">
-        <h2>Authentication Required</h2>
-        <p>Please authenticate in the extension popup to access bookmark management.</p>
-        <button onclick="window.close()" class="primary">Close</button>
-      </div>
-    `;
+    this.appContainer.innerHTML = '';
+
+    const authContainer = document.createElement('div');
+    authContainer.className = 'auth-container';
+
+    const title = document.createElement('h2');
+    title.textContent = 'Authentication Required';
+    authContainer.appendChild(title);
+
+    const message = document.createElement('p');
+    message.textContent =
+      'Please authenticate in the extension popup to access bookmark management.';
+    authContainer.appendChild(message);
+
+    authContainer.appendChild(
+      UIComponents.createButton('Close', () => window.close(), 'primary'),
+    );
+
+    this.appContainer.appendChild(authContainer);
+  }
+
+  /**
+   * Capture active search/filter values before leaving the list view.
+   * @returns {{ searchQuery: string, statusFilter: string }|null}
+   */
+  captureListState() {
+    const searchQuery = this.searchFilter.getSearchQuery();
+    const statusFilter = this.searchFilter.getStatusFilter();
+
+    if (!searchQuery.trim() && (!statusFilter || statusFilter === 'all')) {
+      return null;
+    }
+
+    return { searchQuery, statusFilter };
   }
 
   /**
@@ -171,6 +203,41 @@ class BookmarkManagementPage {
    * @description Displays the main bookmark management interface with search, filter, and bulk operations
    */
   showMainInterface() {
+    void this.showListView(null);
+  }
+
+  /**
+   * Restore the list view, optionally preserving search/filter state.
+   * @param {{ searchQuery: string, statusFilter: string }|null} savedState
+   */
+  async showListView(savedState = null) {
+    this.renderMainInterfaceShell();
+
+    await this.loadStatusFilterOptions();
+
+    if (savedState) {
+      UIComponents.DOM.setValue('search-query', savedState.searchQuery || '');
+      if (savedState.statusFilter) {
+        UIComponents.DOM.setValue('status-filter', savedState.statusFilter);
+      }
+    }
+
+    const hasActiveFilters =
+      savedState &&
+      (savedState.searchQuery.trim() ||
+        (savedState.statusFilter && savedState.statusFilter !== 'all'));
+
+    if (hasActiveFilters) {
+      await this.coordinator.searchBookmarks();
+    } else {
+      await this.coordinator.loadAllBookmarks();
+    }
+  }
+
+  /**
+   * Build the bookmark management shell without loading data.
+   */
+  renderMainInterfaceShell() {
     // Create breadcrumb navigation
     const breadcrumbItems = [
       { text: 'ForgetfulMe', href: '#' },
@@ -224,7 +291,6 @@ class BookmarkManagementPage {
     // Create content area for bookmarks
     const contentArea = document.createElement('div');
     contentArea.className = 'content-area';
-    contentArea.setAttribute('role', 'main');
 
     // Create bookmarks list container
     const bookmarksList = document.createElement('div');
@@ -234,7 +300,7 @@ class BookmarkManagementPage {
 
     const bookmarksCard = UIComponents.createCard(
       'Bookmarks',
-      bookmarksList.outerHTML,
+      bookmarksList,
       '',
       'bookmarks-card',
     );
@@ -247,10 +313,6 @@ class BookmarkManagementPage {
     this.appContainer.appendChild(mainContent);
     mainContent.appendChild(sidebar);
     mainContent.appendChild(contentArea);
-
-    // Load bookmarks
-    this.coordinator.loadAllBookmarks();
-    void this.loadStatusFilterOptions();
   }
 
   /**
@@ -299,6 +361,8 @@ class BookmarkManagementPage {
    * @description Displays the edit interface for the specified bookmark
    */
   async showEditInterface(existingBookmark) {
+    this.savedListState = this.captureListState();
+
     await this.bookmarkEditor.showEditInterface(
       existingBookmark,
       this.appContainer,
@@ -318,22 +382,9 @@ class BookmarkManagementPage {
       const updateData = this.bookmarkEditor.getUpdateData();
 
       await this.supabaseService.updateBookmark(bookmarkId, updateData);
-
-      // Fetch the updated bookmark and update only that item
-      const updatedBookmark =
-        await this.supabaseService.getBookmarkById(bookmarkId);
-      const bookmarksList = UIComponents.DOM.getElement('bookmarks-list');
-      if (bookmarksList && updatedBookmark) {
-        this.bookmarkList.updateBookmarkItem(updatedBookmark, bookmarksList);
-        this.bulkActions.updateBulkActions();
-      }
+      await this.showListView(this.savedListState);
 
       UIMessages.success('Bookmark updated successfully!', this.appContainer);
-
-      // Return to main interface after a short delay
-      setTimeout(() => {
-        this.showMainInterface();
-      }, 1500);
     } catch (error) {
       const errorResult = ErrorHandler.handle(
         error,

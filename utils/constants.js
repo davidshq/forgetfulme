@@ -13,15 +13,23 @@
  * @type {Object}
  */
 export const MESSAGE_TYPES = {
-  MARK_AS_READ: 'MARK_AS_READ',
   BOOKMARK_SAVED: 'BOOKMARK_SAVED',
   BOOKMARK_UPDATED: 'BOOKMARK_UPDATED',
   GET_AUTH_STATE: 'GET_AUTH_STATE',
   AUTH_STATE_CHANGED: 'AUTH_STATE_CHANGED',
-  GET_CONFIG_SUMMARY: 'GET_CONFIG_SUMMARY',
-  CHECK_URL_STATUS: 'CHECK_URL_STATUS',
   URL_STATUS_RESULT: 'URL_STATUS_RESULT',
 };
+
+/**
+ * Keys used in chrome.storage (session and sync).
+ * @type {Object}
+ */
+export const STORAGE_KEYS = {
+  PENDING_MARK_AS_READ: 'pendingMarkAsRead',
+};
+
+/** Max age for a keyboard-shortcut mark request consumed by the popup. */
+export const PENDING_MARK_AS_READ_TTL_MS = 30 * 1000;
 
 /**
  * Default retry configuration for network operations.
@@ -61,3 +69,6 @@ export const DEFAULT_STATUS_TYPES = [
   'low-value',
   'revisit-later',
 ];
+
+/** Default page size for bookmark management list and search. */
+export const BOOKMARK_LIST_LIMIT = 100;

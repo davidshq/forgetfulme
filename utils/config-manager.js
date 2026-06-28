@@ -14,7 +14,6 @@ import {
   validateSupabaseConfig,
   validatePreferences,
 } from './config-validator.js';
-import { migrateConfig } from './config-migration.js';
 import {
   loadAllConfig as loadConfigFromStorage,
   saveSupabaseConfig,
@@ -74,9 +73,6 @@ class ConfigManager extends EventEmitter {
       // Validate configuration
       validateSupabaseConfig(this.config.supabase);
       this.config.preferences = validatePreferences(this.config.preferences);
-
-      // Set up migration if needed
-      await migrateConfig();
 
       this.initialized = true;
       this.notifyListeners('initialized');

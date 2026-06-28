@@ -49,6 +49,7 @@ vi.mock('../../components/bookmark-editor.js', () => ({
   BookmarkEditor: class MockBookmarkEditor {
     constructor() {
       this.showEditInterface = vi.fn();
+      this.getUpdateData = vi.fn();
     }
   },
 }));
@@ -145,6 +146,37 @@ describe('BookmarkManagementPage', () => {
       expect(mockTabsCreate).toHaveBeenCalledWith({
         url: 'https://example.com',
       });
+    });
+
+    it('should restore list view after update without calling showMainInterface', async () => {
+      const showListViewSpy = vi
+        .spyOn(page, 'showListView')
+        .mockResolvedValue(undefined);
+      const showMainInterfaceSpy = vi.spyOn(page, 'showMainInterface');
+
+      page.bookmarkEditor.getUpdateData = vi.fn().mockReturnValue({
+        read_status: 'read',
+        tags: [],
+        updated_at: new Date().toISOString(),
+      });
+      page.savedListState = { searchQuery: 'test', statusFilter: 'read' };
+      mockSupabaseService.updateBookmark.mockResolvedValue({});
+
+      await page.updateBookmark('bookmark-1');
+
+      expect(mockSupabaseService.updateBookmark).toHaveBeenCalledWith(
+        'bookmark-1',
+        expect.objectContaining({ read_status: 'read' }),
+      );
+      expect(showListViewSpy).toHaveBeenCalledWith({
+        searchQuery: 'test',
+        statusFilter: 'read',
+      });
+      expect(showMainInterfaceSpy).not.toHaveBeenCalled();
+      expect(mockUIMessages.success).toHaveBeenCalledWith(
+        'Bookmark updated successfully!',
+        expect.any(Object),
+      );
     });
   });
 });

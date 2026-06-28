@@ -60,10 +60,10 @@ try {
 ### Configuration Flow - Secure Defaults
 
 ```javascript
-// 1. ConfigManager loads from chrome.storage.sync
-// 2. Falls back to supabase-config.js if missing
-// 3. User can override via options.html settings UI
-// Never commit real credentials - use supabase-config.template.js
+// 1. User sets credentials via options.html → saved to chrome.storage.sync
+// 2. ConfigManager loads from chrome.storage.sync on initialize
+// 3. SupabaseConfig uses ConfigManager for client setup
+// Never commit real credentials — configure via the options page
 const configManager = new ConfigManager();
 await configManager.initialize();
 const supabaseConfig = await configManager.getSupabaseConfig();
@@ -141,7 +141,7 @@ npm run test:playwright:debug  # Step through with inspector
 ### Setup & Development
 
 1. **Install**: `npm install && npm run install-browsers` (for Playwright)
-2. **Config**: Copy `supabase-config.template.js` → `supabase-config.local.js` with real credentials
+2. **Config**: Set Supabase URL and anon key via the extension options page (`chrome.storage.sync`)
 3. **Load Extension**: Chrome → `chrome://extensions` → Developer mode → Load unpacked
 4. **Debugging**: Open extension popup → Right-click → Inspect to view console
 

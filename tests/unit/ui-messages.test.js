@@ -1,4 +1,15 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+
+const mockCreateConfirmDialog = vi.fn();
+const mockShowModal = vi.fn();
+
+vi.mock('../../utils/ui-components.js', () => ({
+  default: {
+    createConfirmDialog: (...args) => mockCreateConfirmDialog(...args),
+    showModal: (...args) => mockShowModal(...args),
+  },
+}));
+
 import UIMessages from '../../utils/ui-messages.js';
 
 // Mock console methods
@@ -12,6 +23,8 @@ describe('UIMessages', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockCreateConfirmDialog.mockReset();
+    mockShowModal.mockReset();
     global.console = mockConsole;
 
     // Setup test container
@@ -245,13 +258,8 @@ describe('UIMessages', () => {
 
   describe('confirm', () => {
     test('should create confirmation dialog with UIComponents', () => {
-      // Mock UIComponents
-      global.UIComponents = {
-        createConfirmDialog: vi
-          .fn()
-          .mockReturnValue(document.createElement('div')),
-        showModal: vi.fn(),
-      };
+      const dialogEl = document.createElement('div');
+      mockCreateConfirmDialog.mockReturnValue(dialogEl);
 
       const mockConfirm = vi.fn();
       const mockCancel = vi.fn();
@@ -262,24 +270,19 @@ describe('UIMessages', () => {
         container,
       );
 
-      expect(confirmEl).toBeDefined();
-      // The implementation uses UIComponents when available
-      expect(global.UIComponents.createConfirmDialog).toHaveBeenCalledWith(
+      expect(confirmEl).toBe(dialogEl);
+      expect(mockCreateConfirmDialog).toHaveBeenCalledWith(
         'Are you sure?',
         mockConfirm,
         mockCancel,
         {},
       );
+      expect(mockShowModal).toHaveBeenCalledWith(dialogEl);
     });
 
     test('should create confirmation dialog with custom options', () => {
-      // Mock UIComponents
-      global.UIComponents = {
-        createConfirmDialog: vi
-          .fn()
-          .mockReturnValue(document.createElement('div')),
-        showModal: vi.fn(),
-      };
+      const dialogEl = document.createElement('div');
+      mockCreateConfirmDialog.mockReturnValue(dialogEl);
 
       const options = {
         confirmText: 'Yes',
@@ -288,113 +291,13 @@ describe('UIMessages', () => {
 
       UIMessages.confirm('Are you sure?', vi.fn(), vi.fn(), container, options);
 
-      // The implementation uses UIComponents when available
-      expect(global.UIComponents.createConfirmDialog).toHaveBeenCalledWith(
+      expect(mockCreateConfirmDialog).toHaveBeenCalledWith(
         'Are you sure?',
         expect.any(Function),
         expect.any(Function),
         options,
       );
-    });
-
-    test('should create fallback confirmation dialog without UIComponents', () => {
-      // Ensure UIComponents is not available
-      delete global.UIComponents;
-
-      const mockConfirm = vi.fn();
-      const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm(
-        'Are you sure?',
-        mockConfirm,
-        mockCancel,
-        container,
-      );
-
-      expect(confirmEl.tagName).toBe('DIV');
-      expect(confirmEl.className).toContain('ui-confirm');
-      expect(confirmEl.querySelector('.ui-confirm-message')).toBeTruthy();
-      expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe(
-        'Are you sure?',
-      );
-      expect(confirmEl.querySelector('.ui-confirm-btn-primary')).toBeTruthy();
-      expect(confirmEl.querySelector('.ui-confirm-btn-secondary')).toBeTruthy();
-    });
-
-    test('should call confirm function when confirm button is clicked', () => {
-      delete global.UIComponents;
-
-      const mockConfirm = vi.fn();
-      const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm(
-        'Are you sure?',
-        mockConfirm,
-        mockCancel,
-        container,
-      );
-
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
-      confirmBtn.click();
-
-      expect(mockConfirm).toHaveBeenCalled();
-      expect(container.querySelector('.ui-confirm')).toBeNull();
-    });
-
-    test('should call cancel function when cancel button is clicked', () => {
-      delete global.UIComponents;
-
-      const mockConfirm = vi.fn();
-      const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm(
-        'Are you sure?',
-        mockConfirm,
-        mockCancel,
-        container,
-      );
-
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
-      cancelBtn.click();
-
-      expect(mockCancel).toHaveBeenCalled();
-      expect(container.querySelector('.ui-confirm')).toBeNull();
-    });
-
-    test('should handle missing callback functions', () => {
-      delete global.UIComponents;
-
-      const confirmEl = UIMessages.confirm(
-        'Are you sure?',
-        null,
-        null,
-        container,
-      );
-
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
-
-      // Should not throw errors
-      expect(() => confirmBtn.click()).not.toThrow();
-      expect(() => cancelBtn.click()).not.toThrow();
-    });
-
-    test('should use custom button text', () => {
-      delete global.UIComponents;
-
-      const confirmEl = UIMessages.confirm(
-        'Are you sure?',
-        vi.fn(),
-        vi.fn(),
-        container,
-        {
-          confirmText: 'Yes',
-          cancelText: 'No',
-        },
-      );
-
-      const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
-      const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
-
-      expect(confirmBtn.textContent).toBe('Yes');
-      expect(cancelBtn.textContent).toBe('No');
+      expect(mockShowModal).toHaveBeenCalledWith(dialogEl);
     });
   });
 

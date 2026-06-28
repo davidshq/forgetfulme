@@ -99,10 +99,6 @@ class SupabaseConfig {
     }
   }
 
-  showSetupInstructions() {
-    // Supabase configuration not found - setup instructions would be shown here
-  }
-
   async setConfiguration(url, anonKey) {
     try {
       await this.configManager.initialize();

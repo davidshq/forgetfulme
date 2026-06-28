@@ -74,6 +74,7 @@ import ErrorHandler from '../../utils/error-handler.js';
 import SupabaseService from '../../supabase-service.js';
 import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 import * as bookmarkEditView from '../../components/bookmark-edit-view.js';
+import { STORAGE_KEYS } from '../../utils/constants.js';
 
 describe('ForgetfulMePopup', () => {
   let popup;
@@ -245,6 +246,60 @@ describe('ForgetfulMePopup', () => {
     });
   });
 
+  describe('consumePendingMarkAsRead', () => {
+    it('clears pending only after a successful shortcut save', async () => {
+      const pending = {
+        url: 'https://example.com',
+        requestedAt: Date.now(),
+      };
+
+      chrome.storage.session.get.mockResolvedValue({
+        [STORAGE_KEYS.PENDING_MARK_AS_READ]: pending,
+      });
+
+      mockSupabaseService.saveBookmark.mockResolvedValue({
+        id: 'new-bookmark-id',
+        url: 'https://example.com',
+        title: 'Test Page',
+        read_status: 'read',
+      });
+
+      popup.quickAdd.getFormValues.mockReturnValue({
+        status: 'read',
+        tags: '',
+      });
+
+      await popup.consumePendingMarkAsRead();
+
+      expect(mockSupabaseService.saveBookmark).toHaveBeenCalled();
+      expect(chrome.storage.session.remove).toHaveBeenCalledWith(
+        STORAGE_KEYS.PENDING_MARK_AS_READ,
+      );
+    });
+
+    it('keeps pending when mark-as-read fails', async () => {
+      chrome.storage.session.get.mockResolvedValue({
+        [STORAGE_KEYS.PENDING_MARK_AS_READ]: {
+          url: 'https://example.com',
+          requestedAt: Date.now(),
+        },
+      });
+
+      mockSupabaseService.saveBookmark.mockRejectedValue(
+        new Error('Save failed'),
+      );
+
+      popup.quickAdd.getFormValues.mockReturnValue({
+        status: 'read',
+        tags: '',
+      });
+
+      await popup.consumePendingMarkAsRead();
+
+      expect(chrome.storage.session.remove).not.toHaveBeenCalled();
+    });
+  });
+
   describe('updateBookmark', () => {
     it('should update bookmark successfully', async () => {
       const bookmarkId = 'test-bookmark-id';
@@ -299,6 +354,21 @@ describe('ForgetfulMePopup', () => {
         'Test error message',
         expect.any(Object),
       );
+    });
+  });
+
+  describe('showMainInterface', () => {
+    it('reloads custom status types after rebuilding the main UI', async () => {
+      const customTypes = ['read', 'archived'];
+      popup.configManager.getCustomStatusTypes.mockResolvedValue(customTypes);
+
+      popup.showMainInterface();
+
+      await vi.waitFor(() => {
+        expect(popup.statusSelector.loadCustomStatusTypes).toHaveBeenCalledWith(
+          customTypes,
+        );
+      });
     });
   });
 

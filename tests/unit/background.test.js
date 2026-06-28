@@ -13,6 +13,11 @@ const mockChrome = {
       get: vi.fn(),
       set: vi.fn(),
     },
+    session: {
+      get: vi.fn().mockResolvedValue({}),
+      set: vi.fn().mockResolvedValue(undefined),
+      remove: vi.fn().mockResolvedValue(undefined),
+    },
     onChanged: {
       addListener: vi.fn(),
     },
@@ -46,9 +51,7 @@ const mockChrome = {
   action: {
     setBadgeText: vi.fn(),
     setBadgeBackgroundColor: vi.fn(),
-    onClicked: {
-      addListener: vi.fn(),
-    },
+    openPopup: vi.fn().mockResolvedValue(undefined),
   },
 };
 
@@ -65,68 +68,14 @@ global.console = {
 
 describe('ForgetfulMe Background Service', () => {
   beforeEach(() => {
-    // Reset all mocks
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    mockChrome.storage.session.get.mockResolvedValue({});
+    mockChrome.storage.session.set.mockResolvedValue(undefined);
+    mockChrome.storage.session.remove.mockResolvedValue(undefined);
+    mockChrome.action.openPopup.mockResolvedValue(undefined);
   });
 
   describe('Message Handling', () => {
-    test('should handle MARK_AS_READ messages', async () => {
-      // Mock chrome.storage.sync.get to return authenticated state
-      mockChrome.storage.sync.get.mockImplementation((keys, callback) => {
-        callback({
-          auth_session: {
-            user: { id: 'test-user', email: 'test@example.com' },
-            access_token: 'test-token',
-          },
-        });
-      });
-
-      // Create a mock message handler
-      const handleMessage = async (message, sender, sendResponse) => {
-        try {
-          switch (message.type) {
-            case 'MARK_AS_READ':
-              // Simulate notification creation
-              mockChrome.notifications.create({
-                type: 'basic',
-                iconUrl: 'icons/icon48.png',
-                title: 'ForgetfulMe',
-                message: 'Page marked as read!',
-              });
-              sendResponse({ success: true });
-              break;
-            default:
-              sendResponse({ success: false, error: 'Unknown message type' });
-          }
-        } catch (error) {
-          sendResponse({ success: false, error: error.message });
-        }
-      };
-
-      const sendResponse = vi.fn();
-
-      // Test MARK_AS_READ message
-      await handleMessage(
-        {
-          type: 'MARK_AS_READ',
-          data: { url: 'https://example.com', title: 'Test' },
-        },
-        {},
-        sendResponse,
-      );
-
-      // Check that notification was created
-      expect(mockChrome.notifications.create).toHaveBeenCalledWith({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: 'ForgetfulMe',
-        message: 'Page marked as read!',
-      });
-
-      // Check that response was sent
-      expect(sendResponse).toHaveBeenCalledWith({ success: true });
-    });
-
     test('should handle GET_AUTH_STATE messages', async () => {
       const mockAuthState = {
         user: { id: 'test-user', email: 'test@example.com' },
@@ -209,34 +158,24 @@ describe('ForgetfulMe Background Service', () => {
   });
 
   describe('Authentication State Management', () => {
-    test('should handle storage auth state changes', () => {
-      // Create a mock storage change handler
-      const handleStorageAuthChange = newAuthState => {
-        console.log(
-          'Background: Auth state changed:',
-          newAuthState ? 'authenticated' : 'not authenticated',
-        );
+    test('should notify only on sign-in transition after auth is ready', () => {
+      let authReady = false;
 
-        // Update badge
-        try {
-          if (newAuthState) {
-            chrome.action.setBadgeText({ text: '✓' });
-            chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
-          } else {
-            chrome.action.setBadgeText({ text: '' });
-          }
-        } catch (error) {
-          console.debug('Background: Error updating badge:', error.message);
-        }
+      const handleStorageAuthChange = authChange => {
+        const oldAuthState = authChange.oldValue ?? null;
+        const newAuthState = authChange.newValue ?? null;
 
-        // Show notification for successful auth
-        if (newAuthState) {
+        if (authReady && !oldAuthState && newAuthState) {
           chrome.notifications.create({
             type: 'basic',
             iconUrl: 'icons/icon48.png',
             title: 'ForgetfulMe',
             message: 'Successfully signed in!',
           });
+        }
+
+        if (!newAuthState) {
+          chrome.action.setBadgeText({ text: '' });
         }
       };
 
@@ -245,16 +184,19 @@ describe('ForgetfulMe Background Service', () => {
         access_token: 'test-token',
       };
 
-      // Test auth state change
-      handleStorageAuthChange(mockAuthState);
+      handleStorageAuthChange({
+        oldValue: undefined,
+        newValue: mockAuthState,
+      });
+      expect(mockChrome.notifications.create).not.toHaveBeenCalled();
 
-      // Check that auth state change was logged
-      expect(console.log).toHaveBeenCalledWith(
-        'Background: Auth state changed:',
-        'authenticated',
-      );
+      authReady = true;
 
-      // Check that notification was created for successful auth
+      handleStorageAuthChange({
+        oldValue: undefined,
+        newValue: mockAuthState,
+      });
+
       expect(mockChrome.notifications.create).toHaveBeenCalledWith({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
@@ -262,132 +204,130 @@ describe('ForgetfulMe Background Service', () => {
         message: 'Successfully signed in!',
       });
 
-      // Check that badge was updated
-      expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({
-        text: '✓',
+      vi.clearAllMocks();
+
+      handleStorageAuthChange({
+        oldValue: mockAuthState,
+        newValue: mockAuthState,
       });
-      expect(mockChrome.action.setBadgeBackgroundColor).toHaveBeenCalledWith({
-        color: '#4CAF50',
-      });
+
+      expect(mockChrome.notifications.create).not.toHaveBeenCalled();
     });
 
-    test('should handle auth state clearing', () => {
-      // Create a mock storage change handler
-      const handleStorageAuthChange = newAuthState => {
-        console.log(
-          'Background: Auth state changed:',
-          newAuthState ? 'authenticated' : 'not authenticated',
-        );
+    test('should clear badge on sign-out', () => {
+      const handleStorageAuthChange = authChange => {
+        const newAuthState = authChange.newValue ?? null;
 
-        // Update badge
-        try {
-          if (newAuthState) {
-            chrome.action.setBadgeText({ text: '✓' });
-            chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
-          } else {
-            chrome.action.setBadgeText({ text: '' });
-          }
-        } catch (error) {
-          console.debug('Background: Error updating badge:', error.message);
+        if (!newAuthState) {
+          chrome.action.setBadgeText({ text: '' });
         }
       };
 
-      // Test auth state being cleared
-      handleStorageAuthChange(null);
-
-      // Check that auth state change was logged
-      expect(console.log).toHaveBeenCalledWith(
-        'Background: Auth state changed:',
-        'not authenticated',
-      );
-
-      // Check that badge was cleared
+      handleStorageAuthChange({ oldValue: {}, newValue: undefined });
       expect(mockChrome.action.setBadgeText).toHaveBeenCalledWith({ text: '' });
     });
   });
 
   describe('Keyboard Shortcut Handling', () => {
-    test('should handle keyboard shortcut when authenticated', async () => {
-      // Mock authenticated state
-      mockChrome.storage.sync.get.mockImplementation((keys, callback) => {
-        callback({
-          auth_session: {
-            user: { id: 'test-user', email: 'test@example.com' },
-            access_token: 'test-token',
+    test('should queue mark and open popup when authenticated', async () => {
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: {
+          user: { id: 'test-user', email: 'test@example.com' },
+          access_token: 'test-token',
+        },
+      });
+
+      mockChrome.tabs.query.mockResolvedValue([
+        {
+          id: 1,
+          url: 'https://example.com/article',
+          title: 'Test Article',
+          active: true,
+        },
+      ]);
+
+      const handleKeyboardShortcut = async () => {
+        const result = await chrome.storage.sync.get(['auth_session']);
+        if (!result.auth_session) {
+          return;
+        }
+
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+
+        if (
+          !tab?.url ||
+          tab.url.startsWith('chrome://') ||
+          tab.url.startsWith('chrome-extension://')
+        ) {
+          return;
+        }
+
+        await chrome.storage.session.set({
+          pendingMarkAsRead: {
+            url: tab.url,
+            requestedAt: Date.now(),
           },
         });
-      });
 
-      // Mock chrome.tabs.query to return a valid tab
-      mockChrome.tabs.query.mockImplementation((queryInfo, callback) => {
-        callback([
-          {
-            id: 1,
-            url: 'https://example.com/article',
-            title: 'Test Article',
-            active: true,
-          },
-        ]);
-      });
+        await chrome.action.openPopup();
+      };
 
-      // Create a mock keyboard shortcut handler
+      await handleKeyboardShortcut();
+
+      expect(mockChrome.storage.session.set).toHaveBeenCalledWith({
+        pendingMarkAsRead: {
+          url: 'https://example.com/article',
+          requestedAt: expect.any(Number),
+        },
+      });
+      expect(mockChrome.action.openPopup).toHaveBeenCalled();
+      expect(mockChrome.notifications.create).not.toHaveBeenCalled();
+    });
+
+    test('should notify when openPopup fails', async () => {
+      mockChrome.storage.sync.get.mockResolvedValue({
+        auth_session: { user: { id: 'test-user' } },
+      });
+      mockChrome.tabs.query.mockResolvedValue([
+        { url: 'https://example.com/article' },
+      ]);
+      mockChrome.action.openPopup.mockRejectedValue(new Error('No popup'));
+
       const handleKeyboardShortcut = async () => {
+        const result = await chrome.storage.sync.get(['auth_session']);
+        if (!result.auth_session) {
+          return;
+        }
+
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
+
+        await chrome.storage.session.set({
+          pendingMarkAsRead: {
+            url: tab.url,
+            requestedAt: Date.now(),
+          },
+        });
+
         try {
-          const isAuthenticated = await new Promise(resolve => {
-            chrome.storage.sync.get(['auth_session'], result => {
-              resolve(result.auth_session !== null);
-            });
-          });
-
-          if (!isAuthenticated) {
-            chrome.notifications.create({
-              type: 'basic',
-              iconUrl: 'icons/icon48.png',
-              title: 'ForgetfulMe',
-              message: 'Please sign in to use keyboard shortcuts',
-            });
-            return;
-          }
-
-          const [tab] = await new Promise(resolve => {
-            chrome.tabs.query(
-              {
-                active: true,
-                currentWindow: true,
-              },
-              resolve,
-            );
-          });
-
-          if (
-            !tab.url ||
-            tab.url.startsWith('chrome://') ||
-            tab.url.startsWith('chrome-extension://')
-          ) {
-            return;
-          }
-
+          await chrome.action.openPopup();
+        } catch (_error) {
           chrome.notifications.create({
             type: 'basic',
             iconUrl: 'icons/icon48.png',
             title: 'ForgetfulMe',
             message: 'Click the extension icon to mark this page as read',
           });
-        } catch (error) {
-          console.error('Error handling keyboard shortcut:', error);
-          chrome.notifications.create({
-            type: 'basic',
-            iconUrl: 'icons/icon48.png',
-            title: 'ForgetfulMe',
-            message: 'Error handling shortcut. Please try again.',
-          });
         }
       };
 
-      // Test keyboard shortcut
       await handleKeyboardShortcut();
 
-      // Check that notification was created
       expect(mockChrome.notifications.create).toHaveBeenCalledWith({
         type: 'basic',
         iconUrl: 'icons/icon48.png',
@@ -628,32 +568,27 @@ describe('ForgetfulMe Background Service', () => {
 
   describe('Error Handling', () => {
     test('should handle badge update errors gracefully', () => {
-      // Mock chrome.action.setBadgeText to throw an error
       mockChrome.action.setBadgeText.mockImplementation(() => {
         throw new Error('Badge update failed');
       });
 
-      // Create a mock badge update function
-      const updateExtensionBadge = session => {
+      const updateIconForUrl = (url, isSaved) => {
         try {
-          if (session) {
+          if (!url) {
+            chrome.action.setBadgeText({ text: '' });
+            return;
+          }
+
+          if (isSaved) {
             chrome.action.setBadgeText({ text: '✓' });
             chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
-          } else {
-            chrome.action.setBadgeText({ text: '' });
           }
         } catch (error) {
           console.debug('Background: Error updating badge:', error.message);
         }
       };
 
-      const mockAuthState = {
-        user: { id: 'test-user', email: 'test@example.com' },
-        access_token: 'test-token',
-      };
-
-      // Test badge update with error
-      updateExtensionBadge(mockAuthState);
+      updateIconForUrl('https://example.com', true);
 
       // Check that error was logged
       expect(console.debug).toHaveBeenCalledWith(
@@ -769,53 +704,6 @@ describe('ForgetfulMe Background Service', () => {
         {},
         sendResponse,
       );
-
-      // Check that tabs.query was called
-      expect(mockChrome.tabs.query).toHaveBeenCalledWith({
-        active: true,
-        currentWindow: true,
-      });
-
-      // Check that response was sent
-      expect(sendResponse).toHaveBeenCalledWith({ success: true });
-    });
-
-    test('should handle CHECK_URL_STATUS message', async () => {
-      // Mock chrome.tabs.query to return a test tab
-      mockChrome.tabs.query.mockImplementation(_queryInfo => {
-        return Promise.resolve([
-          { url: 'https://example.com', title: 'Test Page' },
-        ]);
-      });
-
-      // Create a mock message handler
-      const handleMessage = async (message, sender, sendResponse) => {
-        try {
-          switch (message.type) {
-            case 'CHECK_URL_STATUS': {
-              // Handle request to check current tab URL status
-              const [currentTab] = await chrome.tabs.query({
-                active: true,
-                currentWindow: true,
-              });
-              if (currentTab && currentTab.url) {
-                console.log('Checking URL status for:', currentTab.url);
-              }
-              sendResponse({ success: true });
-              break;
-            }
-            default:
-              sendResponse({ success: false, error: 'Unknown message type' });
-          }
-        } catch (error) {
-          sendResponse({ success: false, error: error.message });
-        }
-      };
-
-      const sendResponse = vi.fn();
-
-      // Test CHECK_URL_STATUS message
-      await handleMessage({ type: 'CHECK_URL_STATUS' }, {}, sendResponse);
 
       // Check that tabs.query was called
       expect(mockChrome.tabs.query).toHaveBeenCalledWith({
