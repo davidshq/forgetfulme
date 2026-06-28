@@ -7,6 +7,18 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { PopupEditInterface } from '../../utils/popup-edit-interface.js';
 
+function getLeafText(element) {
+  if (!element) {
+    return '';
+  }
+
+  if (element.textContent) {
+    return element.textContent;
+  }
+
+  return (element.children || []).map(child => getLeafText(child)).join('');
+}
+
 // Mock dependencies
 vi.mock('../../utils/ui-components.js', () => ({
   default: {
@@ -150,11 +162,18 @@ describe('PopupEditInterface', () => {
 
       await popupEditInterface.showEditInterface(bookmark);
 
-      const infoSection = mockPopup.appContainer.querySelector('.info-section');
-      expect(infoSection).toBeTruthy();
-      expect(infoSection.innerHTML).toContain('Test Bookmark');
-      expect(infoSection.innerHTML).toContain('https://example.com');
-      expect(infoSection.innerHTML).toContain('test, example');
+      const bookmarkInfo =
+        mockPopup.appContainer.querySelector('.bookmark-info');
+      expect(bookmarkInfo).toBeTruthy();
+      expect(bookmarkInfo.textContent || getLeafText(bookmarkInfo)).toContain(
+        'Test Bookmark',
+      );
+      expect(bookmarkInfo.textContent || getLeafText(bookmarkInfo)).toContain(
+        'https://example.com',
+      );
+      expect(bookmarkInfo.textContent || getLeafText(bookmarkInfo)).toContain(
+        'test, example',
+      );
     });
 
     test('should handle bookmark without tags', async () => {
@@ -169,8 +188,9 @@ describe('PopupEditInterface', () => {
 
       await popupEditInterface.showEditInterface(bookmark);
 
-      const infoSection = mockPopup.appContainer.querySelector('.info-section');
-      expect(infoSection.innerHTML).toContain('None');
+      const bookmarkInfo =
+        mockPopup.appContainer.querySelector('.bookmark-info');
+      expect(getLeafText(bookmarkInfo)).toContain('None');
     });
 
     test('should create edit form with status selector', async () => {

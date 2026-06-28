@@ -301,6 +301,30 @@ describe('UIComponents', () => {
       expect(button.disabled).toBe(true);
       expect(button.type).toBe('submit');
     });
+
+    test('should apply multiple Pico modifier classes', () => {
+      const button = UIComponents.createButton(
+        'Test',
+        vi.fn(),
+        'outline secondary',
+      );
+
+      expect(button.className).toBe('outline secondary');
+    });
+
+    test('should apply aria-label from options', () => {
+      const button = UIComponents.createButton('Test', vi.fn(), 'outline', {
+        'aria-label': 'Open settings',
+      });
+
+      expect(button.getAttribute('aria-label')).toBe('Open settings');
+    });
+
+    test('should map danger class to contrast', () => {
+      const button = UIComponents.createButton('Delete', vi.fn(), 'danger');
+
+      expect(button.className).toBe('contrast');
+    });
   });
 
   describe('createFormField', () => {
@@ -811,6 +835,26 @@ describe('UIComponents', () => {
         expect(buttons[0].textContent).toBe('Yes');
         expect(buttons[1].textContent).toBe('No');
       }
+    });
+
+    test('should call onCancel when backdrop is clicked', () => {
+      const mockConfirm = vi.fn();
+      const mockCancel = vi.fn();
+      const dialog = UIComponents.createConfirmDialog(
+        'Are you sure?',
+        mockConfirm,
+        mockCancel,
+      );
+
+      const backdropClick = new Event('click', {
+        bubbles: true,
+        cancelable: true,
+      });
+      Object.defineProperty(backdropClick, 'target', { value: dialog });
+      dialog.dispatchEvent(backdropClick);
+
+      expect(mockCancel).toHaveBeenCalled();
+      expect(mockConfirm).not.toHaveBeenCalled();
     });
   });
 

@@ -208,6 +208,13 @@ class ForgetfulMePopup {
         title: 'Manage Bookmarks',
         'aria-label': 'Manage bookmarks',
       },
+      {
+        text: 'Sign Out',
+        onClick: () => this.authUI.handleSignOut(),
+        className: 'outline secondary',
+        title: 'Sign out',
+        'aria-label': 'Sign out',
+      },
     ];
 
     const header = UIComponents.createHeaderWithNav('ForgetfulMe', navItems, {
@@ -223,6 +230,11 @@ class ForgetfulMePopup {
     // Create form card using component
     const formCard = this.quickAdd.createFormCard();
     mainContent.appendChild(formCard);
+
+    this.messageContainer = UIComponents.DOM.querySelector(
+      '#popupMessage',
+      mainContent,
+    );
 
     // Create recent entries card using component
     const recentCard = this.recentList.createCard();
@@ -240,7 +252,27 @@ class ForgetfulMePopup {
   }
 
   /**
-   * Save the current tab as a bookmark.
+   * Resolve the popup message container (scoped near the quick-add form).
+   * @returns {HTMLElement}
+   */
+  getMessageContainer() {
+    if (this.messageContainer?.isConnected) {
+      return this.messageContainer;
+    }
+
+    const scoped = UIComponents.DOM.querySelector(
+      '#popupMessage',
+      this.appContainer,
+    );
+    if (scoped) {
+      this.messageContainer = scoped;
+      return scoped;
+    }
+
+    return this.appContainer;
+  }
+
+  /**
    * @returns {Promise<'saved'|'duplicate'|'restricted'|'error'>}
    */
   async markAsRead() {
@@ -257,7 +289,7 @@ class ForgetfulMePopup {
       if (isRestrictedUrl(tab.url)) {
         UIMessages.error(
           'Cannot mark browser pages as read',
-          this.appContainer,
+          this.getMessageContainer(),
         );
         return 'restricted';
       }
@@ -276,7 +308,7 @@ class ForgetfulMePopup {
         return 'duplicate';
       }
 
-      UIMessages.success('Page marked as read!', this.appContainer);
+      UIMessages.success('Page marked as read!', this.getMessageContainer());
 
       // Clear form using component
       this.quickAdd.clearForm();
@@ -302,7 +334,7 @@ class ForgetfulMePopup {
       return 'saved';
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.markAsRead');
-      UIMessages.error(errorResult.userMessage, this.appContainer);
+      UIMessages.error(errorResult.userMessage, this.getMessageContainer());
       return 'error';
     }
   }
@@ -334,7 +366,7 @@ class ForgetfulMePopup {
       this.recentList.showError('Error loading entries');
 
       if (errorResult.shouldShowToUser) {
-        UIMessages.error(errorResult.userMessage, this.appContainer);
+        UIMessages.error(errorResult.userMessage, this.getMessageContainer());
       }
     }
   }
@@ -451,7 +483,10 @@ class ForgetfulMePopup {
       const updates = getBookmarkEditFormData();
 
       await this.supabaseService.updateBookmark(bookmarkId, updates);
-      UIMessages.success('Bookmark updated successfully!', this.appContainer);
+      UIMessages.success(
+        'Bookmark updated successfully!',
+        this.getMessageContainer(),
+      );
 
       // Notify background script about updated bookmark
       try {
@@ -468,7 +503,7 @@ class ForgetfulMePopup {
       }, 1500);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.updateBookmark');
-      UIMessages.error(errorResult.userMessage, this.appContainer);
+      UIMessages.error(errorResult.userMessage, this.getMessageContainer());
     }
   }
 }

@@ -181,6 +181,7 @@ export class RecentList {
    */
   createRecentListItem(bookmark, index) {
     const listItem = document.createElement('div');
+    listItem.className = 'recent-item';
     listItem.setAttribute('role', 'listitem');
     listItem.setAttribute(
       'aria-label',

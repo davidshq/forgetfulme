@@ -156,7 +156,11 @@ class ForgetfulMeOptions {
    * @description Creates and displays the main options interface with all cards
    */
   showMainInterface() {
+    const userEmail = this.supabaseConfig.session?.user?.email || '';
+
     const { configStatusContainer } = renderMainInterface(this.appContainer, {
+      userEmail,
+      signOut: () => this.authUI.handleSignOut(),
       addStatusType: () => this.addStatusType(),
       exportData: () => this.exportData(),
       openImportDialog: () => this.openImportDialog(),

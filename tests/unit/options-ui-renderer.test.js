@@ -179,6 +179,21 @@ describe('OptionsUIRenderer', () => {
       );
     });
 
+    test('should create account card when userEmail is provided', () => {
+      renderMainInterface(appContainer, {
+        ...callbacks,
+        userEmail: 'user@example.com',
+        signOut: vi.fn(),
+      });
+
+      const accountCard = appContainer.querySelector('.account-card');
+      expect(accountCard).toBeTruthy();
+      expect(
+        accountCard.querySelector('.user-account-email')?.textContent,
+      ).toBe('Signed in as user@example.com');
+      expect(accountCard.querySelector('button')?.textContent).toBe('Sign Out');
+    });
+
     test('should clear appContainer before rendering', () => {
       appContainer.innerHTML = '<div>Old content</div>';
 

@@ -107,6 +107,7 @@ describe('bookmark-edit-view', () => {
 
       expect(container.querySelector('h1').textContent).toBe('Edit Bookmark');
       expect(container.querySelector('.info-section')).toBeTruthy();
+      expect(container.querySelector('.bookmark-info')).toBeTruthy();
       expect(container.querySelector('#editBookmarkForm')).toBeTruthy();
       expect(UIComponents.createForm).toHaveBeenCalledWith(
         'editBookmarkForm',
@@ -117,6 +118,35 @@ describe('bookmark-edit-view', () => {
         ]),
         expect.objectContaining({ submitText: 'Update Bookmark' }),
       );
+    });
+
+    it('renders bookmark title as plain text (no innerHTML)', () => {
+      const container = document.createElement('div');
+      const bookmark = {
+        id: 'bookmark-1',
+        title: '<script>alert(1)</script>',
+        url: 'https://example.com',
+        read_status: 'read',
+        tags: [],
+        created_at: '2024-01-01T00:00:00.000Z',
+      };
+
+      createBookmarkEditView(bookmark, container, {
+        onBack: vi.fn(),
+        onUpdate: vi.fn(),
+      });
+
+      const info = container.querySelector('.bookmark-info');
+      expect(info).toBeTruthy();
+      expect(info.querySelector('script')).toBeNull();
+
+      const titleParagraph = (info.children || []).find(
+        child => child.tagName === 'P',
+      );
+      const titleSpan = (titleParagraph?.children || []).find(
+        child => child.tagName === 'SPAN',
+      );
+      expect(titleSpan?.textContent).toContain('<script>alert(1)</script>');
     });
 
     it('submits through onUpdate with the bookmark id', () => {

@@ -63,6 +63,13 @@ export class QuickAdd {
       'mark-as-read-card',
     );
 
+    const messageContainer = document.createElement('div');
+    messageContainer.id = 'popupMessage';
+    messageContainer.className = 'popup-message';
+    messageContainer.setAttribute('role', 'status');
+    messageContainer.setAttribute('aria-live', 'polite');
+    formCard.appendChild(messageContainer);
+
     return formCard;
   }
 

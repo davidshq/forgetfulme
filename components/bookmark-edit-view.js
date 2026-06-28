@@ -13,6 +13,73 @@ import {
 import { DEFAULT_STATUS_TYPES } from '../utils/constants.js';
 
 /**
+ * Append a labeled paragraph with plain-text value to a parent element.
+ * @param {HTMLElement} parent
+ * @param {string} label
+ * @param {string} value
+ */
+function appendInfoParagraph(parent, label, value) {
+  const paragraph = document.createElement('p');
+  const strong = document.createElement('strong');
+  strong.textContent = `${label}:`;
+  paragraph.appendChild(strong);
+
+  const valueText = document.createElement('span');
+  valueText.textContent = ` ${value}`;
+  paragraph.appendChild(valueText);
+
+  parent.appendChild(paragraph);
+}
+
+/**
+ * Build the bookmark info section using safe DOM APIs (no innerHTML).
+ * @param {Object} existingBookmark
+ * @returns {HTMLElement}
+ */
+function createBookmarkInfoSection(existingBookmark) {
+  const infoWrapper = document.createElement('div');
+  infoWrapper.className = 'bookmark-info';
+
+  appendInfoParagraph(infoWrapper, 'Title', existingBookmark.title);
+
+  const urlParagraph = document.createElement('p');
+  const urlLabel = document.createElement('strong');
+  urlLabel.textContent = 'URL:';
+  urlParagraph.appendChild(urlLabel);
+
+  const urlSpace = document.createElement('span');
+  urlSpace.textContent = ' ';
+  urlParagraph.appendChild(urlSpace);
+
+  const urlLink = document.createElement('a');
+  urlLink.href = existingBookmark.url;
+  urlLink.textContent = existingBookmark.url;
+  urlLink.target = '_blank';
+  urlLink.rel = 'noopener noreferrer';
+  urlParagraph.appendChild(urlLink);
+  infoWrapper.appendChild(urlParagraph);
+
+  appendInfoParagraph(
+    infoWrapper,
+    'Current Status',
+    formatStatus(existingBookmark.read_status),
+  );
+
+  const tagsText = existingBookmark.tags?.length
+    ? existingBookmark.tags.join(', ')
+    : 'None';
+  appendInfoParagraph(infoWrapper, 'Current Tags', tagsText);
+
+  appendInfoParagraph(
+    infoWrapper,
+    'Created',
+    formatTime(new Date(existingBookmark.created_at).getTime()),
+  );
+
+  return infoWrapper;
+}
+
+/**
  * Read edit form values from the shared bookmark edit form IDs.
  * @returns {{ read_status: string, tags: string[], updated_at: string }}
  */
@@ -64,21 +131,7 @@ export function createBookmarkEditView(
     'Bookmark Info',
     'info-section',
   );
-  infoSection.innerHTML = `
-    <div class="bookmark-info">
-      <p><strong>Title:</strong> ${existingBookmark.title}</p>
-      <p><strong>URL:</strong> <a href="${existingBookmark.url}" target="_blank">${existingBookmark.url}</a></p>
-      <p><strong>Current Status:</strong> ${formatStatus(
-        existingBookmark.read_status,
-      )}</p>
-      <p><strong>Current Tags:</strong> ${
-        existingBookmark.tags ? existingBookmark.tags.join(', ') : 'None'
-      }</p>
-      <p><strong>Created:</strong> ${formatTime(
-        new Date(existingBookmark.created_at).getTime(),
-      )}</p>
-    </div>
-  `;
+  infoSection.appendChild(createBookmarkInfoSection(existingBookmark));
 
   const statusOptions = buildStatusSelectOptions(statusTypes, {
     selected: existingBookmark.read_status,

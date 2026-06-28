@@ -20,6 +20,10 @@ export function renderMainInterface(appContainer, callbacks) {
     'main-container',
   );
 
+  if (callbacks.userEmail) {
+    mainContainer.appendChild(createAccountCard(callbacks));
+  }
+
   // Create config card
   const configCard = UIComponents.createCard(
     'Supabase Configuration',
@@ -79,6 +83,37 @@ export function renderMainInterface(appContainer, callbacks) {
       'config-status-container',
     ),
   };
+}
+
+/**
+ * Create account card with signed-in user and sign-out action
+ * @param {Object} callbacks - Callback functions
+ * @param {string} callbacks.userEmail - Signed-in user email
+ * @param {Function} callbacks.signOut - Sign-out handler
+ * @returns {HTMLElement} Account card
+ */
+function createAccountCard(callbacks) {
+  const accountInfo = document.createElement('div');
+  accountInfo.className = 'user-account';
+
+  const emailText = document.createElement('p');
+  emailText.className = 'user-account-email';
+  emailText.textContent = `Signed in as ${callbacks.userEmail}`;
+  accountInfo.appendChild(emailText);
+
+  const signOutBtn = UIComponents.createButton(
+    'Sign Out',
+    () => callbacks.signOut(),
+    'outline secondary',
+    {
+      id: 'sign-out-btn',
+      title: 'Sign out of ForgetfulMe',
+      'aria-label': 'Sign out',
+    },
+  );
+  accountInfo.appendChild(signOutBtn);
+
+  return UIComponents.createCard('Account', accountInfo, '', 'account-card');
 }
 
 /**

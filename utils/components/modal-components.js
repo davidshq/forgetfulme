@@ -46,6 +46,7 @@ export function createConfirmDialog(
   const dialog = createModal(options.title || 'Confirm', message, actions, {
     showClose: false,
     className: 'confirm-dialog',
+    onDismiss: onCancel,
     ...options,
   });
 
@@ -102,23 +103,38 @@ function createModal(title, content, actions = [], options = {}) {
 
   // Add close button if not disabled
   if (options.showClose !== false) {
-    const closeBtn = createButton('×', () => closeModal(dialog), 'outline', {
-      'aria-label': 'Close modal',
-      title: 'Close',
-    });
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.top = '1rem';
-    closeBtn.style.right = '1rem';
+    const closeBtn = createButton(
+      '×',
+      () => closeModal(dialog),
+      'outline modal-close',
+      {
+        'aria-label': 'Close modal',
+        title: 'Close',
+      },
+    );
+    article.style.position = 'relative';
     article.appendChild(closeBtn);
   }
 
   dialog.appendChild(article);
 
+  const handleDismiss = () => {
+    closeModal(dialog);
+    if (options.onDismiss) {
+      options.onDismiss();
+    }
+  };
+
   // Add backdrop click to close
   dialog.addEventListener('click', e => {
     if (e.target === dialog) {
-      closeModal(dialog);
+      handleDismiss();
     }
+  });
+
+  dialog.addEventListener('cancel', e => {
+    e.preventDefault();
+    handleDismiss();
   });
 
   return dialog;
@@ -129,7 +145,11 @@ function createModal(title, content, actions = [], options = {}) {
  * @param {HTMLElement} modal - Modal element
  */
 function closeModal(modal) {
-  if (modal && modal.tagName === 'DIALOG') {
+  if (
+    modal &&
+    modal.tagName === 'DIALOG' &&
+    typeof modal.close === 'function'
+  ) {
     modal.close();
   }
   if (modal && modal.parentNode) {

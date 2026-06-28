@@ -383,27 +383,37 @@ class AuthUI {
    * @param {Object} user - User object with profile information
    */
   showUserProfile(container, user) {
-    const profileHTML = `
-      <div class="user-profile">
-        <div class="profile-header">
-          <h3>Welcome back!</h3>
-          <p>Signed in as ${user.email}</p>
-        </div>
-        
-        <div class="profile-actions">
-          <button id="signOutBtn" class="auth-btn secondary">Sign Out</button>
-        </div>
-      </div>
-    `;
+    container.innerHTML = '';
 
-    container.innerHTML = profileHTML;
+    const profile = document.createElement('div');
+    profile.className = 'user-profile';
 
-    const signOutBtn = container.querySelector('#signOutBtn');
-    if (signOutBtn) {
-      signOutBtn.addEventListener('click', async () => {
-        await this.handleSignOut();
-      });
-    }
+    const profileHeader = document.createElement('div');
+    profileHeader.className = 'profile-header';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Welcome back!';
+    profileHeader.appendChild(heading);
+
+    const emailText = document.createElement('p');
+    emailText.textContent = `Signed in as ${user.email}`;
+    profileHeader.appendChild(emailText);
+
+    profile.appendChild(profileHeader);
+
+    const profileActions = document.createElement('div');
+    profileActions.className = 'profile-actions';
+
+    const signOutBtn = UIComponents.createButton(
+      'Sign Out',
+      () => this.handleSignOut(),
+      'secondary',
+      { id: 'signOutBtn' },
+    );
+    profileActions.appendChild(signOutBtn);
+    profile.appendChild(profileActions);
+
+    container.appendChild(profile);
   }
 }
 

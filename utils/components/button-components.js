@@ -32,6 +32,19 @@ export const BUTTON_STYLES = {
 };
 
 /**
+ * Map a class token to Pico CSS or passthrough utility classes.
+ * @param {string} token
+ * @returns {string}
+ */
+function mapClassToken(token) {
+  if (token === 'danger') {
+    return 'contrast';
+  }
+
+  return token;
+}
+
+/**
  * Create a button element
  * @param {string} text - Button text
  * @param {Function} onClick - Click handler
@@ -43,25 +56,33 @@ export function createButton(text, onClick, className = '', options = {}) {
   const button = document.createElement('button');
   button.textContent = text;
 
-  // Map custom classes to Pico CSS classes
-  let picoClass = '';
-  if (className.includes('primary')) picoClass = 'primary';
-  else if (className.includes('secondary')) picoClass = 'secondary';
-  else if (className.includes('danger')) picoClass = 'contrast';
-  else if (className.includes('outline')) picoClass = 'outline';
-  else picoClass = className;
+  const classes = className.split(/\s+/).filter(Boolean).map(mapClassToken);
 
-  button.className = picoClass;
+  button.className = classes.join(' ');
 
   if (onClick) {
     button.addEventListener('click', onClick);
   }
 
   // Apply additional attributes
-  if (options.type) button.type = options.type;
-  if (options.disabled) button.disabled = options.disabled;
-  if (options.title) button.title = options.title;
-  if (options.id) button.id = options.id;
+  if (options.type) {
+    button.type = options.type;
+  }
+  if (options.disabled) {
+    button.disabled = options.disabled;
+  }
+  if (options.title) {
+    button.title = options.title;
+  }
+  if (options.id) {
+    button.id = options.id;
+  }
+
+  for (const [key, value] of Object.entries(options)) {
+    if (key.startsWith('aria-') && value != null) {
+      button.setAttribute(key, String(value));
+    }
+  }
 
   return button;
 }
