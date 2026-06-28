@@ -10,7 +10,6 @@
 
 import { categorizeError } from './error-categorizer.js';
 import { getUserMessage } from './error-messages.js';
-import { validateInput } from './error-validator.js';
 
 /**
  * Centralized Error Handler for ForgetfulMe Extension
@@ -230,73 +229,6 @@ class ErrorHandler {
     error.context = context;
     error.timestamp = new Date().toISOString();
     return error;
-  }
-
-  /**
-   * Handle async operations with automatic error handling
-   * @param {Function} operation - Async operation to execute
-   * @param {string} context - Operation context
-   * @param {Object} options - Additional options
-   * @returns {Promise} - Promise that resolves with result or rejects with handled error
-   */
-  static async handleAsync(operation, context, options = {}) {
-    try {
-      return await operation();
-    } catch (error) {
-      const errorResult = this.handle(error, context, options);
-
-      if (errorResult.shouldShowToUser) {
-        // Re-throw with user-friendly message
-        throw this.createError(
-          errorResult.userMessage,
-          errorResult.errorInfo.type,
-          context,
-        );
-      } else {
-        // Log but don't show to user
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * Show error message in UI
-   * @param {string} message - Error message
-   * @param {string} type - Message type (error, warning, info, success)
-   * @param {HTMLElement} container - Container element
-   * @param {Object} options - Additional options
-   */
-  static showMessage(message, type = 'error', container = null, options = {}) {
-    if (!container) {
-      // No container provided - message cannot be displayed
-      return;
-    }
-
-    // Create message element
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message message-${type}`;
-    messageDiv.textContent = message;
-
-    // Add to container
-    container.appendChild(messageDiv);
-
-    // Auto-remove after timeout
-    const timeout = options.timeout || (type === 'error' ? 10000 : 5000);
-    setTimeout(() => {
-      if (messageDiv.parentNode) {
-        messageDiv.parentNode.removeChild(messageDiv);
-      }
-    }, timeout);
-  }
-
-  /**
-   * Validate and sanitize user input
-   * @param {string} input - User input
-   * @param {string} type - Input type (email, url, text, etc.)
-   * @returns {Object} - Validation result
-   */
-  static validateInput(input, type = 'text') {
-    return validateInput(input, type);
   }
 }
 

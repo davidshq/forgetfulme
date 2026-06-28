@@ -352,29 +352,6 @@ class AuthUI {
   }
 
   /**
-   * Convert error object to user-friendly message
-   * @param {Error} error - Error object
-   * @returns {string} User-friendly error message
-   */
-  getErrorMessage(error) {
-    if (error.message.includes('Invalid login credentials')) {
-      return 'Invalid email or password';
-    } else if (error.message.includes('User already registered')) {
-      return 'An account with this email already exists';
-    } else if (error.message.includes('Password should be at least')) {
-      return 'Password must be at least 6 characters';
-    } else if (error.message.includes('Unable to validate email address')) {
-      return 'Please enter a valid email address';
-    } else if (error.message.includes('Email not confirmed')) {
-      return 'Please check your email and click the verification link before signing in';
-    } else if (error.message.includes('Invalid token')) {
-      return 'Email verification failed. Please try signing up again or contact support';
-    } else {
-      return error.message || 'An error occurred. Please try again.';
-    }
-  }
-
-  /**
    * Display user profile information
    * @param {HTMLElement} container - Container element to render the profile
    * @param {Object} user - User object with profile information

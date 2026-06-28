@@ -119,19 +119,6 @@ class UIMessages {
   }
 
   /**
-   * Show warning message
-   * @param {string} message - Warning message
-   * @param {HTMLElement} container - Container element
-   * @param {Object} options - Additional options
-   */
-  static warning(message, container, options = {}) {
-    return this.show(message, this.MESSAGE_TYPES.WARNING, container, {
-      icon: '⚠️',
-      ...options,
-    });
-  }
-
-  /**
    * Show info message
    * @param {string} message - Info message
    * @param {HTMLElement} container - Container element
@@ -188,21 +175,6 @@ class UIMessages {
   }
 
   /**
-   * Clear all messages from container
-   * @param {HTMLElement} container - Container element
-   */
-  static clear(container) {
-    if (!container) return;
-
-    const messages = container.querySelectorAll('.ui-message');
-    messages.forEach(message => {
-      if (message.parentNode) {
-        message.parentNode.removeChild(message);
-      }
-    });
-  }
-
-  /**
    * Get default timeout for message type
    * @param {string} type - Message type
    * @returns {number} - Timeout in milliseconds
@@ -220,48 +192,6 @@ class UIMessages {
       default:
         return 5000;
     }
-  }
-
-  /**
-   * Show message with retry functionality
-   * @param {string} message - Error message
-   * @param {Function} retryFunction - Function to retry
-   * @param {HTMLElement} container - Container element
-   * @param {Object} _options - Additional options (unused)
-   */
-  static showWithRetry(message, retryFunction, container, _options = {}) {
-    const messageEl = this.error(message, container, _options);
-
-    if (retryFunction) {
-      // Use UIComponents if available, otherwise fall back to manual creation
-
-      if (typeof UIComponents !== 'undefined') {
-        const retryBtn = UIComponents.createButton(
-          'Retry',
-          () => {
-            if (messageEl.parentNode) {
-              messageEl.parentNode.removeChild(messageEl);
-            }
-            retryFunction();
-          },
-          'ui-message-retry-btn',
-        );
-        messageEl.appendChild(retryBtn);
-      } else {
-        const retryBtn = document.createElement('button');
-        retryBtn.textContent = 'Retry';
-        retryBtn.className = 'ui-message-retry-btn';
-        retryBtn.addEventListener('click', () => {
-          if (messageEl.parentNode) {
-            messageEl.parentNode.removeChild(messageEl);
-          }
-          retryFunction();
-        });
-        messageEl.appendChild(retryBtn);
-      }
-    }
-
-    return messageEl;
   }
 
   /**
@@ -326,39 +256,6 @@ class UIMessages {
     container.appendChild(confirmEl);
 
     return confirmEl;
-  }
-
-  /**
-   * Show toast notification
-   * @param {string} message - Toast message
-   * @param {string} type - Message type
-   * @param {Object} options - Additional options
-   */
-  static toast(message, type = 'info', options = {}) {
-    // Create toast container if it doesn't exist
-    let toastContainer = UIComponents.DOM.getElement('toast-container');
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.id = 'toast-container';
-      toastContainer.className = 'toast-container';
-      document.body.appendChild(toastContainer);
-    }
-
-    const toastEl = document.createElement('div');
-    toastEl.className = `toast toast-${type}`;
-    toastEl.textContent = message;
-
-    toastContainer.appendChild(toastEl);
-
-    // Auto-remove after timeout
-    const timeout = options.timeout || this.getDefaultTimeout(type);
-    setTimeout(() => {
-      if (toastEl.parentNode) {
-        toastEl.parentNode.removeChild(toastEl);
-      }
-    }, timeout);
-
-    return toastEl;
   }
 }
 

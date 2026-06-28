@@ -102,7 +102,7 @@ class BookmarkManagementPage {
       await this.authStateManager.initialize();
 
       // Listen for auth state changes
-      this.authStateManager.addListener(session => {
+      this.authStateManager.addListener('authStateChanged', session => {
         this.handleAuthStateChange(session);
       });
     } catch (error) {

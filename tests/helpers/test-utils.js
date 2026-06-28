@@ -127,14 +127,10 @@ const createMockErrorHandler = () => ({
 const createMockUIMessages = () => ({
   success: vi.fn(),
   error: vi.fn(),
-  warning: vi.fn(),
   info: vi.fn(),
   loading: vi.fn(),
-  clear: vi.fn(),
   show: vi.fn(),
-  showWithRetry: vi.fn(),
   confirm: vi.fn(),
-  toast: vi.fn(),
   getDefaultTimeout: vi.fn(),
   MESSAGE_TYPES: {
     SUCCESS: 'success',
@@ -204,7 +200,6 @@ const createMockAuthUI = () => ({
   handleLogin: vi.fn(),
   handleSignup: vi.fn(),
   handleSignOut: vi.fn(),
-  getErrorMessage: vi.fn(),
 });
 
 // Mock BookmarkTransformer

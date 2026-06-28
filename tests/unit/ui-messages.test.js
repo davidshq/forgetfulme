@@ -145,29 +145,6 @@ describe('UIMessages', () => {
     });
   });
 
-  describe('warning', () => {
-    test('should show warning message', () => {
-      const messageEl = UIMessages.warning('Please be careful!', container);
-
-      expect(messageEl.className).toContain('ui-message-warning');
-      expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '⚠️',
-      );
-    });
-
-    test('should show warning message with custom options', () => {
-      const messageEl = UIMessages.warning('Warning!', container, {
-        timeout: 8000,
-        icon: '🚨',
-      });
-
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
-        '🚨',
-      );
-    });
-  });
-
   describe('info', () => {
     test('should show info message', () => {
       const messageEl = UIMessages.info('Here is some information.', container);
@@ -244,31 +221,6 @@ describe('UIMessages', () => {
     });
   });
 
-  describe('clear', () => {
-    test('should clear all messages from container', () => {
-      // Add multiple messages
-      UIMessages.success('Success 1', container);
-      UIMessages.error('Error 1', container);
-      UIMessages.info('Info 1', container);
-
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(3);
-
-      UIMessages.clear(container);
-
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
-    });
-
-    test('should handle empty container', () => {
-      UIMessages.clear(container);
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
-    });
-
-    test('should handle null container', () => {
-      // Should not throw error
-      UIMessages.clear(null);
-    });
-  });
-
   describe('getDefaultTimeout', () => {
     test('should return correct timeout for error messages', () => {
       expect(UIMessages.getDefaultTimeout('error')).toBe(10000);
@@ -288,97 +240,6 @@ describe('UIMessages', () => {
 
     test('should return default timeout for unknown message type', () => {
       expect(UIMessages.getDefaultTimeout('unknown')).toBe(5000);
-    });
-  });
-
-  describe('showWithRetry', () => {
-    test('should show error message with retry button', () => {
-      // Ensure UIComponents is not available to use fallback implementation
-      delete global.UIComponents;
-
-      const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry(
-        'Operation failed',
-        mockRetryFunction,
-        container,
-      );
-
-      expect(messageEl.className).toContain('ui-message-error');
-      expect(messageEl.querySelector('.ui-message-retry-btn')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-retry-btn').textContent).toBe(
-        'Retry',
-      );
-    });
-
-    test('should call retry function when retry button is clicked', () => {
-      // Ensure UIComponents is not available to use fallback implementation
-      delete global.UIComponents;
-
-      const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry(
-        'Operation failed',
-        mockRetryFunction,
-        container,
-      );
-
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
-      retryBtn.click();
-
-      expect(mockRetryFunction).toHaveBeenCalled();
-      expect(container.querySelector('.ui-message-error')).toBeNull();
-    });
-
-    test('should remove message when retry button is clicked', () => {
-      // Ensure UIComponents is not available to use fallback implementation
-      delete global.UIComponents;
-
-      const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry(
-        'Operation failed',
-        mockRetryFunction,
-        container,
-      );
-
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
-      retryBtn.click();
-
-      expect(container.querySelector('.ui-message-error')).toBeNull();
-    });
-
-    test('should handle missing retry function', () => {
-      // Ensure UIComponents is not available to use fallback implementation
-      delete global.UIComponents;
-
-      const messageEl = UIMessages.showWithRetry(
-        'Operation failed',
-        null,
-        container,
-      );
-
-      expect(messageEl.className).toContain('ui-message-error');
-      expect(messageEl.querySelector('.ui-message-retry-btn')).toBeFalsy();
-    });
-
-    test('should handle retry function errors', () => {
-      // Ensure UIComponents is not available to use fallback implementation
-      delete global.UIComponents;
-
-      const mockRetryFunction = vi.fn().mockImplementation(() => {
-        throw new Error('Retry error');
-      });
-
-      const messageEl = UIMessages.showWithRetry(
-        'Operation failed',
-        mockRetryFunction,
-        container,
-      );
-
-      const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
-
-      // The implementation doesn't have a try-catch around the retry function
-      // so the error will be thrown, which is expected behavior
-      expect(() => retryBtn.click()).toThrow('Retry error');
-      expect(mockRetryFunction).toHaveBeenCalled();
     });
   });
 
@@ -537,63 +398,15 @@ describe('UIMessages', () => {
     });
   });
 
-  describe('toast', () => {
-    test('should show toast message', () => {
-      UIMessages.toast('Toast message');
-
-      const toastContainer = document.getElementById('toast-container');
-      expect(toastContainer).toBeDefined();
-      const toastEl = toastContainer.querySelector('.toast');
-      expect(toastEl).toBeDefined();
-      expect(toastEl.tagName).toBe('DIV');
-      expect(toastEl.className).toBe('toast toast-info');
-      expect(toastEl.textContent).toBe('Toast message');
-    });
-
-    test('should show toast with custom options', () => {
-      const toastEl = UIMessages.toast('Toast message', 'success', {
-        timeout: 3000,
-        position: 'top-right',
-      });
-
-      expect(toastEl).toBeDefined();
-      expect(toastEl.className).toBe('toast toast-success');
-    });
-
-    test('should auto-remove toast after duration', async () => {
-      const toastEl = UIMessages.toast('Toast message', 'info', {
-        timeout: 10, // 10ms for testing
-      });
-
-      const toastContainer = document.getElementById('toast-container');
-      expect(toastContainer.querySelector('.toast')).toBeTruthy();
-
-      // Wait for duration
-      await new Promise(resolve => setTimeout(resolve, 20));
-
-      // The mock DOM implementation doesn't properly handle removeChild in setTimeout
-      // so we can't test the actual removal, but we can verify the timeout was set
-      expect(toastEl).toBeDefined();
-    });
-
-    test('should handle toast removal errors', async () => {
-      // The implementation doesn't have error handling for removeChild
-      // so we'll just verify that the toast is created and the timeout is set
-      const toastEl = UIMessages.toast('Toast message', 'info', {
-        timeout: 10,
-      });
-
-      expect(toastEl).toBeDefined();
-      expect(toastEl.className).toBe('toast toast-info');
-      expect(toastEl.textContent).toBe('Toast message');
-    });
-  });
-
   describe('Integration Tests', () => {
     test('should handle multiple message types in same container', () => {
       const successMsg = UIMessages.success('Success!', container);
       const errorMsg = UIMessages.error('Error!', container);
-      const warningMsg = UIMessages.warning('Warning!', container);
+      const warningMsg = UIMessages.show(
+        'Warning!',
+        UIMessages.MESSAGE_TYPES.WARNING,
+        container,
+      );
       const infoMsg = UIMessages.info('Info!', container);
 
       expect(container.querySelectorAll('.ui-message')).toHaveLength(4);
@@ -603,16 +416,12 @@ describe('UIMessages', () => {
       expect(container.querySelector('.ui-message-info')).toBe(infoMsg);
     });
 
-    test('should clear all messages at once', () => {
+    test('should allow multiple messages in same container', () => {
       UIMessages.success('Success!', container);
       UIMessages.error('Error!', container);
-      UIMessages.warning('Warning!', container);
+      UIMessages.show('Warning!', 'warning', container);
 
       expect(container.querySelectorAll('.ui-message')).toHaveLength(3);
-
-      UIMessages.clear(container);
-
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(0);
     });
 
     test('should handle message removal when parent is removed', () => {

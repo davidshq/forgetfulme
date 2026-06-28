@@ -85,19 +85,6 @@ class BookmarkTransformer {
   }
 
   /**
-   * Transform import data to Supabase format
-   * @param {Object} bookmark - Import bookmark data
-   * @param {string} userId - User ID
-   * @returns {Object} Transformed bookmark data
-   */
-  static fromImportData(bookmark, userId) {
-    return this.toSupabaseFormat(bookmark, userId, {
-      preserveTimestamps: true,
-      setDefaults: false,
-    });
-  }
-
-  /**
    * Transform current tab data to bookmark format
    * @param {Object} tab - Chrome tab object
    * @param {string} status - Read status
@@ -195,26 +182,6 @@ class BookmarkTransformer {
   }
 
   /**
-   * Transform bookmark for export format
-   * @param {Object} bookmark - Supabase bookmark data
-   * @returns {Object} Export-formatted bookmark
-   */
-  static toExportFormat(bookmark) {
-    return {
-      id: bookmark.id,
-      url: bookmark.url,
-      title: bookmark.title,
-      description: bookmark.description,
-      read_status: bookmark.read_status,
-      tags: bookmark.tags,
-      created_at: bookmark.created_at,
-      updated_at: bookmark.updated_at,
-      last_accessed: bookmark.last_accessed,
-      access_count: bookmark.access_count,
-    };
-  }
-
-  /**
    * Transform multiple bookmarks at once
    * @param {Array} bookmarks - Array of bookmark data
    * @param {string} userId - User ID
@@ -225,27 +192,6 @@ class BookmarkTransformer {
     return bookmarks.map(bookmark =>
       this.toSupabaseFormat(bookmark, userId, options),
     );
-  }
-
-  /**
-   * Get default bookmark structure
-   * @param {string} userId - User ID
-   * @returns {Object} Default bookmark structure
-   */
-  static getDefaultStructure(userId) {
-    const now = new Date().toISOString();
-    return {
-      user_id: userId,
-      url: '',
-      title: '',
-      description: '',
-      read_status: 'unread',
-      tags: [],
-      created_at: now,
-      updated_at: now,
-      last_accessed: now,
-      access_count: 0,
-    };
   }
 }
 

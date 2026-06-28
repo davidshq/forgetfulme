@@ -203,32 +203,6 @@ describe('BookmarkTransformer', () => {
     });
   });
 
-  describe('fromImportData', () => {
-    test('should transform import data with preserved timestamps', () => {
-      const bookmark = {
-        url: 'https://example.com',
-        title: 'Import Bookmark',
-        created_at: '2022-01-01T00:00:00.000Z',
-        access_count: 5,
-      };
-
-      const result = BookmarkTransformer.fromImportData(bookmark, mockUserId);
-
-      expect(result).toEqual({
-        user_id: mockUserId,
-        url: 'https://example.com',
-        title: 'Import Bookmark',
-        description: '',
-        read_status: 'unread',
-        tags: [],
-        created_at: '2022-01-01T00:00:00.000Z',
-        updated_at: expect.any(String),
-        last_accessed: expect.any(String),
-        access_count: 5,
-      });
-    });
-  });
-
   describe('fromCurrentTab', () => {
     test('should transform current tab to bookmark format', () => {
       const tab = {
@@ -483,38 +457,6 @@ describe('BookmarkTransformer', () => {
     });
   });
 
-  describe('toExportFormat', () => {
-    test('should transform to export format', () => {
-      const bookmark = {
-        id: 'bookmark-123',
-        url: 'https://example.com',
-        title: 'Export Bookmark',
-        description: 'Export description',
-        read_status: 'read',
-        tags: ['export', 'test'],
-        created_at: '2023-01-01T00:00:00.000Z',
-        updated_at: '2023-01-02T00:00:00.000Z',
-        last_accessed: '2023-01-03T00:00:00.000Z',
-        access_count: 5,
-      };
-
-      const result = BookmarkTransformer.toExportFormat(bookmark);
-
-      expect(result).toEqual({
-        id: 'bookmark-123',
-        url: 'https://example.com',
-        title: 'Export Bookmark',
-        description: 'Export description',
-        read_status: 'read',
-        tags: ['export', 'test'],
-        created_at: '2023-01-01T00:00:00.000Z',
-        updated_at: '2023-01-02T00:00:00.000Z',
-        last_accessed: '2023-01-03T00:00:00.000Z',
-        access_count: 5,
-      });
-    });
-  });
-
   describe('transformMultiple', () => {
     test('should transform multiple bookmarks', () => {
       const bookmarks = [
@@ -558,25 +500,6 @@ describe('BookmarkTransformer', () => {
       );
 
       expect(result[0].access_count).toBe(5);
-    });
-  });
-
-  describe('getDefaultStructure', () => {
-    test('should return default bookmark structure', () => {
-      const result = BookmarkTransformer.getDefaultStructure(mockUserId);
-
-      expect(result).toEqual({
-        user_id: mockUserId,
-        url: '',
-        title: '',
-        description: '',
-        read_status: 'unread',
-        tags: [],
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
-        last_accessed: expect.any(String),
-        access_count: 0,
-      });
     });
   });
 });

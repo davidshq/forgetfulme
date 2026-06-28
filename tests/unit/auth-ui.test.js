@@ -413,26 +413,4 @@ describe('AuthUI', () => {
       );
     });
   });
-
-  describe('getErrorMessage', () => {
-    it('should return user-friendly error messages', () => {
-      expect(
-        authUI.getErrorMessage(new Error('Invalid login credentials')),
-      ).toBe('Invalid email or password');
-      expect(authUI.getErrorMessage(new Error('User already registered'))).toBe(
-        'An account with this email already exists',
-      );
-      expect(
-        authUI.getErrorMessage(
-          new Error('Password should be at least 6 characters'),
-        ),
-      ).toBe('Password must be at least 6 characters');
-      expect(
-        authUI.getErrorMessage(new Error('Unable to validate email address')),
-      ).toBe('Please enter a valid email address');
-      expect(authUI.getErrorMessage(new Error('Unknown error'))).toBe(
-        'Unknown error',
-      );
-    });
-  });
 });

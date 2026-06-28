@@ -61,8 +61,7 @@ import { RETRY_CONFIG } from './constants.js';
  * } catch (error) {
  *   const errorResult = ErrorHandler.handle(error, 'bookmark.load');
  *   if (errorResult.shouldRetry) {
- *     // Show retry UI to user
- *     UIMessages.showWithRetry(errorResult.userMessage, retryFunction, container);
+ *     UIMessages.error(errorResult.userMessage, container);
  *   }
  * }
  */
