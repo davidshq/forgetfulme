@@ -371,9 +371,39 @@ describe('BookmarkOperations', () => {
       });
 
       expect(mockSupabase.from).toHaveBeenCalledWith('bookmarks');
-      expect(mockSupabase.update).toHaveBeenCalled();
+      expect(mockSupabase.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Updated',
+          updated_at: expect.any(String),
+        }),
+      );
       expect(mockSupabase.eq).toHaveBeenCalledWith('id', '1');
       expect(result).toEqual(updated);
+    });
+
+    test('should strip disallowed fields from updates', async () => {
+      mockSupabase.select.mockResolvedValue({
+        data: [{ id: '1', title: 'Updated' }],
+        error: null,
+      });
+
+      await bookmarkOps.updateBookmark('1', {
+        title: 'Updated',
+        user_id: 'other-user',
+        id: 'hijacked-id',
+      });
+
+      expect(mockSupabase.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Updated',
+        }),
+      );
+      expect(mockSupabase.update).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          user_id: 'other-user',
+          id: 'hijacked-id',
+        }),
+      );
     });
 
     test('should handle errors', async () => {

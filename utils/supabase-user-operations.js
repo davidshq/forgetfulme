@@ -23,11 +23,27 @@ export class UserOperations {
    * @param {Object} supabase - Supabase client instance
    * @param {Object} config - Supabase config instance
    * @param {Map} pendingRequests - Map for request deduplication
+   * @param {Object} [tokenRefreshHandler=null] - Token refresh handler instance
    */
-  constructor(supabase, config, pendingRequests) {
+  constructor(supabase, config, pendingRequests, tokenRefreshHandler = null) {
     this.supabase = supabase;
     this.config = config;
     this.pendingRequests = pendingRequests;
+    this.tokenRefreshHandler = tokenRefreshHandler;
+  }
+
+  /**
+   * Execute a user operation with token refresh handling
+   * @private
+   * @param {Function} operation - Operation to execute
+   * @param {string} context - Context for error handling
+   * @returns {Promise<any>} Result of operation
+   */
+  async _executeWithTokenRefresh(operation, context) {
+    if (this.tokenRefreshHandler) {
+      return this.tokenRefreshHandler.executeWithRefresh(operation, context);
+    }
+    return operation();
   }
 
   /**
@@ -39,24 +55,26 @@ export class UserOperations {
   async saveUserPreferences(preferences) {
     requireSupabaseAuth(this.config, 'supabase-service.saveUserPreferences');
 
-    const userId = this.config.getCurrentUser().id;
+    return this._executeWithTokenRefresh(async () => {
+      const userId = this.config.getCurrentUser().id;
 
-    try {
-      const { data, error } = await this.supabase
-        .from('user_profiles')
-        .upsert({
-          id: userId,
-          preferences: preferences,
-          updated_at: new Date().toISOString(),
-        })
-        .select();
+      try {
+        const { data, error } = await this.supabase
+          .from('user_profiles')
+          .upsert({
+            id: userId,
+            preferences: preferences,
+            updated_at: new Date().toISOString(),
+          })
+          .select();
 
-      if (error) throw error;
-      return data?.[0] || { id: userId, preferences };
-    } catch (error) {
-      ErrorHandler.handle(error, 'supabase-service.saveUserPreferences');
-      throw error;
-    }
+        if (error) throw error;
+        return data?.[0] || { id: userId, preferences };
+      } catch (error) {
+        ErrorHandler.handle(error, 'supabase-service.saveUserPreferences');
+        throw error;
+      }
+    }, 'supabase-service.saveUserPreferences');
   }
 
   /**
@@ -67,28 +85,30 @@ export class UserOperations {
   async getUserPreferences() {
     requireSupabaseAuth(this.config, 'supabase-service.getUserPreferences');
 
-    const userId = this.config.getCurrentUser().id;
-    const requestKey = getRequestKey(
-      'getUserPreferences',
-      {},
-      this.config,
-      userId,
-    );
+    return this._executeWithTokenRefresh(async () => {
+      const userId = this.config.getCurrentUser().id;
+      const requestKey = getRequestKey(
+        'getUserPreferences',
+        {},
+        this.config,
+        userId,
+      );
 
-    return deduplicateRequest(this.pendingRequests, requestKey, async () => {
-      try {
-        const { data, error } = await this.supabase
-          .from('user_profiles')
-          .select('preferences')
-          .eq('id', userId)
-          .single();
+      return deduplicateRequest(this.pendingRequests, requestKey, async () => {
+        try {
+          const { data, error } = await this.supabase
+            .from('user_profiles')
+            .select('preferences')
+            .eq('id', userId)
+            .single();
 
-        if (error) throw error;
-        return data?.preferences || {};
-      } catch (error) {
-        ErrorHandler.handle(error, 'supabase-service.getUserPreferences');
-        throw error;
-      }
-    });
+          if (error) throw error;
+          return data?.preferences || {};
+        } catch (error) {
+          ErrorHandler.handle(error, 'supabase-service.getUserPreferences');
+          throw error;
+        }
+      });
+    }, 'supabase-service.getUserPreferences');
   }
 }

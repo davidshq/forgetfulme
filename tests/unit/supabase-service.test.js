@@ -27,6 +27,7 @@ vi.mock('../../utils/bookmark-transformer.js');
 describe('SupabaseService', () => {
   let supabaseService;
   let mockSupabaseConfig;
+  let mockAuthStateManager;
   let mockSupabaseClient;
 
   beforeEach(async () => {
@@ -65,6 +66,10 @@ describe('SupabaseService', () => {
 
     mockSupabaseConfig.getSupabaseClient.mockReturnValue(mockSupabaseClient);
 
+    mockAuthStateManager = {
+      initialize: vi.fn().mockResolvedValue(),
+    };
+
     // Mock BookmarkTransformer
     BookmarkTransformer.validate.mockReturnValue({ isValid: true, errors: [] });
     BookmarkTransformer.toSupabaseFormat.mockReturnValue({
@@ -89,7 +94,10 @@ describe('SupabaseService', () => {
       errorInfo: { type: 'DATABASE' },
     });
 
-    supabaseService = new SupabaseService(mockSupabaseConfig);
+    supabaseService = new SupabaseService(
+      mockSupabaseConfig,
+      mockAuthStateManager,
+    );
     // Initialize the service
     await supabaseService.initialize();
   });
@@ -281,7 +289,14 @@ describe('SupabaseService', () => {
 
       expect(mockSupabaseConfig.initialize).toHaveBeenCalled();
       expect(mockSupabaseConfig.getSupabaseClient).toHaveBeenCalled();
+      expect(mockAuthStateManager.initialize).toHaveBeenCalled();
       expect(supabaseService.supabase).toBe(mockSupabaseClient);
+    });
+
+    it('should require authStateManager in constructor', () => {
+      expect(() => new SupabaseService(mockSupabaseConfig)).toThrow(
+        'authStateManager is required',
+      );
     });
   });
 

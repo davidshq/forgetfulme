@@ -84,7 +84,10 @@ describe('ErrorHandler', () => {
 
       ErrorHandler.logError(errorInfo);
 
-      // ErrorHandler doesn't log errors by default
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        '[test] Critical error',
+        errorInfo.originalError,
+      );
     });
 
     test('should log high severity errors', () => {
@@ -98,7 +101,10 @@ describe('ErrorHandler', () => {
 
       ErrorHandler.logError(errorInfo);
 
-      // ErrorHandler doesn't log errors by default
+      expect(mockConsole.error).toHaveBeenCalledWith(
+        '[test] Auth error',
+        errorInfo.originalError,
+      );
     });
 
     test('should log medium severity errors', () => {
@@ -112,7 +118,10 @@ describe('ErrorHandler', () => {
 
       ErrorHandler.logError(errorInfo);
 
-      // ErrorHandler doesn't log warnings by default
+      expect(mockConsole.warn).toHaveBeenCalledWith(
+        '[test] Network error',
+        errorInfo.originalError,
+      );
     });
 
     test('should log low severity errors', () => {
@@ -126,7 +135,7 @@ describe('ErrorHandler', () => {
 
       ErrorHandler.logError(errorInfo);
 
-      // ErrorHandler doesn't log info by default
+      expect(mockConsole.warn).toHaveBeenCalledWith('[test] Validation error');
     });
 
     test('should not log when silent option is true', () => {
@@ -141,6 +150,7 @@ describe('ErrorHandler', () => {
       ErrorHandler.logError(errorInfo, { silent: true });
 
       expect(mockConsole.warn).not.toHaveBeenCalled();
+      expect(mockConsole.error).not.toHaveBeenCalled();
     });
   });
 

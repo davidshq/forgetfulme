@@ -35,6 +35,18 @@ class ConfigUI {
   }
 
   /**
+   * Resolve the dedicated message container within a page container
+   * @param {HTMLElement} container - Page container element
+   * @returns {HTMLElement} Message container element
+   * @private
+   */
+  _getMessageContainer(container) {
+    return (
+      UIComponents.DOM.querySelector('#configMessage', container) || container
+    );
+  }
+
+  /**
    * Display the configuration form
    * @param {HTMLElement} container - Container element to render the form
    * @description Creates and displays the Supabase configuration form with help section
@@ -50,7 +62,7 @@ class ConfigUI {
     // Create config form
     const configForm = UIComponents.createForm(
       'configForm',
-      (_e, _form) => this.handleConfigSubmit(document),
+      (_e, _form) => this.handleConfigSubmit(container),
       [
         {
           type: 'url',
@@ -143,14 +155,11 @@ class ConfigUI {
 
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
-
-        UIMessages.info('Current configuration loaded', container);
       }
     } catch (error) {
       ErrorHandler.handle(error, 'config-ui.loadCurrentConfig', {
         silent: true,
       });
-      // Don't show user for this error as it's not critical
     }
   }
 
@@ -160,6 +169,7 @@ class ConfigUI {
    * @description Validates and saves configuration, then tests the connection
    */
   async handleConfigSubmit(container) {
+    const messageContainer = this._getMessageContainer(container);
     const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
     const keyInput = UIComponents.DOM.querySelector(
       '#supabaseAnonKey',
@@ -170,43 +180,38 @@ class ConfigUI {
     const anonKey = keyInput ? keyInput.value.trim() : '';
 
     if (!url || !anonKey) {
-      UIMessages.error('Please fill in all fields', container);
+      UIMessages.error('Please fill in all fields', messageContainer);
       return;
     }
 
     try {
-      UIMessages.loading('Saving configuration...', container);
+      UIMessages.loading('Saving configuration...', messageContainer);
 
       const result = await this.config.setConfiguration(url, anonKey);
 
       if (result.success) {
-        UIMessages.success('Configuration saved successfully!', container);
-
-        // Test the configuration
-        setTimeout(async () => {
-          try {
-            await this.config.initialize();
-            UIMessages.success(
-              'Configuration test successful! You can now use the extension.',
-              container,
-            );
-          } catch (error) {
-            ErrorHandler.handle(error, 'config-ui.testConfiguration');
-            UIMessages.error(
-              'Configuration saved but test failed. Please check your credentials.',
-              container,
-            );
-          }
-        }, 1000);
+        try {
+          await this.config.initialize();
+          UIMessages.success(
+            'Configuration saved and verified! You can now use the extension.',
+            messageContainer,
+          );
+        } catch (error) {
+          ErrorHandler.handle(error, 'config-ui.testConfiguration');
+          UIMessages.error(
+            'Configuration saved but test failed. Please check your credentials.',
+            messageContainer,
+          );
+        }
       } else {
-        UIMessages.error(`Error: ${result.message}`, container);
+        UIMessages.error(`Error: ${result.message}`, messageContainer);
       }
     } catch (error) {
       const errorResult = ErrorHandler.handle(
         error,
         'config-ui.handleConfigSubmit',
       );
-      UIMessages.error(errorResult.userMessage, container);
+      UIMessages.error(errorResult.userMessage, messageContainer);
     }
   }
 

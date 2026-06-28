@@ -72,3 +72,6 @@ export const DEFAULT_STATUS_TYPES = [
 
 /** Default page size for bookmark management list and search. */
 export const BOOKMARK_LIST_LIMIT = 100;
+
+/** Page size for the popup recent entries list. */
+export const RECENT_LIST_LIMIT = 5;

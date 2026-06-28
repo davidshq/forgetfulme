@@ -301,28 +301,31 @@ describe('UIMessages', () => {
     });
   });
 
-  describe('Integration Tests', () => {
-    test('should handle multiple message types in same container', () => {
-      const successMsg = UIMessages.success('Success!', container);
-      const errorMsg = UIMessages.error('Error!', container);
-      const warningMsg = UIMessages.show(
-        'Warning!',
-        UIMessages.MESSAGE_TYPES.WARNING,
-        container,
-      );
-      const infoMsg = UIMessages.info('Info!', container);
+  describe('clearMessages', () => {
+    test('should remove existing messages from container', () => {
+      UIMessages.success('First', container);
+      UIMessages.error('Second', container);
 
-      expect(container.querySelectorAll('.ui-message')).toHaveLength(4);
-      expect(container.querySelector('.ui-message-success')).toBe(successMsg);
-      expect(container.querySelector('.ui-message-error')).toBe(errorMsg);
-      expect(container.querySelector('.ui-message-warning')).toBe(warningMsg);
-      expect(container.querySelector('.ui-message-info')).toBe(infoMsg);
+      expect(container.querySelectorAll('.ui-message')).toHaveLength(1);
+      expect(container.querySelector('.ui-message-error')).toBeTruthy();
     });
+  });
 
-    test('should allow multiple messages in same container', () => {
+  describe('Integration Tests', () => {
+    test('should replace previous message when showing a new one', () => {
       UIMessages.success('Success!', container);
       UIMessages.error('Error!', container);
-      UIMessages.show('Warning!', 'warning', container);
+      UIMessages.show('Warning!', UIMessages.MESSAGE_TYPES.WARNING, container);
+      UIMessages.info('Info!', container);
+
+      expect(container.querySelectorAll('.ui-message')).toHaveLength(1);
+      expect(container.querySelector('.ui-message-info')).toBeTruthy();
+    });
+
+    test('should allow stacking messages when append option is set', () => {
+      UIMessages.success('Success!', container, { append: true });
+      UIMessages.error('Error!', container, { append: true });
+      UIMessages.show('Warning!', 'warning', container, { append: true });
 
       expect(container.querySelectorAll('.ui-message')).toHaveLength(3);
     });

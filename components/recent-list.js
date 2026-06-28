@@ -20,9 +20,18 @@ import { appendBookmarkMeta } from './bookmark-meta.js';
 export class RecentList {
   /**
    * Create a recent list component
+   * @param {Object} [options={}] - Configuration options
+   * @param {Function} [options.onPageChange] - Called with the target page number
    */
-  constructor() {
+  constructor(options = {}) {
     this.container = null;
+    this.paginationContainer = null;
+    this.pageIndicator = null;
+    this.prevButton = null;
+    this.nextButton = null;
+    this.currentPage = 1;
+    this.hasNextPage = false;
+    this.onPageChange = options.onPageChange || (() => {});
   }
 
   /**
@@ -49,14 +58,29 @@ export class RecentList {
       cardList.appendChild(recentList);
     }
 
+    const pagination = document.createElement('footer');
+    pagination.className = 'recent-list-pagination';
+    pagination.setAttribute('role', 'navigation');
+    pagination.setAttribute('aria-label', 'Recent entries pagination');
+    pagination.hidden = true;
+    pagination.style.alignItems = 'center';
+    pagination.style.justifyContent = 'space-between';
+    pagination.style.gap = '0.5rem';
+    pagination.style.marginTop = '0.75rem';
+    recentCard.appendChild(pagination);
+    this.paginationContainer = pagination;
+
     return recentCard;
   }
 
   /**
    * Display bookmarks in the list
    * @param {Array} bookmarks - Array of bookmark objects to display
+   * @param {Object} [pagination={}] - Pagination state
+   * @param {number} [pagination.page=1] - Current page number
+   * @param {boolean} [pagination.hasNextPage=false] - Whether a next page exists
    */
-  displayBookmarks(bookmarks) {
+  displayBookmarks(bookmarks, pagination = {}) {
     if (!this.container) {
       this.container = UIComponents.DOM.getElement('recent-list');
     }
@@ -83,6 +107,7 @@ export class RecentList {
       emptyItem.appendChild(emptyMeta);
 
       this.container.appendChild(emptyItem);
+      this.updatePagination({ page: 1, hasNextPage: false });
       return;
     }
 
@@ -91,6 +116,61 @@ export class RecentList {
       const listItem = this.createRecentListItem(uiBookmark, index);
       this.container.appendChild(listItem);
     });
+
+    this.updatePagination(pagination);
+  }
+
+  /**
+   * Update pagination controls for the recent list
+   * @param {Object} pagination - Pagination state
+   * @param {number} pagination.page - Current page number
+   * @param {boolean} pagination.hasNextPage - Whether a next page exists
+   */
+  updatePagination({ page = 1, hasNextPage = false } = {}) {
+    if (!this.paginationContainer) {
+      return;
+    }
+
+    this.currentPage = page;
+    this.hasNextPage = hasNextPage;
+
+    const showPagination = page > 1 || hasNextPage;
+    this.paginationContainer.hidden = !showPagination;
+    if (!showPagination) {
+      this.paginationContainer.style.display = 'none';
+      return;
+    }
+
+    this.paginationContainer.style.display = 'flex';
+    this.paginationContainer.innerHTML = '';
+
+    this.prevButton = UIComponents.createButton(
+      '← Previous',
+      () => this.onPageChange(page - 1),
+      'outline secondary',
+      { disabled: page <= 1 },
+    );
+    this.prevButton.setAttribute(
+      'aria-label',
+      'Previous page of recent entries',
+    );
+
+    this.pageIndicator = document.createElement('span');
+    this.pageIndicator.className = 'recent-list-page-indicator';
+    this.pageIndicator.setAttribute('aria-live', 'polite');
+    this.pageIndicator.textContent = `Page ${page}`;
+
+    this.nextButton = UIComponents.createButton(
+      'Next →',
+      () => this.onPageChange(page + 1),
+      'outline secondary',
+      { disabled: !hasNextPage },
+    );
+    this.nextButton.setAttribute('aria-label', 'Next page of recent entries');
+
+    this.paginationContainer.appendChild(this.prevButton);
+    this.paginationContainer.appendChild(this.pageIndicator);
+    this.paginationContainer.appendChild(this.nextButton);
   }
 
   /**
@@ -131,6 +211,8 @@ export class RecentList {
       this.container = UIComponents.DOM.getElement('recent-list');
     }
     if (!this.container) return;
+
+    this.updatePagination({ page: 1, hasNextPage: false });
 
     const errorItem = document.createElement('div');
     errorItem.setAttribute('role', 'listitem');

@@ -76,7 +76,7 @@ describe('BookmarkManagementPage', () => {
 
     ErrorHandler.handle = vi.fn().mockReturnValue(PAGE_ERROR_HANDLER_RESULT);
 
-    mockSupabaseService = new SupabaseService();
+    mockSupabaseService = new SupabaseService({}, { initialize: vi.fn() });
     mockSupabaseService.saveBookmark = vi.fn();
     mockSupabaseService.updateBookmark = vi.fn();
     mockSupabaseService.getBookmarks = vi.fn();

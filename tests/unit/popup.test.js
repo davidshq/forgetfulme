@@ -48,7 +48,8 @@ vi.mock('../../components/quick-add.js', () => ({
 
 vi.mock('../../components/recent-list.js', () => ({
   RecentList: class MockRecentList {
-    constructor() {
+    constructor(options = {}) {
+      this.onPageChange = options.onPageChange;
       this.createCard = vi.fn().mockReturnValue(document.createElement('div'));
       this.loadRecentEntries = vi.fn();
       this.displayBookmarks = vi.fn();
@@ -74,7 +75,7 @@ import ErrorHandler from '../../utils/error-handler.js';
 import SupabaseService from '../../supabase-service.js';
 import BookmarkTransformer from '../../utils/bookmark-transformer.js';
 import * as bookmarkEditView from '../../components/bookmark-edit-view.js';
-import { STORAGE_KEYS } from '../../utils/constants.js';
+import { STORAGE_KEYS, RECENT_LIST_LIMIT } from '../../utils/constants.js';
 
 describe('ForgetfulMePopup', () => {
   let popup;
@@ -103,7 +104,7 @@ describe('ForgetfulMePopup', () => {
     });
 
     // Create a new instance of SupabaseService and ensure methods are vi.fn() instances
-    mockSupabaseService = new SupabaseService();
+    mockSupabaseService = new SupabaseService({}, { initialize: vi.fn() });
     mockSupabaseService.saveBookmark = vi.fn();
     mockSupabaseService.updateBookmark = vi.fn();
     mockSupabaseService.getBookmarks = vi.fn();
@@ -353,6 +354,64 @@ describe('ForgetfulMePopup', () => {
       expect(mockUIMessages.error).toHaveBeenCalledWith(
         'Test error message',
         expect.any(Object),
+      );
+    });
+  });
+
+  describe('loadRecentEntries', () => {
+    it('loads the requested page with the recent list limit', async () => {
+      const bookmarks = Array.from(
+        { length: RECENT_LIST_LIMIT },
+        (_, index) => ({
+          id: `bookmark-${index}`,
+          title: `Example ${index}`,
+          read_status: 'read',
+        }),
+      );
+      mockSupabaseService.getBookmarks.mockResolvedValue(bookmarks);
+
+      await popup.loadRecentEntries(2);
+
+      expect(mockSupabaseService.getBookmarks).toHaveBeenCalledWith({
+        page: 2,
+        limit: RECENT_LIST_LIMIT,
+      });
+      expect(popup.recentList.displayBookmarks).toHaveBeenCalledWith(
+        bookmarks,
+        { page: 2, hasNextPage: true },
+      );
+    });
+
+    it('returns to page 1 when a later page is empty', async () => {
+      mockSupabaseService.getBookmarks
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: 'bookmark-1', title: 'Example' }]);
+
+      await popup.loadRecentEntries(2);
+
+      expect(mockSupabaseService.getBookmarks).toHaveBeenNthCalledWith(1, {
+        page: 2,
+        limit: RECENT_LIST_LIMIT,
+      });
+      expect(mockSupabaseService.getBookmarks).toHaveBeenNthCalledWith(2, {
+        page: 1,
+        limit: RECENT_LIST_LIMIT,
+      });
+      expect(popup.recentPage).toBe(1);
+    });
+
+    it('shows an error state when loading fails', async () => {
+      const mockError = new Error('Load failed');
+      mockSupabaseService.getBookmarks.mockRejectedValue(mockError);
+
+      await popup.loadRecentEntries();
+
+      expect(popup.recentList.showError).toHaveBeenCalledWith(
+        'Error loading entries',
+      );
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'popup.loadRecentEntries',
       );
     });
   });

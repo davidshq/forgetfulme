@@ -23,6 +23,7 @@ import {
   MESSAGE_TYPES,
   STORAGE_KEYS,
   PENDING_MARK_AS_READ_TTL_MS,
+  RECENT_LIST_LIMIT,
 } from './utils/constants.js';
 import { QuickAdd } from './components/quick-add.js';
 import { RecentList } from './components/recent-list.js';
@@ -83,7 +84,11 @@ class ForgetfulMePopup {
       onSubmit: () => this.markAsRead(),
     });
 
-    this.recentList = new RecentList();
+    this.recentPage = 1;
+
+    this.recentList = new RecentList({
+      onPageChange: page => this.loadRecentEntries(page),
+    });
 
     this.statusSelector = new StatusSelector();
 
@@ -229,7 +234,8 @@ class ForgetfulMePopup {
     this.appContainer.appendChild(mainContent);
 
     // Load recent entries and custom status types into the rebuilt form
-    this.loadRecentEntries();
+    this.recentPage = 1;
+    this.loadRecentEntries(1);
     this.loadCustomStatusTypes();
   }
 
@@ -275,7 +281,8 @@ class ForgetfulMePopup {
       // Clear form using component
       this.quickAdd.clearForm();
 
-      this.loadRecentEntries();
+      this.recentPage = 1;
+      this.loadRecentEntries(1);
 
       // Notify background script about saved bookmark
       try {
@@ -300,10 +307,28 @@ class ForgetfulMePopup {
     }
   }
 
-  async loadRecentEntries() {
+  /**
+   * Load a page of recent bookmarks into the popup list.
+   * @async
+   * @param {number} [page=this.recentPage] - Page number to load
+   */
+  async loadRecentEntries(page = this.recentPage) {
     try {
-      const bookmarks = await this.supabaseService.getBookmarks({ limit: 5 });
-      this.recentList.displayBookmarks(bookmarks);
+      this.recentPage = page;
+      const bookmarks = await this.supabaseService.getBookmarks({
+        page,
+        limit: RECENT_LIST_LIMIT,
+      });
+
+      if (bookmarks.length === 0 && page > 1) {
+        await this.loadRecentEntries(1);
+        return;
+      }
+
+      this.recentList.displayBookmarks(bookmarks, {
+        page,
+        hasNextPage: bookmarks.length === RECENT_LIST_LIMIT,
+      });
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'popup.loadRecentEntries');
       this.recentList.showError('Error loading entries');

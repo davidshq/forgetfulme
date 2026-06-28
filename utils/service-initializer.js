@@ -33,8 +33,8 @@ export function initializeServices(options = {}) {
 
   const authStateManager = new AuthStateManager();
   const configManager = new ConfigManager(authStateManager);
-  const supabaseConfig = new SupabaseConfig();
-  const supabaseService = new SupabaseService(supabaseConfig);
+  const supabaseConfig = new SupabaseConfig(configManager);
+  const supabaseService = new SupabaseService(supabaseConfig, authStateManager);
   const authUI = new AuthUI(supabaseConfig, onAuthSuccess, authStateManager);
 
   const services = {

@@ -26,6 +26,30 @@ function nullIfNotFound(error) {
   throw error;
 }
 
+/** Fields clients may pass to updateBookmark (user_id and id are excluded). */
+const ALLOWED_BOOKMARK_UPDATE_FIELDS = new Set([
+  'title',
+  'description',
+  'read_status',
+  'tags',
+  'url',
+  'last_accessed',
+  'access_count',
+]);
+
+/**
+ * Pick only allowed bookmark columns from an updates object.
+ * @param {Object} updates
+ * @returns {Object}
+ */
+function pickBookmarkUpdates(updates) {
+  return Object.fromEntries(
+    Object.entries(updates).filter(([key]) =>
+      ALLOWED_BOOKMARK_UPDATE_FIELDS.has(key),
+    ),
+  );
+}
+
 /**
  * Bookmark operations for Supabase service
  * @class BookmarkOperations
@@ -241,11 +265,13 @@ export class BookmarkOperations {
     requireSupabaseAuth(this.config, 'supabase-service.updateBookmark');
 
     return this._executeWithTokenRefresh(async () => {
+      const safeUpdates = pickBookmarkUpdates(updates);
+
       try {
         const { data, error } = await this.supabase
           .from('bookmarks')
           .update({
-            ...updates,
+            ...safeUpdates,
             updated_at: new Date().toISOString(),
           })
           .eq('id', bookmarkId)
@@ -253,7 +279,7 @@ export class BookmarkOperations {
           .select();
 
         if (error) throw error;
-        return data?.[0] || { id: bookmarkId, ...updates };
+        return data?.[0] || { id: bookmarkId, ...safeUpdates };
       } catch (error) {
         ErrorHandler.handle(error, 'supabase-service.updateBookmark');
         throw error;

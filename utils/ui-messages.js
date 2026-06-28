@@ -44,6 +44,24 @@ class UIMessages {
   };
 
   /**
+   * Remove existing transient messages from a container
+   * @param {HTMLElement} container - Container element
+   */
+  static clearMessages(container) {
+    if (!container) {
+      return;
+    }
+
+    container.querySelectorAll('.ui-message').forEach(messageEl => {
+      if (typeof messageEl.remove === 'function') {
+        messageEl.remove();
+      } else if (messageEl.parentNode) {
+        messageEl.parentNode.removeChild(messageEl);
+      }
+    });
+  }
+
+  /**
    * Show a message in the UI
    * @param {string} message - Message text
    * @param {string} type - Message type (success, error, warning, info)
@@ -56,9 +74,18 @@ class UIMessages {
       return;
     }
 
+    if (!options.append) {
+      this.clearMessages(container);
+    }
+
     // Create message element
     const messageEl = document.createElement('div');
     messageEl.className = `ui-message ui-message-${type}`;
+    messageEl.setAttribute('role', 'status');
+    messageEl.setAttribute(
+      'aria-live',
+      type === 'error' ? 'assertive' : 'polite',
+    );
     messageEl.textContent = message;
 
     // Add icon if specified
@@ -143,10 +170,14 @@ class UIMessages {
       return;
     }
 
+    this.clearMessages(container);
+
     // Create message element
     const messageEl = document.createElement('div');
     messageEl.className = 'ui-message ui-message-loading';
     messageEl.setAttribute('aria-busy', 'true');
+    messageEl.setAttribute('role', 'status');
+    messageEl.setAttribute('aria-live', 'polite');
 
     // Add Pico progress indicator
     const progress = document.createElement('progress');

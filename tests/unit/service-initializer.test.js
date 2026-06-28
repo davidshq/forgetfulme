@@ -14,7 +14,8 @@ import { initializeServices } from '../../utils/service-initializer.js';
 // Mock dependencies
 vi.mock('../../utils/config-manager.js', () => ({
   default: class MockConfigManager {
-    constructor() {
+    constructor(authStateManager) {
+      this.authStateManager = authStateManager;
       this.initialize = vi.fn();
     }
   },
@@ -30,7 +31,8 @@ vi.mock('../../utils/auth-state-manager.js', () => ({
 
 vi.mock('../../supabase-config.js', () => ({
   default: class MockSupabaseConfig {
-    constructor() {
+    constructor(configManager) {
+      this.configManager = configManager;
       this.isConfigured = vi.fn();
     }
   },
@@ -38,7 +40,9 @@ vi.mock('../../supabase-config.js', () => ({
 
 vi.mock('../../supabase-service.js', () => ({
   default: class MockSupabaseService {
-    constructor() {
+    constructor(supabaseConfig, authStateManager) {
+      this.supabaseConfig = supabaseConfig;
+      this.authStateManager = authStateManager;
       this.initialize = vi.fn();
     }
   },
@@ -192,6 +196,19 @@ describe('service-initializer', () => {
       expect(services.authUI).toBeInstanceOf(AuthUI);
       expect(services.supabaseConfig).toBeInstanceOf(SupabaseConfig);
       expect(services.authStateManager).toBeInstanceOf(AuthStateManager);
+    });
+
+    it('should wire shared managers into SupabaseConfig and SupabaseService', () => {
+      const services = initializeServices({
+        onAuthSuccess: mockOnAuthSuccess,
+      });
+
+      expect(services.supabaseConfig.configManager).toBe(
+        services.configManager,
+      );
+      expect(services.supabaseService.authStateManager).toBe(
+        services.authStateManager,
+      );
     });
 
     it('should pass supabaseConfig to ConfigUI when included', () => {

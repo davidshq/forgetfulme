@@ -89,25 +89,29 @@ class ErrorHandler {
    * @param {Object} options - Additional options
    */
   static logError(errorInfo, options = {}) {
-    const { severity } = errorInfo;
+    const { severity, message, context, originalError } = errorInfo;
     const silent = options.silent || false;
 
-    if (silent) return;
+    if (silent) {
+      return;
+    }
 
-    // Log error based on severity level
+    const prefix = context ? `[${context}]` : '';
+    const logMessage = prefix ? `${prefix} ${message}` : message;
+
     switch (severity) {
       case this.SEVERITY.CRITICAL:
       case this.SEVERITY.HIGH:
-        // Critical/High severity errors logged
+        console.error(logMessage, originalError ?? '');
         break;
       case this.SEVERITY.MEDIUM:
-        // Medium severity warnings logged
+        console.warn(logMessage, originalError ?? '');
         break;
       case this.SEVERITY.LOW:
-        // Low severity info logged
+        console.warn(logMessage);
         break;
       default:
-        // Default error logging
+        console.error(logMessage, originalError ?? '');
         break;
     }
   }

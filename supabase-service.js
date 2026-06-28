@@ -12,7 +12,6 @@ import { BookmarkOperations } from './utils/supabase-bookmark-operations.js';
 import { UserOperations } from './utils/supabase-user-operations.js';
 import { DataOperations } from './utils/supabase-data-operations.js';
 import AuthTokenRefreshHandler from './utils/auth-token-refresh-handler.js';
-import AuthStateManager from './utils/auth-state-manager.js';
 
 /**
  * Supabase service for ForgetfulMe extension
@@ -20,8 +19,10 @@ import AuthStateManager from './utils/auth-state-manager.js';
  * @description Manages all Supabase database operations including bookmarks and user preferences
  *
  * @example
- * const supabaseConfig = new SupabaseConfig();
- * const supabaseService = new SupabaseService(supabaseConfig);
+ * const authStateManager = new AuthStateManager();
+ * const configManager = new ConfigManager(authStateManager);
+ * const supabaseConfig = new SupabaseConfig(configManager);
+ * const supabaseService = new SupabaseService(supabaseConfig, authStateManager);
  * await supabaseService.initialize();
  *
  * // Save a bookmark
@@ -36,11 +37,18 @@ class SupabaseService {
    * Initialize the Supabase service with configuration
    * @constructor
    * @param {SupabaseConfig} supabaseConfig - The Supabase configuration instance
+   * @param {import('./utils/auth-state-manager.js').default} authStateManager
+   *   Shared authentication state manager (must match the page-level instance)
    * @description Sets up the service with Supabase configuration
    */
-  constructor(supabaseConfig) {
+  constructor(supabaseConfig, authStateManager) {
+    if (authStateManager == null) {
+      throw new Error('authStateManager is required');
+    }
     /** @type {SupabaseConfig} Supabase configuration instance */
     this.config = supabaseConfig;
+    /** @type {import('./utils/auth-state-manager.js').default} */
+    this.authStateManager = authStateManager;
     /** @type {Object|null} Supabase client instance */
     this.supabase = null;
     /** @type {Map<string, Promise>} Map of pending requests for deduplication */
@@ -65,12 +73,10 @@ class SupabaseService {
     await this.config.initialize();
     this.supabase = this.config.getSupabaseClient();
 
-    // Initialize auth state manager and token refresh handler
-    const authStateManager = new AuthStateManager();
-    await authStateManager.initialize();
+    await this.authStateManager.initialize();
     this.tokenRefreshHandler = new AuthTokenRefreshHandler(
       this.config,
-      authStateManager,
+      this.authStateManager,
     );
 
     // Initialize operation modules
@@ -84,6 +90,7 @@ class SupabaseService {
       this.supabase,
       this.config,
       this.pendingRequests,
+      this.tokenRefreshHandler,
     );
     this.dataOperations = new DataOperations(
       this.supabase,

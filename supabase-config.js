@@ -9,7 +9,6 @@
  */
 
 import { createClient } from './supabase-js.min.js';
-import ConfigManager from './utils/config-manager.js';
 import ErrorHandler from './utils/error-handler.js';
 
 /**
@@ -18,7 +17,8 @@ import ErrorHandler from './utils/error-handler.js';
  * @description Manages Supabase configuration, authentication, and client setup
  *
  * @example
- * const supabaseConfig = new SupabaseConfig();
+ * const configManager = new ConfigManager(authStateManager);
+ * const supabaseConfig = new SupabaseConfig(configManager);
  * await supabaseConfig.initialize();
  *
  * if (supabaseConfig.isConfigured()) {
@@ -30,11 +30,16 @@ class SupabaseConfig {
   /**
    * Initialize the Supabase configuration manager
    * @constructor
+   * @param {import('./utils/config-manager.js').default} configManager
+   *   Shared configuration manager instance
    * @description Sets up the configuration manager with initial state and dependencies
    */
-  constructor() {
-    /** @type {ConfigManager} Configuration manager instance */
-    this.configManager = new ConfigManager();
+  constructor(configManager) {
+    if (configManager == null) {
+      throw new Error('configManager is required');
+    }
+    /** @type {import('./utils/config-manager.js').default} Configuration manager instance */
+    this.configManager = configManager;
     /** @type {string|null} Supabase project URL */
     this.supabaseUrl = null;
     /** @type {string|null} Supabase anonymous key */

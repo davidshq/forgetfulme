@@ -222,9 +222,9 @@ class AuthTokenRefreshHandler {
     return (
       errorResult.errorInfo.type === ErrorHandler.ERROR_TYPES.AUTH ||
       error.message?.includes('JWT') ||
-      error.message?.includes('token') ||
-      error.message?.includes('session') ||
-      error.code === 'PGRST116'
+      error.message?.includes('Invalid refresh token') ||
+      error.message?.includes('refresh_token_not_found') ||
+      error.message?.includes('session expired')
     );
   }
 
