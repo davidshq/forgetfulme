@@ -9,143 +9,36 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import ForgetfulMeOptions from '../../options.js';
+import '../helpers/register-page-mocks.js';
 
-// Mock Chrome API
-global.chrome = {
-  tabs: {
-    create: vi.fn(),
+vi.mock('../../config-ui.js', () => ({
+  default: class MockConfigUI {
+    constructor(_supabaseConfig) {
+      this.showConfigForm = vi.fn();
+      this.showConfigStatus = vi.fn();
+    }
   },
-  runtime: {
-    getURL: vi.fn(url => `chrome-extension://test/${url}`),
-    onMessage: {
-      addListener: vi.fn(),
-    },
-  },
-  storage: {
-    sync: {
-      get: vi.fn(),
-      set: vi.fn(),
-    },
-  },
-};
+}));
 
-// Mock DOM elements
+// Mock DOM elements used by options-specific setup
 const mockAppContainer = {
   innerHTML: '',
   appendChild: vi.fn(),
 };
 
-// Mock UIComponents
-vi.mock('../../utils/ui-components.js', () => ({
-  default: {
-    DOM: {
-      ready: vi.fn().mockResolvedValue(),
-      getElement: vi.fn(id => {
-        if (id === 'app') return mockAppContainer;
-        return null;
-      }),
-      getValue: vi.fn(),
-      setValue: vi.fn(),
-    },
-    createContainer: vi.fn().mockReturnValue(document.createElement('div')),
-    createSection: vi.fn().mockReturnValue(document.createElement('section')),
-    createButton: vi.fn().mockReturnValue(document.createElement('button')),
-    createForm: vi.fn().mockReturnValue(document.createElement('form')),
-    createFormField: vi.fn().mockReturnValue(document.createElement('input')),
-    createGrid: vi.fn().mockReturnValue(document.createElement('div')),
-    createListItem: vi.fn().mockReturnValue(document.createElement('li')),
-  },
-}));
-
-// Mock other dependencies
-vi.mock('../../utils/error-handler.js', () => ({
-  default: {
-    handle: vi.fn().mockReturnValue({
-      userMessage: 'Test error',
-      shouldShowToUser: true,
-    }),
-  },
-}));
-
-vi.mock('../../utils/ui-messages.js', () => ({
-  default: {
-    error: vi.fn(),
-    success: vi.fn(),
-    confirm: vi.fn(),
-  },
-}));
-
-vi.mock('../../utils/config-manager.js', () => ({
-  default: class MockConfigManager {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.getCustomStatusTypes = vi.fn().mockResolvedValue([]);
-      this.addCustomStatusType = vi.fn().mockResolvedValue();
-      this.removeCustomStatusType = vi.fn().mockResolvedValue();
-    }
-  },
-}));
-
-vi.mock('../../utils/bookmark-transformer.js', () => ({
-  default: {
-    toUIFormat: vi.fn(),
-  },
-}));
-
-vi.mock('../../supabase-config.js', () => ({
-  default: class MockSupabaseConfig {
-    constructor() {
-      this.isConfigured = vi.fn().mockResolvedValue(true);
-      this.session = null;
-    }
-  },
-}));
-
-vi.mock('../../supabase-service.js', () => ({
-  default: class MockSupabaseService {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.getBookmarks = vi.fn().mockResolvedValue([]);
-      this.exportData = vi.fn().mockResolvedValue({});
-      this.importData = vi.fn().mockResolvedValue();
-      this.deleteBookmark = vi.fn().mockResolvedValue();
-    }
-  },
-}));
-
-vi.mock('../../auth-ui.js', () => ({
-  default: class MockAuthUI {
-    constructor() {
-      this.showLoginForm = vi.fn();
-    }
-  },
-}));
-
-vi.mock('../../utils/auth-state-manager.js', () => ({
-  default: class MockAuthStateManager {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.isAuthenticated = vi.fn().mockResolvedValue(true);
-      this.addListener = vi.fn();
-      this.setAuthState = vi.fn();
-    }
-  },
-}));
-
-vi.mock('../../config-ui.js', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    showConfigForm: vi.fn(),
-    showConfigStatus: vi.fn(),
-  })),
-}));
+import ForgetfulMeOptions from '../../options.js';
+import UIComponents from '../../utils/ui-components.js';
 
 describe('ForgetfulMeOptions', () => {
   let options;
 
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
+
+    UIComponents.DOM.getElement.mockImplementation(id => {
+      if (id === 'app') return mockAppContainer;
+      return null;
+    });
 
     // Mock document.createElement
     document.createElement = vi.fn(tagName => {
@@ -175,7 +68,6 @@ describe('ForgetfulMeOptions', () => {
       return null;
     });
 
-    // Create options instance
     options = new ForgetfulMeOptions();
   });
 
@@ -185,20 +77,16 @@ describe('ForgetfulMeOptions', () => {
 
   describe('openBookmarkManagement', () => {
     it('should open bookmark management in a new tab', () => {
-      // Call the method
       options.openBookmarkManagement();
 
-      // Verify chrome.tabs.create was called with correct URL
       expect(chrome.tabs.create).toHaveBeenCalledWith({
-        url: 'chrome-extension://test/bookmark-management.html',
+        url: 'chrome-extension://test-id/bookmark-management.html',
       });
     });
 
     it('should use chrome.runtime.getURL to get the correct URL', () => {
-      // Call the method
       options.openBookmarkManagement();
 
-      // Verify chrome.runtime.getURL was called
       expect(chrome.runtime.getURL).toHaveBeenCalledWith(
         'bookmark-management.html',
       );
@@ -207,7 +95,6 @@ describe('ForgetfulMeOptions', () => {
 
   describe('loadData', () => {
     it('should load data without recent entries', async () => {
-      // Mock the necessary methods
       options.supabaseService = {
         getBookmarks: vi.fn().mockResolvedValue([]),
       };
@@ -216,10 +103,8 @@ describe('ForgetfulMeOptions', () => {
         getCustomStatusTypes: vi.fn().mockResolvedValue([]),
       };
 
-      // Call the method
       await options.loadData();
 
-      // Verify the data loading methods were called
       expect(options.supabaseService.getBookmarks).toHaveBeenCalled();
       expect(options.configManager.getCustomStatusTypes).toHaveBeenCalled();
     });

@@ -10,6 +10,12 @@
 
 import ErrorHandler from '../error-handler.js';
 
+function isDocumentReady() {
+  return (
+    document.readyState === 'complete' || document.readyState === 'interactive'
+  );
+}
+
 /**
  * DOM utility class for safe element access and manipulation
  * @namespace DOM
@@ -17,23 +23,12 @@ import ErrorHandler from '../error-handler.js';
  */
 export const DOM = {
   /**
-   * Check if DOM is ready
-   * @returns {boolean} - True if DOM is ready
-   */
-  isReady() {
-    return (
-      document.readyState === 'complete' ||
-      document.readyState === 'interactive'
-    );
-  },
-
-  /**
    * Wait for DOM to be ready
    * @returns {Promise} - Promise that resolves when DOM is ready
    */
   ready() {
     return new Promise(resolve => {
-      if (this.isReady()) {
+      if (isDocumentReady()) {
         resolve();
       } else {
         document.addEventListener('DOMContentLoaded', resolve, {

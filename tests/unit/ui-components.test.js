@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import UIComponents from '../../utils/ui-components.js';
+import { BUTTON_STYLES } from '../../utils/components/button-components.js';
+import { FIELD_TYPES } from '../../utils/components/form-components.js';
 
 // Mock console methods
 const mockConsole = {
@@ -27,26 +29,9 @@ describe('UIComponents', () => {
     document.body.innerHTML = '';
   });
 
-  describe('Constants', () => {
-    test('should have all expected component types', () => {
-      expect(UIComponents.COMPONENT_TYPES).toEqual({
-        BUTTON: 'button',
-        FORM: 'form',
-        INPUT: 'input',
-        SELECT: 'select',
-        LABEL: 'label',
-        CONTAINER: 'container',
-        HEADER: 'header',
-        SECTION: 'section',
-        LIST_ITEM: 'list-item',
-        MESSAGE: 'message',
-        CONFIRM: 'confirm',
-        TOAST: 'toast',
-      });
-    });
-
-    test('should have all expected button styles', () => {
-      expect(UIComponents.BUTTON_STYLES).toEqual({
+  describe('Component module constants', () => {
+    test('should expose button styles from button-components', () => {
+      expect(BUTTON_STYLES).toEqual({
         PRIMARY: 'primary',
         SECONDARY: 'secondary',
         DANGER: 'danger',
@@ -58,8 +43,8 @@ describe('UIComponents', () => {
       });
     });
 
-    test('should have all expected field types', () => {
-      expect(UIComponents.FIELD_TYPES).toEqual({
+    test('should expose field types from form-components', () => {
+      expect(FIELD_TYPES).toEqual({
         TEXT: 'text',
         EMAIL: 'email',
         PASSWORD: 'password',
@@ -70,35 +55,6 @@ describe('UIComponents', () => {
         CHECKBOX: 'checkbox',
         RADIO: 'radio',
       });
-    });
-  });
-
-  describe('DOM.isReady', () => {
-    test('should return true when DOM is complete', () => {
-      Object.defineProperty(document, 'readyState', {
-        value: 'complete',
-        writable: true,
-      });
-
-      expect(UIComponents.DOM.isReady()).toBe(true);
-    });
-
-    test('should return true when DOM is interactive', () => {
-      Object.defineProperty(document, 'readyState', {
-        value: 'interactive',
-        writable: true,
-      });
-
-      expect(UIComponents.DOM.isReady()).toBe(true);
-    });
-
-    test('should return false when DOM is loading', () => {
-      Object.defineProperty(document, 'readyState', {
-        value: 'loading',
-        writable: true,
-      });
-
-      expect(UIComponents.DOM.isReady()).toBe(false);
     });
   });
 

@@ -8,8 +8,8 @@
  * @since 2024-01-01
  */
 
-import { MESSAGE_TYPES } from './constants.js';
 import ErrorHandler from './error-handler.js';
+import { EventEmitter } from './event-emitter.js';
 import {
   validateSupabaseConfig,
   validatePreferences,
@@ -19,8 +19,6 @@ import {
   loadAllConfig as loadConfigFromStorage,
   saveSupabaseConfig,
   saveCustomStatusTypes,
-  saveAuthSession,
-  clearAuthSession as clearAuthSessionFromStorage,
   initializeDefaultSettings,
 } from './config-storage.js';
 
@@ -34,13 +32,16 @@ import {
  * await configManager.initialize();
  */
 
-class ConfigManager {
+class ConfigManager extends EventEmitter {
   /**
    * Initialize the configuration manager
    * @constructor
+   * @param {import('./auth-state-manager.js').default} [authStateManager]
    * @description Sets up the configuration manager with initial state and listener management
    */
-  constructor() {
+  constructor(authStateManager = null) {
+    super();
+    this.authStateManager = authStateManager;
     /** @type {Object} Configuration object containing all settings */
     this.config = {
       /** @type {Object|null} Supabase configuration */
@@ -52,8 +53,6 @@ class ConfigManager {
     };
     /** @type {boolean} Whether the manager has been initialized */
     this.initialized = false;
-    /** @type {Set} Set of event listeners */
-    this.listeners = new Set();
   }
 
   /**
@@ -112,30 +111,7 @@ class ConfigManager {
   async setSupabaseConfig(url, anonKey) {
     await this.ensureInitialized();
 
-    // Validate input
-    if (!url || !anonKey) {
-      throw ErrorHandler.createError(
-        'Both URL and anon key are required',
-        ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig',
-      );
-    }
-
-    if (!url.startsWith('https://')) {
-      throw ErrorHandler.createError(
-        'URL must start with https://',
-        ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig',
-      );
-    }
-
-    if (!anonKey.startsWith('eyJ')) {
-      throw ErrorHandler.createError(
-        'Invalid anon key format',
-        ErrorHandler.ERROR_TYPES.VALIDATION,
-        'config-manager.setSupabaseConfig',
-      );
-    }
+    validateSupabaseConfig({ url, anonKey });
 
     // Update configuration
     this.config.supabase = { url, anonKey };
@@ -256,114 +232,16 @@ class ConfigManager {
   }
 
   /**
-   * Get authentication session
-   * @returns {Promise<Object|null>} Authentication session object
-   */
-  async getAuthSession() {
-    await this.ensureInitialized();
-    return this.config.auth;
-  }
-
-  /**
-   * Set authentication session
-   * @param {Object|null} session - Authentication session object
-   * @description Saves authentication session to storage
-   */
-  async setAuthSession(session) {
-    await this.ensureInitialized();
-
-    this.config.auth = session;
-
-    // Save to storage
-    await saveAuthSession(session);
-
-    this.notifyListeners('authSessionChanged', session);
-
-    // Notify all contexts via runtime message
-    try {
-      chrome.runtime
-        .sendMessage({
-          type: MESSAGE_TYPES.AUTH_STATE_CHANGED,
-          session: session,
-        })
-        .catch(error => {
-          ErrorHandler.handle(error, 'config-manager.setAuthSession.runtime');
-        });
-    } catch (error) {
-      ErrorHandler.handle(error, 'config-manager.setAuthSession');
-    }
-  }
-
-  /**
-   * Clear authentication session
-   * @description Removes authentication session from storage
-   */
-  async clearAuthSession() {
-    await this.ensureInitialized();
-
-    this.config.auth = null;
-
-    // Remove from storage
-    await clearAuthSessionFromStorage();
-
-    this.notifyListeners('authSessionChanged', null);
-
-    // Notify all contexts via runtime message
-    try {
-      chrome.runtime
-        .sendMessage({
-          type: MESSAGE_TYPES.AUTH_STATE_CHANGED,
-          session: null,
-        })
-        .catch(error => {
-          ErrorHandler.handle(error, 'config-manager.clearAuthSession.runtime');
-        });
-    } catch (error) {
-      ErrorHandler.handle(error, 'config-manager.clearAuthSession');
-    }
-  }
-
-  /**
-   * Check if user is authenticated
-   * @returns {Promise<boolean>} True if user is authenticated
-   */
-  async isAuthenticated() {
-    await this.ensureInitialized();
-    return this.config.auth !== null;
-  }
-
-  /**
-   * Initialize default settings
-   * @description Sets up default configuration values
-   */
-  async initializeDefaultSettings() {
-    try {
-      const defaultSettings = await initializeDefaultSettings();
-
-      // Update local config
-      this.config.preferences = defaultSettings;
-
-      // Default settings initialized successfully
-    } catch (error) {
-      const errorResult = ErrorHandler.handle(
-        error,
-        'config-manager.initializeDefaultSettings',
-      );
-      throw ErrorHandler.createError(
-        errorResult.userMessage,
-        errorResult.errorInfo.type,
-        'config-manager.initializeDefaultSettings',
-      );
-    }
-  }
-
-  /**
    * Export configuration
    * @returns {Promise<Object>} Configuration export object
    * @description Exports all configuration data for backup
    */
   async exportConfig() {
     await this.ensureInitialized();
+
+    if (this.authStateManager) {
+      this.config.auth = await this.authStateManager.getAuthState();
+    }
 
     return {
       version: 1,
@@ -403,52 +281,37 @@ class ConfigManager {
     }
 
     if (configData.auth) {
-      await this.setAuthSession(configData.auth);
+      if (this.authStateManager) {
+        await this.authStateManager.setAuthState(configData.auth);
+      }
+      this.config.auth = configData.auth;
     }
 
     return { success: true, message: 'Configuration imported successfully' };
   }
 
   /**
-   * Add event listener
-   * @param {string} event - Event name to listen for
-   * @param {Function} callback - Callback function to execute
-   * @description Registers a callback for configuration events
+   * Initialize default settings
+   * @description Sets up default configuration values
    */
-  addListener(event, callback) {
-    this.listeners.add({ event, callback });
-  }
+  async initializeDefaultSettings() {
+    try {
+      const defaultSettings = await initializeDefaultSettings();
 
-  /**
-   * Remove event listener
-   * @param {string} event - Event name to remove listener from
-   * @param {Function} callback - Callback function to remove
-   * @description Removes a specific event listener
-   */
-  removeListener(event, callback) {
-    for (const listener of this.listeners) {
-      if (listener.event === event && listener.callback === callback) {
-        this.listeners.delete(listener);
-        break;
-      }
-    }
-  }
+      // Update local config
+      this.config.preferences = defaultSettings;
 
-  /**
-   * Notify all listeners of an event
-   * @param {string} event - Event name to notify
-   * @param {*} data - Data to pass to listeners
-   * @description Executes all registered callbacks for an event
-   */
-  notifyListeners(event, data) {
-    for (const listener of this.listeners) {
-      if (listener.event === event) {
-        try {
-          listener.callback(data);
-        } catch (_error) {
-          // Error in config listener
-        }
-      }
+      // Default settings initialized successfully
+    } catch (error) {
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initializeDefaultSettings',
+      );
+      throw ErrorHandler.createError(
+        errorResult.userMessage,
+        errorResult.errorInfo.type,
+        'config-manager.initializeDefaultSettings',
+      );
     }
   }
 

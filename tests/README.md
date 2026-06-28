@@ -94,13 +94,22 @@ For Chrome API, console, error handler, and UI component mocks, import from `hel
 
 ### Test Factories (`test-factories.js`)
 
-Provides specialized test instance creation:
+Provides shared test data and assertion helpers:
 
-- `createUtilityTestInstance()` - For testing utility modules
-- `createAuthUITestInstance()` - For testing authentication UI
-- `createBackgroundTestInstance()` - For testing background service
-- `createOptionsTestInstance()` - For testing options page
-- `createSupabaseServiceTestInstance()` - For testing database operations
+- `createTestData` — bookmark, user, tab, and error fixtures
+- `createAssertionHelpers(mocks)` — common assertions for errors, messages, and bookmark saves
+
+### Page-level ES module mocks
+
+Popup, options, and bookmark-management unit tests share dependency mocks via:
+
+- `helpers/vi-module-mocks.js` — factory functions (`mockErrorHandlerModule`, `configureUIComponentStubs`, etc.)
+- `helpers/register-page-mocks.js` — side-effect import that registers shared `vi.mock()` calls
+
+```javascript
+import '../helpers/register-page-mocks.js';
+import { configureUIComponentStubs } from '../helpers/vi-module-mocks.js';
+```
 
 ## Running Tests
 
@@ -714,17 +723,24 @@ global.chrome = mockChrome;
 ### 2. Use Test Factories for Complex Setup
 
 ```javascript
-import { createAuthUITestInstance } from './helpers/test-factories.js';
+import { setupTestWithMocks } from './helpers/test-utils.js';
+import { createTestData } from './helpers/test-factories.js';
 
-describe('AuthUI', () => {
-  let authUI, mocks, cleanup;
+describe('BookmarkService', () => {
+  let mocks;
+  let cleanup;
 
-  beforeEach(async () => {
-    ({ authUI, mocks, cleanup } = await createAuthUITestInstance());
+  beforeEach(() => {
+    ({ mocks, cleanup } = setupTestWithMocks());
   });
 
   afterEach(() => {
     cleanup();
+  });
+
+  test('saves bookmark fixtures from createTestData', async () => {
+    const bookmark = createTestData.bookmark({ title: 'Example' });
+    // ...
   });
 });
 ```

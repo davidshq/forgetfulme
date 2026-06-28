@@ -5,12 +5,7 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import {
-  getMigrationVersion,
-  setMigrationVersion,
-  migrateToVersion1,
-  migrateConfig,
-} from '../../utils/config-migration.js';
+import { migrateConfig } from '../../utils/config-migration.js';
 
 // Mock chrome.storage
 const mockStorage = {
@@ -27,61 +22,6 @@ global.chrome = {
 describe('ConfigMigration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  describe('getMigrationVersion', () => {
-    test('should return version from storage', async () => {
-      mockStorage.sync.get.mockResolvedValue({ configVersion: 2 });
-
-      const version = await getMigrationVersion();
-
-      expect(version).toBe(2);
-      expect(mockStorage.sync.get).toHaveBeenCalledWith(['configVersion']);
-    });
-
-    test('should return 0 when version is not set', async () => {
-      mockStorage.sync.get.mockResolvedValue({});
-
-      const version = await getMigrationVersion();
-
-      expect(version).toBe(0);
-    });
-
-    test('should return 0 when storage.get fails', async () => {
-      mockStorage.sync.get.mockRejectedValue(new Error('Storage error'));
-
-      const version = await getMigrationVersion();
-
-      expect(version).toBe(0);
-    });
-  });
-
-  describe('setMigrationVersion', () => {
-    test('should set migration version in storage', async () => {
-      mockStorage.sync.set.mockResolvedValue();
-
-      await setMigrationVersion(3);
-
-      expect(mockStorage.sync.set).toHaveBeenCalledWith({ configVersion: 3 });
-    });
-
-    test('should not throw when storage.set fails', async () => {
-      const consoleWarnSpy = vi
-        .spyOn(console, 'warn')
-        .mockImplementation(() => {});
-      mockStorage.sync.set.mockRejectedValue(new Error('Storage error'));
-
-      await expect(setMigrationVersion(3)).resolves.not.toThrow();
-
-      expect(consoleWarnSpy).toHaveBeenCalled();
-      consoleWarnSpy.mockRestore();
-    });
-  });
-
-  describe('migrateToVersion1', () => {
-    test('should complete migration to version 1', async () => {
-      await expect(migrateToVersion1()).resolves.not.toThrow();
-    });
   });
 
   describe('migrateConfig', () => {

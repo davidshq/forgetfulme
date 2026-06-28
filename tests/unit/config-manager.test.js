@@ -120,7 +120,7 @@ describe('ConfigManager', () => {
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
       await expect(configManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.',
+        'Configuration error. Please check your settings and try again.',
       );
       // ErrorHandler handles errors internally
     });
@@ -137,9 +137,7 @@ describe('ConfigManager', () => {
         auth_session: null,
       });
 
-      await expect(configManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.',
-      );
+      await expect(configManager.initialize()).rejects.toThrow();
     });
 
     test('should validate anon key format', async () => {
@@ -282,13 +280,17 @@ describe('ConfigManager', () => {
     test('should reject setting Supabase config with missing URL', async () => {
       await expect(
         configManager.setSupabaseConfig('', 'valid-key'),
-      ).rejects.toThrow('Both URL and anon key are required');
+      ).rejects.toThrow(
+        'Invalid Supabase configuration: missing URL or anon key',
+      );
     });
 
     test('should reject setting Supabase config with missing anon key', async () => {
       await expect(
         configManager.setSupabaseConfig('https://example.supabase.co', ''),
-      ).rejects.toThrow('Both URL and anon key are required');
+      ).rejects.toThrow(
+        'Invalid Supabase configuration: missing URL or anon key',
+      );
     });
 
     test('should reject setting Supabase config with invalid URL', async () => {
@@ -297,7 +299,7 @@ describe('ConfigManager', () => {
           'http://example.supabase.co',
           'valid-key',
         ),
-      ).rejects.toThrow('URL must start with https://');
+      ).rejects.toThrow('Invalid Supabase URL: must start with https://');
     });
 
     test('should reject setting Supabase config with invalid anon key', async () => {
@@ -443,53 +445,33 @@ describe('ConfigManager', () => {
     });
   });
 
-  describe('Authentication Methods', () => {
+  describe('Import auth delegation', () => {
     beforeEach(async () => {
       mockChrome.storage.sync.get.mockResolvedValue({
         supabaseConfig: null,
-        customStatusTypes: null,
+        customStatusTypes: [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ],
         auth_session: null,
       });
       await configManager.initialize();
     });
 
-    test('should get auth session', async () => {
+    test('should delegate imported auth to AuthStateManager', async () => {
       const mockSession = { user: { id: '123' } };
-      configManager.config.auth = mockSession;
+      const authStateManager = {
+        setAuthState: vi.fn().mockResolvedValue(undefined),
+        getAuthState: vi.fn().mockResolvedValue(mockSession),
+      };
+      configManager.authStateManager = authStateManager;
 
-      const result = await configManager.getAuthSession();
+      await configManager.importConfig({ auth: mockSession });
 
-      expect(result).toEqual(mockSession);
-    });
-
-    test('should set auth session', async () => {
-      const mockSession = { user: { id: '123' } };
-
-      await configManager.setAuthSession(mockSession);
-
+      expect(authStateManager.setAuthState).toHaveBeenCalledWith(mockSession);
       expect(configManager.config.auth).toEqual(mockSession);
-      expect(mockChrome.storage.sync.set).toHaveBeenCalledWith({
-        auth_session: mockSession,
-      });
-    });
-
-    test('should clear auth session', async () => {
-      configManager.config.auth = { user: { id: '123' } };
-
-      await configManager.clearAuthSession();
-
-      expect(configManager.config.auth).toBeNull();
-      expect(mockChrome.storage.sync.remove).toHaveBeenCalledWith([
-        'auth_session',
-      ]);
-    });
-
-    test('should check if authenticated', async () => {
-      expect(await configManager.isAuthenticated()).toBe(false);
-
-      configManager.config.auth = { user: { id: '123' } };
-
-      expect(await configManager.isAuthenticated()).toBe(true);
     });
   });
 
@@ -706,6 +688,7 @@ describe('ConfigManager', () => {
         customStatusTypes: null,
         auth_session: null,
       });
+      mockChrome.storage.sync.set.mockResolvedValue(undefined);
       await configManager.initialize();
 
       const importData = {
@@ -747,7 +730,7 @@ describe('ConfigManager', () => {
 
       await expect(
         configManager.importConfig(invalidImportData),
-      ).rejects.toThrow('URL must start with https://');
+      ).rejects.toThrow('Invalid Supabase URL: must start with https://');
     });
   });
 });

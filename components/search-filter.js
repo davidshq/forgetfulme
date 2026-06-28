@@ -9,6 +9,8 @@
  */
 
 import UIComponents from '../utils/ui-components.js';
+import { buildStatusSelectOptions } from '../utils/formatters.js';
+import { DEFAULT_STATUS_TYPES } from '../utils/constants.js';
 
 /**
  * Search and filter component
@@ -23,6 +25,32 @@ export class SearchFilter {
    */
   constructor(options = {}) {
     this.onSearch = options.onSearch || (() => {});
+  }
+
+  /**
+   * Replace status filter options (e.g. after loading custom types from config).
+   * @param {string[]} statusTypes
+   */
+  updateStatusFilterOptions(statusTypes) {
+    const select = UIComponents.DOM.getElement('status-filter');
+    if (!select) {
+      return;
+    }
+
+    const currentValue = select.value || 'all';
+    select.innerHTML = '';
+
+    buildStatusSelectOptions(statusTypes, { includeAll: true }).forEach(
+      option => {
+        const optionEl = document.createElement('option');
+        optionEl.value = option.value;
+        optionEl.textContent = option.text;
+        if (option.value === currentValue) {
+          optionEl.selected = true;
+        }
+        select.appendChild(optionEl);
+      },
+    );
   }
 
   /**
@@ -51,13 +79,9 @@ export class SearchFilter {
           id: 'status-filter',
           label: 'Filter by Status:',
           options: {
-            options: [
-              { value: 'all', text: 'All Statuses' },
-              { value: 'read', text: 'Read' },
-              { value: 'good-reference', text: 'Good Reference' },
-              { value: 'low-value', text: 'Low Value' },
-              { value: 'revisit-later', text: 'Revisit Later' },
-            ],
+            options: buildStatusSelectOptions(DEFAULT_STATUS_TYPES, {
+              includeAll: true,
+            }),
             helpText: 'Filter bookmarks by their status',
           },
         },

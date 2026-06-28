@@ -13,7 +13,9 @@ import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 import { initializeServices } from './utils/service-initializer.js';
 import { initializeApp as initializeAppUtil } from './utils/app-initializer.js';
+import { initializePage } from './utils/page-controller.js';
 import { showSetupInterface } from './utils/setup-interface.js';
+import { DEFAULT_STATUS_TYPES } from './utils/constants.js';
 import { BookmarkList } from './components/bookmark-list.js';
 import { SearchFilter } from './components/search-filter.js';
 import { BulkActions } from './components/bulk-actions.js';
@@ -64,6 +66,7 @@ class BookmarkManagementPage {
     this.bookmarkEditor = new BookmarkEditor({
       onUpdate: id => this.updateBookmark(id),
       onCancel: () => this.showMainInterface(),
+      getStatusTypes: () => this.configManager.getCustomStatusTypes(),
     });
 
     // Initialize coordinator
@@ -79,37 +82,20 @@ class BookmarkManagementPage {
    * @throws {Error} When initialization fails
    */
   async initializeAsync() {
-    try {
-      // Wait for DOM to be ready
-      await UIComponents.DOM.ready();
-
-      this.initializeElements();
-      await this.initializeApp();
-      this.initializeAuthState();
-    } catch (error) {
-      ErrorHandler.handle(error, 'bookmark-management.initializeAsync');
-      // Failed to initialize bookmark management page
-    }
+    await initializePage({
+      configManager: this.configManager,
+      initConfigManager: true,
+      authStateManager: this.authStateManager,
+      listenForRuntimeAuth: false,
+      initializeElements: () => this.initializeElements(),
+      initializeApp: () => this.initializeApp(),
+      onAuthStateChange: session => this.handleAuthStateChange(session),
+      context: 'bookmark-management.initializeAsync',
+    });
   }
 
-  /**
-   * Initialize authentication state and set up listeners
-   * @async
-   * @throws {Error} When auth state initialization fails
-   */
-  async initializeAuthState() {
-    try {
-      await this.authStateManager.initialize();
-
-      // Listen for auth state changes
-      this.authStateManager.addListener('authStateChanged', session => {
-        this.handleAuthStateChange(session);
-      });
-    } catch (error) {
-      ErrorHandler.handle(error, 'bookmark-management.initializeAuthState');
-      // Failed to initialize auth state
-    }
-  }
+  /** @deprecated Auth wiring handled by initializePage() */
+  async initializeAuthState() {}
 
   /**
    * Handle authentication state changes
@@ -267,6 +253,25 @@ class BookmarkManagementPage {
 
     // Load bookmarks
     this.coordinator.loadAllBookmarks();
+    void this.loadStatusFilterOptions();
+  }
+
+  /**
+   * Sync search filter options with configured custom status types.
+   */
+  async loadStatusFilterOptions() {
+    try {
+      const statusTypes = await this.configManager.getCustomStatusTypes();
+      this.searchFilter.updateStatusFilterOptions(
+        statusTypes || DEFAULT_STATUS_TYPES,
+      );
+    } catch (error) {
+      ErrorHandler.handle(
+        error,
+        'bookmark-management.loadStatusFilterOptions',
+        { silent: true },
+      );
+    }
   }
 
   /**
@@ -275,7 +280,7 @@ class BookmarkManagementPage {
    * @param {Object} bookmark - The bookmark to edit
    * @description Shows the edit interface for the specified bookmark
    */
-  editBookmark(bookmark) {
+  async editBookmark(bookmark) {
     // Convert UI format back to database format for edit interface
     const dbBookmark = {
       id: bookmark.id,
@@ -287,7 +292,7 @@ class BookmarkManagementPage {
       created_at: bookmark.created_at,
     };
 
-    this.showEditInterface(dbBookmark);
+    await this.showEditInterface(dbBookmark);
   }
 
   /**
@@ -296,8 +301,11 @@ class BookmarkManagementPage {
    * @param {Object} existingBookmark - The bookmark to edit
    * @description Displays the edit interface for the specified bookmark
    */
-  showEditInterface(existingBookmark) {
-    this.bookmarkEditor.showEditInterface(existingBookmark, this.appContainer);
+  async showEditInterface(existingBookmark) {
+    await this.bookmarkEditor.showEditInterface(
+      existingBookmark,
+      this.appContainer,
+    );
   }
 
   /**

@@ -130,6 +130,22 @@ export default [
     },
   },
 
+  // Node.js build scripts
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'off',
+    },
+  },
+
   // Test files configuration
   {
     files: ['**/*.test.js', '**/tests/**/*.js'],

@@ -10,48 +10,38 @@ import {
   loadStatusTypes,
 } from '../../utils/options-data-manager.js';
 
-// Mock dependencies
-vi.mock('../../utils/ui-components.js', () => ({
-  default: {
-    DOM: {
-      getElement: vi.fn(id => {
-        if (id === 'total-entries') {
-          return document.createElement('span');
-        }
-        if (id === 'status-types-count') {
-          return document.createElement('span');
-        }
-        if (id === 'most-used-status') {
-          return document.createElement('span');
-        }
-        if (id === 'status-types-list') {
-          return document.createElement('ul');
-        }
-        return null;
-      }),
-    },
-    createListItem: vi.fn((item, options) => {
-      const listItem = document.createElement('li');
-      listItem.className = options?.className || '';
-      const title = document.createElement('span');
-      title.textContent = item.title;
-      listItem.appendChild(title);
-      return listItem;
-    }),
-  },
-}));
-
 vi.mock('../../utils/formatters.js', () => ({
   formatStatus: vi.fn(status => status),
+  countByStatus: vi.fn(items =>
+    (items || []).reduce((stats, item) => {
+      const status = item.read_status;
+      if (status) {
+        stats[status] = (stats[status] || 0) + 1;
+      }
+      return stats;
+    }, {}),
+  ),
 }));
+
+function mountOptionsStatsDom() {
+  ['total-entries', 'status-types-count', 'most-used-status'].forEach(id => {
+    const el = document.createElement('span');
+    el.id = id;
+    document.body.appendChild(el);
+  });
+
+  const list = document.createElement('ul');
+  list.id = 'status-types-list';
+  document.body.appendChild(list);
+}
 
 describe('OptionsDataManager', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mountOptionsStatsDom();
   });
 
   describe('loadStatistics', () => {
-    test('should load statistics into UI elements', async () => {
+    test('should load statistics into UI elements', () => {
       const bookmarks = [
         { id: '1', read_status: 'read' },
         { id: '2', read_status: 'read' },
@@ -61,45 +51,32 @@ describe('OptionsDataManager', () => {
 
       loadStatistics(bookmarks, statusTypes);
 
-      const { default: UIComponents } =
-        await import('../../utils/ui-components.js');
-      const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
-      const statusTypesCountEl =
-        UIComponents.DOM.getElement('status-types-count');
-      const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
-
-      expect(totalEntriesEl.textContent).toBe('3');
-      expect(statusTypesCountEl.textContent).toBe('3');
-      expect(mostUsedStatusEl.textContent).toBe('read');
+      expect(document.getElementById('total-entries').textContent).toBe(3);
+      expect(document.getElementById('status-types-count').textContent).toBe(3);
+      expect(document.getElementById('most-used-status').textContent).toBe(
+        'read',
+      );
     });
 
-    test('should handle empty bookmarks array', async () => {
-      const bookmarks = [];
-      const statusTypes = ['read', 'unread'];
+    test('should handle empty bookmarks array', () => {
+      loadStatistics([], ['read', 'unread']);
 
-      loadStatistics(bookmarks, statusTypes);
-
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
-      const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
-
-      expect(totalEntriesEl.textContent).toBe('0');
-      expect(mostUsedStatusEl.textContent).toBe('None');
+      expect(document.getElementById('total-entries').textContent).toBe(0);
+      expect(document.getElementById('most-used-status').textContent).toBe(
+        'None',
+      );
     });
 
-    test('should handle missing UI elements gracefully', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      UIComponents.DOM.getElement.mockReturnValue(null);
+    test('should handle missing UI elements gracefully', () => {
+      document.body.innerHTML = '';
+      document.body._id = undefined;
 
-      const bookmarks = [{ id: '1', read_status: 'read' }];
-      const statusTypes = ['read'];
-
-      expect(() => loadStatistics(bookmarks, statusTypes)).not.toThrow();
+      expect(() =>
+        loadStatistics([{ id: '1', read_status: 'read' }], ['read']),
+      ).not.toThrow();
     });
 
-    test('should calculate most used status correctly', async () => {
+    test('should calculate most used status correctly', () => {
       const bookmarks = [
         { id: '1', read_status: 'read' },
         { id: '2', read_status: 'read' },
@@ -107,104 +84,67 @@ describe('OptionsDataManager', () => {
         { id: '4', read_status: 'unread' },
         { id: '5', read_status: 'unread' },
       ];
-      const statusTypes = ['read', 'unread'];
 
-      loadStatistics(bookmarks, statusTypes);
+      loadStatistics(bookmarks, ['read', 'unread']);
 
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
-
-      expect(mostUsedStatusEl.textContent).toBe('read');
+      expect(document.getElementById('most-used-status').textContent).toBe(
+        'read',
+      );
     });
 
-    test('should handle tie in status counts', async () => {
-      const bookmarks = [
-        { id: '1', read_status: 'read' },
-        { id: '2', read_status: 'unread' },
-      ];
-      const statusTypes = ['read', 'unread'];
+    test('should handle tie in status counts', () => {
+      loadStatistics(
+        [
+          { id: '1', read_status: 'read' },
+          { id: '2', read_status: 'unread' },
+        ],
+        ['read', 'unread'],
+      );
 
-      loadStatistics(bookmarks, statusTypes);
-
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
-
-      // Should return one of them (implementation dependent)
-      expect(['read', 'unread']).toContain(mostUsedStatusEl.textContent);
+      expect(['read', 'unread']).toContain(
+        document.getElementById('most-used-status').textContent,
+      );
     });
   });
 
   describe('loadStatusTypes', () => {
-    test('should load status types into list', async () => {
-      const statusTypes = ['read', 'unread', 'archived'];
-      const onRemove = vi.fn();
+    test('should load status types into list', () => {
+      loadStatusTypes(['read', 'unread', 'archived'], vi.fn());
 
-      loadStatusTypes(statusTypes, onRemove);
-
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const statusTypesListEl =
-        UIComponents.DOM.getElement('status-types-list');
-
-      expect(statusTypesListEl.children.length).toBe(3);
+      expect(document.getElementById('status-types-list').children.length).toBe(
+        3,
+      );
     });
 
-    test('should handle empty status types array', async () => {
-      const statusTypes = [];
-      const onRemove = vi.fn();
+    test('should handle empty status types array', () => {
+      loadStatusTypes([], vi.fn());
 
-      loadStatusTypes(statusTypes, onRemove);
-
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const statusTypesListEl =
-        UIComponents.DOM.getElement('status-types-list');
-
-      expect(statusTypesListEl.children.length).toBe(1);
-      expect(statusTypesListEl.querySelector('.empty')).toBeTruthy();
+      const list = document.getElementById('status-types-list');
+      expect(list.children.length).toBe(1);
+      expect(list.querySelector('.empty')).toBeTruthy();
     });
 
-    test('should handle missing status types list element', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      UIComponents.DOM.getElement.mockReturnValue(null);
+    test('should handle missing status types list element', () => {
+      document.body.innerHTML = '';
 
-      const statusTypes = ['read'];
-      const onRemove = vi.fn();
-
-      expect(() => loadStatusTypes(statusTypes, onRemove)).not.toThrow();
+      expect(() => loadStatusTypes(['read'], vi.fn())).not.toThrow();
     });
 
-    test('should clear list before populating', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const statusTypesListEl = document.createElement('ul');
-      statusTypesListEl.innerHTML = '<li>Old item</li>';
-      UIComponents.DOM.getElement.mockReturnValue(statusTypesListEl);
+    test('should clear list before populating', () => {
+      const list = document.getElementById('status-types-list');
+      list.innerHTML = '<li>Old item</li>';
 
-      const statusTypes = ['read', 'unread'];
-      const onRemove = vi.fn();
+      loadStatusTypes(['read', 'unread'], vi.fn());
 
-      loadStatusTypes(statusTypes, onRemove);
-
-      expect(statusTypesListEl.innerHTML).not.toContain('Old item');
+      expect(list.innerHTML).not.toContain('Old item');
     });
 
-    test('should wire up remove callback for each status type', async () => {
-      const statusTypes = ['read', 'unread'];
-      const onRemove = vi.fn();
+    test('should wire up remove callback for each status type', () => {
+      loadStatusTypes(['read', 'unread'], vi.fn());
 
-      loadStatusTypes(statusTypes, onRemove);
-
-      const UIComponents = (await import('../../utils/ui-components.js'))
-        .default;
-      const statusTypesListEl =
-        UIComponents.DOM.getElement('status-types-list');
-
-      // Each list item should have a remove button
-      expect(statusTypesListEl.children.length).toBe(2);
+      expect(document.getElementById('status-types-list').children.length).toBe(
+        2,
+      );
     });
   });
 });

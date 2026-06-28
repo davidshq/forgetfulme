@@ -31,8 +31,8 @@ import ConfigUI from '../config-ui.js';
 export function initializeServices(options = {}) {
   const { onAuthSuccess, includeConfigUI = false } = options;
 
-  const configManager = new ConfigManager();
   const authStateManager = new AuthStateManager();
+  const configManager = new ConfigManager(authStateManager);
   const supabaseConfig = new SupabaseConfig();
   const supabaseService = new SupabaseService(supabaseConfig);
   const authUI = new AuthUI(supabaseConfig, onAuthSuccess, authStateManager);

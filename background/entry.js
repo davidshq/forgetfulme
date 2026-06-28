@@ -1,28 +1,11 @@
 /**
- * @fileoverview Background service worker for ForgetfulMe extension
- * @module background
- * @description Handles background tasks, keyboard shortcuts, and message routing
- *
- * @author ForgetfulMe Team
- * @version 1.0.0
- * @since 2024-01-01
+ * @fileoverview Background service worker entry (bundled to dist/background.js)
+ * @module background/entry
  */
 
-/**
- * Message types for Chrome extension runtime messaging
- * Note: Service workers can't use ES6 imports, so constants are defined here
- * @type {Object}
- */
-const MESSAGE_TYPES = {
-  MARK_AS_READ: 'MARK_AS_READ',
-  BOOKMARK_SAVED: 'BOOKMARK_SAVED',
-  BOOKMARK_UPDATED: 'BOOKMARK_UPDATED',
-  GET_AUTH_STATE: 'GET_AUTH_STATE',
-  AUTH_STATE_CHANGED: 'AUTH_STATE_CHANGED',
-  GET_CONFIG_SUMMARY: 'GET_CONFIG_SUMMARY',
-  CHECK_URL_STATUS: 'CHECK_URL_STATUS',
-  URL_STATUS_RESULT: 'URL_STATUS_RESULT',
-};
+import { MESSAGE_TYPES, DEFAULT_STATUS_TYPES } from '../utils/constants.js';
+import { isRestrictedUrl } from '../utils/url-utils.js';
+import { initializeDefaultSettings } from '../utils/config-storage.js';
 
 /**
  * Simple error handler for background script (service worker)
@@ -195,11 +178,7 @@ class KeyboardShortcutHandler {
         currentWindow: true,
       });
 
-      if (
-        !tab.url ||
-        tab.url.startsWith('chrome://') ||
-        tab.url.startsWith('chrome-extension://')
-      ) {
+      if (!tab.url || isRestrictedUrl(tab.url)) {
         return; // Don't mark browser pages
       }
 
@@ -234,18 +213,7 @@ class DefaultSettingsInitializer {
 
       // Only initialize if custom status types don't exist
       if (!result.customStatusTypes) {
-        const defaultStatusTypes = [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
-        ];
-
-        await chrome.storage.sync.set({
-          customStatusTypes: defaultStatusTypes,
-        });
-
-        // Default settings initialized successfully
+        await initializeDefaultSettings();
       }
     } catch (error) {
       BackgroundErrorHandler.handle(
@@ -668,13 +636,7 @@ class ForgetfulMeBackground {
   async checkUrlStatus(tab) {
     try {
       // Skip browser pages and extension pages
-      if (
-        !tab.url ||
-        tab.url.startsWith('chrome://') ||
-        tab.url.startsWith('chrome-extension://') ||
-        tab.url.startsWith('about:') ||
-        tab.url.startsWith('moz-extension://')
-      ) {
+      if (isRestrictedUrl(tab.url)) {
         IconManager.updateIconForUrl(null, false);
         return;
       }

@@ -15,12 +15,16 @@ import UIMessages from './utils/ui-messages.js';
 import BookmarkTransformer from './utils/bookmark-transformer.js';
 import { initializeServices } from './utils/service-initializer.js';
 import { initializeApp as initializeAppUtil } from './utils/app-initializer.js';
+import { initializePage } from './utils/page-controller.js';
 import { showSetupInterface } from './utils/setup-interface.js';
+import { openBookmarkManagementTab } from './utils/navigation-utils.js';
+import { isRestrictedUrl } from './utils/url-utils.js';
 import { MESSAGE_TYPES } from './utils/constants.js';
 import { QuickAdd } from './components/quick-add.js';
 import { RecentList } from './components/recent-list.js';
 import { StatusSelector } from './components/status-selector.js';
 import { PopupEditInterface } from './utils/popup-edit-interface.js';
+import { getBookmarkEditFormData } from './components/bookmark-edit-view.js';
 
 /**
  * Main popup class for the ForgetfulMe Chrome extension
@@ -95,55 +99,22 @@ class ForgetfulMePopup {
    * await popup.initializeAsync();
    */
   async initializeAsync() {
-    try {
-      // Wait for DOM to be ready
-      await UIComponents.DOM.ready();
-
-      // Initialize config manager early to ensure it's ready
-      await this.configManager.initialize();
-
-      this.initializeElements();
-      await this.initializeApp();
-      this.initializeAuthState();
-    } catch (error) {
-      ErrorHandler.handle(error, 'popup.initializeAsync');
-      // Failed to initialize popup
-    }
+    await initializePage({
+      configManager: this.configManager,
+      initConfigManager: true,
+      authStateManager: this.authStateManager,
+      initializeElements: () => this.initializeElements(),
+      initializeApp: () => this.initializeApp(),
+      onAuthStateChange: session => this.handleAuthStateChange(session),
+      context: 'popup.initializeAsync',
+    });
   }
 
   /**
-   * Initialize authentication state and set up listeners
-   * @async
-   * @method initializeAuthState
-   * @description Sets up authentication state management and listeners for auth state changes
-   * @throws {Error} When auth state initialization fails
-   *
-   * @example
-   * // Called during popup initialization
-   * await popup.initializeAuthState();
+   * @deprecated Kept for test compatibility; use page-controller wiring instead.
    */
   async initializeAuthState() {
-    try {
-      await this.authStateManager.initialize();
-
-      // Listen for auth state changes
-      this.authStateManager.addListener('authStateChanged', session => {
-        this.handleAuthStateChange(session);
-      });
-
-      // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener(
-        (message, _sender, _sendResponse) => {
-          if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
-            this.handleAuthStateChange(message.session);
-          }
-        },
-      );
-
-      // Auth state initialized successfully
-    } catch (error) {
-      ErrorHandler.handle(error, 'popup.initializeAuthState');
-    }
+    // Auth wiring handled by initializePage()
   }
 
   /**
@@ -279,11 +250,7 @@ class ForgetfulMePopup {
         currentWindow: true,
       });
 
-      if (
-        !tab.url ||
-        tab.url.startsWith('chrome://') ||
-        tab.url.startsWith('chrome-extension://')
-      ) {
+      if (isRestrictedUrl(tab.url)) {
         UIMessages.error(
           'Cannot mark browser pages as read',
           this.appContainer,
@@ -294,14 +261,14 @@ class ForgetfulMePopup {
       const bookmark = BookmarkTransformer.fromCurrentTab(
         tab,
         status,
-        tags.trim() ? tags.trim().split(',') : [],
+        tags.trim() ? BookmarkTransformer.normalizeTags(tags) : [],
       );
 
       const result = await this.supabaseService.saveBookmark(bookmark);
 
       if (result.isDuplicate) {
         // Show edit interface for existing bookmark
-        this.editInterface.showEditInterface(result);
+        await this.editInterface.showEditInterface(result);
       } else {
         UIMessages.success('Page marked as read!', this.appContainer);
 
@@ -358,11 +325,6 @@ class ForgetfulMePopup {
     }
   }
 
-  showMessage(message, type) {
-    // Use the centralized UIMessages system
-    UIMessages.show(message, type, this.appContainer);
-  }
-
   openSettings() {
     chrome.runtime.openOptionsPage();
   }
@@ -373,10 +335,7 @@ class ForgetfulMePopup {
    * @description Opens the bookmark management interface in a new tab for better usability
    */
   showBookmarkManagement() {
-    // Open bookmark management page in a new tab
-    chrome.tabs.create({
-      url: chrome.runtime.getURL('bookmark-management.html'),
-    });
+    openBookmarkManagementTab();
   }
 
   /**
@@ -396,13 +355,7 @@ class ForgetfulMePopup {
         return;
       }
 
-      // Skip browser pages and extension pages
-      if (
-        tab.url.startsWith('chrome://') ||
-        tab.url.startsWith('chrome-extension://') ||
-        tab.url.startsWith('about:') ||
-        tab.url.startsWith('moz-extension://')
-      ) {
+      if (isRestrictedUrl(tab.url)) {
         return;
       }
 
@@ -430,20 +383,7 @@ class ForgetfulMePopup {
 
   async updateBookmark(bookmarkId) {
     try {
-      const status = UIComponents.DOM.getValue('edit-read-status') || 'read';
-      const tags = UIComponents.DOM.getValue('edit-tags') || '';
-
-      const updates = {
-        read_status: status,
-        tags: tags.trim()
-          ? tags
-              .trim()
-              .split(',')
-              .map(tag => tag.trim())
-              .filter(tag => tag)
-          : [],
-        updated_at: new Date().toISOString(),
-      };
+      const updates = getBookmarkEditFormData();
 
       await this.supabaseService.updateBookmark(bookmarkId, updates);
       UIMessages.success('Bookmark updated successfully!', this.appContainer);

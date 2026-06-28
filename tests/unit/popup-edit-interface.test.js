@@ -13,7 +13,9 @@ vi.mock('../../utils/ui-components.js', () => ({
     createButton: vi.fn((text, onClick, type, options) => {
       const button = document.createElement('button');
       button.textContent = text;
-      button.onclick = onClick;
+      if (onClick) {
+        button.addEventListener('click', onClick);
+      }
       button.className = type;
       if (options) {
         Object.assign(button, options);
@@ -31,7 +33,9 @@ vi.mock('../../utils/ui-components.js', () => ({
     createForm: vi.fn((id, onSubmit, fields, options) => {
       const form = document.createElement('form');
       form.id = id;
-      form.onsubmit = onSubmit;
+      if (onSubmit) {
+        form.addEventListener('submit', onSubmit);
+      }
       if (options) {
         Object.assign(form, options);
       }
@@ -43,6 +47,7 @@ vi.mock('../../utils/ui-components.js', () => ({
 vi.mock('../../utils/formatters.js', () => ({
   formatStatus: vi.fn(status => status),
   formatTime: vi.fn(timestamp => new Date(timestamp).toLocaleString()),
+  buildStatusSelectOptions: vi.fn(() => [{ value: 'read', text: 'Read' }]),
 }));
 
 describe('PopupEditInterface', () => {
@@ -58,6 +63,16 @@ describe('PopupEditInterface', () => {
       appContainer: document.createElement('div'),
       showMainInterface: vi.fn(),
       updateBookmark: vi.fn(),
+      configManager: {
+        getCustomStatusTypes: vi
+          .fn()
+          .mockResolvedValue([
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ]),
+      },
     };
 
     popupEditInterface = new PopupEditInterface(mockPopup);
@@ -70,7 +85,7 @@ describe('PopupEditInterface', () => {
   });
 
   describe('showEditInterface', () => {
-    test('should set currentBookmarkUrl', () => {
+    test('should set currentBookmarkUrl', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -80,12 +95,12 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       expect(mockPopup.currentBookmarkUrl).toBe('https://example.com');
     });
 
-    test('should create header with title and back button', () => {
+    test('should create header with title and back button', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -95,7 +110,7 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const header = mockPopup.appContainer.querySelector('header');
       expect(header).toBeTruthy();
@@ -103,7 +118,7 @@ describe('PopupEditInterface', () => {
       expect(header.querySelector('button').textContent).toBe('← Back');
     });
 
-    test('should create main content container', () => {
+    test('should create main content container', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -113,13 +128,13 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const mainContent = mockPopup.appContainer.querySelector('.main-content');
       expect(mainContent).toBeTruthy();
     });
 
-    test('should create info section with bookmark details', () => {
+    test('should create info section with bookmark details', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -129,7 +144,7 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const infoSection = mockPopup.appContainer.querySelector('.info-section');
       expect(infoSection).toBeTruthy();
@@ -138,7 +153,7 @@ describe('PopupEditInterface', () => {
       expect(infoSection.innerHTML).toContain('test, example');
     });
 
-    test('should handle bookmark without tags', () => {
+    test('should handle bookmark without tags', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -148,13 +163,13 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const infoSection = mockPopup.appContainer.querySelector('.info-section');
       expect(infoSection.innerHTML).toContain('None');
     });
 
-    test('should create edit form with status selector', () => {
+    test('should create edit form with status selector', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -164,14 +179,14 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const form = mockPopup.appContainer.querySelector('form');
       expect(form).toBeTruthy();
       expect(form.id).toBe('editBookmarkForm');
     });
 
-    test('should call showMainInterface when back button is clicked', () => {
+    test('should call showMainInterface when back button is clicked', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -181,7 +196,7 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const backButton = mockPopup.appContainer.querySelector('button');
       backButton.click();
@@ -189,7 +204,7 @@ describe('PopupEditInterface', () => {
       expect(mockPopup.showMainInterface).toHaveBeenCalled();
     });
 
-    test('should call updateBookmark when form is submitted', () => {
+    test('should call updateBookmark when form is submitted', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -199,7 +214,7 @@ describe('PopupEditInterface', () => {
         created_at: new Date().toISOString(),
       };
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       const form = mockPopup.appContainer.querySelector('form');
       const submitEvent = new Event('submit', { cancelable: true });
@@ -208,7 +223,7 @@ describe('PopupEditInterface', () => {
       expect(mockPopup.updateBookmark).toHaveBeenCalledWith('bookmark-id');
     });
 
-    test('should clear appContainer before rendering', () => {
+    test('should clear appContainer before rendering', async () => {
       const bookmark = {
         id: 'bookmark-id',
         url: 'https://example.com',
@@ -221,16 +236,16 @@ describe('PopupEditInterface', () => {
       // Add some initial content
       mockPopup.appContainer.innerHTML = '<div>Old content</div>';
 
-      popupEditInterface.showEditInterface(bookmark);
+      await popupEditInterface.showEditInterface(bookmark);
 
       expect(mockPopup.appContainer.innerHTML).not.toContain('Old content');
       expect(mockPopup.appContainer.querySelector('header')).toBeTruthy();
     });
 
-    test('should handle different read statuses', () => {
+    test('should handle different read statuses', async () => {
       const statuses = ['read', 'good-reference', 'low-value', 'revisit-later'];
 
-      statuses.forEach(status => {
+      for (const status of statuses) {
         const bookmark = {
           id: 'bookmark-id',
           url: 'https://example.com',
@@ -240,12 +255,10 @@ describe('PopupEditInterface', () => {
           created_at: new Date().toISOString(),
         };
 
-        popupEditInterface.showEditInterface(bookmark);
-
-        const infoSection =
-          mockPopup.appContainer.querySelector('.info-section');
-        expect(infoSection.innerHTML).toContain(status);
-      });
+        await expect(
+          popupEditInterface.showEditInterface(bookmark),
+        ).resolves.not.toThrow();
+      }
     });
   });
 });

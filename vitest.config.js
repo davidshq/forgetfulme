@@ -25,7 +25,6 @@ export default defineConfig({
     exclude: [
       'tests/popup.test.js',
       'tests/options.test.js',
-      'tests/auth.test.js',
       'tests/helpers/**',
       '**/node_modules/**',
     ],
@@ -41,7 +40,6 @@ export default defineConfig({
         'node_modules/',
         'tests/popup.test.js',
         'tests/options.test.js',
-        'tests/auth.test.js',
         'tests/helpers/**',
         'tests/unit/**/*.test.js',
         'vitest.config.js',

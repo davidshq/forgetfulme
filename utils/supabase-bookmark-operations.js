@@ -6,11 +6,25 @@
 
 import ErrorHandler from './error-handler.js';
 import BookmarkTransformer from './bookmark-transformer.js';
+import { countByStatus } from './formatters.js';
 import {
   deduplicateRequest,
   getRequestKey,
   requireSupabaseAuth,
 } from './supabase-request-utils.js';
+
+/**
+ * Return null when Supabase reports no matching row (PGRST116).
+ * @param {Object} error
+ * @returns {null}
+ */
+function nullIfNotFound(error) {
+  if (error.code === 'PGRST116') {
+    return null;
+  }
+
+  throw error;
+}
 
 /**
  * Bookmark operations for Supabase service
@@ -201,11 +215,10 @@ export class BookmarkOperations {
             .single();
 
           if (error) {
-            if (error.code === 'PGRST116') {
-              // No rows returned - bookmark doesn't exist
+            const notFound = nullIfNotFound(error);
+            if (notFound === null) {
               return null;
             }
-            throw error;
           }
 
           return data;
@@ -302,11 +315,10 @@ export class BookmarkOperations {
             .single();
 
           if (error) {
-            if (error.code === 'PGRST116') {
-              // No rows returned - bookmark doesn't exist
+            const notFound = nullIfNotFound(error);
+            if (notFound === null) {
               return null;
             }
-            throw error;
           }
 
           return data;
@@ -344,11 +356,7 @@ export class BookmarkOperations {
 
           if (error) throw error;
 
-          return (data || []).reduce((stats, bookmark) => {
-            stats[bookmark.read_status] =
-              (stats[bookmark.read_status] || 0) + 1;
-            return stats;
-          }, {});
+          return countByStatus(data || []);
         } catch (error) {
           ErrorHandler.handle(error, 'supabase-service.getBookmarkStats');
           throw error;

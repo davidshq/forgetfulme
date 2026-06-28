@@ -61,11 +61,15 @@ Before using the extension, you need to set up a Supabase backend:
    npm install
    ```
 3. **Set up Supabase** following the setup guide
-4. **Configure your extension** with your credentials (see Configuration section below)
-5. **Open Chrome** and navigate to `chrome://extensions/`
-6. **Enable Developer mode** (toggle in top right)
-7. **Click "Load unpacked"** and select the extension directory
-8. **Pin the extension** to your toolbar for easy access
+4. **Build the background service worker** (required after clone or background changes):
+   ```bash
+   npm run build:background
+   ```
+5. **Configure your extension** with your credentials (see Configuration section below)
+6. **Open Chrome** and navigate to `chrome://extensions/`
+7. **Enable Developer mode** (toggle in top right)
+8. **Click "Load unpacked"** and select the extension directory
+9. **Pin the extension** to your toolbar for easy access
 
 ### For Users (Future Chrome Web Store Release)
 

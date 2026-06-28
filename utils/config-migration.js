@@ -15,7 +15,7 @@ const CONFIG = {
  * Get current migration version
  * @returns {Promise<number>} Current migration version
  */
-export async function getMigrationVersion() {
+async function getMigrationVersion() {
   try {
     const result = await chrome.storage.sync.get(['configVersion']);
     return result.configVersion || 0;
@@ -28,7 +28,7 @@ export async function getMigrationVersion() {
  * Set migration version
  * @param {number} version - Version number to set
  */
-export async function setMigrationVersion(version) {
+async function setMigrationVersion(version) {
   try {
     await chrome.storage.sync.set({ configVersion: version });
   } catch (error) {
@@ -41,7 +41,7 @@ export async function setMigrationVersion(version) {
  * Migrate to version 1 configuration
  * @description Performs migration to version 1 format
  */
-export async function migrateToVersion1() {
+async function migrateToVersion1() {
   // Migration logic for version 1
   // This is where we'd handle any breaking changes in configuration format
   // Migrating configuration to version 1

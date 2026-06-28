@@ -10,6 +10,7 @@
 
 import ErrorHandler from './error-handler.js';
 import { MESSAGE_TYPES } from './constants.js';
+import { EventEmitter } from './event-emitter.js';
 
 /**
  * Authentication State Manager for ForgetfulMe extension
@@ -24,17 +25,16 @@ import { MESSAGE_TYPES } from './constants.js';
  *   console.log('Auth state changed:', session);
  * });
  */
-class AuthStateManager {
+class AuthStateManager extends EventEmitter {
   /**
    * Initialize the authentication state manager
    * @constructor
    * @description Sets up the auth state manager with initial state and listener management
    */
   constructor() {
+    super();
     /** @type {Object|null} Current authentication session */
     this.authState = null;
-    /** @type {Set} Set of event listeners */
-    this.listeners = new Set();
     /** @type {boolean} Whether the manager has been initialized */
     this.initialized = false;
   }
@@ -171,49 +171,6 @@ class AuthStateManager {
         });
     } catch (error) {
       ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts');
-    }
-  }
-
-  /**
-   * Add event listener
-   * @param {string} event - Event name to listen for
-   * @param {Function} callback - Callback function to execute
-   * @description Registers a callback for auth state events
-   */
-  addListener(event, callback) {
-    this.listeners.add({ event, callback });
-  }
-
-  /**
-   * Remove event listener
-   * @param {string} event - Event name to remove listener from
-   * @param {Function} callback - Callback function to remove
-   * @description Removes a specific event listener
-   */
-  removeListener(event, callback) {
-    for (const listener of this.listeners) {
-      if (listener.event === event && listener.callback === callback) {
-        this.listeners.delete(listener);
-        break;
-      }
-    }
-  }
-
-  /**
-   * Notify all listeners of an event
-   * @param {string} event - Event name to notify
-   * @param {*} data - Data to pass to listeners
-   * @description Executes all registered callbacks for an event
-   */
-  notifyListeners(event, data) {
-    for (const listener of this.listeners) {
-      if (listener.event === event) {
-        try {
-          listener.callback(data);
-        } catch (error) {
-          ErrorHandler.handle(error, 'auth-state-manager.notifyListeners');
-        }
-      }
     }
   }
 

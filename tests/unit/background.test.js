@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Background handler specification tests
+ * @description Validates background message/auth behavior inline. Does not import
+ * the bundled service worker — see `background/entry.js` and `npm run build:background`.
+ */
+
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
 // Mock Chrome APIs

@@ -13,7 +13,8 @@ import ErrorHandler from './utils/error-handler.js';
 import UIMessages from './utils/ui-messages.js';
 import { initializeServices } from './utils/service-initializer.js';
 import { initializeApp as initializeAppUtil } from './utils/app-initializer.js';
-import { MESSAGE_TYPES } from './utils/constants.js';
+import { initializePage } from './utils/page-controller.js';
+import { openBookmarkManagementTab } from './utils/navigation-utils.js';
 import { renderMainInterface } from './utils/options-ui-renderer.js';
 import {
   loadStatistics,
@@ -57,46 +58,19 @@ class ForgetfulMeOptions {
    * @description Sets up DOM elements, app initialization, and auth state
    */
   async initializeAsync() {
-    try {
-      // Wait for DOM to be ready
-      await UIComponents.DOM.ready();
-
-      this.initializeElements();
-      await this.initializeApp();
-      this.initializeAuthState();
-    } catch (error) {
-      ErrorHandler.handle(error, 'options.initializeAsync');
-      // Failed to initialize options
-    }
+    await initializePage({
+      configManager: this.configManager,
+      initConfigManager: true,
+      authStateManager: this.authStateManager,
+      initializeElements: () => this.initializeElements(),
+      initializeApp: () => this.initializeApp(),
+      onAuthStateChange: session => this.handleAuthStateChange(session),
+      context: 'options.initializeAsync',
+    });
   }
 
-  /**
-   * Initialize authentication state and listeners
-   * @description Sets up auth state manager and message listeners
-   */
-  async initializeAuthState() {
-    try {
-      await this.authStateManager.initialize();
-
-      // Listen for auth state changes
-      this.authStateManager.addListener('authStateChanged', session => {
-        this.handleAuthStateChange(session);
-      });
-
-      // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener(
-        (message, _sender, _sendResponse) => {
-          if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
-            this.handleAuthStateChange(message.session);
-          }
-        },
-      );
-
-      // Auth state initialized successfully
-    } catch (error) {
-      ErrorHandler.handle(error, 'options.initializeAuthState');
-    }
-  }
+  /** @deprecated Auth wiring handled by initializePage() */
+  async initializeAuthState() {}
 
   /**
    * Handle authentication state changes
@@ -427,21 +401,7 @@ class ForgetfulMeOptions {
    * @description Opens the bookmark management interface in a new tab for better usability
    */
   openBookmarkManagement() {
-    // Open bookmark management page in a new tab
-    chrome.tabs.create({
-      url: chrome.runtime.getURL('bookmark-management.html'),
-    });
-  }
-
-  /**
-   * Show message to user
-   * @param {string} message - Message to display
-   * @param {string} type - Message type (success, error, info, loading)
-   * @description Shows user feedback messages using centralized UIMessages system
-   */
-  showMessage(message, type) {
-    // Use the centralized UIMessages system
-    UIMessages.show(message, type, this.appContainer);
+    openBookmarkManagementTab();
   }
 }
 

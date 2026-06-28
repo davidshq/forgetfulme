@@ -1,4 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import '../helpers/register-page-mocks.js';
+import {
+  configureUIComponentStubs,
+  PAGE_ERROR_HANDLER_RESULT,
+} from '../helpers/vi-module-mocks.js';
 
 /**
  * @fileoverview Unit tests for ForgetfulMePopup using Kent Dodds testing methodology
@@ -22,130 +27,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
  * @since 2024-01-01
  */
 
-// Mock dependencies BEFORE importing the module under test
-vi.mock('../../utils/ui-components.js', () => {
-  const createMockElement = tagName => document.createElement(tagName);
-  const createMockListCard = () => {
-    const card = document.createElement('article');
-    const cardList = document.createElement('div');
-    cardList.className = 'card-list';
-    card.appendChild(cardList);
-    return card;
-  };
-
-  return {
-    default: {
-      DOM: {
-        ready: vi.fn().mockResolvedValue(),
-        getElement: vi.fn(),
-        setValue: vi.fn(),
-        getValue: vi.fn(),
-        querySelector: vi.fn(),
-        querySelectorAll: vi.fn(),
-      },
-      createButton: vi.fn(() => createMockElement('button')),
-      createForm: vi.fn(() => createMockElement('form')),
-      createFormField: vi.fn(() => createMockElement('input')),
-      createSection: vi.fn(() => createMockElement('section')),
-      createContainer: vi.fn(() => createMockElement('div')),
-      createListItem: vi.fn(() => createMockElement('li')),
-      createCard: vi.fn(() => createMockElement('article')),
-      createFormCard: vi.fn(() => createMockElement('article')),
-      createListCard: vi.fn(() => createMockListCard()),
-      createHeaderWithNav: vi.fn(() => createMockElement('header')),
-    },
-  };
-});
-
-vi.mock('../../utils/auth-state-manager.js', () => ({
-  default: class MockAuthStateManager {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.isAuthenticated = vi.fn().mockResolvedValue(true);
-      this.addListener = vi.fn();
-    }
-  },
-}));
-
-vi.mock('../../utils/error-handler.js', () => ({
-  default: {
-    handle: vi.fn(),
-    ERROR_TYPES: {
-      NETWORK: 'NETWORK',
-      AUTH: 'AUTH',
-      VALIDATION: 'VALIDATION',
-      DATABASE: 'DATABASE',
-      CONFIG: 'CONFIG',
-      UI: 'UI',
-      UNKNOWN: 'UNKNOWN',
-    },
-    SEVERITY: {
-      LOW: 'LOW',
-      MEDIUM: 'MEDIUM',
-      HIGH: 'HIGH',
-      CRITICAL: 'CRITICAL',
-    },
-  },
-}));
-
-vi.mock('../../utils/ui-messages.js', () => ({
-  default: {
-    success: vi.fn(),
-    error: vi.fn(),
-    show: vi.fn(),
-    confirm: vi.fn(),
-  },
-}));
-
-vi.mock('../../utils/config-manager.js', () => ({
-  default: class MockConfigManager {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.getCustomStatusTypes = vi.fn().mockResolvedValue([]);
-    }
-  },
-}));
-
-vi.mock('../../utils/bookmark-transformer.js', () => ({
-  default: {
-    toUIFormat: vi.fn(),
-    fromCurrentTab: vi.fn(),
-  },
-}));
-
-vi.mock('../../supabase-config.js', () => ({
-  default: class MockSupabaseConfig {
-    constructor() {
-      this.isConfigured = vi.fn().mockResolvedValue(true);
-      this.initialize = vi.fn().mockResolvedValue();
-      this.getCurrentUser = vi.fn().mockReturnValue({ id: 'test-user-id' });
-    }
-  },
-}));
-
-vi.mock('../../supabase-service.js', () => ({
-  default: class MockSupabaseService {
-    constructor() {
-      this.initialize = vi.fn().mockResolvedValue();
-      this.saveBookmark = vi.fn();
-      this.getBookmarks = vi.fn();
-      this.updateBookmark = vi.fn();
-      this.deleteBookmark = vi.fn();
-      this.getBookmarkById = vi.fn();
-    }
-  },
-}));
-
 vi.mock('../../utils/app-initializer.js', () => ({
   initializeApp: vi.fn().mockResolvedValue(),
-}));
-
-vi.mock('../../auth-ui.js', () => ({
-  default: class MockAuthUI {
-    constructor() {
-      this.showLoginForm = vi.fn();
-    }
-  },
 }));
 
 // Mock component modules
@@ -183,19 +66,6 @@ vi.mock('../../components/status-selector.js', () => ({
   },
 }));
 
-// Mock chrome API
-global.chrome = {
-  tabs: {
-    query: vi.fn(),
-  },
-  runtime: {
-    openOptionsPage: vi.fn(),
-    onMessage: {
-      addListener: vi.fn(),
-    },
-  },
-};
-
 // Import the module under test AFTER mocking
 import ForgetfulMePopup from '../../popup.js';
 import UIComponents from '../../utils/ui-components.js';
@@ -203,6 +73,7 @@ import UIMessages from '../../utils/ui-messages.js';
 import ErrorHandler from '../../utils/error-handler.js';
 import SupabaseService from '../../supabase-service.js';
 import BookmarkTransformer from '../../utils/bookmark-transformer.js';
+import * as bookmarkEditView from '../../components/bookmark-edit-view.js';
 
 describe('ForgetfulMePopup', () => {
   let popup;
@@ -220,19 +91,7 @@ describe('ForgetfulMePopup', () => {
     mockUIMessages = UIMessages;
     mockErrorHandler = ErrorHandler;
 
-    // Directly replace the ErrorHandler.handle method to ensure it returns the correct structure
-    ErrorHandler.handle = vi.fn().mockReturnValue({
-      errorInfo: {
-        type: 'UNKNOWN',
-        severity: 'MEDIUM',
-        message: 'Test error message',
-        context: 'test',
-        originalError: new Error('Test error message'),
-      },
-      userMessage: 'Test error message',
-      shouldRetry: false,
-      shouldShowToUser: true,
-    });
+    ErrorHandler.handle = vi.fn().mockReturnValue(PAGE_ERROR_HANDLER_RESULT);
 
     // Mock BookmarkTransformer.fromCurrentTab
     BookmarkTransformer.fromCurrentTab = vi.fn().mockReturnValue({
@@ -259,51 +118,18 @@ describe('ForgetfulMePopup', () => {
     const mockEditReadStatus = document.createElement('select');
     const mockEditTags = document.createElement('input');
 
-    mockUIComponents.DOM.getElement.mockImplementation(id => {
-      if (id === 'app') return mockAppContainer;
-      if (id === 'read-status') return mockReadStatus;
-      if (id === 'tags') return mockTags;
-      if (id === 'settings-btn') return mockSettingsBtn;
-      if (id === 'recent-list') return mockRecentList;
-      if (id === 'edit-read-status') return mockEditReadStatus;
-      if (id === 'edit-tags') return mockEditTags;
-      return null;
+    configureUIComponentStubs(mockUIComponents, {
+      getElement: id => {
+        if (id === 'app') return mockAppContainer;
+        if (id === 'read-status') return mockReadStatus;
+        if (id === 'tags') return mockTags;
+        if (id === 'settings-btn') return mockSettingsBtn;
+        if (id === 'recent-list') return mockRecentList;
+        if (id === 'edit-read-status') return mockEditReadStatus;
+        if (id === 'edit-tags') return mockEditTags;
+        return null;
+      },
     });
-
-    // Mock UI component methods to return proper DOM elements
-    mockUIComponents.createButton.mockReturnValue(
-      document.createElement('button'),
-    );
-    mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
-    mockUIComponents.createFormField.mockReturnValue(
-      document.createElement('input'),
-    );
-    mockUIComponents.createSection.mockReturnValue(
-      document.createElement('section'),
-    );
-    mockUIComponents.createContainer.mockReturnValue(
-      document.createElement('div'),
-    );
-    mockUIComponents.createListItem.mockReturnValue(
-      document.createElement('li'),
-    );
-    mockUIComponents.createCard.mockReturnValue(
-      document.createElement('article'),
-    );
-    mockUIComponents.createFormCard.mockReturnValue(
-      document.createElement('article'),
-    );
-    // createListCard needs to return an element with a .card-list child
-    mockUIComponents.createListCard.mockImplementation(() => {
-      const card = document.createElement('article');
-      const cardList = document.createElement('div');
-      cardList.className = 'card-list';
-      card.appendChild(cardList);
-      return card;
-    });
-    mockUIComponents.createHeaderWithNav.mockReturnValue(
-      document.createElement('header'),
-    );
 
     // Mock chrome tabs
     chrome.tabs.query.mockResolvedValue([
@@ -344,10 +170,10 @@ describe('ForgetfulMePopup', () => {
         read_status: 'read',
       });
 
-      // Mock form values
-      mockUIComponents.DOM.getValue
-        .mockReturnValueOnce('read') // read-status
-        .mockReturnValueOnce('test, tags'); // tags
+      popup.quickAdd.getFormValues.mockReturnValue({
+        status: 'read',
+        tags: 'test, tags',
+      });
 
       await popup.markAsRead();
 
@@ -374,10 +200,10 @@ describe('ForgetfulMePopup', () => {
         isDuplicate: true,
       });
 
-      // Mock form values
-      mockUIComponents.DOM.getValue
-        .mockReturnValueOnce('read') // read-status
-        .mockReturnValueOnce('test, tags'); // tags
+      popup.quickAdd.getFormValues.mockReturnValue({
+        status: 'read',
+        tags: 'test, tags',
+      });
 
       // Mock UI components for edit interface
       mockUIComponents.createButton.mockReturnValue(
@@ -401,10 +227,10 @@ describe('ForgetfulMePopup', () => {
       const mockError = new Error('Test error');
       mockSupabaseService.saveBookmark.mockRejectedValue(mockError);
 
-      // Mock form values
-      mockUIComponents.DOM.getValue
-        .mockReturnValueOnce('read') // read-status
-        .mockReturnValueOnce('test, tags'); // tags
+      popup.quickAdd.getFormValues.mockReturnValue({
+        status: 'read',
+        tags: 'test, tags',
+      });
 
       await popup.markAsRead();
 
@@ -430,10 +256,11 @@ describe('ForgetfulMePopup', () => {
         tags: ['updated', 'tags'],
       });
 
-      // Mock form values
-      mockUIComponents.DOM.getValue
-        .mockReturnValueOnce('good-reference') // edit-read-status
-        .mockReturnValueOnce('updated, tags'); // edit-tags
+      vi.spyOn(bookmarkEditView, 'getBookmarkEditFormData').mockReturnValue({
+        read_status: 'good-reference',
+        tags: ['updated', 'tags'],
+        updated_at: '2024-01-01T00:00:00.000Z',
+      });
 
       await popup.updateBookmark(bookmarkId);
 
@@ -456,10 +283,11 @@ describe('ForgetfulMePopup', () => {
       const mockError = new Error('Update failed');
       mockSupabaseService.updateBookmark.mockRejectedValue(mockError);
 
-      // Mock form values
-      mockUIComponents.DOM.getValue
-        .mockReturnValueOnce('read') // edit-read-status
-        .mockReturnValueOnce('test'); // edit-tags
+      vi.spyOn(bookmarkEditView, 'getBookmarkEditFormData').mockReturnValue({
+        read_status: 'read',
+        tags: ['test'],
+        updated_at: '2024-01-01T00:00:00.000Z',
+      });
 
       await popup.updateBookmark(bookmarkId);
 

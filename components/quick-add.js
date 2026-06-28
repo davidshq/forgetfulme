@@ -9,6 +9,7 @@
  */
 
 import UIComponents from '../utils/ui-components.js';
+import { buildStatusSelectOptions } from '../utils/formatters.js';
 
 /**
  * Quick add form component
@@ -38,12 +39,7 @@ export class QuickAdd {
           id: 'read-status',
           label: 'Mark as:',
           options: {
-            options: [
-              { value: 'read', text: 'Read' },
-              { value: 'good-reference', text: 'Good Reference' },
-              { value: 'low-value', text: 'Low Value' },
-              { value: 'revisit-later', text: 'Revisit Later' },
-            ],
+            options: buildStatusSelectOptions(),
             helpText: 'Choose how you want to categorize this page',
             'aria-describedby': 'status-help',
           },

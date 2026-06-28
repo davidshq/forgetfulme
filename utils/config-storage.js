@@ -4,6 +4,8 @@
  * @description Handles configuration storage operations
  */
 
+import { DEFAULT_STATUS_TYPES } from './constants.js';
+
 /**
  * Load all configuration from storage
  * @returns {Promise<Object>} Configuration object
@@ -20,10 +22,7 @@ export async function loadAllConfig() {
       supabase: result.supabaseConfig || null,
       preferences: {
         customStatusTypes: result.customStatusTypes || [
-          'read',
-          'good-reference',
-          'low-value',
-          'revisit-later',
+          ...DEFAULT_STATUS_TYPES,
         ],
       },
       auth: result.auth_session || null,
@@ -76,7 +75,7 @@ export async function clearAuthSession() {
  */
 export async function initializeDefaultSettings() {
   const defaultSettings = {
-    customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+    customStatusTypes: [...DEFAULT_STATUS_TYPES],
   };
 
   await chrome.storage.sync.set(defaultSettings);

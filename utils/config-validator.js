@@ -5,6 +5,7 @@
  */
 
 import ErrorHandler from './error-handler.js';
+import { DEFAULT_STATUS_TYPES } from './constants.js';
 
 /**
  * Validate Supabase configuration
@@ -49,12 +50,7 @@ export function validateSupabaseConfig(supabaseConfig) {
 export function validatePreferences(preferences) {
   if (!preferences || !Array.isArray(preferences.customStatusTypes)) {
     return {
-      customStatusTypes: [
-        'read',
-        'good-reference',
-        'low-value',
-        'revisit-later',
-      ],
+      customStatusTypes: [...DEFAULT_STATUS_TYPES],
     };
   }
 

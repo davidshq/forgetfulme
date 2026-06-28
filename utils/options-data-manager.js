@@ -5,7 +5,7 @@
  */
 
 import UIComponents from './ui-components.js';
-import { formatStatus } from './formatters.js';
+import { formatStatus, countByStatus } from './formatters.js';
 
 /**
  * Load statistics into the UI
@@ -28,11 +28,7 @@ export function loadStatistics(bookmarks, statusTypes) {
   }
 
   // Most used status
-  const statusCounts = {};
-  bookmarks.forEach(bookmark => {
-    statusCounts[bookmark.read_status] =
-      (statusCounts[bookmark.read_status] || 0) + 1;
-  });
+  const statusCounts = countByStatus(bookmarks);
 
   const mostUsed = Object.entries(statusCounts).sort(
     ([, a], [, b]) => b - a,

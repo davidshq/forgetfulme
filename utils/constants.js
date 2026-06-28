@@ -50,3 +50,14 @@ export const RETRY_CONFIG = {
   MAX_RETRIES: 3,
   BASE_DELAY: 1000,
 };
+
+/**
+ * Default read-status types used on first install and as fallback.
+ * @type {string[]}
+ */
+export const DEFAULT_STATUS_TYPES = [
+  'read',
+  'good-reference',
+  'low-value',
+  'revisit-later',
+];

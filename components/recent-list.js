@@ -9,8 +9,8 @@
  */
 
 import BookmarkTransformer from '../utils/bookmark-transformer.js';
-import { formatStatus, formatTime } from '../utils/formatters.js';
 import UIComponents from '../utils/ui-components.js';
+import { appendBookmarkMeta } from './bookmark-meta.js';
 
 /**
  * Recent list component
@@ -115,32 +115,7 @@ export class RecentList {
 
     // Add meta information
     const metaDiv = document.createElement('div');
-
-    // Add status badge
-    const statusSpan = document.createElement('small');
-    statusSpan.textContent = formatStatus(bookmark.status);
-    statusSpan.setAttribute(
-      'aria-label',
-      `Status: ${formatStatus(bookmark.status)}`,
-    );
-    metaDiv.appendChild(statusSpan);
-
-    // Add time
-    const timeSpan = document.createElement('small');
-    timeSpan.textContent = formatTime(new Date(bookmark.created_at).getTime());
-    timeSpan.setAttribute(
-      'aria-label',
-      `Created ${formatTime(new Date(bookmark.created_at).getTime())}`,
-    );
-    metaDiv.appendChild(timeSpan);
-
-    // Add tags if they exist
-    if (bookmark.tags && bookmark.tags.length > 0) {
-      const tagsSpan = document.createElement('small');
-      tagsSpan.textContent = `Tags: ${bookmark.tags.join(', ')}`;
-      tagsSpan.setAttribute('aria-label', `Tags: ${bookmark.tags.join(', ')}`);
-      metaDiv.appendChild(tagsSpan);
-    }
+    appendBookmarkMeta(metaDiv, bookmark);
 
     listItem.appendChild(metaDiv);
 

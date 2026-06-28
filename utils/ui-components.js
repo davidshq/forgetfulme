@@ -10,15 +10,8 @@
 
 // Import all component modules
 import { DOM } from './components/dom-utils.js';
-import {
-  BUTTON_STYLES as BUTTON_STYLES_CONST,
-  createButton,
-} from './components/button-components.js';
-import {
-  FIELD_TYPES as FIELD_TYPES_CONST,
-  createFormField,
-  createForm,
-} from './components/form-components.js';
+import { createButton } from './components/button-components.js';
+import { createFormField, createForm } from './components/form-components.js';
 import {
   createContainer,
   createSection,
@@ -53,52 +46,6 @@ import {
  * const element = UIComponents.DOM.getElement('my-element');
  */
 class UIComponents {
-  /**
-   * Available component types for UI creation
-   * @static
-   * @type {Object}
-   * @property {string} BUTTON - Button component type
-   * @property {string} FORM - Form component type
-   * @property {string} INPUT - Input component type
-   * @property {string} SELECT - Select component type
-   * @property {string} LABEL - Label component type
-   * @property {string} CONTAINER - Container component type
-   * @property {string} HEADER - Header component type
-   * @property {string} SECTION - Section component type
-   * @property {string} LIST_ITEM - List item component type
-   * @property {string} MESSAGE - Message component type
-   * @property {string} CONFIRM - Confirmation dialog component type
-   * @property {string} TOAST - Toast notification component type
-   */
-  static COMPONENT_TYPES = {
-    BUTTON: 'button',
-    FORM: 'form',
-    INPUT: 'input',
-    SELECT: 'select',
-    LABEL: 'label',
-    CONTAINER: 'container',
-    HEADER: 'header',
-    SECTION: 'section',
-    LIST_ITEM: 'list-item',
-    MESSAGE: 'message',
-    CONFIRM: 'confirm',
-    TOAST: 'toast',
-  };
-
-  /**
-   * Available button styles for consistent UI
-   * @static
-   * @type {Object}
-   */
-  static BUTTON_STYLES = BUTTON_STYLES_CONST;
-
-  /**
-   * Available form field types for form creation
-   * @static
-   * @type {Object}
-   */
-  static FIELD_TYPES = FIELD_TYPES_CONST;
-
   /**
    * DOM utility class for safe element access and manipulation
    * @static

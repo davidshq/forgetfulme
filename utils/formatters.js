@@ -4,6 +4,8 @@
  * @description Centralized formatting functions used across the extension
  */
 
+import { DEFAULT_STATUS_TYPES } from './constants.js';
+
 /**
  * Format status string for display
  * @param {string} status - The status string to format (e.g., 'good-reference')
@@ -41,4 +43,45 @@ export function formatTime(timestamp) {
   if (days < 7) return `${days}d ago`;
 
   return new Date(timestamp).toLocaleDateString();
+}
+
+/**
+ * Build select options for status dropdowns.
+ * @param {string[]} [statusTypes=DEFAULT_STATUS_TYPES]
+ * @param {Object} [options]
+ * @param {string} [options.selected]
+ * @param {boolean} [options.includeAll=false]
+ * @returns {Array<{ value: string, text: string, selected?: boolean }>}
+ */
+export function buildStatusSelectOptions(
+  statusTypes = DEFAULT_STATUS_TYPES,
+  { selected, includeAll = false } = {},
+) {
+  const options = includeAll ? [{ value: 'all', text: 'All Statuses' }] : [];
+
+  statusTypes.forEach(value => {
+    options.push({
+      value,
+      text: formatStatus(value),
+      ...(value === selected ? { selected: true } : {}),
+    });
+  });
+
+  return options;
+}
+
+/**
+ * Aggregate bookmark counts by status field.
+ * @param {Array<Object>} items
+ * @param {string} [statusField='read_status']
+ * @returns {Object<string, number>}
+ */
+export function countByStatus(items, statusField = 'read_status') {
+  return (items || []).reduce((stats, item) => {
+    const status = item[statusField];
+    if (status) {
+      stats[status] = (stats[status] || 0) + 1;
+    }
+    return stats;
+  }, {});
 }
