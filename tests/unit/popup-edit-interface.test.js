@@ -242,7 +242,8 @@ describe('PopupEditInterface', () => {
 
         popupEditInterface.showEditInterface(bookmark);
 
-        const infoSection = mockPopup.appContainer.querySelector('.info-section');
+        const infoSection =
+          mockPopup.appContainer.querySelector('.info-section');
         expect(infoSection.innerHTML).toContain(status);
       });
     });

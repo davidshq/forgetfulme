@@ -27,7 +27,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
 
     // Check for welcome message in the container header
     const welcomeText = await extensionHelper.getElementText(
-      '.ui-container-header h2'
+      '.ui-container-header h2',
     );
     expect(welcomeText).toContain('Welcome to ForgetfulMe');
 
@@ -63,7 +63,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
 
     // Check that the openOptionsPage function was called
     const optionsPageOpened = await page.evaluate(
-      () => window.optionsPageOpened
+      () => window.optionsPageOpened,
     );
     expect(optionsPageOpened).toBeTruthy();
   });

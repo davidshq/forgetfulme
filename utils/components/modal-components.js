@@ -18,7 +18,12 @@ import { createButton } from './button-components.js';
  * @param {Object} options - Dialog options
  * @returns {HTMLElement}
  */
-export function createConfirmDialog(message, onConfirm, onCancel, options = {}) {
+export function createConfirmDialog(
+  message,
+  onConfirm,
+  onCancel,
+  options = {},
+) {
   const actions = [
     {
       text: options.confirmText || 'Confirm',

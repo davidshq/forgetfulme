@@ -75,9 +75,13 @@ class AuthTokenRefreshHandler {
       try {
         await operation();
       } catch (error) {
-        ErrorHandler.handle(error, 'auth-token-refresh-handler.processOfflineQueue', {
-          silent: true,
-        });
+        ErrorHandler.handle(
+          error,
+          'auth-token-refresh-handler.processOfflineQueue',
+          {
+            silent: true,
+          },
+        );
       }
     }
   }

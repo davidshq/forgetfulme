@@ -243,7 +243,10 @@ describe('ForgetfulMe Background Service', () => {
       handleStorageAuthChange(mockAuthState);
 
       // Check that auth state change was logged
-      expect(console.log).toHaveBeenCalledWith('Background: Auth state changed:', 'authenticated');
+      expect(console.log).toHaveBeenCalledWith(
+        'Background: Auth state changed:',
+        'authenticated',
+      );
 
       // Check that notification was created for successful auth
       expect(mockChrome.notifications.create).toHaveBeenCalledWith({
@@ -525,7 +528,12 @@ describe('ForgetfulMe Background Service', () => {
           return new Promise(resolve => {
             chrome.storage.sync.get(['customStatusTypes'], _result => {
               if (!_result.customStatusTypes) {
-                const defaultStatusTypes = ['read', 'good-reference', 'low-value', 'revisit-later'];
+                const defaultStatusTypes = [
+                  'read',
+                  'good-reference',
+                  'low-value',
+                  'revisit-later',
+                ];
 
                 chrome.storage.sync.set(
                   {
@@ -552,7 +560,12 @@ describe('ForgetfulMe Background Service', () => {
       // Check that default settings were saved
       expect(mockChrome.storage.sync.set).toHaveBeenCalledWith(
         {
-          customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+          customStatusTypes: [
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ],
         },
         expect.any(Function),
       );
@@ -573,7 +586,12 @@ describe('ForgetfulMe Background Service', () => {
           return new Promise(resolve => {
             chrome.storage.sync.get(['customStatusTypes'], _result => {
               if (!_result.customStatusTypes) {
-                const defaultStatusTypes = ['read', 'good-reference', 'low-value', 'revisit-later'];
+                const defaultStatusTypes = [
+                  'read',
+                  'good-reference',
+                  'low-value',
+                  'revisit-later',
+                ];
 
                 chrome.storage.sync.set(
                   {
@@ -643,7 +661,9 @@ describe('ForgetfulMe Background Service', () => {
     test('should handle BOOKMARK_SAVED message and clear cache', async () => {
       // Mock chrome.tabs.query to return a test tab
       mockChrome.tabs.query.mockImplementation(_queryInfo => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler
@@ -699,7 +719,9 @@ describe('ForgetfulMe Background Service', () => {
     test('should handle BOOKMARK_UPDATED message and clear cache', async () => {
       // Mock chrome.tabs.query to return a test tab
       mockChrome.tabs.query.mockImplementation(_queryInfo => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler
@@ -755,7 +777,9 @@ describe('ForgetfulMe Background Service', () => {
     test('should handle CHECK_URL_STATUS message', async () => {
       // Mock chrome.tabs.query to return a test tab
       mockChrome.tabs.query.mockImplementation(_queryInfo => {
-        return Promise.resolve([{ url: 'https://example.com', title: 'Test Page' }]);
+        return Promise.resolve([
+          { url: 'https://example.com', title: 'Test Page' },
+        ]);
       });
 
       // Create a mock message handler

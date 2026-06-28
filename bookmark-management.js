@@ -194,7 +194,10 @@ class BookmarkManagementPage {
       { text: 'Bookmark Management' }, // Current page
     ];
 
-    const breadcrumb = UIComponents.createBreadcrumb(breadcrumbItems, 'page-breadcrumb');
+    const breadcrumb = UIComponents.createBreadcrumb(
+      breadcrumbItems,
+      'page-breadcrumb',
+    );
 
     // Create header with navigation
     const navItems = [
@@ -207,11 +210,15 @@ class BookmarkManagementPage {
       },
     ];
 
-    const header = UIComponents.createHeaderWithNav('Bookmark Management', navItems, {
-      titleId: 'page-title',
-      navAriaLabel: 'Page actions',
-      navClassName: 'header-nav',
-    });
+    const header = UIComponents.createHeaderWithNav(
+      'Bookmark Management',
+      navItems,
+      {
+        titleId: 'page-title',
+        navAriaLabel: 'Page actions',
+        navClassName: 'header-nav',
+      },
+    );
 
     // Create main content container with sidebar layout using Pico components
     const mainContent = document.createElement('div');
@@ -308,7 +315,8 @@ class BookmarkManagementPage {
       await this.supabaseService.updateBookmark(bookmarkId, updateData);
 
       // Fetch the updated bookmark and update only that item
-      const updatedBookmark = await this.supabaseService.getBookmarkById(bookmarkId);
+      const updatedBookmark =
+        await this.supabaseService.getBookmarkById(bookmarkId);
       const bookmarksList = UIComponents.DOM.getElement('bookmarks-list');
       if (bookmarksList && updatedBookmark) {
         this.bookmarkList.updateBookmarkItem(updatedBookmark, bookmarksList);
@@ -322,7 +330,10 @@ class BookmarkManagementPage {
         this.showMainInterface();
       }, 1500);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.updateBookmark');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.updateBookmark',
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -350,9 +361,15 @@ class BookmarkManagementPage {
             this.bulkActions.updateBulkActions();
           }
 
-          UIMessages.success('Bookmark deleted successfully!', this.appContainer);
+          UIMessages.success(
+            'Bookmark deleted successfully!',
+            this.appContainer,
+          );
         } catch (error) {
-          const errorResult = ErrorHandler.handle(error, 'bookmark-management.deleteBookmark');
+          const errorResult = ErrorHandler.handle(
+            error,
+            'bookmark-management.deleteBookmark',
+          );
           UIMessages.error(errorResult.userMessage, this.appContainer);
         }
       },

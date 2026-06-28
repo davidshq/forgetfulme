@@ -69,12 +69,20 @@ const BackgroundErrorHandler = {
     const message = error.message || error.toString();
 
     // Network errors
-    if (message.includes('fetch') || message.includes('network') || message.includes('HTTP')) {
+    if (
+      message.includes('fetch') ||
+      message.includes('network') ||
+      message.includes('HTTP')
+    ) {
       return 'Connection error. Please check your internet connection and try again.';
     }
 
     // Authentication errors
-    if (message.includes('auth') || message.includes('login') || message.includes('sign')) {
+    if (
+      message.includes('auth') ||
+      message.includes('login') ||
+      message.includes('sign')
+    ) {
       return 'Authentication error. Please try signing in again.';
     }
 
@@ -226,7 +234,12 @@ class DefaultSettingsInitializer {
 
       // Only initialize if custom status types don't exist
       if (!result.customStatusTypes) {
-        const defaultStatusTypes = ['read', 'good-reference', 'low-value', 'revisit-later'];
+        const defaultStatusTypes = [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ];
 
         await chrome.storage.sync.set({
           customStatusTypes: defaultStatusTypes,
@@ -235,7 +248,10 @@ class DefaultSettingsInitializer {
         // Default settings initialized successfully
       }
     } catch (error) {
-      BackgroundErrorHandler.handle(error, 'background.initializeDefaultSettings');
+      BackgroundErrorHandler.handle(
+        error,
+        'background.initializeDefaultSettings',
+      );
     }
   }
 }
@@ -294,13 +310,19 @@ class ForgetfulMeBackground {
     /** @type {Object} Map of message types to handler methods */
     this.messageHandlers = {
       [MESSAGE_TYPES.MARK_AS_READ]: this.handleMarkAsReadMessage.bind(this),
-      [MESSAGE_TYPES.BOOKMARK_SAVED]: this.handleBookmarkSavedMessage.bind(this),
-      [MESSAGE_TYPES.BOOKMARK_UPDATED]: this.handleBookmarkUpdatedMessage.bind(this),
+      [MESSAGE_TYPES.BOOKMARK_SAVED]:
+        this.handleBookmarkSavedMessage.bind(this),
+      [MESSAGE_TYPES.BOOKMARK_UPDATED]:
+        this.handleBookmarkUpdatedMessage.bind(this),
       [MESSAGE_TYPES.GET_AUTH_STATE]: this.handleGetAuthStateMessage.bind(this),
-      [MESSAGE_TYPES.AUTH_STATE_CHANGED]: this.handleAuthStateChangedMessage.bind(this),
-      [MESSAGE_TYPES.GET_CONFIG_SUMMARY]: this.handleGetConfigSummaryMessage.bind(this),
-      [MESSAGE_TYPES.CHECK_URL_STATUS]: this.handleCheckUrlStatusMessage.bind(this),
-      [MESSAGE_TYPES.URL_STATUS_RESULT]: this.handleUrlStatusResultMessage.bind(this),
+      [MESSAGE_TYPES.AUTH_STATE_CHANGED]:
+        this.handleAuthStateChangedMessage.bind(this),
+      [MESSAGE_TYPES.GET_CONFIG_SUMMARY]:
+        this.handleGetConfigSummaryMessage.bind(this),
+      [MESSAGE_TYPES.CHECK_URL_STATUS]:
+        this.handleCheckUrlStatusMessage.bind(this),
+      [MESSAGE_TYPES.URL_STATUS_RESULT]:
+        this.handleUrlStatusResultMessage.bind(this),
     };
 
     this.initializeEventListeners();
@@ -565,7 +587,11 @@ class ForgetfulMeBackground {
    * @param {Function} sendResponse - Function to send response back to sender
    */
   handleUrlStatusResultMessage(message, _sender, sendResponse) {
-    if (message.data && message.data.url && typeof message.data.isSaved === 'boolean') {
+    if (
+      message.data &&
+      message.data.url &&
+      typeof message.data.isSaved === 'boolean'
+    ) {
       this.urlStatusCache.set(message.data.url, {
         isSaved: message.data.isSaved,
         timestamp: Date.now(),

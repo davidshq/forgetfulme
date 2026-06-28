@@ -5,7 +5,10 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { loadStatistics, loadStatusTypes } from '../../utils/options-data-manager.js';
+import {
+  loadStatistics,
+  loadStatusTypes,
+} from '../../utils/options-data-manager.js';
 
 // Mock dependencies
 vi.mock('../../utils/ui-components.js', () => ({
@@ -58,9 +61,11 @@ describe('OptionsDataManager', () => {
 
       loadStatistics(bookmarks, statusTypes);
 
-      const { default: UIComponents } = await import('../../utils/ui-components.js');
+      const { default: UIComponents } =
+        await import('../../utils/ui-components.js');
       const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
-      const statusTypesCountEl = UIComponents.DOM.getElement('status-types-count');
+      const statusTypesCountEl =
+        UIComponents.DOM.getElement('status-types-count');
       const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
 
       expect(totalEntriesEl.textContent).toBe('3');
@@ -74,7 +79,8 @@ describe('OptionsDataManager', () => {
 
       loadStatistics(bookmarks, statusTypes);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       const totalEntriesEl = UIComponents.DOM.getElement('total-entries');
       const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
 
@@ -83,7 +89,8 @@ describe('OptionsDataManager', () => {
     });
 
     test('should handle missing UI elements gracefully', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       UIComponents.DOM.getElement.mockReturnValue(null);
 
       const bookmarks = [{ id: '1', read_status: 'read' }];
@@ -104,7 +111,8 @@ describe('OptionsDataManager', () => {
 
       loadStatistics(bookmarks, statusTypes);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
 
       expect(mostUsedStatusEl.textContent).toBe('read');
@@ -119,7 +127,8 @@ describe('OptionsDataManager', () => {
 
       loadStatistics(bookmarks, statusTypes);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       const mostUsedStatusEl = UIComponents.DOM.getElement('most-used-status');
 
       // Should return one of them (implementation dependent)
@@ -134,8 +143,10 @@ describe('OptionsDataManager', () => {
 
       loadStatusTypes(statusTypes, onRemove);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
-      const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
+      const statusTypesListEl =
+        UIComponents.DOM.getElement('status-types-list');
 
       expect(statusTypesListEl.children.length).toBe(3);
     });
@@ -146,15 +157,18 @@ describe('OptionsDataManager', () => {
 
       loadStatusTypes(statusTypes, onRemove);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
-      const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
+      const statusTypesListEl =
+        UIComponents.DOM.getElement('status-types-list');
 
       expect(statusTypesListEl.children.length).toBe(1);
       expect(statusTypesListEl.querySelector('.empty')).toBeTruthy();
     });
 
     test('should handle missing status types list element', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       UIComponents.DOM.getElement.mockReturnValue(null);
 
       const statusTypes = ['read'];
@@ -164,7 +178,8 @@ describe('OptionsDataManager', () => {
     });
 
     test('should clear list before populating', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       const statusTypesListEl = document.createElement('ul');
       statusTypesListEl.innerHTML = '<li>Old item</li>';
       UIComponents.DOM.getElement.mockReturnValue(statusTypesListEl);
@@ -183,8 +198,10 @@ describe('OptionsDataManager', () => {
 
       loadStatusTypes(statusTypes, onRemove);
 
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
-      const statusTypesListEl = UIComponents.DOM.getElement('status-types-list');
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
+      const statusTypesListEl =
+        UIComponents.DOM.getElement('status-types-list');
 
       // Each list item should have a remove button
       expect(statusTypesListEl.children.length).toBe(2);

@@ -57,7 +57,9 @@ describe('UIMessages', () => {
       });
 
       expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('✅');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '✅',
+      );
     });
 
     test('should auto-remove message after timeout', async () => {
@@ -103,7 +105,9 @@ describe('UIMessages', () => {
 
       expect(messageEl.className).toContain('ui-message-success');
       expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('✅');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '✅',
+      );
     });
 
     test('should show success message with custom options', () => {
@@ -112,7 +116,9 @@ describe('UIMessages', () => {
         icon: '🎉',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('🎉');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '🎉',
+      );
     });
   });
 
@@ -122,7 +128,9 @@ describe('UIMessages', () => {
 
       expect(messageEl.className).toContain('ui-message-error');
       expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('❌');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '❌',
+      );
     });
 
     test('should show error message with custom options', () => {
@@ -131,7 +139,9 @@ describe('UIMessages', () => {
         icon: '💥',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('💥');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '💥',
+      );
     });
   });
 
@@ -141,7 +151,9 @@ describe('UIMessages', () => {
 
       expect(messageEl.className).toContain('ui-message-warning');
       expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('⚠️');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '⚠️',
+      );
     });
 
     test('should show warning message with custom options', () => {
@@ -150,7 +162,9 @@ describe('UIMessages', () => {
         icon: '🚨',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('🚨');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '🚨',
+      );
     });
   });
 
@@ -160,7 +174,9 @@ describe('UIMessages', () => {
 
       expect(messageEl.className).toContain('ui-message-info');
       expect(messageEl.querySelector('.ui-message-icon')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('ℹ️');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        'ℹ️',
+      );
     });
 
     test('should show info message with custom options', () => {
@@ -169,7 +185,9 @@ describe('UIMessages', () => {
         icon: '📋',
       });
 
-      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe('📋');
+      expect(messageEl.querySelector('.ui-message-icon').textContent).toBe(
+        '📋',
+      );
     });
   });
 
@@ -180,9 +198,13 @@ describe('UIMessages', () => {
       expect(messageEl.className).toContain('ui-message-loading');
       expect(messageEl.getAttribute('aria-busy')).toBe('true');
       expect(messageEl.querySelector('progress')).toBeTruthy();
-      expect(messageEl.querySelector('progress').getAttribute('aria-label')).toBe('Loading');
+      expect(
+        messageEl.querySelector('progress').getAttribute('aria-label'),
+      ).toBe('Loading');
       expect(messageEl.querySelector('.ui-message-text')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-text').textContent).toBe('Please wait...');
+      expect(messageEl.querySelector('.ui-message-text').textContent).toBe(
+        'Please wait...',
+      );
     });
 
     test('should not auto-remove loading message', async () => {
@@ -208,7 +230,9 @@ describe('UIMessages', () => {
 
     test('should handle null container gracefully', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleLogSpy = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
 
       const result = UIMessages.loading('Loading...', null);
 
@@ -273,11 +297,17 @@ describe('UIMessages', () => {
       delete global.UIComponents;
 
       const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry('Operation failed', mockRetryFunction, container);
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        mockRetryFunction,
+        container,
+      );
 
       expect(messageEl.className).toContain('ui-message-error');
       expect(messageEl.querySelector('.ui-message-retry-btn')).toBeTruthy();
-      expect(messageEl.querySelector('.ui-message-retry-btn').textContent).toBe('Retry');
+      expect(messageEl.querySelector('.ui-message-retry-btn').textContent).toBe(
+        'Retry',
+      );
     });
 
     test('should call retry function when retry button is clicked', () => {
@@ -285,7 +315,11 @@ describe('UIMessages', () => {
       delete global.UIComponents;
 
       const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry('Operation failed', mockRetryFunction, container);
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        mockRetryFunction,
+        container,
+      );
 
       const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
       retryBtn.click();
@@ -299,7 +333,11 @@ describe('UIMessages', () => {
       delete global.UIComponents;
 
       const mockRetryFunction = vi.fn();
-      const messageEl = UIMessages.showWithRetry('Operation failed', mockRetryFunction, container);
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        mockRetryFunction,
+        container,
+      );
 
       const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
       retryBtn.click();
@@ -311,7 +349,11 @@ describe('UIMessages', () => {
       // Ensure UIComponents is not available to use fallback implementation
       delete global.UIComponents;
 
-      const messageEl = UIMessages.showWithRetry('Operation failed', null, container);
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        null,
+        container,
+      );
 
       expect(messageEl.className).toContain('ui-message-error');
       expect(messageEl.querySelector('.ui-message-retry-btn')).toBeFalsy();
@@ -325,7 +367,11 @@ describe('UIMessages', () => {
         throw new Error('Retry error');
       });
 
-      const messageEl = UIMessages.showWithRetry('Operation failed', mockRetryFunction, container);
+      const messageEl = UIMessages.showWithRetry(
+        'Operation failed',
+        mockRetryFunction,
+        container,
+      );
 
       const retryBtn = messageEl.querySelector('.ui-message-retry-btn');
 
@@ -340,13 +386,20 @@ describe('UIMessages', () => {
     test('should create confirmation dialog with UIComponents', () => {
       // Mock UIComponents
       global.UIComponents = {
-        createConfirmDialog: vi.fn().mockReturnValue(document.createElement('div')),
+        createConfirmDialog: vi
+          .fn()
+          .mockReturnValue(document.createElement('div')),
         showModal: vi.fn(),
       };
 
       const mockConfirm = vi.fn();
       const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm('Are you sure?', mockConfirm, mockCancel, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        mockConfirm,
+        mockCancel,
+        container,
+      );
 
       expect(confirmEl).toBeDefined();
       // The implementation uses UIComponents when available
@@ -361,7 +414,9 @@ describe('UIMessages', () => {
     test('should create confirmation dialog with custom options', () => {
       // Mock UIComponents
       global.UIComponents = {
-        createConfirmDialog: vi.fn().mockReturnValue(document.createElement('div')),
+        createConfirmDialog: vi
+          .fn()
+          .mockReturnValue(document.createElement('div')),
         showModal: vi.fn(),
       };
 
@@ -387,12 +442,19 @@ describe('UIMessages', () => {
 
       const mockConfirm = vi.fn();
       const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm('Are you sure?', mockConfirm, mockCancel, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        mockConfirm,
+        mockCancel,
+        container,
+      );
 
       expect(confirmEl.tagName).toBe('DIV');
       expect(confirmEl.className).toContain('ui-confirm');
       expect(confirmEl.querySelector('.ui-confirm-message')).toBeTruthy();
-      expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe('Are you sure?');
+      expect(confirmEl.querySelector('.ui-confirm-message').textContent).toBe(
+        'Are you sure?',
+      );
       expect(confirmEl.querySelector('.ui-confirm-btn-primary')).toBeTruthy();
       expect(confirmEl.querySelector('.ui-confirm-btn-secondary')).toBeTruthy();
     });
@@ -402,7 +464,12 @@ describe('UIMessages', () => {
 
       const mockConfirm = vi.fn();
       const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm('Are you sure?', mockConfirm, mockCancel, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        mockConfirm,
+        mockCancel,
+        container,
+      );
 
       const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
       confirmBtn.click();
@@ -416,7 +483,12 @@ describe('UIMessages', () => {
 
       const mockConfirm = vi.fn();
       const mockCancel = vi.fn();
-      const confirmEl = UIMessages.confirm('Are you sure?', mockConfirm, mockCancel, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        mockConfirm,
+        mockCancel,
+        container,
+      );
 
       const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
       cancelBtn.click();
@@ -428,7 +500,12 @@ describe('UIMessages', () => {
     test('should handle missing callback functions', () => {
       delete global.UIComponents;
 
-      const confirmEl = UIMessages.confirm('Are you sure?', null, null, container);
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        null,
+        null,
+        container,
+      );
 
       const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
       const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');
@@ -441,10 +518,16 @@ describe('UIMessages', () => {
     test('should use custom button text', () => {
       delete global.UIComponents;
 
-      const confirmEl = UIMessages.confirm('Are you sure?', vi.fn(), vi.fn(), container, {
-        confirmText: 'Yes',
-        cancelText: 'No',
-      });
+      const confirmEl = UIMessages.confirm(
+        'Are you sure?',
+        vi.fn(),
+        vi.fn(),
+        container,
+        {
+          confirmText: 'Yes',
+          cancelText: 'No',
+        },
+      );
 
       const confirmBtn = confirmEl.querySelector('.ui-confirm-btn-primary');
       const cancelBtn = confirmEl.querySelector('.ui-confirm-btn-secondary');

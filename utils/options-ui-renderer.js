@@ -14,7 +14,11 @@ import UIComponents from './ui-components.js';
  */
 export function renderMainInterface(appContainer, callbacks) {
   // Create main container
-  const mainContainer = UIComponents.createContainer('ForgetfulMe Settings', '', 'main-container');
+  const mainContainer = UIComponents.createContainer(
+    'ForgetfulMe Settings',
+    '',
+    'main-container',
+  );
 
   // Create config card
   const configCard = UIComponents.createCard(
@@ -46,7 +50,12 @@ export function renderMainInterface(appContainer, callbacks) {
       '<span class="stat-label">Most Used Status:</span><span id="most-used-status" class="stat-value">-</span>';
   }
 
-  const statsCard = UIComponents.createCard('Statistics', statsGrid.outerHTML, '', 'stats-card');
+  const statsCard = UIComponents.createCard(
+    'Statistics',
+    statsGrid.outerHTML,
+    '',
+    'stats-card',
+  );
   mainContainer.appendChild(statsCard);
 
   // Create status types card
@@ -66,7 +75,9 @@ export function renderMainInterface(appContainer, callbacks) {
   appContainer.appendChild(mainContainer);
 
   return {
-    configStatusContainer: UIComponents.DOM.getElement('config-status-container'),
+    configStatusContainer: UIComponents.DOM.getElement(
+      'config-status-container',
+    ),
   };
 }
 

@@ -39,7 +39,10 @@ export class BookmarkOperations {
   _getRequestKey(methodName, params, userId = null) {
     const paramKey = JSON.stringify(params || {});
     const userKey =
-      userId || (this.config.isAuthenticated() ? this.config.getCurrentUser()?.id : 'anonymous');
+      userId ||
+      (this.config.isAuthenticated()
+        ? this.config.getCurrentUser()?.id
+        : 'anonymous');
     return `${methodName}:${userKey}:${paramKey}`;
   }
 
@@ -133,10 +136,16 @@ export class BookmarkOperations {
         };
       }
 
-      const bookmarkData = BookmarkTransformer.toSupabaseFormat(bookmark, userId);
+      const bookmarkData = BookmarkTransformer.toSupabaseFormat(
+        bookmark,
+        userId,
+      );
 
       try {
-        const { data, error } = await this.supabase.from('bookmarks').insert(bookmarkData).select();
+        const { data, error } = await this.supabase
+          .from('bookmarks')
+          .insert(bookmarkData)
+          .select();
 
         if (error) throw error;
         return data?.[0] || bookmarkData;
@@ -172,7 +181,13 @@ export class BookmarkOperations {
       const requestKey = this._getRequestKey('getBookmarks', options, userId);
 
       return this._deduplicateRequest(requestKey, async () => {
-        const { page = 1, limit = 50, status = null, search = null, tags = null } = options;
+        const {
+          page = 1,
+          limit = 50,
+          status = null,
+          search = null,
+          tags = null,
+        } = options;
 
         try {
           // Creating query with supabase client
@@ -189,7 +204,9 @@ export class BookmarkOperations {
           }
 
           if (search) {
-            query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+            query = query.or(
+              `title.ilike.%${search}%,description.ilike.%${search}%`,
+            );
           }
 
           if (tags && tags.length > 0) {
@@ -225,7 +242,11 @@ export class BookmarkOperations {
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey('getBookmarkByUrl', { url }, userId);
+      const requestKey = this._getRequestKey(
+        'getBookmarkByUrl',
+        { url },
+        userId,
+      );
 
       return this._deduplicateRequest(requestKey, async () => {
         try {
@@ -339,7 +360,11 @@ export class BookmarkOperations {
 
     return this._executeWithTokenRefresh(async () => {
       const userId = this.config.getCurrentUser().id;
-      const requestKey = this._getRequestKey('getBookmarkById', { bookmarkId }, userId);
+      const requestKey = this._getRequestKey(
+        'getBookmarkById',
+        { bookmarkId },
+        userId,
+      );
 
       return this._deduplicateRequest(requestKey, async () => {
         try {
@@ -395,7 +420,8 @@ export class BookmarkOperations {
           if (error) throw error;
 
           return (data || []).reduce((stats, bookmark) => {
-            stats[bookmark.read_status] = (stats[bookmark.read_status] || 0) + 1;
+            stats[bookmark.read_status] =
+              (stats[bookmark.read_status] || 0) + 1;
             return stats;
           }, {});
         } catch (error) {

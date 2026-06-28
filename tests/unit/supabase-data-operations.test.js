@@ -89,21 +89,27 @@ describe('DataOperations', () => {
       expect(result.bookmarks).toEqual(mockBookmarks);
       expect(result.preferences).toEqual(mockPreferences);
       expect(result.version).toBe('1.0.0');
-      expect(mockBookmarkOperations.getBookmarks).toHaveBeenCalledWith({ limit: 10000 });
+      expect(mockBookmarkOperations.getBookmarks).toHaveBeenCalledWith({
+        limit: 10000,
+      });
       expect(mockUserOperations.getUserPreferences).toHaveBeenCalled();
     });
 
     it('should throw error when user is not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(dataOperations.exportData()).rejects.toThrow('User not authenticated');
+      await expect(dataOperations.exportData()).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     it('should handle errors during export', async () => {
       const mockError = new Error('Export failed');
       mockBookmarkOperations.getBookmarks.mockRejectedValue(mockError);
 
-      await expect(dataOperations.exportData()).rejects.toThrow('Export failed');
+      await expect(dataOperations.exportData()).rejects.toThrow(
+        'Export failed',
+      );
       expect(ErrorHandler.handle).toHaveBeenCalled();
     });
   });
@@ -111,7 +117,9 @@ describe('DataOperations', () => {
   describe('importData', () => {
     it('should import bookmarks and preferences successfully', async () => {
       const importData = {
-        bookmarks: [{ url: 'https://example.com', title: 'Test', status: 'read' }],
+        bookmarks: [
+          { url: 'https://example.com', title: 'Test', status: 'read' },
+        ],
         preferences: { theme: 'dark' },
       };
 
@@ -124,7 +132,9 @@ describe('DataOperations', () => {
         },
       ];
 
-      BookmarkTransformer.transformMultiple.mockReturnValue(transformedBookmarks);
+      BookmarkTransformer.transformMultiple.mockReturnValue(
+        transformedBookmarks,
+      );
 
       const mockInsertChain = {
         select: vi.fn().mockResolvedValue({
@@ -144,12 +154,16 @@ describe('DataOperations', () => {
         { preserveTimestamps: true, setDefaults: false },
       );
       expect(mockSupabase.insert).toHaveBeenCalled();
-      expect(mockUserOperations.saveUserPreferences).toHaveBeenCalledWith(importData.preferences);
+      expect(mockUserOperations.saveUserPreferences).toHaveBeenCalledWith(
+        importData.preferences,
+      );
     });
 
     it('should import only bookmarks when preferences are not provided', async () => {
       const importData = {
-        bookmarks: [{ url: 'https://example.com', title: 'Test', status: 'read' }],
+        bookmarks: [
+          { url: 'https://example.com', title: 'Test', status: 'read' },
+        ],
       };
 
       const transformedBookmarks = [
@@ -161,7 +175,9 @@ describe('DataOperations', () => {
         },
       ];
 
-      BookmarkTransformer.transformMultiple.mockReturnValue(transformedBookmarks);
+      BookmarkTransformer.transformMultiple.mockReturnValue(
+        transformedBookmarks,
+      );
 
       const mockInsertChain = {
         select: vi.fn().mockResolvedValue({
@@ -188,7 +204,9 @@ describe('DataOperations', () => {
 
       expect(result).toBe(true);
       expect(mockSupabase.insert).not.toHaveBeenCalled();
-      expect(mockUserOperations.saveUserPreferences).toHaveBeenCalledWith(importData.preferences);
+      expect(mockUserOperations.saveUserPreferences).toHaveBeenCalledWith(
+        importData.preferences,
+      );
     });
 
     it('should handle empty bookmarks array', async () => {
@@ -213,12 +231,16 @@ describe('DataOperations', () => {
         bookmarks: [{ url: 'https://example.com', title: 'Test' }],
       };
 
-      await expect(dataOperations.importData(importData)).rejects.toThrow('User not authenticated');
+      await expect(dataOperations.importData(importData)).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     it('should handle errors during bookmark import', async () => {
       const importData = {
-        bookmarks: [{ url: 'https://example.com', title: 'Test', status: 'read' }],
+        bookmarks: [
+          { url: 'https://example.com', title: 'Test', status: 'read' },
+        ],
       };
 
       const transformedBookmarks = [
@@ -230,7 +252,9 @@ describe('DataOperations', () => {
         },
       ];
 
-      BookmarkTransformer.transformMultiple.mockReturnValue(transformedBookmarks);
+      BookmarkTransformer.transformMultiple.mockReturnValue(
+        transformedBookmarks,
+      );
 
       const mockError = new Error('Import failed');
       const mockInsertChain = {
@@ -241,7 +265,9 @@ describe('DataOperations', () => {
       };
       mockSupabase.insert.mockReturnValue(mockInsertChain);
 
-      await expect(dataOperations.importData(importData)).rejects.toThrow('Import failed');
+      await expect(dataOperations.importData(importData)).rejects.toThrow(
+        'Import failed',
+      );
       expect(ErrorHandler.handle).toHaveBeenCalled();
     });
 

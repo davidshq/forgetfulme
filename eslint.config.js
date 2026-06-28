@@ -119,7 +119,8 @@ export default [
         'error',
         {
           name: 'event',
-          message: 'Use the event parameter instead of the global event object.',
+          message:
+            'Use the event parameter instead of the global event object.',
         },
       ],
 

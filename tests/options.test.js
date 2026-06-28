@@ -32,7 +32,7 @@ test.describe('ForgetfulMe Options Tests', () => {
 
     // Check for save button
     const saveBtn = await extensionHelper.isElementVisible(
-      'button[type="submit"]'
+      'button[type="submit"]',
     );
     expect(saveBtn).toBeTruthy();
   });
@@ -56,7 +56,7 @@ test.describe('ForgetfulMe Options Tests', () => {
     await extensionHelper.fillField('#supabaseUrl', 'https://test.supabase.co');
     await extensionHelper.fillField(
       '#supabaseAnonKey',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key',
     );
 
     // Submit the form
@@ -102,7 +102,7 @@ test.describe('ForgetfulMe Options Tests', () => {
     const note = await page.locator('.config-note');
     expect(await note.isVisible()).toBeTruthy();
     expect(await note.textContent()).toContain(
-      'Your credentials are stored securely'
+      'Your credentials are stored securely',
     );
   });
 

@@ -79,7 +79,7 @@ describe('setup-interface', () => {
       expect(UIComponents.createContainer).toHaveBeenCalledWith(
         'Welcome to ForgetfulMe!',
         'This extension helps you mark websites as read for research purposes.',
-        'setup-container'
+        'setup-container',
       );
     });
 
@@ -88,7 +88,7 @@ describe('setup-interface', () => {
 
       expect(UIComponents.createSection).toHaveBeenCalledWith(
         '🔧 Setup Required',
-        'setup-section'
+        'setup-section',
       );
     });
 
@@ -97,7 +97,7 @@ describe('setup-interface', () => {
 
       expect(UIComponents.createSection).toHaveBeenCalledWith(
         '📚 How it works',
-        'setup-section'
+        'setup-section',
       );
     });
 
@@ -107,7 +107,7 @@ describe('setup-interface', () => {
       expect(UIComponents.createButton).toHaveBeenCalledWith(
         'Open Settings',
         mockOnOpenSettings,
-        'primary'
+        'primary',
       );
     });
 
@@ -133,7 +133,7 @@ describe('setup-interface', () => {
       showSetupInterface(mockAppContainer, mockOnOpenSettings);
 
       expect(mockContainer.appendChild).toHaveBeenCalledWith(
-        mockHowItWorksSection
+        mockHowItWorksSection,
       );
     });
 
@@ -167,7 +167,7 @@ describe('setup-interface', () => {
 
       expect(mockHowItWorksSection.innerHTML).toContain('extension icon');
       expect(mockHowItWorksSection.innerHTML).toContain(
-        'mark the current page'
+        'mark the current page',
       );
       expect(mockHowItWorksSection.innerHTML).toContain('status');
       expect(mockHowItWorksSection.innerHTML).toContain('tags');
@@ -194,7 +194,7 @@ describe('setup-interface', () => {
       showSetupInterface(mockAppContainer, mockOnOpenSettings);
 
       expect(mockSetupSection.innerHTML).toContain(
-        'href="https://supabase.com"'
+        'href="https://supabase.com"',
       );
       expect(mockSetupSection.innerHTML).toContain('target="_blank"');
     });
@@ -231,7 +231,7 @@ describe('setup-interface', () => {
       expect(UIComponents.createButton).toHaveBeenCalledWith(
         'Open Settings',
         customCallback,
-        'primary'
+        'primary',
       );
 
       // Get the actual button that was created

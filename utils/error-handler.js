@@ -153,7 +153,10 @@ class ErrorHandler {
     const { type } = errorInfo;
 
     // Retry network errors and database errors
-    if (type === this.ERROR_TYPES.NETWORK || type === this.ERROR_TYPES.DATABASE) {
+    if (
+      type === this.ERROR_TYPES.NETWORK ||
+      type === this.ERROR_TYPES.DATABASE
+    ) {
       return true;
     }
 
@@ -217,7 +220,11 @@ class ErrorHandler {
    * @param {string} context - Error context
    * @returns {Error} - Standardized error object
    */
-  static createError(message, type = this.ERROR_TYPES.UNKNOWN, context = 'unknown') {
+  static createError(
+    message,
+    type = this.ERROR_TYPES.UNKNOWN,
+    context = 'unknown',
+  ) {
     const error = new Error(message);
     error.type = type;
     error.context = context;
@@ -240,7 +247,11 @@ class ErrorHandler {
 
       if (errorResult.shouldShowToUser) {
         // Re-throw with user-friendly message
-        throw this.createError(errorResult.userMessage, errorResult.errorInfo.type, context);
+        throw this.createError(
+          errorResult.userMessage,
+          errorResult.errorInfo.type,
+          context,
+        );
       } else {
         // Log but don't show to user
         throw error;

@@ -132,11 +132,13 @@ class ForgetfulMePopup {
       });
 
       // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-        if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
-          this.handleAuthStateChange(message.session);
-        }
-      });
+      chrome.runtime.onMessage.addListener(
+        (message, _sender, _sendResponse) => {
+          if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
+            this.handleAuthStateChange(message.session);
+          }
+        },
+      );
 
       // Auth state initialized successfully
     } catch (error) {
@@ -282,7 +284,10 @@ class ForgetfulMePopup {
         tab.url.startsWith('chrome://') ||
         tab.url.startsWith('chrome-extension://')
       ) {
-        UIMessages.error('Cannot mark browser pages as read', this.appContainer);
+        UIMessages.error(
+          'Cannot mark browser pages as read',
+          this.appContainer,
+        );
         return;
       }
 

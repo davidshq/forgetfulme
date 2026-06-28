@@ -46,7 +46,10 @@
 try {
   const result = await supabaseService.saveBookmark(data);
 } catch (error) {
-  const { userMessage, errorInfo } = ErrorHandler.handle(error, 'context.method');
+  const { userMessage, errorInfo } = ErrorHandler.handle(
+    error,
+    'context.method',
+  );
   // userMessage = user-friendly text for UI
   // errorInfo.type = one of [NETWORK, AUTH, VALIDATION, DATABASE, CONFIG, UI, UNKNOWN]
 }
@@ -74,9 +77,12 @@ UI code cannot directly call background script functions. Always use Chrome mess
 
 ```javascript
 // popup.js (UI)
-chrome.runtime.sendMessage({ type: 'SAVE_BOOKMARK', data: bookmarkData }, response => {
-  /* handle response */
-});
+chrome.runtime.sendMessage(
+  { type: 'SAVE_BOOKMARK', data: bookmarkData },
+  response => {
+    /* handle response */
+  },
+);
 
 // background.js
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

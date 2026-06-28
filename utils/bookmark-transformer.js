@@ -160,8 +160,13 @@ class BookmarkTransformer {
       errors.push('Title is required and must be non-empty');
     }
 
-    const readStatus = bookmark.readStatus || bookmark.status || bookmark.read_status;
-    if (!readStatus || typeof readStatus !== 'string' || readStatus.trim().length === 0) {
+    const readStatus =
+      bookmark.readStatus || bookmark.status || bookmark.read_status;
+    if (
+      !readStatus ||
+      typeof readStatus !== 'string' ||
+      readStatus.trim().length === 0
+    ) {
       errors.push('Read status is required and must be non-empty');
     }
 
@@ -217,7 +222,9 @@ class BookmarkTransformer {
    * @returns {Array} Array of transformed bookmarks
    */
   static transformMultiple(bookmarks, userId, options = {}) {
-    return bookmarks.map(bookmark => this.toSupabaseFormat(bookmark, userId, options));
+    return bookmarks.map(bookmark =>
+      this.toSupabaseFormat(bookmark, userId, options),
+    );
   }
 
   /**

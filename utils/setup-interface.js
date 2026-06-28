@@ -27,7 +27,10 @@ export function showSetupInterface(appContainer, onOpenSettings) {
   );
 
   // Create setup section
-  const setupSection = UIComponents.createSection('🔧 Setup Required', 'setup-section');
+  const setupSection = UIComponents.createSection(
+    '🔧 Setup Required',
+    'setup-section',
+  );
   setupSection.innerHTML = `
     <p>To use this extension, you need to configure your Supabase backend:</p>
     
@@ -38,12 +41,19 @@ export function showSetupInterface(appContainer, onOpenSettings) {
     </ol>
   `;
 
-  const settingsBtn = UIComponents.createButton('Open Settings', onOpenSettings, 'primary');
+  const settingsBtn = UIComponents.createButton(
+    'Open Settings',
+    onOpenSettings,
+    'primary',
+  );
   setupSection.appendChild(settingsBtn);
   container.appendChild(setupSection);
 
   // Create how it works section
-  const howItWorksSection = UIComponents.createSection('📚 How it works', 'setup-section');
+  const howItWorksSection = UIComponents.createSection(
+    '📚 How it works',
+    'setup-section',
+  );
   howItWorksSection.innerHTML = `
     <ul>
       <li>Click the extension icon to mark the current page</li>

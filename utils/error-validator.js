@@ -18,7 +18,9 @@ export function validateInput(input, type = 'text') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return {
         isValid: emailRegex.test(trimmed),
-        message: emailRegex.test(trimmed) ? null : 'Please enter a valid email address.',
+        message: emailRegex.test(trimmed)
+          ? null
+          : 'Please enter a valid email address.',
       };
     },
 
@@ -40,7 +42,10 @@ export function validateInput(input, type = 'text') {
     password: () => {
       return {
         isValid: trimmed.length >= 6,
-        message: trimmed.length >= 6 ? null : 'Password must be at least 6 characters.',
+        message:
+          trimmed.length >= 6
+            ? null
+            : 'Password must be at least 6 characters.',
       };
     },
 

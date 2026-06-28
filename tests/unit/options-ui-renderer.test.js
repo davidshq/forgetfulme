@@ -125,7 +125,9 @@ describe('OptionsUIRenderer', () => {
 
       const configCard = appContainer.querySelector('.config-card');
       expect(configCard).toBeTruthy();
-      expect(configCard.querySelector('h2').textContent).toBe('Supabase Configuration');
+      expect(configCard.querySelector('h2').textContent).toBe(
+        'Supabase Configuration',
+      );
     });
 
     test('should create stats card', () => {
@@ -141,7 +143,9 @@ describe('OptionsUIRenderer', () => {
 
       const statusCard = appContainer.querySelector('.status-card');
       expect(statusCard).toBeTruthy();
-      expect(statusCard.querySelector('h2').textContent).toBe('Custom Status Types');
+      expect(statusCard.querySelector('h2').textContent).toBe(
+        'Custom Status Types',
+      );
     });
 
     test('should create data management card', () => {
@@ -157,7 +161,9 @@ describe('OptionsUIRenderer', () => {
 
       const bookmarkCard = appContainer.querySelector('.bookmark-card');
       expect(bookmarkCard).toBeTruthy();
-      expect(bookmarkCard.querySelector('h2').textContent).toBe('Bookmark Management');
+      expect(bookmarkCard.querySelector('h2').textContent).toBe(
+        'Bookmark Management',
+      );
     });
 
     test('should clear appContainer before rendering', () => {
@@ -190,9 +196,9 @@ describe('OptionsUIRenderer', () => {
     test('should wire up exportAllData callback', () => {
       renderMainInterface(appContainer, callbacks);
 
-      const exportButton = Array.from(appContainer.querySelectorAll('button')).find(
-        btn => btn.textContent === 'Export All Data',
-      );
+      const exportButton = Array.from(
+        appContainer.querySelectorAll('button'),
+      ).find(btn => btn.textContent === 'Export All Data');
       expect(exportButton).toBeTruthy();
 
       exportButton.click();
@@ -203,9 +209,9 @@ describe('OptionsUIRenderer', () => {
     test('should wire up importData callback', () => {
       renderMainInterface(appContainer, callbacks);
 
-      const importButton = Array.from(appContainer.querySelectorAll('button')).find(
-        btn => btn.textContent === 'Import Data',
-      );
+      const importButton = Array.from(
+        appContainer.querySelectorAll('button'),
+      ).find(btn => btn.textContent === 'Import Data');
       expect(importButton).toBeTruthy();
 
       importButton.click();
@@ -216,9 +222,9 @@ describe('OptionsUIRenderer', () => {
     test('should wire up clearAllData callback', () => {
       renderMainInterface(appContainer, callbacks);
 
-      const clearButton = Array.from(appContainer.querySelectorAll('button')).find(
-        btn => btn.textContent === 'Clear All Data',
-      );
+      const clearButton = Array.from(
+        appContainer.querySelectorAll('button'),
+      ).find(btn => btn.textContent === 'Clear All Data');
       expect(clearButton).toBeTruthy();
 
       clearButton.click();
@@ -229,9 +235,9 @@ describe('OptionsUIRenderer', () => {
     test('should wire up openBookmarkManagement callback', () => {
       renderMainInterface(appContainer, callbacks);
 
-      const manageButton = Array.from(appContainer.querySelectorAll('button')).find(btn =>
-        btn.textContent.includes('Manage Bookmarks'),
-      );
+      const manageButton = Array.from(
+        appContainer.querySelectorAll('button'),
+      ).find(btn => btn.textContent.includes('Manage Bookmarks'));
       expect(manageButton).toBeTruthy();
 
       manageButton.click();

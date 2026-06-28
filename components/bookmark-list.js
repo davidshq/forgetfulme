@@ -68,7 +68,9 @@ export class BookmarkList {
     }
 
     // Convert to UI format and create list items
-    const uiBookmarks = bookmarks.map(bookmark => BookmarkTransformer.toUIFormat(bookmark));
+    const uiBookmarks = bookmarks.map(bookmark =>
+      BookmarkTransformer.toUIFormat(bookmark),
+    );
 
     uiBookmarks.forEach((bookmark, index) => {
       const listItem = this.createBookmarkListItem(bookmark, index);
@@ -87,14 +89,20 @@ export class BookmarkList {
     listItem.className = 'bookmark-item';
     listItem.setAttribute('role', 'listitem');
     listItem.setAttribute('data-bookmark-id', bookmark.id);
-    listItem.setAttribute('aria-label', `Bookmark ${index + 1}: ${bookmark.title}`);
+    listItem.setAttribute(
+      'aria-label',
+      `Bookmark ${index + 1}: ${bookmark.title}`,
+    );
 
     // Add checkbox for bulk selection
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'bookmark-checkbox';
     checkbox.dataset.bookmarkId = bookmark.id;
-    checkbox.setAttribute('aria-label', `Select ${bookmark.title} for bulk action`);
+    checkbox.setAttribute(
+      'aria-label',
+      `Select ${bookmark.title} for bulk action`,
+    );
     checkbox.addEventListener('change', () => this.onSelectionChange());
     listItem.appendChild(checkbox);
 
@@ -117,7 +125,10 @@ export class BookmarkList {
     const statusSpan = document.createElement('span');
     statusSpan.className = `bookmark-status status-${bookmark.status}`;
     statusSpan.textContent = formatStatus(bookmark.status);
-    statusSpan.setAttribute('aria-label', `Status: ${formatStatus(bookmark.status)}`);
+    statusSpan.setAttribute(
+      'aria-label',
+      `Status: ${formatStatus(bookmark.status)}`,
+    );
     metaDiv.appendChild(statusSpan);
 
     // Add time
@@ -160,7 +171,9 @@ export class BookmarkList {
     deleteBtn.textContent = '🗑️ Delete';
     deleteBtn.setAttribute('aria-label', `Delete bookmark: ${bookmark.title}`);
     deleteBtn.setAttribute('title', 'Delete bookmark');
-    deleteBtn.addEventListener('click', () => this.onDelete(bookmark.id, bookmark.title));
+    deleteBtn.addEventListener('click', () =>
+      this.onDelete(bookmark.id, bookmark.title),
+    );
     actionsDiv.appendChild(deleteBtn);
 
     const openBtn = document.createElement('button');
@@ -187,11 +200,16 @@ export class BookmarkList {
     if (!container) return;
 
     const uiBookmark = BookmarkTransformer.toUIFormat(bookmark);
-    const existingItem = container.querySelector(`[data-bookmark-id="${bookmark.id}"]`);
+    const existingItem = container.querySelector(
+      `[data-bookmark-id="${bookmark.id}"]`,
+    );
 
     if (!existingItem) {
       // Item doesn't exist, add it
-      const listItem = this.createBookmarkListItem(uiBookmark, container.children.length);
+      const listItem = this.createBookmarkListItem(
+        uiBookmark,
+        container.children.length,
+      );
       // data-bookmark-id is already set in createBookmarkListItem
       container.appendChild(listItem);
       return;
@@ -215,7 +233,9 @@ export class BookmarkList {
   removeBookmarkItem(bookmarkId, container) {
     if (!container) return;
 
-    const itemToRemove = container.querySelector(`[data-bookmark-id="${bookmarkId}"]`);
+    const itemToRemove = container.querySelector(
+      `[data-bookmark-id="${bookmarkId}"]`,
+    );
     if (itemToRemove) {
       itemToRemove.remove();
 

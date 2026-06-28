@@ -201,8 +201,14 @@ describe('app-initializer', () => {
         context: 'test.initializeApp',
       });
 
-      expect(ErrorHandler.handle).toHaveBeenCalledWith(testError, 'test.initializeApp');
-      expect(UIMessages.error).toHaveBeenCalledWith('Failed to initialize', mockAppContainer);
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(
+        testError,
+        'test.initializeApp',
+      );
+      expect(UIMessages.error).toHaveBeenCalledWith(
+        'Failed to initialize',
+        mockAppContainer,
+      );
       expect(mockOnConfigured).toHaveBeenCalled();
     });
 
@@ -235,7 +241,10 @@ describe('app-initializer', () => {
         context: 'test.initializeApp',
       });
 
-      expect(ErrorHandler.handle).toHaveBeenCalledWith(testError, 'test.initializeApp');
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(
+        testError,
+        'test.initializeApp',
+      );
       expect(UIMessages.error).not.toHaveBeenCalled();
       expect(mockOnConfigured).toHaveBeenCalled();
     });
@@ -269,7 +278,10 @@ describe('app-initializer', () => {
         context: 'test.initializeApp',
       });
 
-      expect(ErrorHandler.handle).toHaveBeenCalledWith(testError, 'test.initializeApp');
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(
+        testError,
+        'test.initializeApp',
+      );
       expect(UIMessages.error).not.toHaveBeenCalled();
       expect(mockOnConfigured).toHaveBeenCalled();
     });
@@ -319,7 +331,10 @@ describe('app-initializer', () => {
         context: 'test.initializeApp',
       });
 
-      expect(ErrorHandler.handle).toHaveBeenCalledWith(testError, 'test.initializeApp');
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(
+        testError,
+        'test.initializeApp',
+      );
       expect(mockOnConfigured).toHaveBeenCalled();
     });
 
@@ -353,7 +368,10 @@ describe('app-initializer', () => {
         context: 'test.initializeApp',
       });
 
-      expect(ErrorHandler.handle).toHaveBeenCalledWith(testError, 'test.initializeApp');
+      expect(ErrorHandler.handle).toHaveBeenCalledWith(
+        testError,
+        'test.initializeApp',
+      );
       expect(mockOnConfigured).toHaveBeenCalled();
     });
   });

@@ -5,7 +5,10 @@
  */
 
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { validateSupabaseConfig, validatePreferences } from '../../utils/config-validator.js';
+import {
+  validateSupabaseConfig,
+  validatePreferences,
+} from '../../utils/config-validator.js';
 
 // Mock ErrorHandler
 vi.mock('../../utils/error-handler.js', () => ({
@@ -39,13 +42,17 @@ describe('ConfigValidator', () => {
     test('should throw when URL is missing', () => {
       const config = { anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' };
 
-      expect(() => validateSupabaseConfig(config)).toThrow('Invalid Supabase configuration');
+      expect(() => validateSupabaseConfig(config)).toThrow(
+        'Invalid Supabase configuration',
+      );
     });
 
     test('should throw when anonKey is missing', () => {
       const config = { url: 'https://example.supabase.co' };
 
-      expect(() => validateSupabaseConfig(config)).toThrow('Invalid Supabase configuration');
+      expect(() => validateSupabaseConfig(config)).toThrow(
+        'Invalid Supabase configuration',
+      );
     });
 
     test('should throw when URL does not start with https://', () => {
@@ -54,7 +61,9 @@ describe('ConfigValidator', () => {
         anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
       };
 
-      expect(() => validateSupabaseConfig(config)).toThrow('Invalid Supabase URL');
+      expect(() => validateSupabaseConfig(config)).toThrow(
+        'Invalid Supabase URL',
+      );
     });
 
     test('should throw when anonKey does not start with eyJ', () => {
@@ -63,7 +72,9 @@ describe('ConfigValidator', () => {
         anonKey: 'invalid-key',
       };
 
-      expect(() => validateSupabaseConfig(config)).toThrow('Invalid anon key format');
+      expect(() => validateSupabaseConfig(config)).toThrow(
+        'Invalid anon key format',
+      );
     });
 
     test('should not throw when config is valid', () => {
@@ -100,7 +111,12 @@ describe('ConfigValidator', () => {
       const result = validatePreferences(null);
 
       expect(result).toEqual({
-        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+        customStatusTypes: [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ],
       });
     });
 
@@ -108,7 +124,12 @@ describe('ConfigValidator', () => {
       const result = validatePreferences(undefined);
 
       expect(result).toEqual({
-        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+        customStatusTypes: [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ],
       });
     });
 
@@ -118,7 +139,12 @@ describe('ConfigValidator', () => {
       const result = validatePreferences(preferences);
 
       expect(result).toEqual({
-        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+        customStatusTypes: [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ],
       });
     });
 

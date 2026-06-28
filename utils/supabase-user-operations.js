@@ -36,7 +36,10 @@ export class UserOperations {
   _getRequestKey(methodName, params, userId = null) {
     const paramKey = JSON.stringify(params || {});
     const userKey =
-      userId || (this.config.isAuthenticated() ? this.config.getCurrentUser()?.id : 'anonymous');
+      userId ||
+      (this.config.isAuthenticated()
+        ? this.config.getCurrentUser()?.id
+        : 'anonymous');
     return `${methodName}:${userKey}:${paramKey}`;
   }
 

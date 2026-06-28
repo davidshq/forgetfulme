@@ -10,7 +10,10 @@
 
 import { MESSAGE_TYPES } from './constants.js';
 import ErrorHandler from './error-handler.js';
-import { validateSupabaseConfig, validatePreferences } from './config-validator.js';
+import {
+  validateSupabaseConfig,
+  validatePreferences,
+} from './config-validator.js';
 import { migrateConfig } from './config-migration.js';
 import {
   loadAllConfig as loadConfigFromStorage,
@@ -79,7 +82,10 @@ class ConfigManager {
       this.initialized = true;
       this.notifyListeners('initialized');
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initialize');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initialize',
+      );
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
@@ -339,7 +345,10 @@ class ConfigManager {
 
       // Default settings initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-manager.initializeDefaultSettings');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-manager.initializeDefaultSettings',
+      );
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
@@ -383,7 +392,10 @@ class ConfigManager {
 
     // Validate imported data
     if (configData.supabase) {
-      await this.setSupabaseConfig(configData.supabase.url, configData.supabase.anonKey);
+      await this.setSupabaseConfig(
+        configData.supabase.url,
+        configData.supabase.anonKey,
+      );
     }
 
     if (configData.preferences) {

@@ -21,7 +21,13 @@ import { createListItem } from './list-components.js';
  * @param {Object} _options - Card options (unused)
  * @returns {HTMLElement}
  */
-export function createCard(title, content, footer = '', className = '', _options = {}) {
+export function createCard(
+  title,
+  content,
+  footer = '',
+  className = '',
+  _options = {},
+) {
   const article = document.createElement('article');
   article.className = `card ${className}`.trim();
 
@@ -65,7 +71,12 @@ export function createCard(title, content, footer = '', className = '', _options
  * @param {string} className - Additional CSS classes
  * @returns {HTMLElement}
  */
-export function createCardWithActions(title, content, actions = [], className = '') {
+export function createCardWithActions(
+  title,
+  content,
+  actions = [],
+  className = '',
+) {
   const article = document.createElement('article');
   article.className = `card ${className}`.trim();
 
@@ -93,7 +104,11 @@ export function createCardWithActions(title, content, actions = [], className = 
     footer.className = 'card-actions';
 
     actions.forEach(action => {
-      const button = createButton(action.text, action.onClick, action.className || 'secondary');
+      const button = createButton(
+        action.text,
+        action.onClick,
+        action.className || 'secondary',
+      );
       footer.appendChild(button);
     });
 
@@ -112,7 +127,13 @@ export function createCardWithActions(title, content, actions = [], className = 
  * @param {string} className - Additional CSS classes
  * @returns {HTMLElement}
  */
-export function createFormCard(title, formFields, onSubmit, submitText = 'Submit', className = '') {
+export function createFormCard(
+  title,
+  formFields,
+  onSubmit,
+  submitText = 'Submit',
+  className = '',
+) {
   const article = document.createElement('article');
   article.className = `card form-card ${className}`.trim();
 

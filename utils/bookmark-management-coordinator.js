@@ -32,10 +32,15 @@ export class BookmarkManagementCoordinator {
    */
   async loadAllBookmarks() {
     try {
-      const bookmarks = await this.page.supabaseService.getBookmarks({ limit: 100 });
+      const bookmarks = await this.page.supabaseService.getBookmarks({
+        limit: 100,
+      });
       this.displayBookmarks(bookmarks);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.loadAllBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.loadAllBookmarks',
+      );
       UIMessages.error(errorResult.userMessage, this.page.appContainer);
     }
   }
@@ -67,7 +72,10 @@ export class BookmarkManagementCoordinator {
       const bookmarks = await this.page.supabaseService.getBookmarks(filters);
       this.displayBookmarks(bookmarks);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.searchBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.searchBookmarks',
+      );
       UIMessages.error(errorResult.userMessage, this.page.appContainer);
     }
   }
@@ -94,7 +102,10 @@ export class BookmarkManagementCoordinator {
 
             // Remove only the deleted item instead of re-rendering the entire list
             if (bookmarksList) {
-              this.page.bookmarkList.removeBookmarkItem(bookmarkId, bookmarksList);
+              this.page.bookmarkList.removeBookmarkItem(
+                bookmarkId,
+                bookmarksList,
+              );
             }
           }
 
@@ -129,8 +140,8 @@ export class BookmarkManagementCoordinator {
    */
   async exportSelectedBookmarks() {
     try {
-      const exportData = await this.page.bulkActions.exportSelectedBookmarks(bookmarkId =>
-        this.page.supabaseService.getBookmarkById(bookmarkId),
+      const exportData = await this.page.bulkActions.exportSelectedBookmarks(
+        bookmarkId => this.page.supabaseService.getBookmarkById(bookmarkId),
       );
 
       if (!exportData) return;
@@ -142,7 +153,10 @@ export class BookmarkManagementCoordinator {
         this.page.appContainer,
       );
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'bookmark-management.exportSelectedBookmarks');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'bookmark-management.exportSelectedBookmarks',
+      );
       UIMessages.error(errorResult.userMessage, this.page.appContainer);
     }
   }

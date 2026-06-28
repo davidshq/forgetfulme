@@ -66,7 +66,9 @@ describe('ConfigMigration', () => {
     });
 
     test('should not throw when storage.set fails', async () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       mockStorage.sync.set.mockRejectedValue(new Error('Storage error'));
 
       await expect(setMigrationVersion(3)).resolves.not.toThrow();
@@ -110,7 +112,9 @@ describe('ConfigMigration', () => {
     });
 
     test('should not throw when migration fails', async () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       mockStorage.sync.get.mockResolvedValue({ configVersion: 0 });
       mockStorage.sync.set.mockRejectedValue(new Error('Migration error'));
 
@@ -121,7 +125,9 @@ describe('ConfigMigration', () => {
     });
 
     test('should not throw when getMigrationVersion fails', async () => {
-      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       mockStorage.sync.get.mockRejectedValue(new Error('Storage error'));
 
       await expect(migrateConfig()).resolves.not.toThrow();

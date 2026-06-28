@@ -26,7 +26,9 @@ describe('ErrorMessages', () => {
       };
       const result = getUserMessage(errorInfo);
 
-      expect(result).toBe('Connection error. Please check your internet connection and try again.');
+      expect(result).toBe(
+        'Connection error. Please check your internet connection and try again.',
+      );
     });
 
     test('should return offline message for offline network errors', () => {
@@ -140,7 +142,9 @@ describe('ErrorMessages', () => {
       };
       const result = getUserMessage(errorInfo);
 
-      expect(result).toBe('Configuration error. Please check your Supabase settings.');
+      expect(result).toBe(
+        'Configuration error. Please check your Supabase settings.',
+      );
     });
 
     test('should return user-friendly UI message', () => {
@@ -150,7 +154,9 @@ describe('ErrorMessages', () => {
       };
       const result = getUserMessage(errorInfo);
 
-      expect(result).toBe('Interface error. Please refresh the page and try again.');
+      expect(result).toBe(
+        'Interface error. Please refresh the page and try again.',
+      );
     });
 
     test('should return user-friendly unknown error message', () => {

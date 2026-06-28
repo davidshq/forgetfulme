@@ -93,7 +93,9 @@ describe('BookmarkManagementCoordinator', () => {
 
       await coordinator.loadAllBookmarks();
 
-      expect(mockPage.supabaseService.getBookmarks).toHaveBeenCalledWith({ limit: 100 });
+      expect(mockPage.supabaseService.getBookmarks).toHaveBeenCalledWith({
+        limit: 100,
+      });
       expect(mockPage.bookmarkList.displayBookmarks).toHaveBeenCalledWith(
         mockBookmarks,
         expect.any(HTMLElement),
@@ -130,7 +132,8 @@ describe('BookmarkManagementCoordinator', () => {
     });
 
     test('should handle missing bookmarks list element', async () => {
-      const UIComponents = (await import('../../utils/ui-components.js')).default;
+      const UIComponents = (await import('../../utils/ui-components.js'))
+        .default;
       UIComponents.DOM.getElement.mockReturnValue(null);
 
       const bookmarks = [{ id: '1', title: 'Bookmark 1' }];
@@ -180,8 +183,12 @@ describe('BookmarkManagementCoordinator', () => {
 
       expect(UIMessages.confirm).toHaveBeenCalled();
       expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledTimes(2);
-      expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledWith('id1');
-      expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledWith('id2');
+      expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledWith(
+        'id1',
+      );
+      expect(mockPage.supabaseService.deleteBookmark).toHaveBeenCalledWith(
+        'id2',
+      );
       expect(mockPage.bookmarkList.removeBookmarkItem).toHaveBeenCalledTimes(2);
       expect(UIMessages.success).toHaveBeenCalled();
     });
@@ -225,7 +232,9 @@ describe('BookmarkManagementCoordinator', () => {
         ],
       };
 
-      mockPage.bulkActions.exportSelectedBookmarks.mockResolvedValue(mockExportData);
+      mockPage.bulkActions.exportSelectedBookmarks.mockResolvedValue(
+        mockExportData,
+      );
       mockPage.bulkActions.getSelectedIds.mockReturnValue(['id1', 'id2']);
 
       const UIMessages = (await import('../../utils/ui-messages.js')).default;
@@ -233,7 +242,9 @@ describe('BookmarkManagementCoordinator', () => {
       await coordinator.exportSelectedBookmarks();
 
       expect(mockPage.bulkActions.exportSelectedBookmarks).toHaveBeenCalled();
-      expect(mockPage.bulkActions.downloadExport).toHaveBeenCalledWith(mockExportData);
+      expect(mockPage.bulkActions.downloadExport).toHaveBeenCalledWith(
+        mockExportData,
+      );
       expect(UIMessages.success).toHaveBeenCalled();
     });
 

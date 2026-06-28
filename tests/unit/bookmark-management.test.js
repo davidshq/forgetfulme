@@ -27,7 +27,6 @@ vi.mock('../../utils/ui-components.js', () => ({
     createSection: vi.fn(),
     createContainer: vi.fn(),
     createListItem: vi.fn(),
-    createList: vi.fn(),
     createCard: vi.fn(),
     createFormCard: vi.fn(),
     createListCard: vi.fn(),
@@ -126,7 +125,9 @@ vi.mock('../../components/bookmark-list.js', () => ({
 vi.mock('../../components/search-filter.js', () => ({
   SearchFilter: class MockSearchFilter {
     constructor() {
-      this.createSearchForm = vi.fn().mockReturnValue(document.createElement('form'));
+      this.createSearchForm = vi
+        .fn()
+        .mockReturnValue(document.createElement('form'));
     }
   },
 }));
@@ -134,7 +135,9 @@ vi.mock('../../components/search-filter.js', () => ({
 vi.mock('../../components/bulk-actions.js', () => ({
   BulkActions: class MockBulkActions {
     constructor() {
-      this.createBulkActionsCard = vi.fn().mockReturnValue(document.createElement('article'));
+      this.createBulkActionsCard = vi
+        .fn()
+        .mockReturnValue(document.createElement('article'));
       this.updateBulkActions = vi.fn();
       this.toggleSelectAll = vi.fn();
     }
@@ -226,15 +229,28 @@ describe('BookmarkManagementPage', () => {
     });
 
     // Mock UI component methods to return proper DOM elements
-    mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
+    mockUIComponents.createButton.mockReturnValue(
+      document.createElement('button'),
+    );
     mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
-    mockUIComponents.createFormField.mockReturnValue(document.createElement('input'));
-    mockUIComponents.createSection.mockReturnValue(document.createElement('section'));
-    mockUIComponents.createContainer.mockReturnValue(document.createElement('div'));
-    mockUIComponents.createListItem.mockReturnValue(document.createElement('li'));
-    mockUIComponents.createList.mockReturnValue(document.createElement('ul'));
-    mockUIComponents.createCard.mockReturnValue(document.createElement('article'));
-    mockUIComponents.createFormCard.mockReturnValue(document.createElement('article'));
+    mockUIComponents.createFormField.mockReturnValue(
+      document.createElement('input'),
+    );
+    mockUIComponents.createSection.mockReturnValue(
+      document.createElement('section'),
+    );
+    mockUIComponents.createContainer.mockReturnValue(
+      document.createElement('div'),
+    );
+    mockUIComponents.createListItem.mockReturnValue(
+      document.createElement('li'),
+    );
+    mockUIComponents.createCard.mockReturnValue(
+      document.createElement('article'),
+    );
+    mockUIComponents.createFormCard.mockReturnValue(
+      document.createElement('article'),
+    );
     // createListCard needs to return an element with a .card-list child
     mockUIComponents.createListCard.mockImplementation(() => {
       const card = document.createElement('article');
@@ -243,7 +259,9 @@ describe('BookmarkManagementPage', () => {
       card.appendChild(cardList);
       return card;
     });
-    mockUIComponents.createHeaderWithNav.mockReturnValue(document.createElement('header'));
+    mockUIComponents.createHeaderWithNav.mockReturnValue(
+      document.createElement('header'),
+    );
 
     // Create page instance
     page = new BookmarkManagementPage();
@@ -293,11 +311,18 @@ describe('BookmarkManagementPage', () => {
       mockSupabaseService.getBookmarks.mockResolvedValue(mockBookmarks);
 
       // Mock UI components
-      mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
-      mockUIComponents.createSection.mockReturnValue(document.createElement('div'));
-      mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
-      mockUIComponents.createList.mockReturnValue(document.createElement('ul'));
-      mockUIComponents.createListItem.mockReturnValue(document.createElement('li'));
+      mockUIComponents.createButton.mockReturnValue(
+        document.createElement('button'),
+      );
+      mockUIComponents.createSection.mockReturnValue(
+        document.createElement('div'),
+      );
+      mockUIComponents.createForm.mockReturnValue(
+        document.createElement('form'),
+      );
+      mockUIComponents.createListItem.mockReturnValue(
+        document.createElement('li'),
+      );
 
       // Mock document.getElementById for bookmarks list
       const mockBookmarksList = document.createElement('ul');
@@ -354,7 +379,9 @@ describe('BookmarkManagementPage', () => {
 
       await page.deleteBookmark('bookmark-1', 'Test Bookmark');
 
-      expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith('bookmark-1');
+      expect(mockSupabaseService.deleteBookmark).toHaveBeenCalledWith(
+        'bookmark-1',
+      );
       expect(mockUIMessages.success).toHaveBeenCalledWith(
         'Bookmark deleted successfully!',
         expect.any(Object),
@@ -377,7 +404,10 @@ describe('BookmarkManagementPage', () => {
         mockError,
         'bookmark-management.deleteBookmark',
       );
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object),
+      );
     });
 
     it('should open bookmark in new tab', () => {
@@ -402,12 +432,14 @@ describe('BookmarkManagementPage', () => {
       mockSupabaseService.deleteBookmark.mockResolvedValue(true);
 
       // Mock DOM query to return selected checkboxes
-      mockUIComponents.DOM.querySelectorAll = vi.fn().mockImplementation(selector => {
-        if (selector === '.bookmark-checkbox:checked') {
-          return mockCheckboxes;
-        }
-        return [];
-      });
+      mockUIComponents.DOM.querySelectorAll = vi
+        .fn()
+        .mockImplementation(selector => {
+          if (selector === '.bookmark-checkbox:checked') {
+            return mockCheckboxes;
+          }
+          return [];
+        });
 
       // Mock loadAllBookmarks to prevent errors
       page.loadAllBookmarks = vi.fn().mockResolvedValue();
@@ -468,7 +500,9 @@ describe('BookmarkManagementPage', () => {
       };
 
       mockSupabaseService.getBookmarkById.mockResolvedValue(mockBookmark);
-      mockUIComponents.DOM.querySelectorAll = vi.fn().mockReturnValue(mockCheckboxes);
+      mockUIComponents.DOM.querySelectorAll = vi
+        .fn()
+        .mockReturnValue(mockCheckboxes);
 
       // Mock URL.createObjectURL and related functions
       const mockBlob = {};

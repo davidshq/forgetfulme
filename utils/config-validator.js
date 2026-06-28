@@ -49,7 +49,12 @@ export function validateSupabaseConfig(supabaseConfig) {
 export function validatePreferences(preferences) {
   if (!preferences || !Array.isArray(preferences.customStatusTypes)) {
     return {
-      customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+      customStatusTypes: [
+        'read',
+        'good-reference',
+        'low-value',
+        'revisit-later',
+      ],
     };
   }
 

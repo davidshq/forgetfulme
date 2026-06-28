@@ -43,7 +43,9 @@ export class DataOperations {
     }
 
     try {
-      const bookmarks = await this.bookmarkOperations.getBookmarks({ limit: 10000 }); // Get all bookmarks
+      const bookmarks = await this.bookmarkOperations.getBookmarks({
+        limit: 10000,
+      }); // Get all bookmarks
       const preferences = await this.userOperations.getUserPreferences();
 
       return {

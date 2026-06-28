@@ -19,42 +19,26 @@ import {
   createFormField,
   createForm,
 } from './components/form-components.js';
-import { createContainer, createSection } from './components/container-components.js';
-import { createList, createListItem } from './components/list-components.js';
+import {
+  createContainer,
+  createSection,
+} from './components/container-components.js';
+import { createListItem } from './components/list-components.js';
 import {
   createCard,
   createCardWithActions,
   createFormCard,
   createListCard,
 } from './components/card-components.js';
+import { createGrid } from './components/layout-components.js';
 import {
-  createLayoutContainer,
-  createSidebarLayout,
-  createGrid,
-} from './components/layout-components.js';
-import {
-  createModal,
   createConfirmDialog,
-  closeModal,
   showModal,
 } from './components/modal-components.js';
 import {
-  createNavigation,
   createBreadcrumb,
-  createNavMenu,
   createHeaderWithNav,
 } from './components/navigation-components.js';
-import {
-  createProgressIndicator,
-  createProgressBar,
-  createLoadingState,
-  setBusyState,
-  createStatusIndicator,
-  createTabs,
-  switchTab,
-  createTooltip,
-  positionTooltip,
-} from './components/utility-components.js';
 
 /**
  * UI Components factory for ForgetfulMe Extension
@@ -81,7 +65,6 @@ class UIComponents {
    * @property {string} CONTAINER - Container component type
    * @property {string} HEADER - Header component type
    * @property {string} SECTION - Section component type
-   * @property {string} LIST - List component type
    * @property {string} LIST_ITEM - List item component type
    * @property {string} MESSAGE - Message component type
    * @property {string} CONFIRM - Confirmation dialog component type
@@ -96,7 +79,6 @@ class UIComponents {
     CONTAINER: 'container',
     HEADER: 'header',
     SECTION: 'section',
-    LIST: 'list',
     LIST_ITEM: 'list-item',
     MESSAGE: 'message',
     CONFIRM: 'confirm',
@@ -137,7 +119,6 @@ class UIComponents {
   static createSection = createSection;
 
   // List components
-  static createList = createList;
   static createListItem = createListItem;
 
   // Card components
@@ -147,32 +128,15 @@ class UIComponents {
   static createListCard = createListCard;
 
   // Layout components
-  static createLayoutContainer = createLayoutContainer;
-  static createSidebarLayout = createSidebarLayout;
   static createGrid = createGrid;
 
   // Modal components
-  static createModal = createModal;
   static createConfirmDialog = createConfirmDialog;
-  static closeModal = closeModal;
   static showModal = showModal;
 
   // Navigation components
-  static createNavigation = createNavigation;
   static createBreadcrumb = createBreadcrumb;
-  static createNavMenu = createNavMenu;
   static createHeaderWithNav = createHeaderWithNav;
-
-  // Utility components
-  static createProgressIndicator = createProgressIndicator;
-  static createProgressBar = createProgressBar;
-  static createLoadingState = createLoadingState;
-  static setBusyState = setBusyState;
-  static createStatusIndicator = createStatusIndicator;
-  static createTabs = createTabs;
-  static switchTab = switchTab;
-  static createTooltip = createTooltip;
-  static positionTooltip = positionTooltip;
 }
 
 // Export for use in other modules

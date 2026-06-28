@@ -102,7 +102,10 @@ export class RecentList {
   createRecentListItem(bookmark, index) {
     const listItem = document.createElement('div');
     listItem.setAttribute('role', 'listitem');
-    listItem.setAttribute('aria-label', `Recent bookmark ${index + 1}: ${bookmark.title}`);
+    listItem.setAttribute(
+      'aria-label',
+      `Recent bookmark ${index + 1}: ${bookmark.title}`,
+    );
 
     // Add title
     const titleDiv = document.createElement('div');
@@ -116,7 +119,10 @@ export class RecentList {
     // Add status badge
     const statusSpan = document.createElement('small');
     statusSpan.textContent = formatStatus(bookmark.status);
-    statusSpan.setAttribute('aria-label', `Status: ${formatStatus(bookmark.status)}`);
+    statusSpan.setAttribute(
+      'aria-label',
+      `Status: ${formatStatus(bookmark.status)}`,
+    );
     metaDiv.appendChild(statusSpan);
 
     // Add time

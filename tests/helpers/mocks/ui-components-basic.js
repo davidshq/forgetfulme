@@ -95,12 +95,6 @@ export const createBasicComponents = document => ({
     }
     return button;
   }),
-  createList: vi.fn(id => {
-    const list = document.createElement('div');
-    list.id = id;
-    list.className = 'list';
-    return list;
-  }),
   createListItem: vi.fn((data, options) => {
     const item = document.createElement('div');
     item.className = 'list-item';

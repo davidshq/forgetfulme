@@ -63,37 +63,6 @@ export const createNavigationComponents = document => ({
     nav.appendChild(ol);
     return nav;
   }),
-  createNavMenu: vi.fn((items, ariaLabel, className) => {
-    const nav = document.createElement('nav');
-    nav.setAttribute('aria-label', ariaLabel || 'Navigation menu');
-    nav.className = `nav-menu ${className || ''}`.trim();
-
-    const ul = document.createElement('ul');
-    items.forEach(item => {
-      const li = document.createElement('li');
-      if (item.dropdown) {
-        const details = document.createElement('details');
-        details.className = 'dropdown';
-        const summary = document.createElement('summary');
-        summary.textContent = item.text;
-        details.appendChild(summary);
-        li.appendChild(details);
-      } else if (item.href) {
-        const a = document.createElement('a');
-        a.href = item.href;
-        a.textContent = item.text;
-        li.appendChild(a);
-      } else if (item.onClick) {
-        const button = document.createElement('button');
-        button.textContent = item.text;
-        button.className = item.className || 'outline';
-        li.appendChild(button);
-      }
-      ul.appendChild(li);
-    });
-    nav.appendChild(ul);
-    return nav;
-  }),
   createHeaderWithNav: vi.fn((title, navItems, options) => {
     const header = document.createElement('header');
     header.setAttribute('role', 'banner');
@@ -108,7 +77,10 @@ export const createNavigationComponents = document => ({
 
     if (navItems && navItems.length > 0) {
       const nav = document.createElement('nav');
-      nav.setAttribute('aria-label', options?.navAriaLabel || 'Main navigation');
+      nav.setAttribute(
+        'aria-label',
+        options?.navAriaLabel || 'Main navigation',
+      );
       nav.className = options?.navClassName || '';
       header.appendChild(nav);
     }

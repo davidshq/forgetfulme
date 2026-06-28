@@ -82,7 +82,10 @@ class ConfigUI {
     containerEl.appendChild(configForm);
 
     // Create help section
-    const helpSection = UIComponents.createSection('How to get your credentials:', 'config-help');
+    const helpSection = UIComponents.createSection(
+      'How to get your credentials:',
+      'config-help',
+    );
     helpSection.innerHTML = `
       <ol>
         <li>Go to <a href="https://supabase.com" target="_blank">supabase.com</a> and create an account</li>
@@ -129,8 +132,14 @@ class ConfigUI {
       const currentConfig = await this.config.getConfiguration();
 
       if (currentConfig) {
-        const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
-        const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container);
+        const urlInput = UIComponents.DOM.querySelector(
+          '#supabaseUrl',
+          container,
+        );
+        const keyInput = UIComponents.DOM.querySelector(
+          '#supabaseAnonKey',
+          container,
+        );
 
         if (urlInput) urlInput.value = currentConfig.url || '';
         if (keyInput) keyInput.value = currentConfig.anonKey || '';
@@ -152,7 +161,10 @@ class ConfigUI {
    */
   async handleConfigSubmit(container) {
     const urlInput = UIComponents.DOM.querySelector('#supabaseUrl', container);
-    const keyInput = UIComponents.DOM.querySelector('#supabaseAnonKey', container);
+    const keyInput = UIComponents.DOM.querySelector(
+      '#supabaseAnonKey',
+      container,
+    );
 
     const url = urlInput ? urlInput.value.trim() : '';
     const anonKey = keyInput ? keyInput.value.trim() : '';
@@ -190,7 +202,10 @@ class ConfigUI {
         UIMessages.error(`Error: ${result.message}`, container);
       }
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'config-ui.handleConfigSubmit');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'config-ui.handleConfigSubmit',
+      );
       UIMessages.error(errorResult.userMessage, container);
     }
   }
@@ -254,14 +269,19 @@ class ConfigUI {
 
         if (urlEl) urlEl.textContent = config.url || 'Not set';
         if (keyEl)
-          keyEl.textContent = config.anonKey ? `${config.anonKey.substring(0, 20)}...` : 'Not set';
+          keyEl.textContent = config.anonKey
+            ? `${config.anonKey.substring(0, 20)}...`
+            : 'Not set';
 
         // Test connection
         await this.testConnection(container);
       } else {
         const urlEl = UIComponents.DOM.querySelector('#statusUrl', container);
         const keyEl = UIComponents.DOM.querySelector('#statusKey', container);
-        const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container);
+        const connectionEl = UIComponents.DOM.querySelector(
+          '#statusConnection',
+          container,
+        );
 
         if (urlEl) urlEl.textContent = 'Not configured';
         if (keyEl) keyEl.textContent = 'Not configured';
@@ -281,7 +301,10 @@ class ConfigUI {
    * @description Attempts to connect to Supabase and updates connection status
    */
   async testConnection(container) {
-    const connectionEl = UIComponents.DOM.querySelector('#statusConnection', container);
+    const connectionEl = UIComponents.DOM.querySelector(
+      '#statusConnection',
+      container,
+    );
 
     try {
       await this.config.initialize();
@@ -303,7 +326,10 @@ class ConfigUI {
    * @description Sets up event listeners for test connection and edit configuration buttons
    */
   bindStatusEvents(container) {
-    const testBtn = UIComponents.DOM.querySelector('#testConnectionBtn', container);
+    const testBtn = UIComponents.DOM.querySelector(
+      '#testConnectionBtn',
+      container,
+    );
     const editBtn = UIComponents.DOM.querySelector('#editConfigBtn', container);
 
     if (testBtn) {

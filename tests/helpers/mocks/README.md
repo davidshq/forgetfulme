@@ -58,12 +58,11 @@ ErrorHandler utility mocks:
 UIComponents mocks split into modular files for maintainability:
 
 - **`ui-components.js`** - Main entry point that combines all component mocks
-- **`ui-components-basic.js`** - Basic components (container, form, formField, button, list, listItem)
+- **`ui-components-basic.js`** - Basic components (container, form, formField, button, listItem)
 - **`ui-components-cards.js`** - Card components (section, card, cardWithActions, formCard, listCard)
-- **`ui-components-navigation.js`** - Navigation components (navigation, breadcrumb, navMenu, headerWithNav)
-- **`ui-components-modals.js`** - Modal and dialog components (modal, confirmDialog, showModal, closeModal, tooltip)
-- **`ui-components-tabs.js`** - Tab components (createTabs, switchTab)
-- **`ui-components-dom.js`** - DOM utility methods (getElement, querySelector, setValue, etc.)
+- **`ui-components-navigation.js`** - Navigation components (navigation, breadcrumb, headerWithNav)
+- **`ui-components-modals.js`** - Modal and dialog components (modal, confirmDialog, showModal)
+- **`ui-components-dom.js`** - DOM utility methods (ready, getElement, querySelector, setValue, etc.)
 
 **`createMockUIComponents(document)`** - Returns a complete UIComponents mock with all the above functionality combined.
 

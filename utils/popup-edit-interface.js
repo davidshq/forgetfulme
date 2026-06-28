@@ -49,7 +49,10 @@ export class PopupEditInterface {
     mainContent.className = 'main-content';
 
     // Create info section
-    const infoSection = UIComponents.createSection('Bookmark Info', 'info-section');
+    const infoSection = UIComponents.createSection(
+      'Bookmark Info',
+      'info-section',
+    );
     infoSection.innerHTML = `
       <div class="bookmark-info">
         <p><strong>Title:</strong> ${existingBookmark.title}</p>
@@ -96,7 +99,9 @@ export class PopupEditInterface {
           label: 'Update Tags (comma separated):',
           options: {
             placeholder: 'research, tutorial, important',
-            value: existingBookmark.tags ? existingBookmark.tags.join(', ') : '',
+            value: existingBookmark.tags
+              ? existingBookmark.tags.join(', ')
+              : '',
           },
         },
       ],

@@ -125,10 +125,16 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedContext - Expected error context
    */
   assertErrorHandling: (expectedContext = 'test') => {
-    expect(mocks.errorHandler.handle).toHaveBeenCalledWith(expect.any(Error), expectedContext);
+    expect(mocks.errorHandler.handle).toHaveBeenCalledWith(
+      expect.any(Error),
+      expectedContext,
+    );
 
     const errorResult = mocks.errorHandler.handle.mock.results[0].value;
-    expect(mocks.uiMessages.error).toHaveBeenCalledWith(errorResult.userMessage, expect.anything());
+    expect(mocks.uiMessages.error).toHaveBeenCalledWith(
+      errorResult.userMessage,
+      expect.anything(),
+    );
   },
 
   /**
@@ -136,7 +142,10 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedMessage - Expected success message
    */
   assertSuccessMessage: expectedMessage => {
-    expect(mocks.uiMessages.success).toHaveBeenCalledWith(expectedMessage, expect.anything());
+    expect(mocks.uiMessages.success).toHaveBeenCalledWith(
+      expectedMessage,
+      expect.anything(),
+    );
   },
 
   /**
@@ -144,7 +153,10 @@ export const createAssertionHelpers = mocks => ({
    * @param {string} expectedMessage - Expected loading message
    */
   assertLoadingMessage: expectedMessage => {
-    expect(mocks.uiMessages.loading).toHaveBeenCalledWith(expectedMessage, expect.anything());
+    expect(mocks.uiMessages.loading).toHaveBeenCalledWith(
+      expectedMessage,
+      expect.anything(),
+    );
   },
 
   /**

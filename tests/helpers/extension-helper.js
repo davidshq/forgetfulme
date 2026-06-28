@@ -385,7 +385,7 @@ class ExtensionHelper {
                 });
                 if (targetInfo.targetInfo && targetInfo.targetInfo.url) {
                   const match = targetInfo.targetInfo.url.match(
-                    /chrome-extension:\/\/([a-z]{32})\//
+                    /chrome-extension:\/\/([a-z]{32})\//,
                   );
                   if (match) {
                     extensionId = match[1];
@@ -442,7 +442,7 @@ class ExtensionHelper {
       } catch (error) {
         console.warn(
           '[extension-id] Failed to compute from path:',
-          error.message
+          error.message,
         );
       }
     }
@@ -455,7 +455,7 @@ class ExtensionHelper {
       throw new Error(
         `Could not determine extensionId. Service workers: ${swCount}, Background pages: ${bgCount}, Pages: ${pageCount}, Extension path provided: ${hasPath}. ` +
           'Make sure the extension is loaded correctly. The extension may not be loading in headless mode. ' +
-          'Try running with headless: false to debug.'
+          'Try running with headless: false to debug.',
       );
     }
 
@@ -494,7 +494,7 @@ class ExtensionHelper {
     const isLoaded = await this.verifyExtensionLoaded(extensionId);
     if (!isLoaded) {
       console.warn(
-        `[nav] Extension may not be loaded. Computed ID: ${extensionId}`
+        `[nav] Extension may not be loaded. Computed ID: ${extensionId}`,
       );
       // Continue anyway - navigation might still work
     }

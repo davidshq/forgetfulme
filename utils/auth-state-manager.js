@@ -62,7 +62,10 @@ class AuthStateManager {
       this.initialized = true;
       // AuthStateManager initialized successfully
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'auth-state-manager.initialize');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'auth-state-manager.initialize',
+      );
       throw ErrorHandler.createError(
         errorResult.userMessage,
         errorResult.errorInfo.type,
@@ -161,7 +164,10 @@ class AuthStateManager {
           session: session,
         })
         .catch(error => {
-          ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts.runtime');
+          ErrorHandler.handle(
+            error,
+            'auth-state-manager.notifyAllContexts.runtime',
+          );
         });
     } catch (error) {
       ErrorHandler.handle(error, 'auth-state-manager.notifyAllContexts');

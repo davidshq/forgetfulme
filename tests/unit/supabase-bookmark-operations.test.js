@@ -98,7 +98,11 @@ describe('BookmarkOperations', () => {
     });
 
     test('should work without token refresh handler', () => {
-      const ops = new BookmarkOperations(mockSupabase, mockConfig, mockPendingRequests);
+      const ops = new BookmarkOperations(
+        mockSupabase,
+        mockConfig,
+        mockPendingRequests,
+      );
       expect(ops.tokenRefreshHandler).toBeNull();
     });
   });
@@ -107,11 +111,15 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.saveBookmark({})).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.saveBookmark({})).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should throw error when validation fails', async () => {
-      const BookmarkTransformer = (await import('../../utils/bookmark-transformer.js')).default;
+      const BookmarkTransformer = (
+        await import('../../utils/bookmark-transformer.js')
+      ).default;
       BookmarkTransformer.validate.mockReturnValue({
         isValid: false,
         errors: ['URL is required'],
@@ -127,7 +135,10 @@ describe('BookmarkOperations', () => {
     });
 
     test('should return existing bookmark if duplicate', async () => {
-      const existingBookmark = { id: 'existing-id', url: 'https://example.com' };
+      const existingBookmark = {
+        id: 'existing-id',
+        url: 'https://example.com',
+      };
       mockSupabase.single.mockResolvedValue({
         data: existingBookmark,
         error: null,
@@ -192,7 +203,9 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.getBookmarks()).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.getBookmarks()).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should get bookmarks with default options', async () => {
@@ -207,7 +220,9 @@ describe('BookmarkOperations', () => {
       expect(mockSupabase.from).toHaveBeenCalledWith('bookmarks');
       expect(mockSupabase.select).toHaveBeenCalledWith('*');
       expect(mockSupabase.eq).toHaveBeenCalledWith('user_id', 'test-user-id');
-      expect(mockSupabase.order).toHaveBeenCalledWith('created_at', { ascending: false });
+      expect(mockSupabase.order).toHaveBeenCalledWith('created_at', {
+        ascending: false,
+      });
       expect(result).toHaveLength(2);
     });
 
@@ -302,9 +317,9 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.getBookmarkByUrl('https://example.com')).rejects.toThrow(
-        'User not authenticated',
-      );
+      await expect(
+        bookmarkOps.getBookmarkByUrl('https://example.com'),
+      ).rejects.toThrow('User not authenticated');
     });
 
     test('should return bookmark when found', async () => {
@@ -317,7 +332,10 @@ describe('BookmarkOperations', () => {
       const result = await bookmarkOps.getBookmarkByUrl('https://example.com');
 
       expect(result).toEqual(bookmark);
-      expect(mockSupabase.eq).toHaveBeenCalledWith('url', 'https://example.com');
+      expect(mockSupabase.eq).toHaveBeenCalledWith(
+        'url',
+        'https://example.com',
+      );
     });
 
     test('should return null when not found', async () => {
@@ -337,7 +355,9 @@ describe('BookmarkOperations', () => {
         error: new Error('Database error'),
       });
 
-      await expect(bookmarkOps.getBookmarkByUrl('https://example.com')).rejects.toThrow();
+      await expect(
+        bookmarkOps.getBookmarkByUrl('https://example.com'),
+      ).rejects.toThrow();
     });
   });
 
@@ -345,7 +365,9 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.updateBookmark('id', {})).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.updateBookmark('id', {})).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should update bookmark', async () => {
@@ -355,7 +377,9 @@ describe('BookmarkOperations', () => {
         error: null,
       });
 
-      const result = await bookmarkOps.updateBookmark('1', { title: 'Updated' });
+      const result = await bookmarkOps.updateBookmark('1', {
+        title: 'Updated',
+      });
 
       expect(mockSupabase.from).toHaveBeenCalledWith('bookmarks');
       expect(mockSupabase.update).toHaveBeenCalled();
@@ -377,7 +401,9 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.deleteBookmark('id')).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.deleteBookmark('id')).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should delete bookmark', async () => {
@@ -417,7 +443,9 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.getBookmarkById('id')).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.getBookmarkById('id')).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should return bookmark when found', async () => {
@@ -449,12 +477,18 @@ describe('BookmarkOperations', () => {
     test('should throw error when not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(bookmarkOps.getBookmarkStats()).rejects.toThrow('User not authenticated');
+      await expect(bookmarkOps.getBookmarkStats()).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     test('should return bookmark statistics', async () => {
       mockSupabase.eq.mockResolvedValue({
-        data: [{ read_status: 'read' }, { read_status: 'read' }, { read_status: 'unread' }],
+        data: [
+          { read_status: 'read' },
+          { read_status: 'read' },
+          { read_status: 'unread' },
+        ],
         error: null,
       });
 

@@ -276,7 +276,12 @@ class UIMessages {
     // Use UIComponents if available, otherwise fall back to manual creation
 
     if (typeof UIComponents !== 'undefined') {
-      const confirmEl = UIComponents.createConfirmDialog(message, onConfirm, onCancel, options);
+      const confirmEl = UIComponents.createConfirmDialog(
+        message,
+        onConfirm,
+        onCancel,
+        options,
+      );
 
       UIComponents.showModal(confirmEl);
       return confirmEl;

@@ -88,7 +88,8 @@ class AuthUI {
     // Create footer
     const footer = document.createElement('div');
     footer.className = 'auth-footer';
-    footer.innerHTML = '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>';
+    footer.innerHTML =
+      '<p>Don\'t have an account? <a href="#" id="showSignup">Sign up</a></p>';
     containerEl.appendChild(footer);
 
     // Create message container
@@ -159,7 +160,8 @@ class AuthUI {
     // Create footer
     const footer = document.createElement('div');
     footer.className = 'auth-footer';
-    footer.innerHTML = '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>';
+    footer.innerHTML =
+      '<p>Already have an account? <a href="#" id="showLogin">Sign in</a></p>';
     containerEl.appendChild(footer);
 
     // Create message container
@@ -178,8 +180,14 @@ class AuthUI {
    * @param {HTMLElement} container - Container element with auth forms
    */
   bindAuthEvents(container) {
-    const showSignupLink = UIComponents.DOM.querySelector('#showSignup', container);
-    const showLoginLink = UIComponents.DOM.querySelector('#showLogin', container);
+    const showSignupLink = UIComponents.DOM.querySelector(
+      '#showSignup',
+      container,
+    );
+    const showLoginLink = UIComponents.DOM.querySelector(
+      '#showLogin',
+      container,
+    );
 
     if (showSignupLink) {
       showSignupLink.addEventListener('click', e => {
@@ -235,7 +243,10 @@ class AuthUI {
   async handleSignup(container) {
     const email = UIComponents.DOM.getValue('signupEmail', container);
     const password = UIComponents.DOM.getValue('signupPassword', container);
-    const confirmPassword = UIComponents.DOM.getValue('confirmPassword', container);
+    const confirmPassword = UIComponents.DOM.getValue(
+      'confirmPassword',
+      container,
+    );
 
     if (!email || !password || !confirmPassword) {
       UIMessages.error('Please fill in all fields', container);
@@ -263,7 +274,10 @@ class AuthUI {
         // since email verification links don't work well with extensions
         try {
           await this.config.signIn(email, password);
-          UIMessages.success('Account created and signed in successfully!', container);
+          UIMessages.success(
+            'Account created and signed in successfully!',
+            container,
+          );
 
           // Call the success callback
           if (this.onAuthSuccess) {

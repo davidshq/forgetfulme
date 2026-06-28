@@ -114,7 +114,10 @@ class SupabaseConfig {
 
       return result;
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'supabase-config.setConfiguration');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'supabase-config.setConfiguration',
+      );
       return { success: false, message: errorResult.userMessage };
     }
   }
@@ -169,7 +172,10 @@ class SupabaseConfig {
 
       // Use the globally available Supabase client
       // Creating Supabase client
-      this.supabase = supabaseClient.createClient(this.supabaseUrl, this.supabaseAnonKey);
+      this.supabase = supabaseClient.createClient(
+        this.supabaseUrl,
+        this.supabaseAnonKey,
+      );
       this.auth = this.supabase.auth;
 
       // Verify the client was created properly

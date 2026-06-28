@@ -299,7 +299,10 @@ const assertions = createAssertionHelpers(mocks);
 assertions.assertErrorHandling('popup.markAsRead');
 
 // Avoid
-expect(mocks.errorHandler.handle).toHaveBeenCalledWith(expect.any(Error), 'popup.markAsRead');
+expect(mocks.errorHandler.handle).toHaveBeenCalledWith(
+  expect.any(Error),
+  'popup.markAsRead',
+);
 ```
 
 ### 4. Use Custom Mocks Sparingly

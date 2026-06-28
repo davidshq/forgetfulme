@@ -346,7 +346,9 @@ describe('ErrorHandler', () => {
 
       const result = ErrorHandler.getUserMessage(errorInfo);
 
-      expect(result).toBe('Connection error. Please check your internet connection and try again.');
+      expect(result).toBe(
+        'Connection error. Please check your internet connection and try again.',
+      );
     });
 
     test('should return user-friendly auth error messages', () => {
@@ -365,7 +367,8 @@ describe('ErrorHandler', () => {
         },
         {
           message: 'Email not confirmed',
-          expected: 'Please check your email and click the verification link before signing in.',
+          expected:
+            'Please check your email and click the verification link before signing in.',
         },
         {
           message: 'User not authenticated',
@@ -449,7 +452,8 @@ describe('ErrorHandler', () => {
         },
         {
           message: 'Config error',
-          expected: 'Configuration error. Please check your settings and try again.',
+          expected:
+            'Configuration error. Please check your settings and try again.',
         },
       ];
 
@@ -473,7 +477,9 @@ describe('ErrorHandler', () => {
 
       const result = ErrorHandler.getUserMessage(errorInfo);
 
-      expect(result).toBe('Interface error. Please refresh the page and try again.');
+      expect(result).toBe(
+        'Interface error. Please refresh the page and try again.',
+      );
     });
 
     test('should return user-friendly unknown error message', () => {
@@ -685,7 +691,9 @@ describe('ErrorHandler', () => {
       const error = new Error('Operation failed');
       const operation = vi.fn().mockRejectedValue(error);
 
-      await expect(ErrorHandler.handleAsync(operation, 'test-context')).rejects.toThrow();
+      await expect(
+        ErrorHandler.handleAsync(operation, 'test-context'),
+      ).rejects.toThrow();
     });
 
     test('should pass options to error handler', async () => {
@@ -693,7 +701,9 @@ describe('ErrorHandler', () => {
       const operation = vi.fn().mockRejectedValue(error);
       const options = { silent: true };
 
-      await expect(ErrorHandler.handleAsync(operation, 'test-context', options)).rejects.toThrow();
+      await expect(
+        ErrorHandler.handleAsync(operation, 'test-context', options),
+      ).rejects.toThrow();
     });
   });
 

@@ -75,7 +75,10 @@ class SupabaseService {
     // Initialize auth state manager and token refresh handler
     const authStateManager = new AuthStateManager();
     await authStateManager.initialize();
-    this.tokenRefreshHandler = new AuthTokenRefreshHandler(this.config, authStateManager);
+    this.tokenRefreshHandler = new AuthTokenRefreshHandler(
+      this.config,
+      authStateManager,
+    );
 
     // Initialize operation modules
     this.bookmarkOperations = new BookmarkOperations(
@@ -84,7 +87,11 @@ class SupabaseService {
       this.pendingRequests,
       this.tokenRefreshHandler,
     );
-    this.userOperations = new UserOperations(this.supabase, this.config, this.pendingRequests);
+    this.userOperations = new UserOperations(
+      this.supabase,
+      this.config,
+      this.pendingRequests,
+    );
     this.dataOperations = new DataOperations(
       this.supabase,
       this.config,

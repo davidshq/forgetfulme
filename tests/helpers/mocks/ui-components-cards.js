@@ -78,21 +78,23 @@ export const createCardComponents = document => ({
     }
     return card;
   }),
-  createFormCard: vi.fn((title, formFields, onSubmit, submitText, className) => {
-    const card = document.createElement('article');
-    card.className = `card form-card ${className || ''}`.trim();
-    if (title) {
-      const header = document.createElement('header');
-      const titleElement = document.createElement('h3');
-      titleElement.textContent = title;
-      header.appendChild(titleElement);
-      card.appendChild(header);
-    }
-    const form = document.createElement('form');
-    form.className = 'card-form';
-    card.appendChild(form);
-    return card;
-  }),
+  createFormCard: vi.fn(
+    (title, formFields, onSubmit, submitText, className) => {
+      const card = document.createElement('article');
+      card.className = `card form-card ${className || ''}`.trim();
+      if (title) {
+        const header = document.createElement('header');
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
+        header.appendChild(titleElement);
+        card.appendChild(header);
+      }
+      const form = document.createElement('form');
+      form.className = 'card-form';
+      card.appendChild(form);
+      return card;
+    },
+  ),
   createListCard: vi.fn((title, items, options, className) => {
     const card = document.createElement('article');
     card.className = `card list-card ${className || ''}`.trim();

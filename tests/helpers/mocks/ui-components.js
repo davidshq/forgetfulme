@@ -12,7 +12,6 @@ import { createBasicComponents } from './ui-components-basic.js';
 import { createCardComponents } from './ui-components-cards.js';
 import { createNavigationComponents } from './ui-components-navigation.js';
 import { createModalComponents } from './ui-components-modals.js';
-import { createTabComponents } from './ui-components-tabs.js';
 import { createDOMUtilities } from './ui-components-dom.js';
 
 /**
@@ -27,6 +26,5 @@ export const createMockUIComponents = document => ({
   ...createCardComponents(document),
   ...createNavigationComponents(document),
   ...createModalComponents(document),
-  ...createTabComponents(document),
   ...createDOMUtilities(document),
 });

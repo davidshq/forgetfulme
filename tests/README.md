@@ -233,13 +233,17 @@ describe('BookmarkService', () => {
       await bookmarkService.saveBookmark(bookmark);
 
       // Execute & Assert
-      await expect(bookmarkService.saveBookmark(bookmark)).rejects.toThrow('Duplicate URL');
+      await expect(bookmarkService.saveBookmark(bookmark)).rejects.toThrow(
+        'Duplicate URL',
+      );
     });
 
     test('should validate bookmark data', async () => {
       const invalidBookmark = { url: '' }; // Missing required fields
 
-      await expect(bookmarkService.saveBookmark(invalidBookmark)).rejects.toThrow();
+      await expect(
+        bookmarkService.saveBookmark(invalidBookmark),
+      ).rejects.toThrow();
     });
   });
 });
@@ -278,7 +282,10 @@ Test factories create consistent, reusable test data objects. They're located in
 ### Using Built-in Factories
 
 ```javascript
-import { createTestData, createAssertionHelpers } from './helpers/test-factories.js';
+import {
+  createTestData,
+  createAssertionHelpers,
+} from './helpers/test-factories.js';
 
 describe('Bookmark Operations', () => {
   test('should create bookmarks with factory', () => {
@@ -447,14 +454,18 @@ describe('Chrome Storage', () => {
 
     await chrome.storage.sync.set({ key: 'value' });
 
-    expect(mocks.chrome.storage.sync.set).toHaveBeenCalledWith({ key: 'value' });
+    expect(mocks.chrome.storage.sync.set).toHaveBeenCalledWith({
+      key: 'value',
+    });
   });
 
   test('should handle storage errors', async () => {
     const error = new Error('Storage full');
     mocks.chrome.storage.sync.set.mockRejectedValue(error);
 
-    await expect(chrome.storage.sync.set({ key: 'value' })).rejects.toThrow('Storage full');
+    await expect(chrome.storage.sync.set({ key: 'value' })).rejects.toThrow(
+      'Storage full',
+    );
   });
 });
 ```
@@ -491,7 +502,9 @@ describe('Chrome Runtime', () => {
     const listener = vi.fn();
     mocks.chrome.runtime.onMessage.addListener(listener);
 
-    expect(mocks.chrome.runtime.onMessage.addListener).toHaveBeenCalledWith(listener);
+    expect(mocks.chrome.runtime.onMessage.addListener).toHaveBeenCalledWith(
+      listener,
+    );
   });
 });
 ```
@@ -552,7 +565,9 @@ describe('SupabaseService', () => {
       url: 'https://example.com',
     });
 
-    mocks.supabaseService.getBookmarks.mockResolvedValue([{ id: '1', url: 'https://example.com' }]);
+    mocks.supabaseService.getBookmarks.mockResolvedValue([
+      { id: '1', url: 'https://example.com' },
+    ]);
   });
 
   test('should save bookmarks', async () => {

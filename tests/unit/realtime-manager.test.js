@@ -44,7 +44,10 @@ describe('RealtimeManager', () => {
       const userId = 'user-123';
       const callback = vi.fn();
 
-      const subscription = realtimeManager.subscribeToBookmarks(userId, callback);
+      const subscription = realtimeManager.subscribeToBookmarks(
+        userId,
+        callback,
+      );
 
       expect(mockSupabase.channel).toHaveBeenCalledWith('bookmarks');
       expect(subscription).toBeDefined();
@@ -113,7 +116,9 @@ describe('RealtimeManager', () => {
 
       realtimeManager.subscribeToBookmarks(userId, callback);
 
-      expect(realtimeManager.subscriptions.get('bookmarks')).toBe(mockSubscription);
+      expect(realtimeManager.subscriptions.get('bookmarks')).toBe(
+        mockSubscription,
+      );
     });
 
     test('should replace existing subscription if called twice', () => {
@@ -130,12 +135,16 @@ describe('RealtimeManager', () => {
         on: vi.fn().mockReturnThis(),
         subscribe: vi.fn().mockReturnValue(mockSubscription2),
       };
-      mockSupabase.channel.mockReturnValueOnce(mockChannel1).mockReturnValueOnce(mockChannel2);
+      mockSupabase.channel
+        .mockReturnValueOnce(mockChannel1)
+        .mockReturnValueOnce(mockChannel2);
 
       realtimeManager.subscribeToBookmarks(userId, callback);
       realtimeManager.subscribeToBookmarks(userId, callback);
 
-      expect(realtimeManager.subscriptions.get('bookmarks')).toBe(mockSubscription2);
+      expect(realtimeManager.subscriptions.get('bookmarks')).toBe(
+        mockSubscription2,
+      );
     });
   });
 

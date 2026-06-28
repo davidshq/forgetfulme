@@ -236,7 +236,10 @@ describe('BookmarkTransformer', () => {
         title: 'Current Tab Title',
       };
 
-      const result = BookmarkTransformer.fromCurrentTab(tab, 'read', ['current', 'tab']);
+      const result = BookmarkTransformer.fromCurrentTab(tab, 'read', [
+        'current',
+        'tab',
+      ]);
 
       expect(result).toEqual({
         url: 'https://example.com',
@@ -352,7 +355,9 @@ describe('BookmarkTransformer', () => {
       const result = BookmarkTransformer.validate(bookmark);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Title is required and must be non-empty');
+      expect(result.errors).toContain(
+        'Title is required and must be non-empty',
+      );
     });
 
     test('should detect empty title', () => {
@@ -365,7 +370,9 @@ describe('BookmarkTransformer', () => {
       const result = BookmarkTransformer.validate(bookmark);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Title is required and must be non-empty');
+      expect(result.errors).toContain(
+        'Title is required and must be non-empty',
+      );
     });
 
     test('should detect missing readStatus', () => {
@@ -377,7 +384,9 @@ describe('BookmarkTransformer', () => {
       const result = BookmarkTransformer.validate(bookmark);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Read status is required and must be non-empty');
+      expect(result.errors).toContain(
+        'Read status is required and must be non-empty',
+      );
     });
 
     test('should detect empty readStatus', () => {
@@ -390,7 +399,9 @@ describe('BookmarkTransformer', () => {
       const result = BookmarkTransformer.validate(bookmark);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain('Read status is required and must be non-empty');
+      expect(result.errors).toContain(
+        'Read status is required and must be non-empty',
+      );
     });
 
     test('should accept readStatus from status field', () => {
@@ -442,8 +453,12 @@ describe('BookmarkTransformer', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toContain('URL is required');
-      expect(result.errors).toContain('Title is required and must be non-empty');
-      expect(result.errors).toContain('Read status is required and must be non-empty');
+      expect(result.errors).toContain(
+        'Title is required and must be non-empty',
+      );
+      expect(result.errors).toContain(
+        'Read status is required and must be non-empty',
+      );
       expect(result.errors).toContain('Tags must be an array');
     });
   });
@@ -452,8 +467,12 @@ describe('BookmarkTransformer', () => {
     test('should validate correct URLs', () => {
       expect(BookmarkTransformer.isValidUrl('https://example.com')).toBe(true);
       expect(BookmarkTransformer.isValidUrl('http://example.com')).toBe(true);
-      expect(BookmarkTransformer.isValidUrl('https://example.com/path')).toBe(true);
-      expect(BookmarkTransformer.isValidUrl('https://example.com?param=value')).toBe(true);
+      expect(BookmarkTransformer.isValidUrl('https://example.com/path')).toBe(
+        true,
+      );
+      expect(
+        BookmarkTransformer.isValidUrl('https://example.com?param=value'),
+      ).toBe(true);
     });
 
     test('should reject invalid URLs', () => {
@@ -509,7 +528,10 @@ describe('BookmarkTransformer', () => {
         },
       ];
 
-      const result = BookmarkTransformer.transformMultiple(bookmarks, mockUserId);
+      const result = BookmarkTransformer.transformMultiple(
+        bookmarks,
+        mockUserId,
+      );
 
       expect(result).toHaveLength(2);
       expect(result[0].user_id).toBe(mockUserId);
@@ -527,9 +549,13 @@ describe('BookmarkTransformer', () => {
         },
       ];
 
-      const result = BookmarkTransformer.transformMultiple(bookmarks, mockUserId, {
-        setDefaults: false,
-      });
+      const result = BookmarkTransformer.transformMultiple(
+        bookmarks,
+        mockUserId,
+        {
+          setDefaults: false,
+        },
+      );
 
       expect(result[0].access_count).toBe(5);
     });

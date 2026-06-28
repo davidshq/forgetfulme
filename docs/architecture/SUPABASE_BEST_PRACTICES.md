@@ -47,7 +47,10 @@ This document provides comprehensive guidance on implementing Supabase as a back
 
 ```javascript
 // Never expose in client-side code
-const supabase = createClient('https://your-project.supabase.co', 'public-anon-key');
+const supabase = createClient(
+  'https://your-project.supabase.co',
+  'public-anon-key',
+);
 ```
 
 **✅ Best Practice:**
@@ -59,7 +62,10 @@ const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 // For extensions, consider using chrome.storage for sensitive config
 chrome.storage.sync.get(['supabaseConfig'], result => {
-  const supabase = createClient(result.supabaseConfig.url, result.supabaseConfig.anonKey);
+  const supabase = createClient(
+    result.supabaseConfig.url,
+    result.supabaseConfig.anonKey,
+  );
 });
 ```
 
@@ -338,7 +344,9 @@ class BackgroundSync {
           await this.supabase.from('bookmarks').insert(operation.data);
         }
         // Remove processed operation
-        this.pendingOperations = this.pendingOperations.filter(op => op !== operation);
+        this.pendingOperations = this.pendingOperations.filter(
+          op => op !== operation,
+        );
       } catch (error) {
         console.error('Failed to process pending operation:', error);
       }
@@ -359,7 +367,13 @@ class BookmarkService {
   }
 
   async getBookmarks(userId, options = {}) {
-    const { page = 1, limit = 50, status = null, search = null, tags = null } = options;
+    const {
+      page = 1,
+      limit = 50,
+      status = null,
+      search = null,
+      tags = null,
+    } = options;
 
     let query = this.supabase
       .from('bookmarks')
@@ -538,7 +552,10 @@ class OfflineManager {
 
         // Create pending operations store
         if (!db.objectStoreNames.contains('pending_operations')) {
-          db.createObjectStore('pending_operations', { keyPath: 'id', autoIncrement: true });
+          db.createObjectStore('pending_operations', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
         }
       };
     });

@@ -66,7 +66,12 @@ describe('ConfigStorage', () => {
       expect(result).toEqual({
         supabase: null,
         preferences: {
-          customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+          customStatusTypes: [
+            'read',
+            'good-reference',
+            'low-value',
+            'revisit-later',
+          ],
         },
         auth: null,
       });
@@ -75,7 +80,9 @@ describe('ConfigStorage', () => {
     test('should throw error when storage.get fails', async () => {
       mockStorage.sync.get.mockRejectedValue(new Error('Storage error'));
 
-      await expect(loadAllConfig()).rejects.toThrow('Failed to load configuration');
+      await expect(loadAllConfig()).rejects.toThrow(
+        'Failed to load configuration',
+      );
     });
   });
 
@@ -141,7 +148,12 @@ describe('ConfigStorage', () => {
   describe('initializeDefaultSettings', () => {
     test('should initialize default settings', async () => {
       const defaultSettings = {
-        customStatusTypes: ['read', 'good-reference', 'low-value', 'revisit-later'],
+        customStatusTypes: [
+          'read',
+          'good-reference',
+          'low-value',
+          'revisit-later',
+        ],
       };
       mockStorage.sync.set.mockResolvedValue();
 

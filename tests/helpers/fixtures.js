@@ -15,7 +15,7 @@ const test = base.extend({
   // Launch a persistent context with the extension loaded so background service workers stay alive
   context: async ({}, use) => {
     const userDataDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), 'forgetfulme-e2e-')
+      path.join(os.tmpdir(), 'forgetfulme-e2e-'),
     );
 
     // Ensure extension path is absolute

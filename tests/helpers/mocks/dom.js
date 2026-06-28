@@ -6,7 +6,8 @@
 import { vi } from 'vitest';
 
 // Helper functions
-const hasOwnProperty = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
+const hasOwnProperty = (obj, prop) =>
+  Object.prototype.hasOwnProperty.call(obj, prop);
 
 const ensureChildProperties = child => {
   if (!hasOwnProperty(child, 'parentNode')) {
@@ -54,7 +55,9 @@ const ensureAttributes = element => {
   if (!element._attributes) element._attributes = {};
 };
 const getClassList = className =>
-  typeof className === 'string' ? className.split(' ').filter(c => c.length > 0) : [className];
+  typeof className === 'string'
+    ? className.split(' ').filter(c => c.length > 0)
+    : [className];
 const matchesSelector = (element, selector) => {
   if (!element || !selector) return false;
 
@@ -77,12 +80,16 @@ const matchesSelector = (element, selector) => {
   if (selector.startsWith('[') && selector.endsWith(']')) {
     const attrSelector = selector.slice(1, -1);
     if (attrSelector.includes('=')) {
-      const [attr, value] = attrSelector.split('=').map(s => s.trim().replace(/^["']|["']$/g, ''));
-      const elementValue = element.getAttribute?.(attr) || element._attributes?.[attr];
+      const [attr, value] = attrSelector
+        .split('=')
+        .map(s => s.trim().replace(/^["']|["']$/g, ''));
+      const elementValue =
+        element.getAttribute?.(attr) || element._attributes?.[attr];
       return elementValue === value;
     } else {
       return (
-        element.hasAttribute?.(attrSelector) || element._attributes?.[attrSelector] !== undefined
+        element.hasAttribute?.(attrSelector) ||
+        element._attributes?.[attrSelector] !== undefined
       );
     }
   }
@@ -96,7 +103,11 @@ const matchesSelector = (element, selector) => {
   // Split by space for descendant selectors, but for now handle simple combinations
   if (selector.includes('.')) {
     const [tag, ...classes] = selector.split('.');
-    if (tag && element.tagName && element.tagName.toLowerCase() !== tag.toLowerCase()) {
+    if (
+      tag &&
+      element.tagName &&
+      element.tagName.toLowerCase() !== tag.toLowerCase()
+    ) {
       return false;
     }
     if (classes.length > 0) {
@@ -109,7 +120,11 @@ const matchesSelector = (element, selector) => {
 };
 const getFormType = tagName => {
   const lower = tagName.toLowerCase();
-  return lower === 'button' ? 'button' : lower === 'textarea' ? 'textarea' : 'text';
+  return lower === 'button'
+    ? 'button'
+    : lower === 'textarea'
+      ? 'textarea'
+      : 'text';
 };
 const createStorage = () => ({
   getItem: vi.fn(),
@@ -171,7 +186,9 @@ export const createMockElement = tagName => {
     insertBefore: vi.fn(function (newNode, referenceNode) {
       if (isValidChild(newNode)) {
         ensureChildProperties(newNode);
-        const index = referenceNode ? this.children.indexOf(referenceNode) : this.children.length;
+        const index = referenceNode
+          ? this.children.indexOf(referenceNode)
+          : this.children.length;
         this.children.splice(index, 0, newNode);
         setParentNode(newNode, this);
         updateFirstChild(this, newNode);
@@ -288,7 +305,9 @@ export const createMockElement = tagName => {
         textContent: this.textContent,
       });
       if (deep) {
-        this.children.forEach(child => clone.appendChild(child.cloneNode(true)));
+        this.children.forEach(child =>
+          clone.appendChild(child.cloneNode(true)),
+        );
       }
       return clone;
     }),
@@ -321,7 +340,9 @@ export const createMockDocument = createElementFn => {
   const document = {
     createElement: vi.fn(tagName => createElementFn(tagName)),
     getElementById: vi.fn(id => elementsById.get(id) || null),
-    getElementsByClassName: vi.fn(className => body.querySelectorAll(`.${className}`)),
+    getElementsByClassName: vi.fn(className =>
+      body.querySelectorAll(`.${className}`),
+    ),
     getElementsByTagName: vi.fn(tagName => body.querySelectorAll(tagName)),
     querySelector: vi.fn(function (selector) {
       // Handle ID selector directly via getElementById for efficiency

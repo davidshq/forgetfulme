@@ -49,7 +49,6 @@ vi.mock('../../utils/ui-components.js', () => {
       createSection: vi.fn(() => createMockElement('section')),
       createContainer: vi.fn(() => createMockElement('div')),
       createListItem: vi.fn(() => createMockElement('li')),
-      createList: vi.fn(() => createMockElement('ul')),
       createCard: vi.fn(() => createMockElement('article')),
       createFormCard: vi.fn(() => createMockElement('article')),
       createListCard: vi.fn(() => createMockListCard()),
@@ -153,8 +152,12 @@ vi.mock('../../auth-ui.js', () => ({
 vi.mock('../../components/quick-add.js', () => ({
   QuickAdd: class MockQuickAdd {
     constructor() {
-      this.createFormCard = vi.fn().mockReturnValue(document.createElement('article'));
-      this.getFormValues = vi.fn().mockReturnValue({ status: 'read', tags: '' });
+      this.createFormCard = vi
+        .fn()
+        .mockReturnValue(document.createElement('article'));
+      this.getFormValues = vi
+        .fn()
+        .mockReturnValue({ status: 'read', tags: '' });
       this.clearForm = vi.fn();
     }
   },
@@ -268,15 +271,28 @@ describe('ForgetfulMePopup', () => {
     });
 
     // Mock UI component methods to return proper DOM elements
-    mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
+    mockUIComponents.createButton.mockReturnValue(
+      document.createElement('button'),
+    );
     mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
-    mockUIComponents.createFormField.mockReturnValue(document.createElement('input'));
-    mockUIComponents.createSection.mockReturnValue(document.createElement('section'));
-    mockUIComponents.createContainer.mockReturnValue(document.createElement('div'));
-    mockUIComponents.createListItem.mockReturnValue(document.createElement('li'));
-    mockUIComponents.createList.mockReturnValue(document.createElement('ul'));
-    mockUIComponents.createCard.mockReturnValue(document.createElement('article'));
-    mockUIComponents.createFormCard.mockReturnValue(document.createElement('article'));
+    mockUIComponents.createFormField.mockReturnValue(
+      document.createElement('input'),
+    );
+    mockUIComponents.createSection.mockReturnValue(
+      document.createElement('section'),
+    );
+    mockUIComponents.createContainer.mockReturnValue(
+      document.createElement('div'),
+    );
+    mockUIComponents.createListItem.mockReturnValue(
+      document.createElement('li'),
+    );
+    mockUIComponents.createCard.mockReturnValue(
+      document.createElement('article'),
+    );
+    mockUIComponents.createFormCard.mockReturnValue(
+      document.createElement('article'),
+    );
     // createListCard needs to return an element with a .card-list child
     mockUIComponents.createListCard.mockImplementation(() => {
       const card = document.createElement('article');
@@ -285,7 +301,9 @@ describe('ForgetfulMePopup', () => {
       card.appendChild(cardList);
       return card;
     });
-    mockUIComponents.createHeaderWithNav.mockReturnValue(document.createElement('header'));
+    mockUIComponents.createHeaderWithNav.mockReturnValue(
+      document.createElement('header'),
+    );
 
     // Mock chrome tabs
     chrome.tabs.query.mockResolvedValue([
@@ -362,9 +380,15 @@ describe('ForgetfulMePopup', () => {
         .mockReturnValueOnce('test, tags'); // tags
 
       // Mock UI components for edit interface
-      mockUIComponents.createButton.mockReturnValue(document.createElement('button'));
-      mockUIComponents.createSection.mockReturnValue(document.createElement('div'));
-      mockUIComponents.createForm.mockReturnValue(document.createElement('form'));
+      mockUIComponents.createButton.mockReturnValue(
+        document.createElement('button'),
+      );
+      mockUIComponents.createSection.mockReturnValue(
+        document.createElement('div'),
+      );
+      mockUIComponents.createForm.mockReturnValue(
+        document.createElement('form'),
+      );
 
       await popup.markAsRead();
 
@@ -384,8 +408,14 @@ describe('ForgetfulMePopup', () => {
 
       await popup.markAsRead();
 
-      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.markAsRead');
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'popup.markAsRead',
+      );
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object),
+      );
     });
   });
 
@@ -407,11 +437,14 @@ describe('ForgetfulMePopup', () => {
 
       await popup.updateBookmark(bookmarkId);
 
-      expect(mockSupabaseService.updateBookmark).toHaveBeenCalledWith(bookmarkId, {
-        read_status: 'good-reference',
-        tags: ['updated', 'tags'],
-        updated_at: expect.any(String),
-      });
+      expect(mockSupabaseService.updateBookmark).toHaveBeenCalledWith(
+        bookmarkId,
+        {
+          read_status: 'good-reference',
+          tags: ['updated', 'tags'],
+          updated_at: expect.any(String),
+        },
+      );
       expect(mockUIMessages.success).toHaveBeenCalledWith(
         'Bookmark updated successfully!',
         expect.any(Object),
@@ -430,8 +463,14 @@ describe('ForgetfulMePopup', () => {
 
       await popup.updateBookmark(bookmarkId);
 
-      expect(mockErrorHandler.handle).toHaveBeenCalledWith(mockError, 'popup.updateBookmark');
-      expect(mockUIMessages.error).toHaveBeenCalledWith('Test error message', expect.any(Object));
+      expect(mockErrorHandler.handle).toHaveBeenCalledWith(
+        mockError,
+        'popup.updateBookmark',
+      );
+      expect(mockUIMessages.error).toHaveBeenCalledWith(
+        'Test error message',
+        expect.any(Object),
+      );
     });
   });
 

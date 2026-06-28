@@ -15,7 +15,10 @@ import { initializeServices } from './utils/service-initializer.js';
 import { initializeApp as initializeAppUtil } from './utils/app-initializer.js';
 import { MESSAGE_TYPES } from './utils/constants.js';
 import { renderMainInterface } from './utils/options-ui-renderer.js';
-import { loadStatistics, loadStatusTypes } from './utils/options-data-manager.js';
+import {
+  loadStatistics,
+  loadStatusTypes,
+} from './utils/options-data-manager.js';
 
 /**
  * Options page class for ForgetfulMe extension
@@ -81,11 +84,13 @@ class ForgetfulMeOptions {
       });
 
       // Listen for runtime messages from background
-      chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
-        if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
-          this.handleAuthStateChange(message.session);
-        }
-      });
+      chrome.runtime.onMessage.addListener(
+        (message, _sender, _sendResponse) => {
+          if (message.type === MESSAGE_TYPES.AUTH_STATE_CHANGED) {
+            this.handleAuthStateChange(message.session);
+          }
+        },
+      );
 
       // Auth state initialized successfully
     } catch (error) {
@@ -258,7 +263,9 @@ class ForgetfulMeOptions {
         this.configManager.getCustomStatusTypes(),
       ]);
 
-      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
+      loadStatusTypes(customStatusTypes, status =>
+        this.removeStatusType(status),
+      );
       loadStatistics(bookmarks, customStatusTypes);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.loadData');
@@ -293,7 +300,9 @@ class ForgetfulMeOptions {
       UIComponents.DOM.setValue('new-status', '');
 
       const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
+      loadStatusTypes(customStatusTypes, status =>
+        this.removeStatusType(status),
+      );
       UIMessages.success('Status type added successfully', this.appContainer);
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, 'options.addStatusType');
@@ -312,10 +321,15 @@ class ForgetfulMeOptions {
       await this.configManager.removeCustomStatusType(status);
 
       const customStatusTypes = await this.configManager.getCustomStatusTypes();
-      loadStatusTypes(customStatusTypes, status => this.removeStatusType(status));
+      loadStatusTypes(customStatusTypes, status =>
+        this.removeStatusType(status),
+      );
       UIMessages.success('Status type removed successfully', this.appContainer);
     } catch (error) {
-      const errorResult = ErrorHandler.handle(error, 'options.removeStatusType');
+      const errorResult = ErrorHandler.handle(
+        error,
+        'options.removeStatusType',
+      );
       UIMessages.error(errorResult.userMessage, this.appContainer);
     }
   }
@@ -391,7 +405,10 @@ class ForgetfulMeOptions {
             await this.supabaseService.deleteBookmark(bookmark.id);
           }
 
-          UIMessages.success('All data cleared successfully', this.appContainer);
+          UIMessages.success(
+            'All data cleared successfully',
+            this.appContainer,
+          );
           this.loadData(); // Refresh the data
         } catch (error) {
           const errorResult = ErrorHandler.handle(error, 'options.clearData');

@@ -113,7 +113,9 @@ export class BulkActions {
    */
   updateBulkActions() {
     const checkboxes = UIComponents.DOM.querySelectorAll('.bookmark-checkbox');
-    const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+    const selectedCount = Array.from(checkboxes).filter(
+      cb => cb.checked,
+    ).length;
 
     const deleteSelectedBtn = UIComponents.DOM.getElement('delete-selected');
     const exportSelectedBtn = UIComponents.DOM.getElement('export-selected');
@@ -132,7 +134,9 @@ export class BulkActions {
    * @returns {Array<string>} Array of selected bookmark IDs
    */
   getSelectedIds() {
-    const checkboxes = UIComponents.DOM.querySelectorAll('.bookmark-checkbox:checked');
+    const checkboxes = UIComponents.DOM.querySelectorAll(
+      '.bookmark-checkbox:checked',
+    );
     return Array.from(checkboxes).map(cb => cb.dataset.bookmarkId);
   }
 

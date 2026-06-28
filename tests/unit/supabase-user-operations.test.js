@@ -45,7 +45,11 @@ describe('UserOperations', () => {
       shouldShowToUser: true,
     });
 
-    userOperations = new UserOperations(mockSupabase, mockConfig, mockPendingRequests);
+    userOperations = new UserOperations(
+      mockSupabase,
+      mockConfig,
+      mockPendingRequests,
+    );
   });
 
   afterEach(() => {
@@ -81,9 +85,9 @@ describe('UserOperations', () => {
 
       const preferences = { theme: 'dark' };
 
-      await expect(userOperations.saveUserPreferences(preferences)).rejects.toThrow(
-        'User not authenticated',
-      );
+      await expect(
+        userOperations.saveUserPreferences(preferences),
+      ).rejects.toThrow('User not authenticated');
     });
 
     it('should handle database errors', async () => {
@@ -98,9 +102,9 @@ describe('UserOperations', () => {
 
       const preferences = { theme: 'dark' };
 
-      await expect(userOperations.saveUserPreferences(preferences)).rejects.toThrow(
-        'Database error',
-      );
+      await expect(
+        userOperations.saveUserPreferences(preferences),
+      ).rejects.toThrow('Database error');
       expect(ErrorHandler.handle).toHaveBeenCalled();
     });
 
@@ -159,7 +163,9 @@ describe('UserOperations', () => {
     it('should throw error when user is not authenticated', async () => {
       mockConfig.isAuthenticated.mockReturnValue(false);
 
-      await expect(userOperations.getUserPreferences()).rejects.toThrow('User not authenticated');
+      await expect(userOperations.getUserPreferences()).rejects.toThrow(
+        'User not authenticated',
+      );
     });
 
     it('should handle database errors', async () => {
@@ -169,7 +175,9 @@ describe('UserOperations', () => {
         error: mockError,
       });
 
-      await expect(userOperations.getUserPreferences()).rejects.toThrow('Database error');
+      await expect(userOperations.getUserPreferences()).rejects.toThrow(
+        'Database error',
+      );
       expect(ErrorHandler.handle).toHaveBeenCalled();
     });
 

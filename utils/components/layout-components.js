@@ -9,43 +9,6 @@
  */
 
 /**
- * Create a responsive layout container
- * @param {string} className - Additional CSS classes
- * @returns {HTMLElement}
- */
-export function createLayoutContainer(className = '') {
-  const container = document.createElement('div');
-  container.className = `container ${className}`.trim();
-  return container;
-}
-
-/**
- * Create a sidebar layout
- * @param {HTMLElement} sidebar - Sidebar content
- * @param {HTMLElement} main - Main content
- * @param {Object} options - Layout options
- * @returns {HTMLElement}
- */
-export function createSidebarLayout(sidebar, main, options = {}) {
-  const layout = document.createElement('div');
-  layout.className = `sidebar-layout ${options.className || ''}`.trim();
-
-  // Create sidebar container
-  const sidebarContainer = document.createElement('aside');
-  sidebarContainer.className = 'sidebar';
-  sidebarContainer.appendChild(sidebar);
-  layout.appendChild(sidebarContainer);
-
-  // Create main content container
-  const mainContainer = document.createElement('main');
-  mainContainer.className = 'main-content';
-  mainContainer.appendChild(main);
-  layout.appendChild(mainContainer);
-
-  return layout;
-}
-
-/**
  * Create a grid layout with Pico CSS classes
  * @param {Array} items - Grid items
  * @param {Object} options - Grid options

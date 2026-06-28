@@ -91,13 +91,4 @@ export const createModalComponents = document => ({
   showModal: vi.fn(modal => {
     modal.classList.add('ui-modal-show');
   }),
-  closeModal: vi.fn(modal => {
-    modal.classList.remove('ui-modal-show');
-  }),
-  createTooltip: vi.fn((element, text, _position = 'top') => {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'ui-tooltip';
-    tooltip.textContent = text;
-    return tooltip;
-  }),
 });

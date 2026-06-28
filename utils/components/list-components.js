@@ -1,7 +1,7 @@
 /**
  * @fileoverview List component creation utilities
  * @module components/list-components
- * @description Provides list and list item creation utilities
+ * @description Provides list item creation utilities
  *
  * @author ForgetfulMe Team
  * @version 1.0.0
@@ -9,19 +9,6 @@
  */
 
 import { createButton } from './button-components.js';
-
-/**
- * Create a list container
- * @param {string} id - List ID
- * @param {string} className - Additional CSS classes
- * @returns {HTMLElement}
- */
-export function createList(id, className = '') {
-  const list = document.createElement('div');
-  list.id = id;
-  list.className = `list ${className}`.trim();
-  return list;
-}
 
 /**
  * Create a list item
@@ -75,7 +62,11 @@ export function createListItem(data, options = {}) {
     actions.className = 'item-actions';
 
     data.actions.forEach(action => {
-      const actionBtn = createButton(action.text, action.onClick, action.className || '');
+      const actionBtn = createButton(
+        action.text,
+        action.onClick,
+        action.className || '',
+      );
       actions.appendChild(actionBtn);
     });
 

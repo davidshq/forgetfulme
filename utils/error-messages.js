@@ -88,7 +88,11 @@ function getAuthMessage(message) {
   if (message.includes('Session expired')) {
     return 'Your session has expired. Please sign in again.';
   }
-  if (message.includes('JWT expired') || message.includes('token') || message.includes('session')) {
+  if (
+    message.includes('JWT expired') ||
+    message.includes('token') ||
+    message.includes('session')
+  ) {
     return 'Your session has expired. Please sign in again.';
   }
   return 'Authentication error. Please try signing in again.';

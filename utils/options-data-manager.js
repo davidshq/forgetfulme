@@ -30,10 +30,13 @@ export function loadStatistics(bookmarks, statusTypes) {
   // Most used status
   const statusCounts = {};
   bookmarks.forEach(bookmark => {
-    statusCounts[bookmark.read_status] = (statusCounts[bookmark.read_status] || 0) + 1;
+    statusCounts[bookmark.read_status] =
+      (statusCounts[bookmark.read_status] || 0) + 1;
   });
 
-  const mostUsed = Object.entries(statusCounts).sort(([, a], [, b]) => b - a)[0];
+  const mostUsed = Object.entries(statusCounts).sort(
+    ([, a], [, b]) => b - a,
+  )[0];
 
   if (mostUsedStatusEl) {
     if (mostUsed) {
