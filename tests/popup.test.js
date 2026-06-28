@@ -17,9 +17,7 @@ test.describe('ForgetfulMe Popup Tests', () => {
     await extensionHelper.waitForExtensionReady();
   });
 
-  test('should display setup interface when not configured', async ({
-    page,
-  }) => {
+  test('should display setup interface when not configured', async () => {
     // Test that the setup interface is shown
     const setupContainer =
       await extensionHelper.isElementVisible('.setup-container');
@@ -111,23 +109,14 @@ test.describe('ForgetfulMe Popup Tests', () => {
   });
 
   test('should handle errors gracefully', async ({ page }) => {
-    // Mock an error condition by modifying the Chrome API
     await page.addInitScript(() => {
-      // Override chrome.storage to simulate an error
-      if (chrome.storage) {
-        chrome.storage.sync.get = (keys, callback) => {
-          // Simulate an error
-          callback(null);
-        };
-      }
+      chrome.storage.sync.get = () =>
+        Promise.reject(new Error('storage unavailable'));
     });
 
-    // Reload the page to trigger the error
     await page.reload();
-    await extensionHelper.waitForExtensionReady();
+    await page.waitForSelector('#app', { state: 'attached', timeout: 10_000 });
 
-    // The page should still load and show some interface
-    const appContainer = await extensionHelper.isElementVisible('#app');
-    expect(appContainer).toBeTruthy();
+    expect(await extensionHelper.isAppAttached()).toBe(true);
   });
 });

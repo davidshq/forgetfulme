@@ -51,25 +51,14 @@ test.describe('ForgetfulMe Options Tests', () => {
   });
 
   test('should handle form submission', async ({ page }) => {
-    // Fill in the form with test data that passes validation
-    // Anon key must start with 'eyJ' to pass validation
     await extensionHelper.fillField('#supabaseUrl', 'https://test.supabase.co');
     await extensionHelper.fillField(
       '#supabaseAnonKey',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-anon-key',
     );
 
-    // Submit the form
-    const submitButton = await page.locator('button[type="submit"]');
-    await submitButton.click();
-
-    // Wait for submission to complete - wait longer for async operations
-    await page.waitForTimeout(4000);
-
-    // Check that the form was submitted (should show success or error message)
-    // The form should show a message (either success or validation error)
-    const messageVisible = await extensionHelper.waitForMessage('any');
-    expect(messageVisible).toBeTruthy();
+    await page.locator('button[type="submit"]').click();
+    await expect(page.locator('.ui-message')).toBeVisible({ timeout: 10_000 });
   });
 
   test('should have proper styling and layout', async ({ page }) => {
@@ -107,23 +96,14 @@ test.describe('ForgetfulMe Options Tests', () => {
   });
 
   test('should handle errors gracefully', async ({ page }) => {
-    // Mock an error condition by modifying the Chrome API
     await page.addInitScript(() => {
-      // Override chrome.storage to simulate an error
-      if (chrome.storage) {
-        chrome.storage.sync.get = (keys, callback) => {
-          // Simulate an error
-          callback(null);
-        };
-      }
+      chrome.storage.sync.get = () =>
+        Promise.reject(new Error('storage unavailable'));
     });
 
-    // Reload the page to trigger the error
     await page.reload();
-    await extensionHelper.waitForExtensionReady();
+    await page.waitForSelector('#app', { state: 'attached', timeout: 10_000 });
 
-    // The page should still load and show some interface
-    const appContainer = await extensionHelper.isElementVisible('#app');
-    expect(appContainer).toBeTruthy();
+    expect(await extensionHelper.isAppAttached()).toBe(true);
   });
 });

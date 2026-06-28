@@ -828,6 +828,7 @@ describe('UIComponents', () => {
       dialog.showModal = mockShowModal;
 
       UIComponents.showModal(dialog);
+      expect(dialog.parentNode).toBe(document.body);
       expect(mockShowModal).toHaveBeenCalled();
     });
   });

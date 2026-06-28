@@ -9,8 +9,61 @@
  */
 
 import path from 'path';
-import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import { buildChromeMockInitScript } from './playwright-mocks.js';
+
+const EXTENSION_ID_FROM_URL_RE = /chrome-extension:\/\/([a-z]{32})\//;
+
+/**
+ * @param {string} url
+ * @returns {string|null}
+ */
+function extensionIdFromUrl(url) {
+  const match = url.match(EXTENSION_ID_FROM_URL_RE);
+  return match ? match[1] : null;
+}
+
+/**
+ * @param {Array<unknown>} items
+ * @param {(item: unknown) => string} getUrl
+ * @returns {string|null}
+ */
+function findExtensionIdInItems(items, getUrl) {
+  for (const item of items) {
+    const id = extensionIdFromUrl(getUrl(item));
+    if (id) {
+      return id;
+    }
+  }
+  return null;
+}
+
+/**
+ * @param {Array<{ url?: string, type?: string }>} targetInfos
+ * @returns {string|null}
+ */
+function findExtensionIdInCdpTargets(targetInfos) {
+  for (const target of targetInfos) {
+    const url = target.url || '';
+    if (url.includes('chrome-extension://')) {
+      const id = extensionIdFromUrl(url);
+      if (id) {
+        return id;
+      }
+    }
+    if (
+      target.type === 'service_worker' ||
+      target.type === 'background_page' ||
+      target.type === 'page'
+    ) {
+      const id = extensionIdFromUrl(url);
+      if (id) {
+        return id;
+      }
+    }
+  }
+  return null;
+}
 
 // Extension path will be passed from fixtures
 
@@ -90,6 +143,235 @@ class ExtensionHelper {
   }
 
   /**
+   * Wait briefly for a service worker to register before probing targets.
+   * @returns {Promise<void>}
+   */
+  async _waitForServiceWorkerEvent() {
+    try {
+      await Promise.race([
+        this.context
+          .waitForEvent('serviceworker', { timeout: 5000 })
+          .catch(() => null),
+        new Promise(resolve => setTimeout(resolve, 2000)),
+      ]);
+    } catch (_error) {
+      // Continue even if service worker event doesn't fire
+    }
+  }
+
+  /**
+   * @param {(worker: import('@playwright/test').Worker) => boolean} [filterFn]
+   * @returns {string|null}
+   */
+  _findExtensionIdInServiceWorkers(filterFn) {
+    let workers = this.context.serviceWorkers();
+    if (filterFn) {
+      workers = workers.filter(filterFn);
+    }
+    return findExtensionIdInItems(workers, worker => worker.url());
+  }
+
+  /** @returns {string|null} */
+  _findExtensionIdInBackgroundPages() {
+    return findExtensionIdInItems(this.context.backgroundPages(), bg =>
+      bg.url(),
+    );
+  }
+
+  /** @returns {string|null} */
+  _findExtensionIdInPages() {
+    try {
+      return findExtensionIdInItems(this.context.pages(), pg => pg.url());
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  /** @returns {Promise<string|null>} */
+  async _tryExtensionIdFromPageEvaluate() {
+    try {
+      await this.page.goto('about:blank');
+      await this.page.waitForTimeout(1000);
+
+      const id = await this.page.evaluate(() => {
+        return new Promise(resolve => {
+          if (chrome && chrome.runtime && chrome.runtime.id) {
+            resolve(chrome.runtime.id);
+          } else {
+            resolve(null);
+          }
+        });
+      });
+
+      if (id && /^[a-z]{32}$/.test(id)) {
+        return id;
+      }
+    } catch (_error) {
+      // This won't work in extension pages, but worth trying
+    }
+    return null;
+  }
+
+  /** @returns {Promise<string|null>} */
+  async _tryExtensionIdFromCdpSession() {
+    try {
+      const client = await this.context.newCDPSession(this.page);
+
+      try {
+        const targets = await client.send('Target.getTargets');
+        const id = findExtensionIdInCdpTargets(targets.targetInfos);
+        if (id) {
+          return id;
+        }
+      } catch (targetError) {
+        console.warn('Target.getTargets failed:', targetError.message);
+      }
+
+      try {
+        const tempPage = await this.context.newPage();
+        await tempPage.goto('about:blank');
+
+        const result = await client.send('Runtime.evaluate', {
+          expression: `
+            (function() {
+              try {
+                if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+                  return chrome.runtime.id;
+                }
+              } catch(e) {}
+              return null;
+            })()
+          `,
+          returnByValue: true,
+        });
+        await tempPage.close();
+
+        if (
+          result.result &&
+          result.result.value &&
+          /^[a-z]{32}$/.test(result.result.value)
+        ) {
+          return result.result.value;
+        }
+      } catch (_evalError) {
+        // Ignore
+      }
+    } catch (error) {
+      console.warn('CDP method failed:', error.message);
+    }
+    return null;
+  }
+
+  /** @returns {Promise<string|null>} */
+  async _tryExtensionIdFromBackgroundServiceWorkers() {
+    await this.page.waitForTimeout(2000);
+    return this._findExtensionIdInServiceWorkers(worker => {
+      const url = worker.url();
+      return url.includes('background.js') || url.includes('service_worker');
+    });
+  }
+
+  /**
+   * @param {string} url
+   * @param {import('@playwright/test').GotoOptions} gotoOptions
+   * @param {number} waitMs
+   * @returns {Promise<string|null>}
+   */
+  async _tryExtensionIdByNavigation(url, gotoOptions, waitMs) {
+    try {
+      const testPage = await this.context.newPage();
+      await testPage.goto(url, gotoOptions);
+      await testPage.waitForTimeout(waitMs);
+
+      const id = this._findExtensionIdInServiceWorkers();
+      await testPage.close();
+      return id;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  /** @returns {Promise<string|null>} */
+  async _retryExtensionIdDiscovery() {
+    for (let i = 0; i < 5; i++) {
+      await this.page.waitForTimeout(1000);
+
+      const fromWorkers = this._findExtensionIdInServiceWorkers();
+      if (fromWorkers) {
+        return fromWorkers;
+      }
+
+      const fromBackground = this._findExtensionIdInBackgroundPages();
+      if (fromBackground) {
+        return fromBackground;
+      }
+
+      const fromPages = this._findExtensionIdInPages();
+      if (fromPages) {
+        return fromPages;
+      }
+    }
+    return null;
+  }
+
+  /** @returns {Promise<string|null>} */
+  async _tryExtensionIdFromCdpBrowserDomain() {
+    try {
+      const client = await this.context.newCDPSession(this.page);
+      try {
+        const targets = await client.send('Target.getTargets');
+        for (const target of targets.targetInfos) {
+          const url = target.url || '';
+          if (url.includes('chrome-extension://')) {
+            const id = extensionIdFromUrl(url);
+            if (id) {
+              return id;
+            }
+          }
+          if (target.targetId && target.targetId.includes('extension')) {
+            try {
+              const targetInfo = await client.send('Target.getTargetInfo', {
+                targetId: target.targetId,
+              });
+              if (targetInfo.targetInfo && targetInfo.targetInfo.url) {
+                const id = extensionIdFromUrl(targetInfo.targetInfo.url);
+                if (id) {
+                  return id;
+                }
+              }
+            } catch (_e) {
+              // Ignore
+            }
+          }
+        }
+      } catch (_browserError) {
+        // Browser domain might not be available
+      }
+    } catch (_error) {
+      // CDP might not be available
+    }
+    return null;
+  }
+
+  /** @returns {string|null} */
+  _tryExtensionIdFromPath() {
+    if (!this.extensionPath) {
+      return null;
+    }
+    try {
+      const id = this.computeExtensionIdFromPath(this.extensionPath);
+      console.log(`[extension-id] Computed from path: ${id}`);
+      return id;
+    } catch (error) {
+      console.warn(
+        '[extension-id] Failed to compute from path:',
+        error.message,
+      );
+      return null;
+    }
+  }
+
+  /**
    * Get the extension ID from the background page target
    * @returns {Promise<string>} The extension ID
    */
@@ -98,354 +380,28 @@ class ExtensionHelper {
       return this.extensionId;
     }
 
-    // Wait for extension to load - service workers may take time to initialize
-    let extensionId = null;
+    await this._waitForServiceWorkerEvent();
 
-    // Wait for service worker to be available (with timeout)
-    try {
-      await Promise.race([
-        this.context
-          .waitForEvent('serviceworker', { timeout: 5000 })
-          .catch(() => null),
-        new Promise(resolve => setTimeout(resolve, 2000)),
-      ]);
-    } catch (error) {
-      // Continue even if service worker event doesn't fire
-    }
-
-    // Method 1: Check all service workers (primary for MV3)
-    const serviceWorkers = this.context.serviceWorkers();
-    for (const worker of serviceWorkers) {
-      const url = worker.url();
-      // Extension IDs are 32 lowercase letters
-      const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-      if (match) {
-        extensionId = match[1];
-        break;
-      }
-    }
-
-    // Method 2: Check background pages (for non-MV3 extensions)
-    if (!extensionId) {
-      const backgroundPages = this.context.backgroundPages();
-      for (const bg of backgroundPages) {
-        const url = bg.url();
-        const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-        if (match) {
-          extensionId = match[1];
-          break;
-        }
-      }
-    }
-
-    // Method 3: Check all pages in the context
-    if (!extensionId) {
-      try {
-        const pages = this.context.pages();
-        for (const pg of pages) {
-          const url = pg.url();
-          const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-          if (match) {
-            extensionId = match[1];
-            break;
-          }
-        }
-      } catch (error) {
-        // Ignore errors
-      }
-    }
-
-    // Method 4: Try navigating to a test page and checking extension context
-    if (!extensionId) {
-      try {
-        // Navigate to a blank page first
-        await this.page.goto('about:blank');
-        await this.page.waitForTimeout(1000);
-
-        // Try to access chrome.runtime.id via injected script
-        const id = await this.page.evaluate(() => {
-          return new Promise(resolve => {
-            if (chrome && chrome.runtime && chrome.runtime.id) {
-              resolve(chrome.runtime.id);
-            } else {
-              // Try to get it from window
-              resolve(null);
-            }
-          });
-        });
-
-        if (id && /^[a-z]{32}$/.test(id)) {
-          extensionId = id;
-        }
-      } catch (error) {
-        // This won't work in extension pages, but worth trying
-      }
-    }
-
-    // Method 5: Use CDP (Chrome DevTools Protocol) to get extension info
-    if (!extensionId) {
-      try {
-        const client = await this.context.newCDPSession(this.page);
-
-        // Try Target.getTargets first - this should work even if service workers aren't running
-        try {
-          const targets = await client.send('Target.getTargets');
-          // Check all targets, not just service workers
-          for (const target of targets.targetInfos) {
-            const url = target.url || '';
-            // Check for any extension-related target
-            if (url.includes('chrome-extension://')) {
-              const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-              if (match) {
-                extensionId = match[1];
-                break;
-              }
-            }
-            // Also check target type
-            if (
-              target.type === 'service_worker' ||
-              target.type === 'background_page' ||
-              target.type === 'page' // Extension pages might be type 'page'
-            ) {
-              const url = target.url || '';
-              const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-              if (match) {
-                extensionId = match[1];
-                break;
-              }
-            }
-          }
-        } catch (targetError) {
-          // Target.getTargets might not be available
-          console.warn('Target.getTargets failed:', targetError.message);
-        }
-
-        // Try to get extension ID from Runtime domain by creating a page and injecting script
-        if (!extensionId) {
-          try {
-            // Create a temporary page and try to access chrome.runtime
-            const tempPage = await this.context.newPage();
-            await tempPage.goto('about:blank');
-
-            // Try to inject a script that accesses chrome.runtime.id
-            // This won't work in regular pages, but let's try
-            const result = await client.send('Runtime.evaluate', {
-              expression: `
-                (function() {
-                  try {
-                    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-                      return chrome.runtime.id;
-                    }
-                  } catch(e) {}
-                  return null;
-                })()
-              `,
-              returnByValue: true,
-            });
-            if (
-              result.result &&
-              result.result.value &&
-              /^[a-z]{32}$/.test(result.result.value)
-            ) {
-              extensionId = result.result.value;
-            }
-            await tempPage.close();
-          } catch (evalError) {
-            // Ignore
-          }
-        }
-      } catch (error) {
-        // CDP might not be available, continue
-        console.warn('CDP method failed:', error.message);
-      }
-    }
-
-    // Method 6: Try to load background.js directly by checking all service workers more thoroughly
-    if (!extensionId) {
-      // Wait a bit more and retry service workers
-      await this.page.waitForTimeout(2000);
-      const serviceWorkersRetry = this.context.serviceWorkers();
-      for (const worker of serviceWorkersRetry) {
-        const url = worker.url();
-        if (url.includes('background.js') || url.includes('service_worker')) {
-          const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-          if (match) {
-            extensionId = match[1];
-            break;
-          }
-        }
-      }
-    }
-
-    // Method 7: Try to trigger extension by navigating to a page
-    // This can cause the extension's service worker to start
-    if (!extensionId) {
-      try {
-        const testPage = await this.context.newPage();
-
-        // Navigate to a page that might trigger the extension
-        await testPage.goto('https://example.com', {
-          waitUntil: 'domcontentloaded',
-          timeout: 5000,
-        });
-        await testPage.waitForTimeout(3000);
-
-        // Check if service workers were created
-        const newServiceWorkers = this.context.serviceWorkers();
-        for (const worker of newServiceWorkers) {
-          const url = worker.url();
-          const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-          if (match) {
-            extensionId = match[1];
-            break;
-          }
-        }
-
-        await testPage.close();
-      } catch (error) {
-        // Ignore errors
-      }
-    }
-
-    // Method 8: Wait longer and retry all methods with more time
-    if (!extensionId) {
-      for (let i = 0; i < 5; i++) {
-        await this.page.waitForTimeout(1000);
-
-        // Retry service workers
-        const serviceWorkersRetry = this.context.serviceWorkers();
-        for (const worker of serviceWorkersRetry) {
-          const url = worker.url();
-          const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-          if (match) {
-            extensionId = match[1];
-            break;
-          }
-        }
-
-        // Retry background pages
-        if (!extensionId) {
-          const backgroundPagesRetry = this.context.backgroundPages();
-          for (const bg of backgroundPagesRetry) {
-            const url = bg.url();
-            const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-            if (match) {
-              extensionId = match[1];
-              break;
-            }
-          }
-        }
-
-        // Retry pages
-        if (!extensionId) {
-          try {
-            const pagesRetry = this.context.pages();
-            for (const pg of pagesRetry) {
-              const url = pg.url();
-              const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-              if (match) {
-                extensionId = match[1];
-                break;
-              }
-            }
-          } catch (error) {
-            // Ignore
-          }
-        }
-
-        if (extensionId) break;
-      }
-    }
-
-    // Final fallback: Use CDP Browser domain to query extension registry
-    if (!extensionId) {
-      try {
-        const client = await this.context.newCDPSession(this.page);
-        // Try to use Browser.getWindowForTarget or similar to get extension info
-        // Note: Browser domain might not be available in all contexts
-        try {
-          // Try to get all targets and find extension-related ones
-          const targets = await client.send('Target.getTargets');
-          for (const target of targets.targetInfos) {
-            const url = target.url || '';
-            // Check if this is an extension target
-            if (url.includes('chrome-extension://')) {
-              const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-              if (match) {
-                extensionId = match[1];
-                break;
-              }
-            }
-            // Also check targetId which might contain extension info
-            if (target.targetId && target.targetId.includes('extension')) {
-              // Try to get more info about this target
-              try {
-                const targetInfo = await client.send('Target.getTargetInfo', {
-                  targetId: target.targetId,
-                });
-                if (targetInfo.targetInfo && targetInfo.targetInfo.url) {
-                  const match = targetInfo.targetInfo.url.match(
-                    /chrome-extension:\/\/([a-z]{32})\//,
-                  );
-                  if (match) {
-                    extensionId = match[1];
-                    break;
-                  }
-                }
-              } catch (e) {
-                // Ignore
-              }
-            }
-          }
-        } catch (browserError) {
-          // Browser domain might not be available
-        }
-      } catch (error) {
-        // CDP might not be available
-      }
-    }
-
-    // Final fallback: Try to get extension ID by attempting navigation to extension pages
-    // and catching the actual extension ID from navigation events or errors
-    if (!extensionId) {
-      try {
-        // Create a new page and try to navigate to a web page
-        // This might trigger the extension's service worker
-        const triggerPage = await this.context.newPage();
-        await triggerPage.goto('http://example.com', {
-          waitUntil: 'networkidle',
-          timeout: 10000,
-        });
-        await triggerPage.waitForTimeout(2000);
-
-        // Check service workers again after navigation
-        const triggeredWorkers = this.context.serviceWorkers();
-        for (const worker of triggeredWorkers) {
-          const url = worker.url();
-          const match = url.match(/chrome-extension:\/\/([a-z]{32})\//);
-          if (match) {
-            extensionId = match[1];
-            break;
-          }
-        }
-        await triggerPage.close();
-      } catch (error) {
-        // Ignore
-      }
-    }
-
-    // Final fallback: Compute extension ID from path (works in headless mode)
-    if (!extensionId && this.extensionPath) {
-      try {
-        extensionId = this.computeExtensionIdFromPath(this.extensionPath);
-        console.log(`[extension-id] Computed from path: ${extensionId}`);
-      } catch (error) {
-        console.warn(
-          '[extension-id] Failed to compute from path:',
-          error.message,
-        );
-      }
-    }
+    const extensionId =
+      this._findExtensionIdInServiceWorkers() ||
+      this._findExtensionIdInBackgroundPages() ||
+      this._findExtensionIdInPages() ||
+      (await this._tryExtensionIdFromPageEvaluate()) ||
+      (await this._tryExtensionIdFromCdpSession()) ||
+      (await this._tryExtensionIdFromBackgroundServiceWorkers()) ||
+      (await this._tryExtensionIdByNavigation(
+        'https://example.com',
+        { waitUntil: 'domcontentloaded', timeout: 5000 },
+        3000,
+      )) ||
+      (await this._retryExtensionIdDiscovery()) ||
+      (await this._tryExtensionIdFromCdpBrowserDomain()) ||
+      (await this._tryExtensionIdByNavigation(
+        'http://example.com',
+        { waitUntil: 'networkidle', timeout: 10000 },
+        2000,
+      )) ||
+      this._tryExtensionIdFromPath();
 
     if (!extensionId) {
       const swCount = this.context.serviceWorkers().length;
@@ -479,7 +435,7 @@ class ExtensionHelper {
       const response = await testPage.goto(manifestUrl, { timeout: 5000 });
       await testPage.close();
       return response && response.ok();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -537,18 +493,68 @@ class ExtensionHelper {
   }
 
   /**
-   * Wait for the extension to be fully loaded
+   * Navigate to the bookmark management page
    */
-  async waitForExtensionReady() {
-    // Wait for the main app container to be present (attached, not necessarily visible)
+  async openBookmarkManagement() {
+    const extensionId = await this.getExtensionId();
+    const url = `chrome-extension://${extensionId}/bookmark-management.html`;
+    console.log(`[nav] Opening bookmark management: ${url}`);
+    await this.page.goto(url, {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
     await this.page.waitForSelector('#app', {
       state: 'attached',
       timeout: 10000,
     });
+  }
 
-    // Wait longer for any async initialization and for JavaScript errors to settle
-    // Even if there are JS errors, the DOM might still render
-    await this.page.waitForTimeout(3000);
+  /**
+   * Wait for the extension to be fully loaded
+   */
+  async waitForExtensionReady() {
+    await this.page.waitForSelector('#app', {
+      state: 'attached',
+      timeout: 10_000,
+    });
+
+    await this.page
+      .waitForSelector(
+        '.setup-container, .config-container, .auth-container, .auth-form, #read-status, .main-container, .auth-container h2',
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
+
+    await this.page.waitForTimeout(300);
+  }
+
+  /**
+   * Disable native HTML5 validation so JS validation messages can be tested.
+   * @param {string} [formSelector='form']
+   */
+  async disableNativeValidation(formSelector = 'form') {
+    await this.page
+      .locator(formSelector)
+      .first()
+      .evaluate(form => {
+        form.noValidate = true;
+      });
+  }
+
+  /**
+   * Confirm the root app container exists in the DOM.
+   * @returns {Promise<boolean>}
+   */
+  async isAppAttached() {
+    try {
+      await this.page.waitForSelector('#app', {
+        state: 'attached',
+        timeout: 5_000,
+      });
+      return (await this.page.locator('#app').count()) > 0;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -631,11 +637,11 @@ class ExtensionHelper {
   async waitForMessage(messageType = 'any') {
     try {
       if (messageType === 'success') {
-        await this.page.waitForSelector('.ui-message.success', {
+        await this.page.waitForSelector('.ui-message-success', {
           timeout: 5000,
         });
       } else if (messageType === 'error') {
-        await this.page.waitForSelector('.ui-message.error', { timeout: 5000 });
+        await this.page.waitForSelector('.ui-message-error', { timeout: 5000 });
       } else {
         await this.page.waitForSelector('.ui-message', { timeout: 5000 });
       }
@@ -647,85 +653,10 @@ class ExtensionHelper {
 
   /**
    * Mock Chrome API for testing
+   * @param {'unconfigured'|'configured'|'authenticated'} [preset='unconfigured']
    */
-  async mockChromeAPI() {
-    await this.page.addInitScript(() => {
-      // Mock chrome.storage API
-      if (typeof chrome === 'undefined') {
-        window.chrome = {};
-      }
-
-      if (!chrome.storage) {
-        chrome.storage = {
-          sync: {
-            get: (keys, callback) => {
-              // Mock storage data
-              const mockData = {
-                auth_session: null,
-                supabase_url: 'https://test.supabase.co',
-                supabase_anon_key: 'test-key',
-              };
-              callback(mockData);
-            },
-            set: (data, callback) => {
-              if (callback) callback();
-            },
-          },
-          local: {
-            get: (keys, callback) => {
-              callback({});
-            },
-            set: (data, callback) => {
-              if (callback) callback();
-            },
-          },
-        };
-      }
-
-      // Mock chrome.runtime API
-      if (!chrome.runtime) {
-        chrome.runtime = {
-          onMessage: {
-            addListener: () => {},
-          },
-          sendMessage: (message, callback) => {
-            if (callback) callback({ success: true });
-          },
-          openOptionsPage: () => {
-            // Set a flag to indicate the function was called
-            window.optionsPageOpened = true;
-          },
-        };
-      } else if (chrome.runtime && !chrome.runtime.openOptionsPage) {
-        // If chrome.runtime exists but openOptionsPage doesn't, add it
-        chrome.runtime.openOptionsPage = () => {
-          window.optionsPageOpened = true;
-        };
-      } else if (chrome.runtime && chrome.runtime.openOptionsPage) {
-        // If it already exists, wrap it to set the flag
-        const originalOpenOptionsPage = chrome.runtime.openOptionsPage;
-        chrome.runtime.openOptionsPage = () => {
-          window.optionsPageOpened = true;
-          if (originalOpenOptionsPage) {
-            originalOpenOptionsPage();
-          }
-        };
-      }
-
-      // Mock chrome.tabs API
-      if (!chrome.tabs) {
-        chrome.tabs = {
-          query: (queryInfo, callback) => {
-            callback([
-              {
-                url: 'https://example.com',
-                title: 'Test Page',
-              },
-            ]);
-          },
-        };
-      }
-    });
+  async mockChromeAPI(preset = 'unconfigured') {
+    await this.page.addInitScript(buildChromeMockInitScript(preset));
   }
 }
 

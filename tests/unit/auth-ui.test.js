@@ -113,6 +113,7 @@ vi.mock('../../utils/error-handler.js', () => ({
 }));
 
 // Import the mocked modules
+import UIComponents from '../../utils/ui-components.js';
 import UIMessages from '../../utils/ui-messages.js';
 import ErrorHandler from '../../utils/error-handler.js';
 
@@ -142,7 +143,41 @@ describe('AuthUI', () => {
     return input;
   };
 
+  const resetContainer = container => {
+    container.children.length = 0;
+    container.firstChild = null;
+    container.lastChild = null;
+    container.innerHTML = '';
+  };
+
+  const querySelectorImpl = (selector, container) => {
+    if (selector.startsWith('#') && container?.children) {
+      const id = selector.slice(1);
+      const findById = element => {
+        if (element?.id === id || element?._id === id) {
+          return element;
+        }
+        for (const child of element.children || []) {
+          const match = findById(child);
+          if (match) {
+            return match;
+          }
+        }
+        return null;
+      };
+      const match = findById(container);
+      if (match) {
+        return match;
+      }
+    }
+    return (
+      container?.querySelector?.(selector) || document.querySelector(selector)
+    );
+  };
+
   beforeEach(() => {
+    UIComponents.DOM.querySelector.mockImplementation(querySelectorImpl);
+
     // Create mock dependencies
     mockSupabaseConfig = {
       signIn: vi.fn(),
@@ -189,15 +224,15 @@ describe('AuthUI', () => {
 
   describe('handleLogin', () => {
     beforeEach(() => {
-      mockContainer.innerHTML = '';
+      resetContainer(mockContainer);
       messageContainer = setupMessageContainer(mockContainer);
       addInput(mockContainer, 'loginEmail', 'test@example.com');
       addInput(mockContainer, 'loginPassword', 'password123');
     });
 
     it('should validate required fields', async () => {
-      mockContainer.querySelector('#loginEmail').value = '';
-      mockContainer.querySelector('#loginPassword').value = '';
+      querySelectorImpl('#loginEmail', mockContainer).value = '';
+      querySelectorImpl('#loginPassword', mockContainer).value = '';
 
       await authUI.handleLogin(mockContainer);
 
@@ -270,7 +305,7 @@ describe('AuthUI', () => {
 
   describe('handleSignup', () => {
     beforeEach(() => {
-      mockContainer.innerHTML = '';
+      resetContainer(mockContainer);
       messageContainer = setupMessageContainer(mockContainer);
       addInput(mockContainer, 'signupEmail', 'test@example.com');
       addInput(mockContainer, 'signupPassword', 'password123');
@@ -278,9 +313,9 @@ describe('AuthUI', () => {
     });
 
     it('should validate required fields', async () => {
-      mockContainer.querySelector('#signupEmail').value = '';
-      mockContainer.querySelector('#signupPassword').value = '';
-      mockContainer.querySelector('#confirmPassword').value = '';
+      querySelectorImpl('#signupEmail', mockContainer).value = '';
+      querySelectorImpl('#signupPassword', mockContainer).value = '';
+      querySelectorImpl('#confirmPassword', mockContainer).value = '';
 
       await authUI.handleSignup(mockContainer);
 
@@ -291,7 +326,7 @@ describe('AuthUI', () => {
     });
 
     it('should validate password confirmation', async () => {
-      mockContainer.querySelector('#confirmPassword').value = 'different';
+      querySelectorImpl('#confirmPassword', mockContainer).value = 'different';
 
       await authUI.handleSignup(mockContainer);
 
@@ -302,8 +337,8 @@ describe('AuthUI', () => {
     });
 
     it('should validate password length', async () => {
-      mockContainer.querySelector('#signupPassword').value = '123';
-      mockContainer.querySelector('#confirmPassword').value = '123';
+      querySelectorImpl('#signupPassword', mockContainer).value = '123';
+      querySelectorImpl('#confirmPassword', mockContainer).value = '123';
 
       await authUI.handleSignup(mockContainer);
 
@@ -341,21 +376,28 @@ describe('AuthUI', () => {
       );
     });
 
-    it('should show success message and call onAuthSuccess on successful signup', async () => {
-      // Mock successful signup
+    it('should auto sign in and call onAuthSuccess on successful signup', async () => {
       mockSupabaseConfig.signUp.mockResolvedValue({
+        user: { id: '123', email: 'test@example.com' },
+      });
+      mockSupabaseConfig.signIn.mockResolvedValue({
         user: { id: '123', email: 'test@example.com' },
       });
 
       await authUI.handleSignup(mockContainer);
 
+      expect(mockSupabaseConfig.signIn).toHaveBeenCalledWith(
+        'test@example.com',
+        'password123',
+      );
       expect(UIMessages.success).toHaveBeenCalledWith(
-        'Account created! Please check your email to verify your account.',
+        'Account created and signed in successfully!',
         messageContainer,
       );
 
-      // The signup flow doesn't automatically call onAuthSuccess
-      // It just shows a success message and switches to login form
+      await new Promise(resolve => setTimeout(resolve, 1100));
+
+      expect(mockOnAuthSuccess).toHaveBeenCalled();
     });
 
     it('should handle signup errors', async () => {
@@ -372,20 +414,36 @@ describe('AuthUI', () => {
     });
 
     it('should handle signin error after successful signup', async () => {
-      // Mock successful signup but failed signin
       mockSupabaseConfig.signUp.mockResolvedValue({
-        data: { user: { id: '123', email: 'test@example.com' } },
+        user: { id: '123', email: 'test@example.com' },
       });
       mockSupabaseConfig.signIn.mockRejectedValue(new Error('Signin failed'));
 
       await authUI.handleSignup(mockContainer);
 
-      // The actual implementation shows a success message and switches to login form
-      // instead of calling ErrorHandler for the signin error
       expect(UIMessages.success).toHaveBeenCalledWith(
         'Account created! Please check your email to verify your account, then sign in.',
         messageContainer,
       );
+    });
+  });
+
+  describe('showLoginForm', () => {
+    it('should wire login form submit to page container', () => {
+      resetContainer(mockContainer);
+      authUI.showLoginForm(mockContainer);
+
+      const createFormCall = UIComponents.createForm.mock.calls.find(
+        ([formId]) => formId === 'loginForm',
+      );
+      const onSubmit = createFormCall[1];
+      const handleLoginSpy = vi
+        .spyOn(authUI, 'handleLogin')
+        .mockResolvedValue(undefined);
+
+      onSubmit({}, document.createElement('form'));
+
+      expect(handleLoginSpy).toHaveBeenCalledWith(mockContainer);
     });
   });
 

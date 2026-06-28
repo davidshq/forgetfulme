@@ -289,11 +289,6 @@ class AuthTokenRefreshHandler {
   async executeWithRefresh(operation, context, options = {}) {
     const { retryOnAuthError = true, queueIfOffline = true } = options;
 
-    // Check if offline and queue if requested
-    if (!this.isOnline && queueIfOffline) {
-      return this._queueOfflineOperation(operation, context, options);
-    }
-
     try {
       // Check if session needs refresh before operation
       const { session } = this.config;
@@ -304,6 +299,16 @@ class AuthTokenRefreshHandler {
       return await operation();
     } catch (error) {
       const errorResult = ErrorHandler.handle(error, context);
+
+      // Queue only after a network failure while offline. Do not block upfront on
+      // navigator.onLine — it is unreliable in extension pages and headless tests.
+      if (
+        queueIfOffline &&
+        !this.isOnline &&
+        errorResult.errorInfo.type === ErrorHandler.ERROR_TYPES.NETWORK
+      ) {
+        return this._queueOfflineOperation(operation, context, options);
+      }
 
       // Check if this is an auth error that might be resolved by refresh
       if (retryOnAuthError && this._isRetryableAuthError(error, errorResult)) {

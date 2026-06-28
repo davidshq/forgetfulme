@@ -95,12 +95,15 @@ export class SearchFilter {
       },
     );
 
-    const searchCard = UIComponents.createCard(
-      'Search & Filter',
-      searchForm.outerHTML,
-      '',
-      'search-card',
-    );
+    const searchCard = document.createElement('article');
+    searchCard.className = 'card search-card';
+
+    const header = document.createElement('header');
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = 'Search & Filter';
+    header.appendChild(titleEl);
+    searchCard.appendChild(header);
+    searchCard.appendChild(searchForm);
 
     return searchCard;
   }

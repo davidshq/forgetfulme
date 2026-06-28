@@ -294,8 +294,8 @@ class AuthUI {
 
       const result = await this.config.signUp(email, password);
 
-      // Check if user was created successfully
-      if (result.data && result.data.user) {
+      // Check if user was created successfully (signUp returns Supabase data)
+      if (result?.user) {
         // For browser extensions, we'll try to sign in immediately
         // since email verification links don't work well with extensions
         try {

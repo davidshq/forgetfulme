@@ -212,6 +212,9 @@ export class RecentList {
     }
     if (!this.container) return;
 
+    while (this.container.firstChild) {
+      this.container.removeChild(this.container.firstChild);
+    }
     this.updatePagination({ page: 1, hasNextPage: false });
 
     const errorItem = document.createElement('div');

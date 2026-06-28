@@ -51,4 +51,18 @@ describe('RecentList', () => {
 
     expect(onPageChange).toHaveBeenCalledWith(1);
   });
+
+  it('replaces existing entries when showing an error', () => {
+    recentList.displayBookmarks([{ title: 'Example', read_status: 'read' }], {
+      page: 1,
+      hasNextPage: false,
+    });
+
+    recentList.showError('Error loading entries');
+
+    expect(recentList.container.children).toHaveLength(1);
+    expect(recentList.container.children[0].getAttribute('aria-label')).toBe(
+      'Error loading entries',
+    );
+  });
 });

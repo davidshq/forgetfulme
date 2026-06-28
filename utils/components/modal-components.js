@@ -142,9 +142,15 @@ function closeModal(modal) {
  * @param {HTMLElement} modal - Modal element
  */
 export function showModal(modal) {
-  if (modal && modal.tagName === 'DIALOG') {
-    modal.showModal();
-  } else {
+  if (!modal) {
+    return;
+  }
+
+  if (!modal.isConnected) {
     document.body.appendChild(modal);
+  }
+
+  if (modal.tagName === 'DIALOG') {
+    modal.showModal();
   }
 }

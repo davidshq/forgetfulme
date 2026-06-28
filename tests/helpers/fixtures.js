@@ -34,8 +34,7 @@ const test = base.extend({
     // Wait for extension to load - create a page and wait a bit
     const page = context.pages()[0] || (await context.newPage());
     await page.goto('about:blank');
-    // Give extension time to initialize
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(1000);
 
     await use(context);
 

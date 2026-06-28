@@ -1,0 +1,40 @@
+---
+description: Playwright E2E test runs — visible output, speed, fail-fast
+globs: tests/**/*.test.js,playwright.config.js,tests/helpers/**
+alwaysApply: false
+---
+
+# Playwright E2E
+
+## Run commands (never hide output)
+
+- Use `npm run test:playwright` or `npx playwright test --reporter=line`
+- **Never** pipe Playwright output through `tail`, `grep`, or `head` — it hides progress
+- For one file: `npx playwright test tests/popup.test.js --reporter=line`
+- For one test: add `--grep "test name"`
+
+## Fail fast
+
+- Fix the first failure before rerunning the full suite
+- Config uses `maxFailures: 1` locally (see `playwright.config.js`)
+- Do not retry locally; CI may use retries
+
+## Speed
+
+- Prefer `waitForSelector` over `waitForTimeout`
+- Keep `waitForExtensionReady()` minimal — wait for UI markers, not fixed 3s sleeps
+- Extension tests use `workers: 1` (shared browser context); do not raise without a fixture refactor
+
+## Mock requirements
+
+- Chrome storage mock must use **Promise-based** `chrome.storage.*` APIs (MV3)
+- Authenticated flows must seed **Supabase `localStorage`** (`sb-<project-ref>-auth-token`) so `auth.getSession()` succeeds
+- Patch **`navigator.onLine`** to `true` in init scripts — headless Playwright reports offline while routed fetch works; otherwise `AuthTokenRefreshHandler` queues ops forever
+- Always override **`chrome.tabs.query`** in init scripts — real extension pages already have `chrome.tabs`; the default tab must be a normal https URL (not the extension page)
+- Disable HTML5 `required` validation when testing JS validation messages (`form.noValidate = true`)
+
+## When tests fail
+
+1. Read the line reporter output
+2. Fix root cause (mock, selector, or app bug)
+3. Rerun the failing file before the full suite

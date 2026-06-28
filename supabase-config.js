@@ -156,6 +156,27 @@ class SupabaseConfig {
         return true;
       }
 
+      // Fall back to auth session stored by AuthStateManager (extension sync storage)
+      const storedAuth = this.configManager.config?.auth;
+      if (storedAuth?.access_token && storedAuth?.refresh_token) {
+        const { data, error } = await this.auth.setSession({
+          access_token: storedAuth.access_token,
+          refresh_token: storedAuth.refresh_token,
+        });
+
+        if (!error && data?.session) {
+          this.session = data.session;
+          this.user = data.session.user;
+          return true;
+        }
+      }
+
+      if (storedAuth?.user) {
+        this.session = storedAuth;
+        this.user = storedAuth.user;
+        return true;
+      }
+
       return false;
     } catch (error) {
       ErrorHandler.handle(error, 'supabase-config.initialize');

@@ -27,7 +27,12 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  maxFailures: process.env.CI ? 0 : 1,
+  timeout: 20_000,
+  expect: { timeout: 5_000 },
+  reporter: process.env.CI
+    ? [['list'], ['html', { open: 'never' }]]
+    : [['line'], ['html', { open: 'never' }]],
   use: {
     trace: 'on-first-retry',
     // No baseURL, we use chrome-extension:// URLs

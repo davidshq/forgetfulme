@@ -22,6 +22,7 @@ const mockChrome = {
 const mockConsole = {
   log: vi.fn(),
   error: vi.fn(),
+  warn: vi.fn(),
   debug: vi.fn(),
 };
 
@@ -97,7 +98,7 @@ describe('AuthStateManager', () => {
       mockChrome.storage.sync.get.mockRejectedValue(error);
 
       await expect(authManager.initialize()).rejects.toThrow(
-        'An unexpected error occurred. Please try again.',
+        'An unexpected error occurred. Please refresh the page and try again.',
       );
       // ErrorHandler handles errors internally
     });
