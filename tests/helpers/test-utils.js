@@ -9,6 +9,9 @@
  */
 
 import { vi } from 'vitest';
+import { createStubUIComponents } from './mocks/ui-components.js';
+
+export { createStubUIComponents };
 
 /**
  * Enhanced test utilities for ForgetfulMe extension tests
@@ -122,62 +125,6 @@ export const createMockErrorHandler = () => ({
   },
 });
 
-// Mock UIComponents
-export const createMockUIComponents = () => ({
-  DOM: {
-    ready: vi.fn().mockResolvedValue(),
-    getElement: vi.fn(),
-    setValue: vi.fn(),
-    getValue: vi.fn(),
-    querySelector: vi.fn(),
-    querySelectorAll: vi.fn(),
-    isReady: vi.fn().mockReturnValue(true),
-  },
-  createButton: vi.fn(),
-  createForm: vi.fn(),
-  createSection: vi.fn(),
-  createContainer: vi.fn(),
-  createListItem: vi.fn(),
-  showModal: vi.fn(),
-  createConfirmDialog: vi.fn(),
-  createFormField: vi.fn(),
-  COMPONENT_TYPES: {
-    BUTTON: 'button',
-    FORM: 'form',
-    INPUT: 'input',
-    SELECT: 'select',
-    LABEL: 'label',
-    CONTAINER: 'container',
-    HEADER: 'header',
-    SECTION: 'section',
-    LIST_ITEM: 'list-item',
-    MESSAGE: 'message',
-    CONFIRM: 'confirm',
-    TOAST: 'toast',
-  },
-  BUTTON_STYLES: {
-    PRIMARY: 'primary',
-    SECONDARY: 'secondary',
-    DANGER: 'danger',
-    SUCCESS: 'success',
-    WARNING: 'warning',
-    INFO: 'info',
-    SMALL: 'small',
-    LARGE: 'large',
-  },
-  FIELD_TYPES: {
-    TEXT: 'text',
-    EMAIL: 'email',
-    PASSWORD: 'password',
-    URL: 'url',
-    NUMBER: 'number',
-    SELECT: 'select',
-    TEXTAREA: 'textarea',
-    CHECKBOX: 'checkbox',
-    RADIO: 'radio',
-  },
-});
-
 // Mock UIMessages
 export const createMockUIMessages = () => ({
   success: vi.fn(),
@@ -281,7 +228,7 @@ export const createTestEnvironment = (customMocks = {}) => {
     chrome: createMockChrome(),
     console: createMockConsole(),
     errorHandler: createMockErrorHandler(),
-    uiComponents: createMockUIComponents(),
+    uiComponents: createStubUIComponents(),
     uiMessages: createMockUIMessages(),
     supabaseService: createMockSupabaseService(),
     configManager: createMockConfigManager(),
@@ -382,60 +329,7 @@ export const setupModuleMocks = () => {
   }));
 
   vi.mock('../../utils/ui-components.js', () => ({
-    default: {
-      DOM: {
-        ready: vi.fn().mockResolvedValue(),
-        getElement: vi.fn(),
-        setValue: vi.fn(),
-        getValue: vi.fn(),
-        querySelector: vi.fn(),
-        querySelectorAll: vi.fn(),
-        isReady: vi.fn().mockReturnValue(true),
-      },
-      createButton: vi.fn(),
-      createForm: vi.fn(),
-      createSection: vi.fn(),
-      createContainer: vi.fn(),
-      createListItem: vi.fn(),
-      showModal: vi.fn(),
-      createConfirmDialog: vi.fn(),
-      createFormField: vi.fn(),
-      COMPONENT_TYPES: {
-        BUTTON: 'button',
-        FORM: 'form',
-        INPUT: 'input',
-        SELECT: 'select',
-        LABEL: 'label',
-        CONTAINER: 'container',
-        HEADER: 'header',
-        SECTION: 'section',
-        LIST_ITEM: 'list-item',
-        MESSAGE: 'message',
-        CONFIRM: 'confirm',
-        TOAST: 'toast',
-      },
-      BUTTON_STYLES: {
-        PRIMARY: 'primary',
-        SECONDARY: 'secondary',
-        DANGER: 'danger',
-        SUCCESS: 'success',
-        WARNING: 'warning',
-        INFO: 'info',
-        SMALL: 'small',
-        LARGE: 'large',
-      },
-      FIELD_TYPES: {
-        TEXT: 'text',
-        EMAIL: 'email',
-        PASSWORD: 'password',
-        URL: 'url',
-        NUMBER: 'number',
-        SELECT: 'select',
-        TEXTAREA: 'textarea',
-        CHECKBOX: 'checkbox',
-        RADIO: 'radio',
-      },
-    },
+    default: createStubUIComponents(),
   }));
 
   vi.mock('../../utils/ui-messages.js', () => ({

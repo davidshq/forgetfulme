@@ -1,7 +1,7 @@
 /**
  * @fileoverview Navigation UI component mocks
  * @module mocks/ui-components-navigation
- * @description Navigation-related UI component mocks
+ * @description Navigation mocks for the public UIComponents facade (breadcrumb, headerWithNav)
  */
 
 import { vi } from 'vitest';
@@ -12,33 +12,6 @@ import { vi } from 'vitest';
  * @returns {Object} Navigation component mocks
  */
 export const createNavigationComponents = document => ({
-  createNavigation: vi.fn((items, ariaLabel, className) => {
-    const nav = document.createElement('nav');
-    nav.setAttribute('aria-label', ariaLabel || 'Main navigation');
-    nav.className = className || '';
-
-    const ul = document.createElement('ul');
-    items.forEach(item => {
-      const li = document.createElement('li');
-      if (item.href) {
-        const a = document.createElement('a');
-        a.href = item.href;
-        a.textContent = item.text;
-        if (item.active) {
-          a.setAttribute('aria-current', 'page');
-        }
-        li.appendChild(a);
-      } else if (item.onClick) {
-        const button = document.createElement('button');
-        button.textContent = item.text;
-        button.className = item.className || 'outline';
-        li.appendChild(button);
-      }
-      ul.appendChild(li);
-    });
-    nav.appendChild(ul);
-    return nav;
-  }),
   createBreadcrumb: vi.fn((items, className) => {
     const nav = document.createElement('nav');
     nav.setAttribute('aria-label', 'Breadcrumb');
@@ -82,6 +55,29 @@ export const createNavigationComponents = document => ({
         options?.navAriaLabel || 'Main navigation',
       );
       nav.className = options?.navClassName || '';
+
+      const ul = document.createElement('ul');
+      navItems.forEach(item => {
+        const li = document.createElement('li');
+        if (item.href) {
+          const a = document.createElement('a');
+          a.href = item.href;
+          a.textContent = item.text;
+          if (item.active) {
+            a.setAttribute('aria-current', 'page');
+          }
+          li.appendChild(a);
+        } else if (item.onClick) {
+          const button = document.createElement('button');
+          button.textContent = item.text;
+          button.className = item.className || 'outline';
+          button.addEventListener('click', item.onClick);
+          li.appendChild(button);
+        }
+        ul.appendChild(li);
+      });
+
+      nav.appendChild(ul);
       header.appendChild(nav);
     }
 

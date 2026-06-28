@@ -1,0 +1,52 @@
+---
+description: Prettier and ESLint conventions when writing or editing code
+alwaysApply: true
+---
+
+# Prettier & ESLint
+
+Match `.prettierrc` and `eslint.config.js` when writing code. Do not rely on generic JS style or Prettier defaults (which use double quotes).
+
+## Prettier (`.prettierrc`)
+
+- **Single quotes** for JS strings and imports — never double quotes in `.js` files
+- **Semicolons** always
+- **Trailing commas** everywhere (`trailingComma: all`)
+- **80-character** line width — break long args/imports across lines
+- **2 spaces**, no tabs
+- **Arrow parens**: omit when a single param (`x => x`, not `(x) => x`)
+
+```javascript
+// ❌ BAD — double quotes, no trailing comma, long one-liner
+import { describe, test } from "vitest";
+const result = ErrorHandler.handle(error, "context.method");
+
+// ✅ GOOD
+import { describe, test } from 'vitest';
+const result = ErrorHandler.handle(
+  error,
+  'context.method',
+);
+```
+
+## ESLint highlights
+
+- `const` over `let`; never `var`
+- `===` / `!==` (except `== null` / `!= null`)
+- **Curly braces** on all `if`, `for`, `while`, etc.
+- Throw `Error` objects; reject promises with `Error`
+- Prefix intentionally unused vars/args with `_`
+- `console.log` discouraged — use `console.warn` / `console.error` only
+- No `eval`, `new Function`, or `javascript:` URLs
+- Use the `event` parameter, not the global `event` object
+
+## After editing
+
+Run Prettier on touched files before finishing:
+
+```bash
+npx prettier --write <files>
+# or: npm run format
+```
+
+Verify with `npm run check` when changing multiple files.

@@ -1,1 +1,2 @@
 - Always remember that this is a browser extension and ensure all code conforms to browser extension requirements and limitations
+- Follow Prettier and ESLint project config when writing code: single quotes, semicolons, trailing commas, 80-char width (see `.prettierrc`, `eslint.config.js`, and `.cursor/rules/prettier-eslint.mdc`). Run `npx prettier --write` on edited files before finishing.

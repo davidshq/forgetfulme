@@ -1,7 +1,7 @@
 /**
  * @fileoverview Basic UI component mocks
  * @module mocks/ui-components-basic
- * @description Basic UI component mocks (container, form, button, list)
+ * @description Basic UI component mocks (container, form, button, listItem)
  */
 
 import { vi } from 'vitest';

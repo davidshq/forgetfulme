@@ -88,7 +88,8 @@ Provides centralized mock creation and test environment setup:
 - `setupTestWithMocks()` - Test setup with mocks and cleanup
 - `createMockChrome()` - Chrome extension API mocks
 - `createMockErrorHandler()` - Error handler mocks
-- `createMockUIComponents()` - UI component mocks
+- `createStubUIComponents()` - UI component stubs (`vi.fn()`; import from `test-utils.js` or `mocks/ui-components.js`)
+- `createMockUIComponents(document)` - UI component mocks with DOM implementations (`mocks/ui-components.js` only)
 - And more...
 
 ### Test Factories (`test-factories.js`)

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Modal UI component mocks
  * @module mocks/ui-components-modals
- * @description Modal and dialog UI component mocks
+ * @description Modal mocks for the public UIComponents facade (confirmDialog, showModal)
  */
 
 import { vi } from 'vitest';
@@ -12,50 +12,6 @@ import { vi } from 'vitest';
  * @returns {Object} Modal component mocks
  */
 export const createModalComponents = document => ({
-  createModal: vi.fn((title, content, actions, options) => {
-    const dialog = document.createElement('dialog');
-    dialog.className = options?.className || '';
-
-    const article = document.createElement('article');
-
-    if (title) {
-      const header = document.createElement('header');
-      const titleEl = document.createElement('h3');
-      titleEl.textContent = title;
-      header.appendChild(titleEl);
-      article.appendChild(header);
-    }
-
-    const mainContent = document.createElement('div');
-    if (typeof content === 'string') {
-      mainContent.innerHTML = content;
-    } else {
-      mainContent.appendChild(content);
-    }
-    article.appendChild(mainContent);
-
-    if (actions && actions.length > 0) {
-      const footer = document.createElement('footer');
-      actions.forEach(action => {
-        const button = document.createElement('button');
-        button.textContent = action.text;
-        button.className = action.className || 'outline';
-        footer.appendChild(button);
-      });
-      article.appendChild(footer);
-    }
-
-    if (options?.showClose !== false) {
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '×';
-      closeBtn.className = 'outline';
-      closeBtn.setAttribute('aria-label', 'Close modal');
-      article.appendChild(closeBtn);
-    }
-
-    dialog.appendChild(article);
-    return dialog;
-  }),
   createConfirmDialog: vi.fn((message, onConfirm, onCancel, options) => {
     const dialog = document.createElement('dialog');
     dialog.className = 'confirm-dialog';
@@ -76,11 +32,17 @@ export const createModalComponents = document => ({
     const confirmBtn = document.createElement('button');
     confirmBtn.textContent = options?.confirmText || 'Confirm';
     confirmBtn.className = 'primary';
+    if (onConfirm) {
+      confirmBtn.addEventListener('click', onConfirm);
+    }
     footer.appendChild(confirmBtn);
 
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = options?.cancelText || 'Cancel';
     cancelBtn.className = 'secondary';
+    if (onCancel) {
+      cancelBtn.addEventListener('click', onCancel);
+    }
     footer.appendChild(cancelBtn);
 
     article.appendChild(footer);

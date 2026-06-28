@@ -55,16 +55,18 @@ ErrorHandler utility mocks:
 
 ### `ui-components.js` (and related modules)
 
-UIComponents mocks split into modular files for maintainability:
+UIComponents mocks split into modular files. **`createMockUIComponents(document)`** mirrors the public `utils/ui-components.js` facade — it does not expose internal helpers such as `createNavigation` or `createModal`.
 
-- **`ui-components.js`** - Main entry point that combines all component mocks
-- **`ui-components-basic.js`** - Basic components (container, form, formField, button, listItem)
-- **`ui-components-cards.js`** - Card components (section, card, cardWithActions, formCard, listCard)
-- **`ui-components-navigation.js`** - Navigation components (navigation, breadcrumb, headerWithNav)
-- **`ui-components-modals.js`** - Modal and dialog components (modal, confirmDialog, showModal)
+- **`ui-components.js`** - Main entry point (`createMockUIComponents`, `createStubUIComponents`)
+- **`ui-components-constants.js`** - `COMPONENT_TYPES`, `BUTTON_STYLES`, `FIELD_TYPES`, and the public member list
+- **`ui-components-basic.js`** - Container, form, formField, button, listItem
+- **`ui-components-cards.js`** - Section, card, cardWithActions, formCard, listCard
+- **`ui-components-layout.js`** - Grid layout (`createGrid`)
+- **`ui-components-navigation.js`** - Breadcrumb and headerWithNav
+- **`ui-components-modals.js`** - Confirm dialog and showModal
 - **`ui-components-dom.js`** - DOM utility methods (ready, getElement, querySelector, setValue, etc.)
 
-**`createMockUIComponents(document)`** - Returns a complete UIComponents mock with all the above functionality combined.
+**`createStubUIComponents()`** - Returns the same public shape with `vi.fn()` stubs for tests that override behavior (used in `test-utils.js`).
 
 ## Usage
 
@@ -93,7 +95,7 @@ These limitations affect 2 tests in `ui-components.test.js`. The mocks work corr
 1. **Use the factory functions** - Always use the factory functions (`createMockElement`, `createMockChrome`, etc.) rather than creating mocks manually
 2. **Reset between tests** - The `vitest.setup.js` file includes `beforeEach` hooks to reset mocks between tests
 3. **Customize when needed** - You can override specific mock behaviors in individual tests if needed
-4. **Keep mocks focused** - Each mock file should focus on a single area of functionality
+4. **Keep mocks aligned with the facade** - When adding to `utils/ui-components.js`, update `ui-components-constants.js` and run `ui-components-mocks.test.js`
 
 ## Maintenance
 

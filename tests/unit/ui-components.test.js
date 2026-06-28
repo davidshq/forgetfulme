@@ -539,6 +539,39 @@ describe('UIComponents', () => {
     });
   });
 
+  describe('createGrid', () => {
+    test('should create grid with string items', () => {
+      const grid = UIComponents.createGrid(['A', 'B']);
+
+      expect(grid.tagName).toBe('DIV');
+      expect(grid.className).toContain('grid');
+      expect(grid.querySelectorAll('.grid-item')).toHaveLength(2);
+      expect(grid.querySelectorAll('.grid-item')[0].textContent).toBe('A');
+      expect(grid.querySelectorAll('.grid-item')[1].textContent).toBe('B');
+    });
+
+    test('should create grid with object items and layout options', () => {
+      const items = [
+        { content: '<strong>1</strong>', className: 'stat' },
+        { text: 'Two' },
+      ];
+      const grid = UIComponents.createGrid(items, {
+        columns: 2,
+        gap: 4,
+        className: 'stats-grid',
+      });
+
+      expect(grid.className).toContain('grid-2');
+      expect(grid.className).toContain('gap-4');
+      expect(grid.className).toContain('stats-grid');
+      expect(grid.querySelectorAll('.grid-item')).toHaveLength(2);
+      const gridItems = grid.querySelectorAll('.grid-item');
+      expect(gridItems[0].className).toContain('stat');
+      expect(gridItems[0].innerHTML).toBe('<strong>1</strong>');
+      expect(gridItems[1].textContent).toBe('Two');
+    });
+  });
+
   describe('createCard', () => {
     test('should have createCard method', () => {
       expect(typeof UIComponents.createCard).toBe('function');
